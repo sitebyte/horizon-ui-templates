@@ -222,12 +222,186 @@
       </div>
     </div>
 
+    <!-- Row 2: P&L Attribution + Hedge Coverage + Cargo Pipeline -->
+    <div style="display:grid;grid-template-columns:1fr;gap:0.75rem;margin-top:0.75rem;" class="fade-in-d2">
+
+      <!-- Three-column row on desktop -->
+      <div style="display:grid;grid-template-columns:1fr;gap:0.75rem;">
+
+        <!-- P&L Attribution -->
+        <div class="hz-card" style="padding:0.75rem;">
+          <div class="section-title">P&L Attribution (Today)</div>
+          <div style="display:flex;flex-direction:column;gap:0.25rem;font-size:0.6875rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:6rem;color:var(--text-3);">Price moves</span>
+              <div style="flex:1;height:0.875rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:58%;height:100%;background:var(--green);border-radius:0.25rem;display:flex;align-items:center;padding-left:0.375rem;">
+                  <span style="font-size:0.5625rem;color:#000;font-weight:600;">+$1.06M</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:6rem;color:var(--text-3);">New trades</span>
+              <div style="flex:1;height:0.875rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:35%;height:100%;background:var(--green);border-radius:0.25rem;display:flex;align-items:center;padding-left:0.375rem;">
+                  <span style="font-size:0.5625rem;color:#000;font-weight:600;">+$0.64M</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:6rem;color:var(--text-3);">Settlements</span>
+              <div style="flex:1;height:0.875rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:10%;height:100%;background:var(--green);border-radius:0.25rem;display:flex;align-items:center;padding-left:0.375rem;">
+                  <span style="font-size:0.5625rem;color:#000;font-weight:600;">+$0.18M</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:6rem;color:var(--text-3);">FX impact</span>
+              <div style="flex:1;height:0.875rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:4%;height:100%;background:var(--red);border-radius:0.25rem;"></div>
+              </div>
+              <span style="font-size:0.5625rem;color:var(--red);width:3.5rem;text-align:right;">-$0.06M</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;padding-top:0.25rem;border-top:0.0625rem solid var(--border);margin-top:0.125rem;">
+              <span style="width:6rem;color:var(--text-0);font-weight:600;">Total</span>
+              <span style="font-weight:700;color:var(--green);">+$1.82M</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <!-- Hedge Coverage by Quarter -->
+        <div class="hz-card" style="padding:0.75rem;">
+          <div class="section-title">Hedge Coverage</div>
+          <div style="display:flex;flex-direction:column;gap:0.375rem;font-size:0.6875rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:3rem;color:var(--text-3);">Q2-26</span>
+              <div style="flex:1;height:0.625rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:92%;height:100%;background:var(--green);border-radius:0.25rem;"></div>
+              </div>
+              <span style="width:2rem;text-align:right;color:var(--green);font-weight:600;">92%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:3rem;color:var(--text-3);">Q3-26</span>
+              <div style="flex:1;height:0.625rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:68%;height:100%;background:var(--amber);border-radius:0.25rem;"></div>
+              </div>
+              <span style="width:2rem;text-align:right;color:var(--amber);font-weight:600;">68%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:3rem;color:var(--text-3);">Q4-26</span>
+              <div style="flex:1;height:0.625rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:31%;height:100%;background:var(--red);border-radius:0.25rem;"></div>
+              </div>
+              <span style="width:2rem;text-align:right;color:var(--red);font-weight:600;">31%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="width:3rem;color:var(--text-3);">Q1-27</span>
+              <div style="flex:1;height:0.625rem;background:var(--border);border-radius:0.25rem;overflow:hidden;">
+                <div style="width:8%;height:100%;background:var(--red);border-radius:0.25rem;"></div>
+              </div>
+              <span style="width:2rem;text-align:right;color:var(--red);font-weight:600;">8%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cargo Pipeline -->
+        <div class="hz-card" style="padding:0.75rem;">
+          <div class="section-title">Cargo Pipeline</div>
+          <div style="display:flex;height:1.5rem;border-radius:0.25rem;overflow:hidden;font-size:0.5625rem;font-weight:600;margin-bottom:0.5rem;">
+            <div style="flex:3;background:#64748b;display:flex;align-items:center;justify-content:center;color:#fff;">Plan 3</div>
+            <div style="flex:2;background:#3b82f6;display:flex;align-items:center;justify-content:center;color:#fff;">Nom 2</div>
+            <div style="flex:1;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#000;">Load 1</div>
+            <div style="flex:4;background:#6366f1;display:flex;align-items:center;justify-content:center;color:#fff;">Transit 4</div>
+            <div style="flex:1;background:#22c55e;display:flex;align-items:center;justify-content:center;color:#000;">Disch 1</div>
+          </div>
+          <div style="font-size:0.625rem;color:var(--text-3);display:flex;flex-direction:column;gap:0.25rem;">
+            <div style="display:flex;justify-content:space-between;"><span>Al Dafna</span><span class="text-amber">Loading @ Ras Laffan</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Seri Begawan</span><span class="text-green">In transit → Sodegaura</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Arctic Spirit</span><span class="text-amber">ETA revised +18hrs</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Trades -->
+      <div class="hz-card" style="padding:0;">
+        <div style="padding:0.5rem 0.75rem;border-bottom:0.0625rem solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <span class="section-title" style="margin:0;">Recent Trades</span>
+          <a href="blotter.html" style="font-size:0.625rem;color:var(--accent);text-decoration:none;">View all &rarr;</a>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.6875rem;">
+          <thead>
+            <tr style="border-bottom:0.0625rem solid var(--border);">
+              <th style="text-align:left;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">TIME</th>
+              <th style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">DIR</th>
+              <th style="text-align:left;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">COUNTERPARTY</th>
+              <th style="text-align:right;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">VOLUME</th>
+              <th style="text-align:right;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">PRICE</th>
+              <th style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);font-weight:600;font-size:0.625rem;">BM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:0.0625rem solid var(--border);">
+              <td style="padding:0.25rem 0.5rem;color:var(--text-3);">09:42</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--green);font-weight:600;">B</td>
+              <td style="padding:0.25rem 0.5rem;">JERA Co.</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">3,200,000</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">$14.25</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);">JKM</td>
+            </tr>
+            <tr style="border-bottom:0.0625rem solid var(--border);">
+              <td style="padding:0.25rem 0.5rem;color:var(--text-3);">09:38</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--red);font-weight:600;">S</td>
+              <td style="padding:0.25rem 0.5rem;">Shell Energy</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">2,800,000</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">$12.80</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);">TTF</td>
+            </tr>
+            <tr style="border-bottom:0.0625rem solid var(--border);">
+              <td style="padding:0.25rem 0.5rem;color:var(--text-3);">09:15</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--green);font-weight:600;">B</td>
+              <td style="padding:0.25rem 0.5rem;">QatarEnergy</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">3,200,000</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">$14.50</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);">JKM</td>
+            </tr>
+            <tr style="border-bottom:0.0625rem solid var(--border);">
+              <td style="padding:0.25rem 0.5rem;color:var(--text-3);">08:55</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--red);font-weight:600;">S</td>
+              <td style="padding:0.25rem 0.5rem;">TotalEnergies</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">1,600,000</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">$3.42</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);">HH</td>
+            </tr>
+            <tr>
+              <td style="padding:0.25rem 0.5rem;color:var(--text-3);">08:30</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--green);font-weight:600;">B</td>
+              <td style="padding:0.25rem 0.5rem;">Cheniere</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">4,800,000</td>
+              <td style="text-align:right;padding:0.25rem 0.5rem;font-variant-numeric:tabular-nums;">$3.28</td>
+              <td style="text-align:center;padding:0.25rem 0.5rem;color:var(--text-3);">HH</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
   </div>
 
   <script src="shell.js"></script>
   <script>
     initShell('dashboard', 'Dashboard');
   </script>
-<!-- Back to Index --><a href="../index.html" style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);" onmouseover="this.style.background='rgba(79,70,229,1)'" onmouseout="this.style.background='rgba(99,102,241,0.9)'"></body>#8592; All Themes</a>
+
+<!-- Back to Index -->
+<a href="../index.html" 
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
 </body>
 </html>
