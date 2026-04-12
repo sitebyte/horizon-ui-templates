@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tables | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, surface: { 900: '#151521', 950: '#0d0d17' } },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-700 { border-color: #cbd5e1; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) .bg-surface-800 { background: #f8fafc; }
+    html:not(.dark) .even\:bg-surface-800:nth-child(even) { background: #f8fafc; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+    html:not(.dark) table th { background: #f1f5f9; color: #475569; }
+    html:not(.dark) table td { color: #334155; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Tables</span>
+        </div>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+          <span id="theme-icon">&#9789;</span>
+        </button>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-4">
+        <!-- Compact Striped Table -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div class="px-3 py-2 border-b border-gray-800">
+            <span class="font-mono text-sm text-gray-300">Forward Curves &mdash; Compact Striped</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs font-mono">
+              <thead>
+                <tr class="bg-surface-950 text-gray-500 text-left">
+                  <th class="px-3 py-1.5 font-medium">Benchmark</th>
+                  <th class="px-3 py-1.5 font-medium text-right">Prompt</th>
+                  <th class="px-3 py-1.5 font-medium text-right">M+1</th>
+                  <th class="px-3 py-1.5 font-medium text-right">M+2</th>
+                  <th class="px-3 py-1.5 font-medium text-right">M+3</th>
+                  <th class="px-3 py-1.5 font-medium text-right">Q+1</th>
+                  <th class="px-3 py-1.5 font-medium text-right">Cal-27</th>
+                  <th class="px-3 py-1.5 font-medium text-right">Chg</th>
+                  <th class="px-3 py-1.5 font-medium text-right">Vol</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-gray-800/30">
+                  <td class="px-3 py-1.5 text-gray-300">JKM</td>
+                  <td class="px-3 py-1.5 text-right text-white">14.325</td>
+                  <td class="px-3 py-1.5 text-right text-white">14.180</td>
+                  <td class="px-3 py-1.5 text-right text-white">13.950</td>
+                  <td class="px-3 py-1.5 text-right text-white">13.720</td>
+                  <td class="px-3 py-1.5 text-right text-white">13.400</td>
+                  <td class="px-3 py-1.5 text-right text-white">12.850</td>
+                  <td class="px-3 py-1.5 text-right text-emerald-400">+0.125</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">12,450</td>
+                </tr>
+                <tr class="border-t border-gray-800/30 bg-surface-800/50">
+                  <td class="px-3 py-1.5 text-gray-300">TTF</td>
+                  <td class="px-3 py-1.5 text-right text-white">11.840</td>
+                  <td class="px-3 py-1.5 text-right text-white">11.620</td>
+                  <td class="px-3 py-1.5 text-right text-white">11.380</td>
+                  <td class="px-3 py-1.5 text-right text-white">11.150</td>
+                  <td class="px-3 py-1.5 text-right text-white">10.900</td>
+                  <td class="px-3 py-1.5 text-right text-white">10.420</td>
+                  <td class="px-3 py-1.5 text-right text-red-400">-0.065</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">8,320</td>
+                </tr>
+                <tr class="border-t border-gray-800/30">
+                  <td class="px-3 py-1.5 text-gray-300">HH</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.142</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.210</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.350</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.480</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.620</td>
+                  <td class="px-3 py-1.5 text-right text-white">3.890</td>
+                  <td class="px-3 py-1.5 text-right text-emerald-400">+0.034</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">45,600</td>
+                </tr>
+                <tr class="border-t border-gray-800/30 bg-surface-800/50">
+                  <td class="px-3 py-1.5 text-gray-300">NBP</td>
+                  <td class="px-3 py-1.5 text-right text-white">10.220</td>
+                  <td class="px-3 py-1.5 text-right text-white">10.050</td>
+                  <td class="px-3 py-1.5 text-right text-white">9.880</td>
+                  <td class="px-3 py-1.5 text-right text-white">9.710</td>
+                  <td class="px-3 py-1.5 text-right text-white">9.450</td>
+                  <td class="px-3 py-1.5 text-right text-white">9.120</td>
+                  <td class="px-3 py-1.5 text-right text-emerald-400">+0.085</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">3,150</td>
+                </tr>
+                <tr class="border-t border-gray-800/30">
+                  <td class="px-3 py-1.5 text-gray-300">Brent</td>
+                  <td class="px-3 py-1.5 text-right text-white">82.450</td>
+                  <td class="px-3 py-1.5 text-right text-white">81.920</td>
+                  <td class="px-3 py-1.5 text-right text-white">81.350</td>
+                  <td class="px-3 py-1.5 text-right text-white">80.800</td>
+                  <td class="px-3 py-1.5 text-right text-white">79.500</td>
+                  <td class="px-3 py-1.5 text-right text-white">76.200</td>
+                  <td class="px-3 py-1.5 text-right text-red-400">-0.320</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">128,400</td>
+                </tr>
+                <tr class="border-t border-gray-800/30 bg-surface-800/50">
+                  <td class="px-3 py-1.5 text-gray-300">AECO</td>
+                  <td class="px-3 py-1.5 text-right text-white">1.850</td>
+                  <td class="px-3 py-1.5 text-right text-white">1.920</td>
+                  <td class="px-3 py-1.5 text-right text-white">2.010</td>
+                  <td class="px-3 py-1.5 text-right text-white">2.150</td>
+                  <td class="px-3 py-1.5 text-right text-white">2.340</td>
+                  <td class="px-3 py-1.5 text-right text-white">2.680</td>
+                  <td class="px-3 py-1.5 text-right text-emerald-400">+0.015</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">5,200</td>
+                </tr>
+                <tr class="border-t border-gray-800/30">
+                  <td class="px-3 py-1.5 text-gray-300">DES Japan</td>
+                  <td class="px-3 py-1.5 text-right text-white">15.100</td>
+                  <td class="px-3 py-1.5 text-right text-white">14.920</td>
+                  <td class="px-3 py-1.5 text-right text-white">14.680</td>
+                  <td class="px-3 py-1.5 text-right text-white">14.350</td>
+                  <td class="px-3 py-1.5 text-right text-white">13.980</td>
+                  <td class="px-3 py-1.5 text-right text-white">13.200</td>
+                  <td class="px-3 py-1.5 text-right text-emerald-400">+0.180</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">2,800</td>
+                </tr>
+                <tr class="border-t border-gray-800/30 bg-surface-800/50">
+                  <td class="px-3 py-1.5 text-gray-300">JCC</td>
+                  <td class="px-3 py-1.5 text-right text-white">78.200</td>
+                  <td class="px-3 py-1.5 text-right text-white">77.800</td>
+                  <td class="px-3 py-1.5 text-right text-white">77.100</td>
+                  <td class="px-3 py-1.5 text-right text-white">76.400</td>
+                  <td class="px-3 py-1.5 text-right text-white">75.200</td>
+                  <td class="px-3 py-1.5 text-right text-white">73.500</td>
+                  <td class="px-3 py-1.5 text-right text-red-400">-0.450</td>
+                  <td class="px-3 py-1.5 text-right text-gray-400">1,100</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Bordered with Sticky Header -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div class="px-3 py-2 border-b border-gray-800">
+            <span class="font-mono text-sm text-gray-300">Counterparty Exposure &mdash; Bordered / Sticky Header</span>
+          </div>
+          <div class="overflow-x-auto max-h-64 overflow-y-auto">
+            <table class="w-full text-xs font-mono border-collapse">
+              <thead class="sticky top-0 z-10">
+                <tr class="bg-surface-950 text-gray-500 text-left">
+                  <th class="px-3 py-1.5 font-medium border border-gray-800">Counterparty</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800 text-right">Open Trades</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800 text-right">Net Exposure</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800 text-right">Credit Limit</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800 text-right">Utilisation</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800 text-right">Avg Tenor</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800">Rating</th>
+                  <th class="px-3 py-1.5 font-medium border border-gray-800">Region</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">Shell Trading</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">8</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$42.3M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$80.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-yellow-400">52.9%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">4.2mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">AA-</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">EUR</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">PETRONAS</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">5</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$47.1M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$50.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-red-400">94.2%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">6.1mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">A</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">APAC</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">TotalEnergies</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">6</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$31.8M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$60.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-emerald-400">53.0%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">3.8mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">A+</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">EUR</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">JERA</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">4</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$28.5M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$45.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-emerald-400">63.3%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">5.4mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">A-</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">APAC</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">QatarEnergy</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">3</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$52.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$75.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-yellow-400">69.3%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">8.2mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">AA</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">MEA</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">Vitol</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">7</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$18.9M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$35.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-emerald-400">54.0%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">2.1mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">BBB+</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">EUR</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">Cheniere</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">4</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$36.2M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$55.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-yellow-400">65.8%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">7.5mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">BBB</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">NAM</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">BP</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">5</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$22.4M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$70.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-emerald-400">32.0%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">3.3mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">A</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">EUR</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">KOGAS</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">3</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$19.6M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$40.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-emerald-400">49.0%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">4.8mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">AA-</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">APAC</td></tr>
+                <tr><td class="px-3 py-1.5 border border-gray-800/50 text-gray-300">Trafigura</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">6</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$24.8M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-white">$30.0M</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-red-400">82.7%</td><td class="px-3 py-1.5 border border-gray-800/50 text-right text-gray-400">1.9mo</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">BBB</td><td class="px-3 py-1.5 border border-gray-800/50 text-gray-400">EUR</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mini Table -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div class="px-3 py-2 border-b border-gray-800">
+            <span class="font-mono text-sm text-gray-300">Recent Settlements &mdash; Mini Table</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full font-mono" style="font-size: 0.6875rem;">
+              <thead>
+                <tr class="bg-surface-950 text-gray-500 text-left">
+                  <th class="px-2 py-1 font-medium">Invoice</th>
+                  <th class="px-2 py-1 font-medium">Counterparty</th>
+                  <th class="px-2 py-1 font-medium text-right">Amount</th>
+                  <th class="px-2 py-1 font-medium">Currency</th>
+                  <th class="px-2 py-1 font-medium">Due</th>
+                  <th class="px-2 py-1 font-medium">Status</th>
+                  <th class="px-2 py-1 font-medium text-right">Days</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4201</td><td class="px-2 py-1 text-gray-400">Shell</td><td class="px-2 py-1 text-right text-white">12,450,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">15-Apr</td><td class="px-2 py-1 text-emerald-400">Paid</td><td class="px-2 py-1 text-right text-gray-500">-4</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4200</td><td class="px-2 py-1 text-gray-400">JERA</td><td class="px-2 py-1 text-right text-white">8,920,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">12-Apr</td><td class="px-2 py-1 text-yellow-400">Pending</td><td class="px-2 py-1 text-right text-yellow-400">+1</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4199</td><td class="px-2 py-1 text-gray-400">Vitol</td><td class="px-2 py-1 text-right text-white">5,340,000</td><td class="px-2 py-1 text-gray-400">EUR</td><td class="px-2 py-1 text-gray-400">10-Apr</td><td class="px-2 py-1 text-emerald-400">Paid</td><td class="px-2 py-1 text-right text-gray-500">-1</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4198</td><td class="px-2 py-1 text-gray-400">PETRONAS</td><td class="px-2 py-1 text-right text-white">15,680,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">18-Apr</td><td class="px-2 py-1 text-gray-400">Scheduled</td><td class="px-2 py-1 text-right text-gray-500">7</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4197</td><td class="px-2 py-1 text-gray-400">QatarEnergy</td><td class="px-2 py-1 text-right text-white">22,100,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">08-Apr</td><td class="px-2 py-1 text-emerald-400">Paid</td><td class="px-2 py-1 text-right text-gray-500">-3</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4196</td><td class="px-2 py-1 text-gray-400">BP</td><td class="px-2 py-1 text-right text-white">7,250,000</td><td class="px-2 py-1 text-gray-400">GBP</td><td class="px-2 py-1 text-gray-400">20-Apr</td><td class="px-2 py-1 text-gray-400">Scheduled</td><td class="px-2 py-1 text-right text-gray-500">9</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4195</td><td class="px-2 py-1 text-gray-400">Trafigura</td><td class="px-2 py-1 text-right text-white">3,890,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">05-Apr</td><td class="px-2 py-1 text-red-400">Overdue</td><td class="px-2 py-1 text-right text-red-400">+6</td></tr>
+                <tr class="border-t border-gray-800/30"><td class="px-2 py-1 text-gray-300">INV-4194</td><td class="px-2 py-1 text-gray-400">Cheniere</td><td class="px-2 py-1 text-right text-white">18,400,000</td><td class="px-2 py-1 text-gray-400">USD</td><td class="px-2 py-1 text-gray-400">22-Apr</td><td class="px-2 py-1 text-gray-400">Scheduled</td><td class="px-2 py-1 text-right text-gray-500">11</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('expanded');
+      document.getElementById('mobile-overlay').classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

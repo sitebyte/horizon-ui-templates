@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cards & Lists — Horizon Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' } } } }
+    }
+  </script>
+  <style>
+    html, body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; font-size: 0.875rem; line-height: 1.6; }
+    .sidebar-link { transition: all 0.15s ease; }
+    .sidebar-link:hover { background: rgba(79,70,229,0.08); }
+    .dark .sidebar-link:hover { background: rgba(99,102,241,0.15); }
+    .sidebar-link.active { background: rgba(79,70,229,0.1); color: #4f46e5; font-weight: 600; }
+    .dark .sidebar-link.active { background: rgba(99,102,241,0.2); color: #818cf8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 antialiased">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden md:flex md:w-64 flex-col bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex-shrink-0">
+      <div class="flex items-center gap-2 px-5 h-16 border-b border-slate-200 dark:border-zinc-800">
+        <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <span class="text-base font-bold text-slate-900 dark:text-white tracking-tight">Horizon Pro</span>
+      </div>
+      <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+        <div><p class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Menu</p><a href="index.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>Dashboard</a></div>
+        <div><p class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Pages</p>
+          <a href="tables.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25"/></svg>Data Tables</a>
+          <a href="basic-tables.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>Basic Tables</a>
+          <a href="forms.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>Forms</a>
+          <a href="cards.html" class="sidebar-link active flex items-center gap-3 px-3 py-2 rounded-lg text-sm"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75z"/></svg>Cards & Lists</a>
+          <a href="charts.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/></svg>Charts</a>
+          <a href="profile.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>Profile</a>
+          <a href="settings.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281"/></svg>Settings</a>
+          <a href="invoice.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5"/></svg>Invoice</a>
+        </div>
+        <div><p class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Authentication</p>
+          <a href="signin.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Sign In</a>
+          <a href="error-404.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Error 404</a>
+        </div>
+      </nav>
+      <div class="p-3 border-t border-slate-200 dark:border-zinc-800">
+        <button onclick="toggleTheme()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 w-full">
+          <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+          <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+          <span class="dark:hidden">Dark mode</span><span class="hidden dark:inline">Light mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="closeMobileSidebar()"></div>
+    <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 z-50 transform -translate-x-full transition-transform duration-200 md:hidden">
+      <div class="flex items-center justify-between px-5 h-16 border-b border-slate-200 dark:border-zinc-800">
+        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><span class="text-base font-bold text-slate-900 dark:text-white">Horizon Pro</span></div>
+        <button onclick="closeMobileSidebar()" class="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+        <a href="index.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Dashboard</a>
+        <a href="tables.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Data Tables</a>
+        <a href="basic-tables.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Basic Tables</a>
+        <a href="forms.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Forms</a>
+        <a href="cards.html" class="sidebar-link active flex items-center gap-3 px-3 py-2 rounded-lg text-sm">Cards & Lists</a>
+        <a href="charts.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Charts</a>
+        <a href="profile.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Profile</a>
+        <a href="settings.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Settings</a>
+        <a href="invoice.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Invoice</a>
+        <a href="signin.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Sign In</a>
+        <a href="error-404.html" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Error 404</a>
+      </nav>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-h-screen overflow-hidden">
+      <header class="h-16 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 flex-shrink-0">
+        <div class="flex items-center gap-4">
+          <button onclick="openMobileSidebar()" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg></button>
+          <h1 class="text-lg font-semibold text-slate-900 dark:text-white">Cards & Lists</h1>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"><svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg><svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg></button>
+          <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-semibold">JC</div>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-4 md:p-6 bg-slate-50 dark:bg-zinc-950">
+        <div class="max-w-7xl mx-auto space-y-8">
+
+          <!-- Stat Cards -->
+          <section>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-white mb-4">Stat Cards</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">$4.28M</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400">Total Revenue</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                  <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-medium">+12.5%</span>
+                  <span class="text-slate-400 dark:text-zinc-500 ml-1">vs last month</span>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">342</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400">Active Trades</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                  <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-medium">+8.2%</span>
+                  <span class="text-slate-400 dark:text-zinc-500 ml-1">vs last month</span>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">28</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400">Pending</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                  <svg class="w-4 h-4 text-red-500 rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                  <span class="text-red-600 dark:text-red-400 font-medium">-3.1%</span>
+                  <span class="text-slate-400 dark:text-zinc-500 ml-1">vs last month</span>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">14</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400">Counterparties</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 text-xs">
+                  <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-medium">+2</span>
+                  <span class="text-slate-400 dark:text-zinc-500 ml-1">new this month</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Content Cards -->
+          <section>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-white mb-4">Content Cards</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-primary-400 to-primary-600"></div>
+                <div class="p-5">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-2">Q2 Market Outlook</h3>
+                  <p class="text-sm text-slate-500 dark:text-zinc-400 mb-3">Analysis of Asian LNG spot market trends and forward curve movements for Q2 2026.</p>
+                  <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">Market</span>
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600 dark:bg-zinc-700 dark:text-zinc-300">Analysis</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">Read More</button>
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Save</button>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-emerald-400 to-emerald-600"></div>
+                <div class="p-5">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-2">Shipping Route Analysis</h3>
+                  <p class="text-sm text-slate-500 dark:text-zinc-400 mb-3">Panama Canal transit delays impacting USGC-to-Asia delivery schedules through April.</p>
+                  <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Shipping</span>
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Alert</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">Read More</button>
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Save</button>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-amber-400 to-orange-500"></div>
+                <div class="p-5">
+                  <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-2">Regulatory Update</h3>
+                  <p class="text-sm text-slate-500 dark:text-zinc-400 mb-3">New EU carbon border adjustment mechanism implications for LNG trading operations.</p>
+                  <div class="flex gap-2 mb-4">
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">Regulatory</span>
+                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600 dark:bg-zinc-700 dark:text-zinc-300">EU</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">Read More</button>
+                    <button class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- User Cards -->
+          <section>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-white mb-4">User Cards</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5 text-center">
+                <div class="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">JC</div>
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">James Chen</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mb-4">Senior LNG Trader</p>
+                <div class="grid grid-cols-3 gap-4 py-3 border-t border-slate-100 dark:border-zinc-800">
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">142</p><p class="text-xs text-slate-400 dark:text-zinc-500">Trades</p></div>
+                  <div><p class="text-lg font-bold text-emerald-600 dark:text-emerald-400">+$2.4M</p><p class="text-xs text-slate-400 dark:text-zinc-500">P&L</p></div>
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">68%</p><p class="text-xs text-slate-400 dark:text-zinc-500">Win Rate</p></div>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5 text-center">
+                <div class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">SK</div>
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Sarah Kim</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mb-4">Risk Analyst</p>
+                <div class="grid grid-cols-3 gap-4 py-3 border-t border-slate-100 dark:border-zinc-800">
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">89</p><p class="text-xs text-slate-400 dark:text-zinc-500">Reports</p></div>
+                  <div><p class="text-lg font-bold text-emerald-600 dark:text-emerald-400">99.2%</p><p class="text-xs text-slate-400 dark:text-zinc-500">VaR Acc.</p></div>
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">12</p><p class="text-xs text-slate-400 dark:text-zinc-500">Alerts</p></div>
+                </div>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-5 text-center">
+                <div class="w-16 h-16 rounded-full bg-amber-600 flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">MP</div>
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Michael Park</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mb-4">Operations Manager</p>
+                <div class="grid grid-cols-3 gap-4 py-3 border-t border-slate-100 dark:border-zinc-800">
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">24</p><p class="text-xs text-slate-400 dark:text-zinc-500">Vessels</p></div>
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">98.5%</p><p class="text-xs text-slate-400 dark:text-zinc-500">On-time</p></div>
+                  <div><p class="text-lg font-bold text-slate-900 dark:text-white">3</p><p class="text-xs text-slate-400 dark:text-zinc-500">Delays</p></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- List Group -->
+          <section>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-white mb-4">List Groups</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm">
+                <div class="px-5 py-4 border-b border-slate-100 dark:border-zinc-800">
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Top Counterparties</h3>
+                </div>
+                <ul class="divide-y divide-slate-100 dark:divide-zinc-800">
+                  <li class="flex items-center justify-between px-5 py-3"><span class="text-sm text-slate-700 dark:text-zinc-300">Shell Energy</span><span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">42 trades</span></li>
+                  <li class="flex items-center justify-between px-5 py-3"><span class="text-sm text-slate-700 dark:text-zinc-300">TotalEnergies</span><span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">38 trades</span></li>
+                  <li class="flex items-center justify-between px-5 py-3"><span class="text-sm text-slate-700 dark:text-zinc-300">BP Trading</span><span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">31 trades</span></li>
+                  <li class="flex items-center justify-between px-5 py-3"><span class="text-sm text-slate-700 dark:text-zinc-300">Cheniere Energy</span><span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">27 trades</span></li>
+                  <li class="flex items-center justify-between px-5 py-3"><span class="text-sm text-slate-700 dark:text-zinc-300">Equinor ASA</span><span class="px-2 py-0.5 text-xs font-medium rounded-full bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">22 trades</span></li>
+                </ul>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm">
+                <div class="px-5 py-4 border-b border-slate-100 dark:border-zinc-800">
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Recent Activity</h3>
+                </div>
+                <ul class="divide-y divide-slate-100 dark:divide-zinc-800">
+                  <li class="flex items-center gap-3 px-5 py-3">
+                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs font-bold text-primary-700 dark:text-primary-400">JC</div>
+                    <div class="flex-1 min-w-0"><p class="text-sm text-slate-700 dark:text-zinc-300 truncate">James confirmed trade T-2026-0891</p><p class="text-xs text-slate-400 dark:text-zinc-500">2 min ago</p></div>
+                    <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex-shrink-0">View</button>
+                  </li>
+                  <li class="flex items-center gap-3 px-5 py-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-xs font-bold text-emerald-700 dark:text-emerald-400">SK</div>
+                    <div class="flex-1 min-w-0"><p class="text-sm text-slate-700 dark:text-zinc-300 truncate">Sarah published risk report for Q1</p><p class="text-xs text-slate-400 dark:text-zinc-500">18 min ago</p></div>
+                    <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex-shrink-0">View</button>
+                  </li>
+                  <li class="flex items-center gap-3 px-5 py-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400">MP</div>
+                    <div class="flex-1 min-w-0"><p class="text-sm text-slate-700 dark:text-zinc-300 truncate">Michael updated vessel ETA for MV Pacific Explorer</p><p class="text-xs text-slate-400 dark:text-zinc-500">34 min ago</p></div>
+                    <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex-shrink-0">View</button>
+                  </li>
+                  <li class="flex items-center gap-3 px-5 py-3">
+                    <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs font-bold text-primary-700 dark:text-primary-400">JC</div>
+                    <div class="flex-1 min-w-0"><p class="text-sm text-slate-700 dark:text-zinc-300 truncate">James created new SPA with KOGAS</p><p class="text-xs text-slate-400 dark:text-zinc-500">1 hr ago</p></div>
+                    <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex-shrink-0">View</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Pricing Cards -->
+          <section>
+            <h2 class="text-base font-semibold text-slate-900 dark:text-white mb-4">Pricing Plans</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Basic</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1 mb-4">Essential trading tools</p>
+                <p class="text-3xl font-bold text-slate-900 dark:text-white mb-6">$299<span class="text-sm font-normal text-slate-400">/mo</span></p>
+                <ul class="space-y-3 mb-6">
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Up to 50 trades/month</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Real-time market data</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Basic position tracking</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-400 dark:text-zinc-500"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>AI-powered insights</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-400 dark:text-zinc-500"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>Vessel tracking</li>
+                </ul>
+                <button class="w-full py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Get Started</button>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-6 ring-2 ring-primary-600 relative">
+                <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-xs font-semibold rounded-full bg-primary-600 text-white">Most Popular</span>
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Pro</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1 mb-4">Full trading suite</p>
+                <p class="text-3xl font-bold text-slate-900 dark:text-white mb-6">$799<span class="text-sm font-normal text-slate-400">/mo</span></p>
+                <ul class="space-y-3 mb-6">
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Unlimited trades</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Real-time market data</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Full position & risk</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>AI-powered insights</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-400 dark:text-zinc-500"><svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>Vessel tracking</li>
+                </ul>
+                <button class="w-full py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">Get Started</button>
+              </div>
+              <div class="bg-white dark:bg-zinc-900 dark:border dark:border-zinc-800 rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Enterprise</h3>
+                <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1 mb-4">Complete platform</p>
+                <p class="text-3xl font-bold text-slate-900 dark:text-white mb-6">Custom</p>
+                <ul class="space-y-3 mb-6">
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Everything in Pro</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Vessel tracking (AIS)</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Custom integrations</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Dedicated support</li>
+                  <li class="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-300"><svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>SLA guarantee</li>
+                </ul>
+                <button class="w-full py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Contact Sales</button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); }
+    function openMobileSidebar() { document.getElementById('mobile-sidebar').classList.remove('-translate-x-full'); document.getElementById('mobile-overlay').classList.remove('hidden'); }
+    function closeMobileSidebar() { document.getElementById('mobile-sidebar').classList.add('-translate-x-full'); document.getElementById('mobile-overlay').classList.add('hidden'); }
+  </script>
+</body>
+</html>

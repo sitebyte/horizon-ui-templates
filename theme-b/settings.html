@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, surface: { 900: '#151521', 950: '#0d0d17' } },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    .input-base { background: #0d0d17; border: 0.0625rem solid #2d2d3d; border-radius: 0.375rem; padding: 0.375rem 0.5rem; font-size: 0.75rem; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; outline: none; width: 100%; transition: border-color 0.15s; }
+    .input-base:focus { border-color: #10b981; }
+    .toggle-track { width: 2rem; height: 1.125rem; border-radius: 0.5625rem; background: #2d2d3d; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-track.active { background: #10b981; }
+    .toggle-knob { width: 0.875rem; height: 0.875rem; border-radius: 50%; background: white; position: absolute; top: 0.125rem; left: 0.125rem; transition: transform 0.2s; }
+    .toggle-track.active .toggle-knob { transform: translateX(0.875rem); }
+    .kbd { display: inline-flex; align-items: center; justify-content: center; background: #1e1e2e; border: 0.0625rem solid #2d2d3d; border-radius: 0.25rem; padding: 0.125rem 0.375rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; color: #94a3b8; min-width: 1.5rem; }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-700 { border-color: #cbd5e1; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+    html:not(.dark) .input-base { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+    html:not(.dark) .kbd { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+    html:not(.dark) .toggle-track { background: #cbd5e1; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Settings</span>
+        </div>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+          <span id="theme-icon">&#9789;</span>
+        </button>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-3 max-w-4xl">
+        <!-- Trading Defaults -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Trading Defaults</div>
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-40">Default Benchmark</label>
+              <select class="input-base max-w-48"><option>JKM</option><option>TTF</option><option>HH</option><option>NBP</option></select>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-40">Default Incoterm</label>
+              <select class="input-base max-w-48"><option>FOB</option><option>DES</option><option>DAP</option></select>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-40">Default Currency</label>
+              <select class="input-base max-w-48"><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option></select>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-40">Volume Unit</label>
+              <select class="input-base max-w-48"><option>MMBtu</option><option>MWh</option><option>Tonnes</option></select>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-40">Hedge Ratio Target</label>
+              <input type="number" class="input-base max-w-48" value="90" min="0" max="100">
+              <span class="text-xs text-gray-600 font-mono">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Display -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Display</div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Dark Mode</div>
+                <div class="text-xs text-gray-600">Use dark interface theme</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Compact Mode</div>
+                <div class="text-xs text-gray-600">Reduce padding and font sizes</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Show Ticker Bar</div>
+                <div class="text-xs text-gray-600">Price ticker on dashboard</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Animate Transitions</div>
+                <div class="text-xs text-gray-600">UI transition animations</div>
+              </div>
+              <div class="toggle-track" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Notifications</div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Trade Confirmations</div>
+                <div class="text-xs text-gray-600">Alert when trades are confirmed</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Credit Alerts</div>
+                <div class="text-xs text-gray-600">Alert on credit limit breaches</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Vessel Updates</div>
+                <div class="text-xs text-gray-600">ETA changes and delays</div>
+              </div>
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Sound Alerts</div>
+                <div class="text-xs text-gray-600">Audible notification sounds</div>
+              </div>
+              <div class="toggle-track" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Keyboard Shortcuts</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Dashboard</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">D</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Blotter</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">B</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">New Trade</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">N</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Search</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">K</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Toggle Theme</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">T</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Quick Actions</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">.</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Settings</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">,</span></div>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-xs text-gray-400">Help</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="kbd">?</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Keys -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">API Keys</div>
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-32">EIA API Key</label>
+              <input type="password" class="input-base flex-1 max-w-md" value="sk-eia-xxxxxxxxxxxx">
+              <button class="text-xs text-emerald-400 font-mono hover:text-emerald-300">Show</button>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-32">AIS Stream Key</label>
+              <input type="password" class="input-base flex-1 max-w-md" value="sk-ais-xxxxxxxxxxxx">
+              <button class="text-xs text-emerald-400 font-mono hover:text-emerald-300">Show</button>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="text-xs text-gray-500 w-32">Claude API Key</label>
+              <input type="password" class="input-base flex-1 max-w-md" value="sk-ant-xxxxxxxxxxxx">
+              <button class="text-xs text-emerald-400 font-mono hover:text-emerald-300">Show</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="bg-surface-900 border border-red-500/30 rounded-lg p-3">
+          <div class="font-mono text-sm text-red-400 mb-3">Danger Zone</div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Reset All Settings</div>
+                <div class="text-xs text-gray-600">Restore default configuration</div>
+              </div>
+              <button class="px-3 py-1 rounded text-xs font-mono border border-red-500/30 text-red-400 hover:bg-red-500/10">Reset</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Clear Cache</div>
+                <div class="text-xs text-gray-600">Remove cached market data and AI reasoning</div>
+              </div>
+              <button class="px-3 py-1 rounded text-xs font-mono border border-red-500/30 text-red-400 hover:bg-red-500/10">Clear</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-gray-300">Delete Account</div>
+                <div class="text-xs text-gray-600">Permanently delete your account and data</div>
+              </div>
+              <button class="px-3 py-1 rounded text-xs font-mono bg-red-600 text-white hover:bg-red-500">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save -->
+        <div class="flex items-center gap-2">
+          <button class="px-4 py-1.5 rounded text-xs font-mono font-semibold bg-emerald-600 text-white hover:bg-emerald-500">Save Changes</button>
+          <button class="px-4 py-1.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-gray-600">Cancel</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('expanded');
+      document.getElementById('mobile-overlay').classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, surface: { 900: '#151521', 950: '#0d0d17' } },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    .tab-btn.active { color: #10b981; border-bottom-color: #10b981; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-700 { border-color: #cbd5e1; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Profile</span>
+        </div>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+          <span id="theme-icon">&#9789;</span>
+        </button>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-3">
+        <!-- Profile Header -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl font-bold text-white font-mono">JC</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-mono text-sm text-white font-semibold">Jonathan Cobley</div>
+              <div class="text-xs text-gray-500">Senior LNG Trader &middot; London Desk</div>
+            </div>
+            <div class="flex items-center gap-4 font-mono text-xs">
+              <div class="text-center">
+                <div class="text-white font-semibold">47</div>
+                <div class="text-gray-500">Trades</div>
+              </div>
+              <div class="text-center">
+                <div class="text-emerald-400 font-semibold">+$1.82M</div>
+                <div class="text-gray-500">YTD P&L</div>
+              </div>
+              <div class="text-center">
+                <div class="text-white font-semibold">87.3%</div>
+                <div class="text-gray-500">Hedge</div>
+              </div>
+              <div class="text-center">
+                <div class="text-white font-semibold">4.2y</div>
+                <div class="text-gray-500">Tenure</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg">
+          <div class="flex border-b border-gray-800">
+            <button onclick="switchTab('positions')" class="tab-btn active px-4 py-2 text-xs font-mono border-b-2 border-transparent hover:text-emerald-400 transition-colors">Positions</button>
+            <button onclick="switchTab('activity')" class="tab-btn px-4 py-2 text-xs font-mono text-gray-500 border-b-2 border-transparent hover:text-emerald-400 transition-colors">Activity</button>
+            <button onclick="switchTab('teams')" class="tab-btn px-4 py-2 text-xs font-mono text-gray-500 border-b-2 border-transparent hover:text-emerald-400 transition-colors">Teams</button>
+          </div>
+
+          <!-- Positions Tab -->
+          <div id="tab-positions" class="tab-content active p-3">
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs font-mono">
+                <thead>
+                  <tr class="text-gray-500 text-left">
+                    <th class="px-2 py-1.5 font-medium">Trade ID</th>
+                    <th class="px-2 py-1.5 font-medium">D</th>
+                    <th class="px-2 py-1.5 font-medium">Counterparty</th>
+                    <th class="px-2 py-1.5 font-medium">Idx</th>
+                    <th class="px-2 py-1.5 font-medium text-right">Price</th>
+                    <th class="px-2 py-1.5 font-medium text-right">Volume</th>
+                    <th class="px-2 py-1.5 font-medium text-right">MTM P&L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0401</td>
+                    <td class="px-2 py-1.5 text-emerald-400 font-semibold">B</td>
+                    <td class="px-2 py-1.5 text-gray-400">Shell</td>
+                    <td class="px-2 py-1.5 text-gray-400">JKM</td>
+                    <td class="px-2 py-1.5 text-right text-white">14.325</td>
+                    <td class="px-2 py-1.5 text-right text-white">950,000</td>
+                    <td class="px-2 py-1.5 text-right text-emerald-400">+$42,300</td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0398</td>
+                    <td class="px-2 py-1.5 text-red-400 font-semibold">S</td>
+                    <td class="px-2 py-1.5 text-gray-400">JERA</td>
+                    <td class="px-2 py-1.5 text-gray-400">JKM</td>
+                    <td class="px-2 py-1.5 text-right text-white">14.500</td>
+                    <td class="px-2 py-1.5 text-right text-white">720,000</td>
+                    <td class="px-2 py-1.5 text-right text-emerald-400">+$126,000</td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0396</td>
+                    <td class="px-2 py-1.5 text-emerald-400 font-semibold">B</td>
+                    <td class="px-2 py-1.5 text-gray-400">Cheniere</td>
+                    <td class="px-2 py-1.5 text-gray-400">HH</td>
+                    <td class="px-2 py-1.5 text-right text-white">3.089</td>
+                    <td class="px-2 py-1.5 text-right text-white">1,100,000</td>
+                    <td class="px-2 py-1.5 text-right text-emerald-400">+$58,300</td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0394</td>
+                    <td class="px-2 py-1.5 text-emerald-400 font-semibold">B</td>
+                    <td class="px-2 py-1.5 text-gray-400">QatarEnergy</td>
+                    <td class="px-2 py-1.5 text-gray-400">JKM</td>
+                    <td class="px-2 py-1.5 text-right text-white">14.150</td>
+                    <td class="px-2 py-1.5 text-right text-white">1,500,000</td>
+                    <td class="px-2 py-1.5 text-right text-emerald-400">+$262,500</td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0384</td>
+                    <td class="px-2 py-1.5 text-red-400 font-semibold">S</td>
+                    <td class="px-2 py-1.5 text-gray-400">PetroChina</td>
+                    <td class="px-2 py-1.5 text-gray-400">JKM</td>
+                    <td class="px-2 py-1.5 text-right text-white">14.520</td>
+                    <td class="px-2 py-1.5 text-right text-white">1,050,000</td>
+                    <td class="px-2 py-1.5 text-right text-emerald-400">+$204,750</td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-2 py-1.5 text-gray-300">T-2026-0392</td>
+                    <td class="px-2 py-1.5 text-emerald-400 font-semibold">B</td>
+                    <td class="px-2 py-1.5 text-gray-400">BP</td>
+                    <td class="px-2 py-1.5 text-gray-400">NBP</td>
+                    <td class="px-2 py-1.5 text-right text-white">10.220</td>
+                    <td class="px-2 py-1.5 text-right text-white">620,000</td>
+                    <td class="px-2 py-1.5 text-right text-red-400">-$12,400</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Activity Tab -->
+          <div id="tab-activity" class="tab-content p-3">
+            <div class="space-y-0">
+              <div class="flex gap-3 py-2 border-b border-gray-800/50">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                <div>
+                  <div class="text-xs text-gray-300">Submitted trade T-2026-0401 (Buy JKM 950K)</div>
+                  <div class="text-xs text-gray-600 font-mono">Today 10:24 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3 py-2 border-b border-gray-800/50">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
+                <div>
+                  <div class="text-xs text-gray-300">Modified hedge on T-2026-0394 (adjusted delta)</div>
+                  <div class="text-xs text-gray-600 font-mono">Today 09:15 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3 py-2 border-b border-gray-800/50">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                <div>
+                  <div class="text-xs text-gray-300">Confirmed trade T-2026-0400 (Sell TTF 680K)</div>
+                  <div class="text-xs text-gray-600 font-mono">Yesterday 16:42 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3 py-2 border-b border-gray-800/50">
+                <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-1.5 flex-shrink-0"></div>
+                <div>
+                  <div class="text-xs text-gray-300">Approved credit increase for Vitol ($30M to $35M)</div>
+                  <div class="text-xs text-gray-600 font-mono">Yesterday 14:20 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3 py-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                <div>
+                  <div class="text-xs text-gray-300">Settled invoice INV-4201 (Shell, $12.45M)</div>
+                  <div class="text-xs text-gray-600 font-mono">Yesterday 11:30 UTC</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teams Tab -->
+          <div id="tab-teams" class="tab-content p-3">
+            <div class="space-y-2">
+              <div class="flex items-center gap-3 p-2 rounded border border-gray-800/50">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white font-mono">MR</div>
+                <div class="flex-1">
+                  <div class="text-xs text-gray-300 font-medium">Maria Rodriguez</div>
+                  <div class="text-xs text-gray-500">LNG Trader &middot; London</div>
+                </div>
+                <div class="text-xs text-gray-500 font-mono">12 trades</div>
+              </div>
+              <div class="flex items-center gap-3 p-2 rounded border border-gray-800/50">
+                <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold text-white font-mono">AL</div>
+                <div class="flex-1">
+                  <div class="text-xs text-gray-300 font-medium">Alex Liu</div>
+                  <div class="text-xs text-gray-500">Junior Trader &middot; Singapore</div>
+                </div>
+                <div class="text-xs text-gray-500 font-mono">8 trades</div>
+              </div>
+              <div class="flex items-center gap-3 p-2 rounded border border-gray-800/50">
+                <div class="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center text-xs font-bold text-white font-mono">SK</div>
+                <div class="flex-1">
+                  <div class="text-xs text-gray-300 font-medium">Sarah Khan</div>
+                  <div class="text-xs text-gray-500">Risk Analyst &middot; London</div>
+                </div>
+                <div class="text-xs text-gray-500 font-mono">-- trades</div>
+              </div>
+              <div class="flex items-center gap-3 p-2 rounded border border-gray-800/50">
+                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-xs font-bold text-white font-mono">TN</div>
+                <div class="flex-1">
+                  <div class="text-xs text-gray-300 font-medium">Takashi Nakamura</div>
+                  <div class="text-xs text-gray-500">Senior Trader &middot; Tokyo</div>
+                </div>
+                <div class="text-xs text-gray-500 font-mono">23 trades</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('expanded');
+      document.getElementById('mobile-overlay').classList.toggle('hidden');
+    }
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-gray-500'); });
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      event.target.classList.remove('text-gray-500');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+  </script>
+</body>
+</html>

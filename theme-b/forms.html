@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forms | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, surface: { 900: '#151521', 950: '#0d0d17' } },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    .input-base { background: #0d0d17; border: 0.0625rem solid #2d2d3d; border-radius: 0.375rem; padding: 0.375rem 0.5rem; font-size: 0.75rem; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; transition: border-color 0.15s; outline: none; width: 100%; }
+    .input-base:focus { border-color: #10b981; }
+    .input-base::placeholder { color: #4a5568; }
+    .toggle-track { width: 2rem; height: 1.125rem; border-radius: 0.5625rem; background: #2d2d3d; position: relative; cursor: pointer; transition: background 0.2s; }
+    .toggle-track.active { background: #10b981; }
+    .toggle-knob { width: 0.875rem; height: 0.875rem; border-radius: 50%; background: white; position: absolute; top: 0.125rem; left: 0.125rem; transition: transform 0.2s; }
+    .toggle-track.active .toggle-knob { transform: translateX(0.875rem); }
+    .combobox-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #151521; border: 0.0625rem solid #2d2d3d; border-radius: 0.375rem; max-height: 10rem; overflow-y: auto; z-index: 20; margin-top: 0.125rem; }
+    .combobox-dropdown.open { display: block; }
+    .combobox-option { padding: 0.375rem 0.5rem; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; color: #e2e8f0; cursor: pointer; }
+    .combobox-option:hover { background: #10b981; color: white; }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+    html:not(.dark) .input-base { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+    html:not(.dark) .input-base:focus { border-color: #10b981; }
+    html:not(.dark) .combobox-dropdown { background: #ffffff; border-color: #cbd5e1; }
+    html:not(.dark) .combobox-option { color: #334155; }
+    html:not(.dark) .combobox-option:hover { background: #10b981; color: white; }
+    html:not(.dark) .toggle-track { background: #cbd5e1; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Forms</span>
+        </div>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+          <span id="theme-icon">&#9789;</span>
+        </button>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-3">
+        <!-- Basic Inputs Row 1 -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Basic Inputs</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Trade Reference</label>
+              <input type="text" class="input-base" placeholder="T-2026-XXXX" value="T-2026-0402">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Email</label>
+              <input type="email" class="input-base" placeholder="trader@horizon.com">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Volume (MMBtu)</label>
+              <input type="number" class="input-base" placeholder="0" value="950000">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Benchmark</label>
+              <select class="input-base">
+                <option>JKM</option>
+                <option>TTF</option>
+                <option>HH</option>
+                <option>NBP</option>
+                <option>Brent</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Delivery Date</label>
+              <input type="date" class="input-base" value="2026-05-15">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Time</label>
+              <input type="time" class="input-base" value="14:30">
+            </div>
+            <div class="relative">
+              <label class="block text-xs text-gray-500 mb-1">Counterparty</label>
+              <input type="text" class="input-base" id="combobox-input" placeholder="Search counterparty..." autocomplete="off" onfocus="openCombobox()" oninput="filterCombobox(this.value)">
+              <div id="combobox-dropdown" class="combobox-dropdown">
+                <div class="combobox-option" onclick="selectCombobox('Shell Trading')">Shell Trading</div>
+                <div class="combobox-option" onclick="selectCombobox('TotalEnergies')">TotalEnergies</div>
+                <div class="combobox-option" onclick="selectCombobox('PETRONAS')">PETRONAS</div>
+                <div class="combobox-option" onclick="selectCombobox('JERA')">JERA</div>
+                <div class="combobox-option" onclick="selectCombobox('QatarEnergy')">QatarEnergy</div>
+                <div class="combobox-option" onclick="selectCombobox('Vitol')">Vitol</div>
+                <div class="combobox-option" onclick="selectCombobox('Cheniere')">Cheniere</div>
+                <div class="combobox-option" onclick="selectCombobox('BP')">BP</div>
+                <div class="combobox-option" onclick="selectCombobox('KOGAS')">KOGAS</div>
+                <div class="combobox-option" onclick="selectCombobox('Trafigura')">Trafigura</div>
+                <div class="combobox-option" onclick="selectCombobox('Gunvor')">Gunvor</div>
+                <div class="combobox-option" onclick="selectCombobox('Equinor')">Equinor</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toggles -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="font-mono text-sm text-gray-300 mb-3">Preferences</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="flex items-center gap-2">
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">Auto-hedge</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="toggle-track" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">Confirm alerts</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">MTM refresh</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="toggle-track" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">Sound</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="toggle-track active" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">Live prices</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="toggle-track" onclick="this.classList.toggle('active')"><div class="toggle-knob"></div></div>
+              <span class="text-xs text-gray-400">Dark pool</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Complex Trade Entry Form -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono text-sm text-gray-300">Trade Entry</span>
+            <span class="text-xs text-gray-600 font-mono">Ctrl+N</span>
+          </div>
+
+          <!-- Direction Toggle -->
+          <div class="flex items-center gap-2 mb-3">
+            <label class="text-xs text-gray-500 mr-2">Direction</label>
+            <button id="dir-buy" onclick="setDirection('buy')" class="px-3 py-1 rounded text-xs font-mono font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">B</button>
+            <button id="dir-sell" onclick="setDirection('sell')" class="px-3 py-1 rounded text-xs font-mono font-semibold text-gray-500 border border-gray-700">S</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Counterparty</label>
+              <input type="text" class="input-base" value="Shell Trading">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Volume (MMBtu)</label>
+              <input type="number" class="input-base" value="1200000">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Delivery Window</label>
+              <input type="text" class="input-base" value="Jun-26">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Incoterm</label>
+              <select class="input-base">
+                <option>FOB</option>
+                <option>DES</option>
+                <option>DAP</option>
+                <option>CIF</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pricing Basis -->
+          <div class="mt-3">
+            <label class="block text-xs text-gray-500 mb-1">Pricing Basis</label>
+            <div class="flex gap-2 mb-3">
+              <button onclick="setPricingBasis('fixed')" class="pricing-tab px-3 py-1 rounded text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Fixed</button>
+              <button onclick="setPricingBasis('oil-indexed')" class="pricing-tab px-3 py-1 rounded text-xs font-mono text-gray-500 border border-gray-700">Oil-Indexed</button>
+              <button onclick="setPricingBasis('hub-indexed')" class="pricing-tab px-3 py-1 rounded text-xs font-mono text-gray-500 border border-gray-700">Hub-Indexed</button>
+              <button onclick="setPricingBasis('hybrid')" class="pricing-tab px-3 py-1 rounded text-xs font-mono text-gray-500 border border-gray-700">Hybrid</button>
+            </div>
+
+            <!-- Fixed pricing fields -->
+            <div id="pricing-fixed" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Fixed Price ($/MMBtu)</label>
+                <input type="number" class="input-base" value="14.325" step="0.001">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Currency</label>
+                <select class="input-base"><option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option></select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Payment Terms</label>
+                <select class="input-base"><option>30 days</option><option>45 days</option><option>60 days</option><option>90 days</option></select>
+              </div>
+            </div>
+
+            <!-- Oil-indexed fields (hidden by default) -->
+            <div id="pricing-oil" class="hidden grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Oil Index</label>
+                <select class="input-base"><option>Brent</option><option>JCC</option><option>WTI</option></select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Slope (%)</label>
+                <input type="number" class="input-base" value="14.85" step="0.01">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Constant ($/MMBtu)</label>
+                <input type="number" class="input-base" value="0.50" step="0.01">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Lag (months)</label>
+                <select class="input-base"><option>0</option><option>1</option><option>2</option><option>3</option></select>
+              </div>
+            </div>
+
+            <!-- Hub-indexed fields (hidden by default) -->
+            <div id="pricing-hub" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Hub Index</label>
+                <select class="input-base"><option>JKM</option><option>TTF</option><option>HH</option><option>NBP</option></select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Premium ($/MMBtu)</label>
+                <input type="number" class="input-base" value="0.125" step="0.001">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Averaging Period</label>
+                <select class="input-base"><option>Full Month</option><option>Last 5 Days</option><option>Last 10 Days</option></select>
+              </div>
+            </div>
+
+            <!-- Hybrid fields (hidden by default) -->
+            <div id="pricing-hybrid" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Fixed Component ($/MMBtu)</label>
+                <input type="number" class="input-base" value="7.000" step="0.001">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Floating Component</label>
+                <select class="input-base"><option>JKM + 0.10</option><option>TTF + 0.15</option><option>14.85% Brent + 0.50</option></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Validation message -->
+          <div id="validation-msg" class="mt-3 hidden text-xs font-mono px-3 py-2 rounded border"></div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-2 mt-4">
+            <button onclick="validateForm()" class="px-4 py-1.5 rounded text-xs font-mono font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors">Submit Trade</button>
+            <button class="px-4 py-1.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-gray-600">Save Draft</button>
+            <button class="px-4 py-1.5 rounded text-xs font-mono text-gray-500 hover:text-gray-400">Cancel</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('expanded');
+      document.getElementById('mobile-overlay').classList.toggle('hidden');
+    }
+
+    function setDirection(dir) {
+      const buy = document.getElementById('dir-buy');
+      const sell = document.getElementById('dir-sell');
+      if (dir === 'buy') {
+        buy.className = 'px-3 py-1 rounded text-xs font-mono font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        sell.className = 'px-3 py-1 rounded text-xs font-mono font-semibold text-gray-500 border border-gray-700';
+      } else {
+        sell.className = 'px-3 py-1 rounded text-xs font-mono font-semibold bg-red-500/20 text-red-400 border border-red-500/30';
+        buy.className = 'px-3 py-1 rounded text-xs font-mono font-semibold text-gray-500 border border-gray-700';
+      }
+    }
+
+    function setPricingBasis(basis) {
+      document.querySelectorAll('.pricing-tab').forEach(t => {
+        t.className = 'pricing-tab px-3 py-1 rounded text-xs font-mono text-gray-500 border border-gray-700';
+      });
+      event.target.className = 'pricing-tab px-3 py-1 rounded text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      document.getElementById('pricing-fixed').classList.add('hidden');
+      document.getElementById('pricing-oil').classList.add('hidden');
+      document.getElementById('pricing-hub').classList.add('hidden');
+      document.getElementById('pricing-hybrid').classList.add('hidden');
+      document.getElementById('pricing-' + (basis === 'oil-indexed' ? 'oil' : basis === 'hub-indexed' ? 'hub' : basis)).classList.remove('hidden');
+    }
+
+    function openCombobox() {
+      document.getElementById('combobox-dropdown').classList.add('open');
+    }
+
+    function filterCombobox(val) {
+      const dropdown = document.getElementById('combobox-dropdown');
+      dropdown.classList.add('open');
+      const options = dropdown.querySelectorAll('.combobox-option');
+      const search = val.toLowerCase();
+      options.forEach(opt => {
+        opt.style.display = opt.textContent.toLowerCase().includes(search) ? '' : 'none';
+      });
+    }
+
+    function selectCombobox(val) {
+      document.getElementById('combobox-input').value = val;
+      document.getElementById('combobox-dropdown').classList.remove('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#combobox-input') && !e.target.closest('#combobox-dropdown')) {
+        document.getElementById('combobox-dropdown').classList.remove('open');
+      }
+    });
+
+    function validateForm() {
+      const msg = document.getElementById('validation-msg');
+      msg.classList.remove('hidden');
+      msg.className = 'mt-3 text-xs font-mono px-3 py-2 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+      msg.textContent = 'Trade T-2026-0402 validated successfully. Ready to submit.';
+      setTimeout(() => msg.classList.add('hidden'), 3000);
+    }
+  </script>
+</body>
+</html>

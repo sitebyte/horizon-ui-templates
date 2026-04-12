@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blotter | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-alpine.css">
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 800: '#1e1e2e', 900: '#151521', 950: '#0d0d17' }
+          },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    /* AG Grid dark overrides */
+    .ag-theme-alpine-dark {
+      --ag-background-color: #151521;
+      --ag-header-background-color: #1e1e2e;
+      --ag-odd-row-background-color: #151521;
+      --ag-row-hover-color: #1e2e2e;
+      --ag-border-color: #2d2d3d;
+      --ag-font-family: 'JetBrains Mono', monospace;
+      --ag-font-size: 0.75rem;
+      --ag-row-height: 2rem;
+      --ag-header-height: 2rem;
+      --ag-cell-horizontal-padding: 0.5rem;
+    }
+    .ag-theme-alpine {
+      --ag-font-family: 'JetBrains Mono', monospace;
+      --ag-font-size: 0.75rem;
+      --ag-row-height: 2rem;
+      --ag-header-height: 2rem;
+      --ag-cell-horizontal-padding: 0.5rem;
+    }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Trade Blotter</span>
+          <span class="hidden sm:inline text-xs text-gray-600 font-mono ml-2">Ctrl+B</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+            <span id="theme-icon">&#9789;</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 flex flex-col gap-3">
+        <!-- Toolbar -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg px-3 py-2 flex flex-wrap items-center gap-2">
+          <input id="search-input" type="text" placeholder="Search trades..." class="bg-surface-950 border border-gray-800 rounded px-2 py-1 text-xs font-mono text-gray-300 w-48 focus:border-emerald-500 focus:outline-none">
+          <div class="flex items-center gap-1">
+            <button onclick="filterStatus('all')" class="filter-chip px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">All</button>
+            <button onclick="filterStatus('confirmed')" class="filter-chip px-2 py-0.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-emerald-500/30">Confirmed</button>
+            <button onclick="filterStatus('pending')" class="filter-chip px-2 py-0.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-emerald-500/30">Pending</button>
+            <button onclick="filterStatus('draft')" class="filter-chip px-2 py-0.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-emerald-500/30">Draft</button>
+          </div>
+          <div class="flex-1"></div>
+          <button onclick="exportCsv()" class="px-2 py-0.5 rounded text-xs font-mono text-gray-400 border border-gray-700 hover:border-emerald-500/30 hover:text-emerald-400">Export CSV</button>
+          <span id="row-count" class="text-xs font-mono text-gray-500">20 rows</span>
+        </div>
+
+        <!-- AG Grid -->
+        <div class="flex-1 bg-surface-900 border border-gray-800 rounded-lg overflow-hidden" style="min-height: 24rem;">
+          <div id="trade-grid" class="ag-theme-alpine-dark w-full h-full"></div>
+        </div>
+
+        <!-- Footer stats -->
+        <div class="bg-surface-900 border border-gray-800 rounded-lg px-3 py-2 flex flex-wrap items-center gap-4 font-mono text-xs">
+          <div><span class="text-gray-500">Total Trades:</span> <span class="text-white" id="total-trades">20</span></div>
+          <div><span class="text-gray-500">Total Volume:</span> <span class="text-white" id="total-volume">14,280,000</span> <span class="text-gray-600">MMBtu</span></div>
+          <div><span class="text-gray-500">Net Position:</span> <span class="text-emerald-400" id="net-position">+2,340,000</span> <span class="text-gray-600">MMBtu</span></div>
+          <div><span class="text-gray-500">Buy:</span> <span class="text-emerald-400">12</span> <span class="text-gray-600 mx-1">|</span> <span class="text-gray-500">Sell:</span> <span class="text-red-400">8</span></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const trades = [
+      { id: 'T-2026-0401', dir: 'B', counterparty: 'Shell Trading', benchmark: 'JKM', price: 14.325, volume: 950000, delivery: 'May-26', basis: 'FOB', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0400', dir: 'S', counterparty: 'TotalEnergies', benchmark: 'TTF', price: 11.840, volume: 680000, delivery: 'Apr-26', basis: 'DES', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0399', dir: 'B', counterparty: 'PETRONAS', benchmark: 'JKM', price: 14.210, volume: 1200000, delivery: 'Jun-26', basis: 'FOB', status: 'pending', trader: 'MR' },
+      { id: 'T-2026-0398', dir: 'S', counterparty: 'JERA', benchmark: 'JKM', price: 14.500, volume: 720000, delivery: 'May-26', basis: 'DES', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0397', dir: 'B', counterparty: 'Vitol', benchmark: 'HH', price: 3.142, volume: 500000, delivery: 'Jul-26', basis: 'FOB', status: 'draft', trader: 'AL' },
+      { id: 'T-2026-0396', dir: 'B', counterparty: 'Cheniere', benchmark: 'HH', price: 3.089, volume: 1100000, delivery: 'Jun-26', basis: 'FOB', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0395', dir: 'S', counterparty: 'Naturgy', benchmark: 'TTF', price: 11.920, volume: 450000, delivery: 'May-26', basis: 'DES', status: 'confirmed', trader: 'MR' },
+      { id: 'T-2026-0394', dir: 'B', counterparty: 'QatarEnergy', benchmark: 'JKM', price: 14.150, volume: 1500000, delivery: 'Q3-26', basis: 'FOB', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0393', dir: 'S', counterparty: 'KOGAS', benchmark: 'JKM', price: 14.450, volume: 800000, delivery: 'Jun-26', basis: 'DES', status: 'pending', trader: 'AL' },
+      { id: 'T-2026-0392', dir: 'B', counterparty: 'BP', benchmark: 'NBP', price: 10.220, volume: 620000, delivery: 'May-26', basis: 'FOB', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0391', dir: 'S', counterparty: 'Shell Trading', benchmark: 'TTF', price: 11.780, volume: 380000, delivery: 'Apr-26', basis: 'DES', status: 'confirmed', trader: 'MR' },
+      { id: 'T-2026-0390', dir: 'B', counterparty: 'Trafigura', benchmark: 'JKM', price: 14.290, volume: 900000, delivery: 'Jul-26', basis: 'FOB', status: 'draft', trader: 'JC' },
+      { id: 'T-2026-0389', dir: 'S', counterparty: 'CNOOC', benchmark: 'JKM', price: 14.380, volume: 750000, delivery: 'Jun-26', basis: 'DES', status: 'confirmed', trader: 'AL' },
+      { id: 'T-2026-0388', dir: 'B', counterparty: 'Gunvor', benchmark: 'HH', price: 3.115, volume: 430000, delivery: 'Aug-26', basis: 'FOB', status: 'pending', trader: 'JC' },
+      { id: 'T-2026-0387', dir: 'B', counterparty: 'Equinor', benchmark: 'NBP', price: 10.180, volume: 560000, delivery: 'Jun-26', basis: 'FOB', status: 'confirmed', trader: 'MR' },
+      { id: 'T-2026-0386', dir: 'S', counterparty: 'Repsol', benchmark: 'TTF', price: 11.900, volume: 340000, delivery: 'May-26', basis: 'DES', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0385', dir: 'B', counterparty: 'Pavilion Energy', benchmark: 'JKM', price: 14.195, volume: 880000, delivery: 'Aug-26', basis: 'FOB', status: 'draft', trader: 'AL' },
+      { id: 'T-2026-0384', dir: 'S', counterparty: 'PetroChina', benchmark: 'JKM', price: 14.520, volume: 1050000, delivery: 'Jul-26', basis: 'DES', status: 'confirmed', trader: 'JC' },
+      { id: 'T-2026-0383', dir: 'B', counterparty: 'ENI', benchmark: 'TTF', price: 11.760, volume: 470000, delivery: 'Jun-26', basis: 'FOB', status: 'pending', trader: 'MR' },
+      { id: 'T-2026-0382', dir: 'S', counterparty: 'ADNOC', benchmark: 'JKM', price: 14.410, volume: 700000, delivery: 'May-26', basis: 'DES', status: 'confirmed', trader: 'JC' },
+    ];
+
+    function statusRenderer(params) {
+      const colors = { confirmed: '#10b981', pending: '#f59e0b', draft: '#6b7280' };
+      const color = colors[params.value] || '#6b7280';
+      return `<span style="display:inline-flex;align-items:center;gap:0.25rem;"><span style="width:0.375rem;height:0.375rem;border-radius:50%;background:${color};display:inline-block;"></span>${params.value}</span>`;
+    }
+
+    function dirRenderer(params) {
+      const isBuy = params.value === 'B';
+      return `<span style="font-weight:600;color:${isBuy ? '#34d399' : '#f87171'}">${params.value}</span>`;
+    }
+
+    function priceRenderer(params) {
+      return params.value ? params.value.toFixed(3) : '';
+    }
+
+    function volumeRenderer(params) {
+      return params.value ? params.value.toLocaleString() : '';
+    }
+
+    const columnDefs = [
+      { field: 'id', headerName: 'Trade ID', width: 130, checkboxSelection: true, headerCheckboxSelection: true },
+      { field: 'dir', headerName: 'D', width: 50, cellRenderer: dirRenderer },
+      { field: 'counterparty', headerName: 'Counterparty', width: 140 },
+      { field: 'benchmark', headerName: 'Idx', width: 70 },
+      { field: 'price', headerName: 'Price', width: 90, cellRenderer: priceRenderer, type: 'numericColumn' },
+      { field: 'volume', headerName: 'Volume', width: 110, cellRenderer: volumeRenderer, type: 'numericColumn' },
+      { field: 'delivery', headerName: 'Delivery', width: 90 },
+      { field: 'basis', headerName: 'Basis', width: 65 },
+      { field: 'status', headerName: 'Status', width: 100, cellRenderer: statusRenderer },
+      { field: 'trader', headerName: 'Tdr', width: 55 },
+    ];
+
+    const gridOptions = {
+      columnDefs,
+      rowData: trades,
+      rowSelection: 'multiple',
+      defaultColDef: { sortable: true, filter: true, resizable: true },
+      animateRows: true,
+      headerHeight: 32,
+      rowHeight: 32,
+    };
+
+    const gridDiv = document.getElementById('trade-grid');
+    const gridApi = agGrid.createGrid(gridDiv, gridOptions);
+
+    // Search
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      gridApi.setGridOption('quickFilterText', e.target.value);
+    });
+
+    // Filter by status
+    function filterStatus(status) {
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30');
+        c.classList.add('text-gray-400', 'border-gray-700');
+      });
+      event.target.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30');
+      event.target.classList.remove('text-gray-400', 'border-gray-700');
+      if (status === 'all') {
+        gridApi.setGridOption('quickFilterText', '');
+      } else {
+        gridApi.setGridOption('quickFilterText', status);
+      }
+    }
+
+    function exportCsv() {
+      gridApi.exportDataAsCsv();
+    }
+
+    // Theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      // Switch AG Grid theme
+      const gridEl = document.getElementById('trade-grid');
+      if (isDark) {
+        gridEl.classList.remove('ag-theme-alpine');
+        gridEl.classList.add('ag-theme-alpine-dark');
+      } else {
+        gridEl.classList.remove('ag-theme-alpine-dark');
+        gridEl.classList.add('ag-theme-alpine');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+      document.getElementById('trade-grid').classList.remove('ag-theme-alpine-dark');
+      document.getElementById('trade-grid').classList.add('ag-theme-alpine');
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebar.classList.toggle('expanded');
+      overlay.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

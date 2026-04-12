@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 800: '#1e1e2e', 900: '#151521', 950: '#0d0d17' }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          },
+          fontSize: {
+            'xs': '0.75rem',
+            'sm': '0.8125rem',
+            'base': '0.875rem',
+            'lg': '1rem',
+            'xl': '1.125rem',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono, [class*="font-mono"] { font-family: 'JetBrains Mono', monospace; }
+    .blink { animation: blink-anim 1s step-end infinite; }
+    @keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200 dark:bg-surface-950 dark:text-gray-200 transition-colors min-h-screen flex items-center justify-center relative">
+
+  <!-- Theme Toggle (top-right) -->
+  <div class="fixed top-3 right-3 z-50">
+    <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800 transition-colors" title="Toggle theme">
+      <span id="theme-icon">&#9789;</span>
+    </button>
+  </div>
+
+  <!-- Subtle grid background -->
+  <div class="fixed inset-0 opacity-5 pointer-events-none" style="background-image: linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px); background-size: 3rem 3rem;"></div>
+
+  <!-- 404 Content -->
+  <div class="relative z-10 text-center px-4">
+    <!-- Large 404 -->
+    <div class="font-mono font-bold text-emerald-500 leading-none" style="font-size: 8rem;">404</div>
+
+    <!-- NOT FOUND -->
+    <div class="font-mono font-semibold text-xl text-gray-300 uppercase tracking-widest mt-2">Not Found</div>
+
+    <!-- Terminal message -->
+    <div class="mt-4 bg-surface-900 border border-gray-800 rounded-lg px-4 py-3 max-w-md mx-auto text-left">
+      <div class="font-mono text-xs text-gray-500 mb-1">horizon@terminal:~$</div>
+      <div class="font-mono text-sm text-gray-300">> The requested resource could not be located.<span class="blink text-emerald-500">_</span></div>
+      <div class="font-mono text-xs text-gray-600 mt-2">ERR_NOT_FOUND &middot; route unresolved &middot; no matching endpoint</div>
+    </div>
+
+    <!-- Return Home Button -->
+    <div class="mt-6">
+      <a href="index.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-mono text-sm rounded transition-colors">
+        <span>&#8592;</span> Return Home
+      </a>
+    </div>
+
+    <!-- Additional links -->
+    <div class="mt-4 flex items-center justify-center gap-4">
+      <a href="index.html" class="text-xs text-gray-500 hover:text-emerald-400 font-mono transition-colors">dashboard</a>
+      <span class="text-gray-700">&middot;</span>
+      <a href="tables.html" class="text-xs text-gray-500 hover:text-emerald-400 font-mono transition-colors">blotter</a>
+      <span class="text-gray-700">&middot;</span>
+      <a href="settings.html" class="text-xs text-gray-500 hover:text-emerald-400 font-mono transition-colors">settings</a>
+    </div>
+
+    <!-- Timestamp -->
+    <div class="mt-6">
+      <span class="text-xs text-gray-700 font-mono">&#9670; horizon v2.4.1</span>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      html.classList.toggle('dark');
+      document.getElementById('theme-icon').textContent = isDark ? '&#9728;' : '&#9789;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Init theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+  </script>
+
+  <style>
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-200 { color: #1e293b; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-gray-600 { color: #94a3b8; }
+    html:not(.dark) .text-gray-700 { color: #94a3b8; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+  </style>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 800: '#1e1e2e', 900: '#151521', 950: '#0d0d17' }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          },
+          fontSize: {
+            'xs': '0.75rem',
+            'sm': '0.8125rem',
+            'base': '0.875rem',
+            'lg': '1rem',
+            'xl': '1.125rem',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono, [class*="font-mono"] { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    .ticker-scroll { animation: ticker 30s linear infinite; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200 dark:bg-surface-950 dark:text-gray-200 transition-colors">
+  <!-- Light mode overrides -->
+  <div class="hidden dark:hidden bg-gray-50 text-gray-900"></div>
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 dark:bg-surface-900 border-r border-gray-800 dark:border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0 transition-transform">
+      <!-- Logo -->
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500">
+          <span class="w-5 text-center">&#9632;</span>
+          <span class="label ml-3 text-sm">Dashboard</span>
+        </a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#8644;</span>
+          <span class="label ml-3 text-sm">Blotter</span>
+        </a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9634;</span>
+          <span class="label ml-3 text-sm">Tables</span>
+        </a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9998;</span>
+          <span class="label ml-3 text-sm">Forms</span>
+        </a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9783;</span>
+          <span class="label ml-3 text-sm">Cards</span>
+        </a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9652;</span>
+          <span class="label ml-3 text-sm">Charts</span>
+        </a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9679;</span>
+          <span class="label ml-3 text-sm">Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9881;</span>
+          <span class="label ml-3 text-sm">Settings</span>
+        </a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9776;</span>
+          <span class="label ml-3 text-sm">Invoice</span>
+        </a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#8594;</span>
+          <span class="label ml-3 text-sm">Sign In</span>
+        </a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9888;</span>
+          <span class="label ml-3 text-sm">404</span>
+        </a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Header -->
+      <header class="h-10 bg-surface-900 dark:bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Dashboard</span>
+          <span class="hidden sm:inline text-xs text-gray-600 font-mono ml-2">Ctrl+D</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-gray-500 font-mono hidden sm:inline" id="clock"></span>
+          <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800 transition-colors" title="Toggle theme">
+            <span id="theme-icon">&#9789;</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-3">
+        <!-- Price Ticker -->
+        <div class="bg-surface-900 dark:bg-surface-900 border border-gray-800 rounded-lg overflow-hidden">
+          <div class="flex items-center gap-6 px-4 py-2 overflow-x-auto font-mono text-xs">
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-gray-500">JKM</span>
+              <span class="text-white font-semibold">14.325</span>
+              <span class="text-emerald-400">&#9650; 0.125</span>
+              <span class="text-emerald-400 text-xs">+0.88%</span>
+            </div>
+            <div class="w-px h-4 bg-gray-700"></div>
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-gray-500">TTF</span>
+              <span class="text-white font-semibold">11.840</span>
+              <span class="text-red-400">&#9660; 0.065</span>
+              <span class="text-red-400 text-xs">-0.55%</span>
+            </div>
+            <div class="w-px h-4 bg-gray-700"></div>
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-gray-500">HH</span>
+              <span class="text-white font-semibold">3.142</span>
+              <span class="text-emerald-400">&#9650; 0.034</span>
+              <span class="text-emerald-400 text-xs">+1.09%</span>
+            </div>
+            <div class="w-px h-4 bg-gray-700"></div>
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-gray-500">BRENT</span>
+              <span class="text-white font-semibold">82.45</span>
+              <span class="text-red-400">&#9660; 0.32</span>
+              <span class="text-red-400 text-xs">-0.39%</span>
+            </div>
+            <div class="w-px h-4 bg-gray-700"></div>
+            <div class="flex items-center gap-2 whitespace-nowrap">
+              <span class="text-gray-500">NBP</span>
+              <span class="text-white font-semibold">10.220</span>
+              <span class="text-emerald-400">&#9650; 0.085</span>
+              <span class="text-emerald-400 text-xs">+0.84%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Net Position</div>
+            <div class="font-mono font-semibold text-white text-lg">+2.4M</div>
+            <div class="font-mono text-xs text-emerald-400">&#9650; 340K</div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Unrealised P&L</div>
+            <div class="font-mono font-semibold text-emerald-400 text-lg">+$1.82M</div>
+            <div class="font-mono text-xs text-emerald-400">&#9650; $124K</div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Hedge Ratio</div>
+            <div class="font-mono font-semibold text-white text-lg">87.3%</div>
+            <div class="font-mono text-xs text-gray-400">target 90%</div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Active Trades</div>
+            <div class="font-mono font-semibold text-white text-lg">47</div>
+            <div class="font-mono text-xs text-emerald-400">+3 today</div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Cargoes In Transit</div>
+            <div class="font-mono font-semibold text-white text-lg">12</div>
+            <div class="font-mono text-xs text-yellow-400">2 delayed</div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="text-xs text-gray-500 mb-1">Credit Utilisation</div>
+            <div class="font-mono font-semibold text-white text-lg">62.1%</div>
+            <div class="w-full bg-gray-800 rounded-full h-1 mt-1"><div class="bg-emerald-500 h-1 rounded-full" style="width:62%"></div></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <!-- Position Heatmap -->
+          <div class="lg:col-span-2 bg-surface-900 border border-gray-800 rounded-lg">
+            <div class="px-3 py-2 border-b border-gray-800 flex items-center justify-between">
+              <span class="font-mono text-sm text-gray-300">Position Heatmap</span>
+              <span class="text-xs text-gray-600 font-mono">MMBtu (000s)</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs font-mono">
+                <thead>
+                  <tr class="text-gray-500">
+                    <th class="text-left px-3 py-1.5 font-medium">Benchmark</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Apr</th>
+                    <th class="text-right px-2 py-1.5 font-medium">May</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Jun</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Jul</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Aug</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Sep</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Q4</th>
+                    <th class="text-right px-2 py-1.5 font-medium">Q1-27</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-3 py-1.5 text-gray-300">JKM</td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">+420</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-400">+680</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">-120</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/30 text-red-400">-340</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">+50</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">0</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">+310</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/40 text-emerald-300">+900</span></td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-3 py-1.5 text-gray-300">TTF</td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">-200</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">+150</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-400">+380</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">+220</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">-80</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/25 text-red-400">-260</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">+90</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">0</span></td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-3 py-1.5 text-gray-300">HH</td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/35 text-emerald-400">+560</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">+280</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">+140</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">0</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">-190</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/35 text-red-400">-440</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">+120</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-400">+350</span></td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-3 py-1.5 text-gray-300">NBP</td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/30 text-red-400">-310</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">-90</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">+60</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">+240</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-400">+410</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">+130</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">-40</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">-180</span></td>
+                  </tr>
+                  <tr class="border-t border-gray-800/50">
+                    <td class="px-3 py-1.5 text-gray-300">BRENT</td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">+110</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">-170</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/25 text-red-400">-290</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">+70</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-400">+320</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/35 text-emerald-400">+510</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">-60</span></td>
+                    <td class="text-right px-2 py-1.5"><span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">+80</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Alert Feed -->
+          <div class="bg-surface-900 border border-gray-800 rounded-lg">
+            <div class="px-3 py-2 border-b border-gray-800">
+              <span class="font-mono text-sm text-gray-300">Alerts</span>
+            </div>
+            <div class="divide-y divide-gray-800/50">
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-red-500">
+                <span class="text-red-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">Credit limit breach: PETRONAS at 94.2% utilisation</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">2 min ago</div>
+                </div>
+              </div>
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-yellow-500">
+                <span class="text-yellow-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">Vessel ARCTIC VOYAGER ETA delayed 18h (weather)</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">15 min ago</div>
+                </div>
+              </div>
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-emerald-500">
+                <span class="text-emerald-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">Trade T-2024-0391 confirmed by Shell Trading</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">32 min ago</div>
+                </div>
+              </div>
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-blue-500">
+                <span class="text-blue-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">JKM prompt spread widened to $0.42 (+15%)</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">1h ago</div>
+                </div>
+              </div>
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-yellow-500">
+                <span class="text-yellow-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">Hedge ratio below target: 87.3% vs 90% threshold</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">2h ago</div>
+                </div>
+              </div>
+              <div class="px-3 py-2 flex items-start gap-2 border-l-2 border-emerald-500">
+                <span class="text-emerald-400 text-xs mt-0.5">&#9679;</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs text-gray-300 truncate">DES cargo C-1204 loaded at Sabine Pass &mdash; on water</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">3h ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' UTC';
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      html.classList.toggle('dark');
+      document.getElementById('theme-icon').textContent = isDark ? '&#9728;' : '&#9789;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      applyTheme(!isDark);
+    }
+
+    function applyTheme(isDark) {
+      const body = document.body;
+      const sidebar = document.getElementById('sidebar');
+      if (isDark) {
+        body.className = 'bg-surface-950 text-gray-200 transition-colors';
+      } else {
+        body.className = 'bg-gray-100 text-gray-900 transition-colors';
+        // Light mode: update cards, surfaces etc via CSS custom approach
+      }
+      document.querySelectorAll('.bg-surface-900').forEach(el => {
+        if (!isDark) {
+          el.classList.add('light-surface');
+        } else {
+          el.classList.remove('light-surface');
+        }
+      });
+    }
+
+    // Init theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+      applyTheme(false);
+    }
+
+    // Mobile sidebar
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebar.classList.toggle('expanded');
+      overlay.classList.toggle('hidden');
+    }
+  </script>
+
+  <style>
+    .light-surface {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #1a202c;
+    }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-gray-600 { color: #94a3b8; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-800\/50 { border-color: #e2e8f0; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) .divide-gray-800\/50 > :not(:last-child) { border-color: #e2e8f0; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+  </style>
+</body>
+</html>

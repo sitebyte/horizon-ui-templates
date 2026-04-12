@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cards | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, surface: { 900: '#151521', 950: '#0d0d17' } },
+          fontFamily: { mono: ['JetBrains Mono', 'monospace'], sans: ['Inter', 'sans-serif'] },
+          fontSize: { 'xs': '0.75rem', 'sm': '0.8125rem', 'base': '0.875rem' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-700 { border-color: #cbd5e1; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 border-r border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9632;</span><span class="label ml-3 text-sm">Dashboard</span></a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8644;</span><span class="label ml-3 text-sm">Blotter</span></a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9634;</span><span class="label ml-3 text-sm">Tables</span></a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9998;</span><span class="label ml-3 text-sm">Forms</span></a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500"><span class="w-5 text-center">&#9783;</span><span class="label ml-3 text-sm">Cards</span></a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9652;</span><span class="label ml-3 text-sm">Charts</span></a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9679;</span><span class="label ml-3 text-sm">Profile</span></a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9881;</span><span class="label ml-3 text-sm">Settings</span></a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9776;</span><span class="label ml-3 text-sm">Invoice</span></a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#8594;</span><span class="label ml-3 text-sm">Sign In</span></a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"><span class="w-5 text-center">&#9888;</span><span class="label ml-3 text-sm">404</span></a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-10 bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Cards & Lists</span>
+        </div>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800" title="Toggle theme">
+          <span id="theme-icon">&#9789;</span>
+        </button>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4 space-y-3">
+        <!-- Compact Stat Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-emerald-400 text-lg">&#9650;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">$1.82M</div>
+              <div class="text-xs text-gray-500">P&L</div>
+            </div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-blue-400 text-lg">&#9644;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">47</div>
+              <div class="text-xs text-gray-500">Open Trades</div>
+            </div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-yellow-400 text-lg">&#9679;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">12</div>
+              <div class="text-xs text-gray-500">In Transit</div>
+            </div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-purple-400 text-lg">&#9733;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">87.3%</div>
+              <div class="text-xs text-gray-500">Hedge Ratio</div>
+            </div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-red-400 text-lg">&#9888;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">3</div>
+              <div class="text-xs text-gray-500">Alerts</div>
+            </div>
+          </div>
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-2.5 flex items-center gap-2">
+            <span class="text-emerald-400 text-lg">&#10003;</span>
+            <div>
+              <div class="font-mono font-semibold text-white text-sm">98.2%</div>
+              <div class="text-xs text-gray-500">Uptime</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cargo Data Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs text-emerald-400">C-1204</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>On Water</span>
+            </div>
+            <div class="font-mono text-sm text-white mb-1">ARCTIC VOYAGER</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>Sabine Pass &#8594; Futtsu</div>
+              <div class="font-mono">ETA: 2026-04-28</div>
+              <div class="font-mono">Vol: 3,200,000 MMBtu</div>
+            </div>
+            <div class="mt-2 w-full bg-gray-800 rounded-full h-1">
+              <div class="bg-emerald-500 h-1 rounded-full" style="width: 62%"></div>
+            </div>
+            <div class="text-xs text-gray-600 font-mono mt-0.5">62% voyage complete</div>
+          </div>
+
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs text-emerald-400">C-1203</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span>Loading</span>
+            </div>
+            <div class="font-mono text-sm text-white mb-1">LNG PIONEER</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>Ras Laffan &#8594; Gate (Rotterdam)</div>
+              <div class="font-mono">ETA: 2026-05-08</div>
+              <div class="font-mono">Vol: 2,800,000 MMBtu</div>
+            </div>
+            <div class="mt-2 w-full bg-gray-800 rounded-full h-1">
+              <div class="bg-yellow-500 h-1 rounded-full" style="width: 8%"></div>
+            </div>
+            <div class="text-xs text-gray-600 font-mono mt-0.5">8% loading</div>
+          </div>
+
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs text-emerald-400">C-1202</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>On Water</span>
+            </div>
+            <div class="font-mono text-sm text-white mb-1">ENERGY NAVIGATOR</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>Bonny Island &#8594; Incheon</div>
+              <div class="font-mono">ETA: 2026-05-02</div>
+              <div class="font-mono">Vol: 3,400,000 MMBtu</div>
+            </div>
+            <div class="mt-2 w-full bg-gray-800 rounded-full h-1">
+              <div class="bg-emerald-500 h-1 rounded-full" style="width: 45%"></div>
+            </div>
+            <div class="text-xs text-gray-600 font-mono mt-0.5">45% voyage complete</div>
+          </div>
+
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs text-emerald-400">C-1201</span>
+              <span class="inline-flex items-center gap-1 text-xs"><span class="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Discharged</span>
+            </div>
+            <div class="font-mono text-sm text-white mb-1">PACIFIC BREEZE</div>
+            <div class="text-xs text-gray-500 space-y-0.5">
+              <div>Cameron &#8594; Dahej</div>
+              <div class="font-mono">Arrived: 2026-04-09</div>
+              <div class="font-mono">Vol: 3,100,000 MMBtu</div>
+            </div>
+            <div class="mt-2 w-full bg-gray-800 rounded-full h-1">
+              <div class="bg-blue-500 h-1 rounded-full" style="width: 100%"></div>
+            </div>
+            <div class="text-xs text-gray-600 font-mono mt-0.5">100% complete</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <!-- Timeline -->
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="font-mono text-sm text-gray-300 mb-3">Activity Timeline</div>
+            <div class="space-y-0">
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                  <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></div>
+                  <div class="w-0.5 flex-1 bg-gray-800"></div>
+                </div>
+                <div class="pb-4">
+                  <div class="text-xs text-gray-300">Trade T-2026-0401 confirmed</div>
+                  <div class="text-xs text-gray-500 font-mono">Shell Trading &middot; JKM &middot; 950K MMBtu</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">10:24 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                  <div class="w-2 h-2 rounded-full bg-yellow-500 mt-1"></div>
+                  <div class="w-0.5 flex-1 bg-gray-800"></div>
+                </div>
+                <div class="pb-4">
+                  <div class="text-xs text-gray-300">Vessel delay: ARCTIC VOYAGER</div>
+                  <div class="text-xs text-gray-500 font-mono">ETA revised +18h due to weather</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">09:52 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                  <div class="w-2 h-2 rounded-full bg-blue-500 mt-1"></div>
+                  <div class="w-0.5 flex-1 bg-gray-800"></div>
+                </div>
+                <div class="pb-4">
+                  <div class="text-xs text-gray-300">Morning briefing generated</div>
+                  <div class="text-xs text-gray-500 font-mono">7 insights, 2 action items</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">07:00 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                  <div class="w-2 h-2 rounded-full bg-red-500 mt-1"></div>
+                  <div class="w-0.5 flex-1 bg-gray-800"></div>
+                </div>
+                <div class="pb-4">
+                  <div class="text-xs text-gray-300">Credit alert: PETRONAS at 94.2%</div>
+                  <div class="text-xs text-gray-500 font-mono">Approaching $50M limit</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">06:45 UTC</div>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center">
+                  <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1"></div>
+                  <div class="w-0.5 h-0 bg-transparent"></div>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-300">Invoice INV-4201 settled</div>
+                  <div class="text-xs text-gray-500 font-mono">Shell Trading &middot; $12.45M</div>
+                  <div class="text-xs text-gray-600 font-mono mt-0.5">Yesterday 16:30 UTC</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pricing Tiers -->
+          <div class="bg-surface-900 border border-gray-800 rounded-lg p-3">
+            <div class="font-mono text-sm text-gray-300 mb-3">Data Plans</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div class="border border-gray-700 rounded-lg p-3 text-center">
+                <div class="font-mono text-xs text-gray-500 uppercase tracking-wider mb-1">Starter</div>
+                <div class="font-mono text-xl text-white font-bold">$499</div>
+                <div class="text-xs text-gray-500 mb-3">/month</div>
+                <div class="space-y-1 text-xs text-gray-400 mb-3">
+                  <div>5 benchmarks</div>
+                  <div>Daily snapshots</div>
+                  <div>Basic alerts</div>
+                  <div>1 user</div>
+                </div>
+                <button class="w-full py-1.5 rounded text-xs font-mono border border-gray-700 text-gray-400 hover:border-emerald-500 hover:text-emerald-400">Select</button>
+              </div>
+              <div class="border border-emerald-500/50 rounded-lg p-3 text-center bg-emerald-500/5">
+                <div class="font-mono text-xs text-emerald-400 uppercase tracking-wider mb-1">Professional</div>
+                <div class="font-mono text-xl text-white font-bold">$1,499</div>
+                <div class="text-xs text-gray-500 mb-3">/month</div>
+                <div class="space-y-1 text-xs text-gray-400 mb-3">
+                  <div>All benchmarks</div>
+                  <div>Real-time feed</div>
+                  <div>AI insights</div>
+                  <div>10 users</div>
+                </div>
+                <button class="w-full py-1.5 rounded text-xs font-mono bg-emerald-600 text-white hover:bg-emerald-500">Select</button>
+              </div>
+              <div class="border border-gray-700 rounded-lg p-3 text-center">
+                <div class="font-mono text-xs text-gray-500 uppercase tracking-wider mb-1">Enterprise</div>
+                <div class="font-mono text-xl text-white font-bold">Custom</div>
+                <div class="text-xs text-gray-500 mb-3">/month</div>
+                <div class="space-y-1 text-xs text-gray-400 mb-3">
+                  <div>Everything</div>
+                  <div>Dedicated feed</div>
+                  <div>Custom agents</div>
+                  <div>Unlimited users</div>
+                </div>
+                <button class="w-full py-1.5 rounded text-xs font-mono border border-gray-700 text-gray-400 hover:border-emerald-500 hover:text-emerald-400">Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-icon').innerHTML = isDark ? '&#9789;' : '&#9728;';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+    }
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('expanded');
+      document.getElementById('mobile-overlay').classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>

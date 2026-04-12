@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice | Trading Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 800: '#1e1e2e', 900: '#151521', 950: '#0d0d17' }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          },
+          fontSize: {
+            'xs': '0.75rem',
+            'sm': '0.8125rem',
+            'base': '0.875rem',
+            'lg': '1rem',
+            'xl': '1.125rem',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; font-size: 0.8125rem; }
+    .font-mono, [class*="font-mono"] { font-family: 'JetBrains Mono', monospace; }
+    .sidebar-item span.label { opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+    aside:hover .sidebar-item span.label, aside.expanded .sidebar-item span.label { opacity: 1; }
+    aside:hover, aside.expanded { width: 14rem !important; }
+    @media print {
+      aside, header, #mobile-overlay { display: none !important; }
+      main { padding: 0 !important; }
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-white { background: white !important; border-color: #d1d5db !important; color: #111827 !important; }
+    }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200 dark:bg-surface-950 dark:text-gray-200 transition-colors">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-14 hover:w-56 transition-all duration-200 bg-surface-900 dark:bg-surface-900 border-r border-gray-800 dark:border-gray-800 flex flex-col z-50 fixed md:relative h-full -translate-x-full md:translate-x-0 transition-transform">
+      <!-- Logo -->
+      <div class="h-10 flex items-center px-3 border-b border-gray-800">
+        <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+        <span class="label ml-3 font-mono font-bold text-sm text-emerald-500">HORIZON</span>
+      </div>
+      <nav class="flex-1 py-2 overflow-y-auto">
+        <a href="index.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9632;</span>
+          <span class="label ml-3 text-sm">Dashboard</span>
+        </a>
+        <a href="tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#8644;</span>
+          <span class="label ml-3 text-sm">Blotter</span>
+        </a>
+        <a href="basic-tables.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9634;</span>
+          <span class="label ml-3 text-sm">Tables</span>
+        </a>
+        <a href="forms.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9998;</span>
+          <span class="label ml-3 text-sm">Forms</span>
+        </a>
+        <a href="cards.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9783;</span>
+          <span class="label ml-3 text-sm">Cards</span>
+        </a>
+        <a href="charts.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9652;</span>
+          <span class="label ml-3 text-sm">Charts</span>
+        </a>
+        <a href="profile.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9679;</span>
+          <span class="label ml-3 text-sm">Profile</span>
+        </a>
+        <a href="settings.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9881;</span>
+          <span class="label ml-3 text-sm">Settings</span>
+        </a>
+        <a href="invoice.html" class="sidebar-item flex items-center px-4 py-2 text-emerald-400 bg-emerald-500/10 border-r-2 border-emerald-500">
+          <span class="w-5 text-center">&#9776;</span>
+          <span class="label ml-3 text-sm">Invoice</span>
+        </a>
+        <div class="border-t border-gray-800 my-2"></div>
+        <a href="signin.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#8594;</span>
+          <span class="label ml-3 text-sm">Sign In</span>
+        </a>
+        <a href="error-404.html" class="sidebar-item flex items-center px-4 py-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
+          <span class="w-5 text-center">&#9888;</span>
+          <span class="label ml-3 text-sm">404</span>
+        </a>
+      </nav>
+      <div class="p-3 border-t border-gray-800">
+        <div class="sidebar-item flex items-center">
+          <div class="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-xs font-bold text-white">J</div>
+          <span class="label ml-3 text-xs text-gray-400 truncate">J. Trader</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden" onclick="toggleMobileSidebar()"></div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Header -->
+      <header class="h-10 bg-surface-900 dark:bg-surface-900 border-b border-gray-800 flex items-center justify-between px-3">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleMobileSidebar()" class="md:hidden text-gray-400 hover:text-white">&#9776;</button>
+          <span class="font-mono text-sm text-gray-400">Invoice</span>
+          <span class="hidden sm:inline text-xs text-gray-600 font-mono ml-2">INV-2026-0042</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-gray-500 font-mono hidden sm:inline" id="clock"></span>
+          <button onclick="toggleTheme()" class="w-7 h-7 rounded flex items-center justify-center text-gray-400 hover:text-emerald-400 hover:bg-gray-800 transition-colors" title="Toggle theme">
+            <span id="theme-icon">&#9789;</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-3 md:p-4">
+        <div class="max-w-3xl mx-auto">
+          <!-- Invoice Card -->
+          <div class="bg-surface-900 border border-gray-800 rounded-lg print-white">
+            <!-- Invoice Header -->
+            <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-emerald-500 font-mono font-bold text-lg">&#9670;</span>
+                <div>
+                  <div class="font-mono font-bold text-lg text-white tracking-wide">INVOICE</div>
+                  <div class="font-mono text-xs text-gray-500">INV-2026-0042</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-mono text-xs text-gray-500">Date Issued</div>
+                <div class="font-mono text-sm text-gray-300">2026-04-11</div>
+                <div class="font-mono text-xs text-gray-500 mt-1">Due Date</div>
+                <div class="font-mono text-sm text-gray-300">2026-05-11</div>
+              </div>
+            </div>
+
+            <!-- From / To -->
+            <div class="grid grid-cols-2 gap-4 px-4 py-3 border-b border-gray-800">
+              <div>
+                <div class="font-mono text-xs text-emerald-500 uppercase tracking-wider mb-1">From</div>
+                <div class="text-sm text-white font-medium">Horizon Trading Ltd</div>
+                <div class="text-xs text-gray-400 mt-0.5">1 Canary Wharf Tower</div>
+                <div class="text-xs text-gray-400">London E14 5AB, UK</div>
+                <div class="text-xs text-gray-500 font-mono mt-1">VAT: GB 123 4567 89</div>
+              </div>
+              <div>
+                <div class="font-mono text-xs text-emerald-500 uppercase tracking-wider mb-1">Bill To</div>
+                <div class="text-sm text-white font-medium">JERA Co., Inc.</div>
+                <div class="text-xs text-gray-400 mt-0.5">2-5-1 Nihonbashi</div>
+                <div class="text-xs text-gray-400">Chuo-ku, Tokyo 103-0027, Japan</div>
+                <div class="text-xs text-gray-500 font-mono mt-1">Ref: PO-JERA-2026-118</div>
+              </div>
+            </div>
+
+            <!-- Line Items Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs font-mono">
+                <thead>
+                  <tr class="text-gray-500 border-b border-gray-800">
+                    <th class="text-left px-4 py-2 font-medium">#</th>
+                    <th class="text-left px-2 py-2 font-medium">Description</th>
+                    <th class="text-right px-2 py-2 font-medium">Qty (MMBtu)</th>
+                    <th class="text-right px-2 py-2 font-medium">Rate ($/MMBtu)</th>
+                    <th class="text-right px-4 py-2 font-medium">Amount (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-gray-800/50 hover:bg-gray-800/20">
+                    <td class="px-4 py-2 text-gray-500">1</td>
+                    <td class="px-2 py-2 text-gray-300">DES Cargo C-1198 &mdash; Sabine Pass to Futtsu, JKM-indexed</td>
+                    <td class="text-right px-2 py-2 text-gray-200">3,400,000</td>
+                    <td class="text-right px-2 py-2 text-gray-200">14.325</td>
+                    <td class="text-right px-4 py-2 text-white">48,705,000.00</td>
+                  </tr>
+                  <tr class="border-b border-gray-800/50 hover:bg-gray-800/20">
+                    <td class="px-4 py-2 text-gray-500">2</td>
+                    <td class="px-2 py-2 text-gray-300">FOB Cargo C-1201 &mdash; Ras Laffan, oil-indexed (14.5% Brent)</td>
+                    <td class="text-right px-2 py-2 text-gray-200">3,100,000</td>
+                    <td class="text-right px-2 py-2 text-gray-200">11.955</td>
+                    <td class="text-right px-4 py-2 text-white">37,060,500.00</td>
+                  </tr>
+                  <tr class="border-b border-gray-800/50 hover:bg-gray-800/20">
+                    <td class="px-4 py-2 text-gray-500">3</td>
+                    <td class="px-2 py-2 text-gray-300">DES Cargo C-1204 &mdash; Cameron LNG to Dahej, TTF+0.35</td>
+                    <td class="text-right px-2 py-2 text-gray-200">3,250,000</td>
+                    <td class="text-right px-2 py-2 text-gray-200">12.190</td>
+                    <td class="text-right px-4 py-2 text-white">39,617,500.00</td>
+                  </tr>
+                  <tr class="border-b border-gray-800/50 hover:bg-gray-800/20">
+                    <td class="px-4 py-2 text-gray-500">4</td>
+                    <td class="px-2 py-2 text-gray-300">Boil-off gas compensation &mdash; voyage C-1198 (0.12%/day)</td>
+                    <td class="text-right px-2 py-2 text-gray-200">61,200</td>
+                    <td class="text-right px-2 py-2 text-gray-200">14.325</td>
+                    <td class="text-right px-4 py-2 text-white">876,690.00</td>
+                  </tr>
+                  <tr class="border-b border-gray-800/50 hover:bg-gray-800/20">
+                    <td class="px-4 py-2 text-gray-500">5</td>
+                    <td class="px-2 py-2 text-gray-300">Demurrage &mdash; ARCTIC VOYAGER, 18h delay at Futtsu ($42K/day)</td>
+                    <td class="text-right px-2 py-2 text-gray-200">&mdash;</td>
+                    <td class="text-right px-2 py-2 text-gray-200">&mdash;</td>
+                    <td class="text-right px-4 py-2 text-white">31,500.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="px-4 py-3 border-t border-gray-800">
+              <div class="flex justify-end">
+                <div class="w-64">
+                  <div class="flex justify-between py-1">
+                    <span class="text-xs text-gray-500">Subtotal</span>
+                    <span class="font-mono text-sm text-gray-300">126,291,190.00</span>
+                  </div>
+                  <div class="flex justify-between py-1">
+                    <span class="text-xs text-gray-500">Tax (0%)</span>
+                    <span class="font-mono text-sm text-gray-400">0.00</span>
+                  </div>
+                  <div class="flex justify-between py-1.5 border-t border-gray-800 mt-1">
+                    <span class="text-sm text-white font-medium">Total</span>
+                    <span class="font-mono text-base font-bold text-emerald-400">$126,291,190.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Terms & Status -->
+            <div class="px-4 py-3 border-t border-gray-800 flex items-end justify-between gap-4">
+              <div>
+                <div class="font-mono text-xs text-emerald-500 uppercase tracking-wider mb-1">Payment Terms</div>
+                <div class="text-xs text-gray-400">Net 30 days from date of invoice. Wire transfer to:</div>
+                <div class="text-xs text-gray-500 font-mono mt-0.5">HSBC London &middot; SWIFT: HSBCGB2L &middot; Acct: 4021-7893-0042</div>
+                <div class="text-xs text-gray-600 font-mono mt-1">Late payment subject to 1.5% monthly interest.</div>
+              </div>
+              <div class="no-print">
+                <button onclick="window.print()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-mono rounded transition-colors flex items-center gap-1.5">
+                  <span>&#9113;</span> Print
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Bar -->
+          <div class="mt-2 flex items-center justify-between text-xs font-mono text-gray-600 px-1">
+            <span>Status: <span class="text-yellow-400">PENDING</span></span>
+            <span>Generated 2026-04-11 09:42:17 UTC</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' UTC';
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      html.classList.toggle('dark');
+      document.getElementById('theme-icon').textContent = isDark ? '&#9728;' : '&#9789;';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      applyTheme(!isDark);
+    }
+
+    function applyTheme(isDark) {
+      const body = document.body;
+      if (isDark) {
+        body.className = 'bg-surface-950 text-gray-200 transition-colors';
+      } else {
+        body.className = 'bg-gray-100 text-gray-900 transition-colors';
+      }
+      document.querySelectorAll('.bg-surface-900').forEach(el => {
+        if (!isDark) {
+          el.classList.add('light-surface');
+        } else {
+          el.classList.remove('light-surface');
+        }
+      });
+    }
+
+    // Init theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+      document.getElementById('theme-icon').innerHTML = '&#9728;';
+      applyTheme(false);
+    }
+
+    // Mobile sidebar
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebar.classList.toggle('expanded');
+      overlay.classList.toggle('hidden');
+    }
+  </script>
+
+  <style>
+    .light-surface {
+      background: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #1a202c;
+    }
+    html:not(.dark) body { background: #f1f5f9; color: #1e293b; }
+    html:not(.dark) .bg-surface-900 { background: #ffffff; border-color: #e2e8f0; }
+    html:not(.dark) .bg-surface-950 { background: #f1f5f9; }
+    html:not(.dark) .text-gray-300 { color: #334155; }
+    html:not(.dark) .text-gray-400 { color: #64748b; }
+    html:not(.dark) .text-gray-500 { color: #64748b; }
+    html:not(.dark) .text-gray-600 { color: #94a3b8; }
+    html:not(.dark) .text-white { color: #0f172a; }
+    html:not(.dark) .border-gray-800 { border-color: #e2e8f0; }
+    html:not(.dark) .border-gray-800\/50 { border-color: #e2e8f0; }
+    html:not(.dark) .bg-gray-800 { background: #e2e8f0; }
+    html:not(.dark) .bg-gray-800\/50 { background: #f1f5f9; }
+    html:not(.dark) .bg-gray-800\/20 { background: #f8fafc; }
+    html:not(.dark) .divide-gray-800\/50 > :not(:last-child) { border-color: #e2e8f0; }
+    html:not(.dark) #sidebar { background: #1e293b; }
+    html:not(.dark) #sidebar .border-gray-800 { border-color: #334155; }
+  </style>
+</body>
+</html>

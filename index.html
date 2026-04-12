@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon UI — Design Template Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <style>
+    body { font-family: 'Inter', -apple-system, sans-serif; }
+    .theme-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .theme-card:hover { transform: translateY(-0.25rem); box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.12); }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 min-h-screen">
+
+  <header class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">HORIZON</span>
+        <span class="text-xs text-gray-400 dark:text-zinc-500">Design Template Library</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-gray-500 dark:text-zinc-400">Horizon UI Templates</span>
+        <button onclick="document.getElementById('html-root').classList.toggle('dark');localStorage.setItem('hz-theme',document.getElementById('html-root').classList.contains('dark')?'dark':'light')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700">&#9789;</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="mb-10">
+      <h1 class="text-3xl font-bold mb-2">3 Design Themes &times; 11 Pages Each</h1>
+      <p class="text-gray-500 dark:text-zinc-400 max-w-2xl">Three visually distinct design languages, each applied to the same set of page types. Every page is fully responsive (rem-based, no fixed pixels), includes dark/light theme toggle, and uses real Tailwind CSS patterns.</p>
+    </div>
+
+    <!-- Theme Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+
+      <!-- Theme A -->
+      <a href="theme-a/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
+        <div class="h-44 bg-gradient-to-br from-indigo-50 to-slate-100 dark:from-indigo-950/30 dark:to-zinc-900 p-5 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">H</div>
+            <span class="font-semibold text-indigo-900 dark:text-indigo-300 text-sm">Horizon Pro</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="w-6 h-6 rounded-full bg-indigo-600"></div>
+            <div class="w-6 h-6 rounded-full bg-slate-400"></div>
+            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
+            <div class="w-6 h-6 rounded-full bg-rose-500"></div>
+            <div class="w-6 h-6 rounded-full bg-amber-400"></div>
+          </div>
+        </div>
+        <div class="p-5">
+          <h3 class="font-bold text-lg mb-1">Clean Enterprise</h3>
+          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Indigo accent, shadow cards, 16rem sidebar, comfortable spacing. Inspired by Linear, Vercel, modern SaaS dashboards.</p>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">System fonts</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Shadow cards</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Wide sidebar</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Comfortable</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Theme B -->
+      <a href="theme-b/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
+        <div class="h-44 bg-gradient-to-br from-gray-900 to-emerald-950 p-5 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-mono font-bold text-lg">&#9670;</span>
+            <span class="font-mono font-semibold text-emerald-400 text-sm">HORIZON</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
+            <div class="w-6 h-6 rounded-full bg-gray-600"></div>
+            <div class="w-6 h-6 rounded-full bg-blue-500"></div>
+            <div class="w-6 h-6 rounded-full bg-red-500"></div>
+            <div class="w-6 h-6 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <div class="p-5">
+          <h3 class="font-bold text-lg mb-1">Trading Terminal</h3>
+          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Emerald accent, monospace-heavy, narrow icon sidebar, compact density. Inspired by Bloomberg, Refinitiv, professional trading desks.</p>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">JetBrains Mono</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Border cards</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Icon sidebar</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Dense</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Theme C -->
+      <a href="theme-c/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
+        <div class="h-44 bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/20 p-5 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">JC</div>
+            <span class="font-semibold text-violet-900 dark:text-violet-300 text-sm">Meridian Glass</span>
+          </div>
+          <div class="flex gap-2">
+            <div class="w-6 h-6 rounded-full bg-violet-600"></div>
+            <div class="w-6 h-6 rounded-full bg-purple-400"></div>
+            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
+            <div class="w-6 h-6 rounded-full bg-rose-400"></div>
+            <div class="w-6 h-6 rounded-full bg-stone-400"></div>
+          </div>
+        </div>
+        <div class="p-5">
+          <h3 class="font-bold text-lg mb-1">Premium Glass</h3>
+          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Violet gradients, backdrop-blur glassmorphism, Plus Jakarta Sans, spacious. Inspired by Raycast, Arc browser, premium fintech.</p>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Jakarta Sans</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Glass cards</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Full sidebar</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Spacious</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Page Types Included -->
+    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-8 mb-12">
+      <h2 class="font-bold text-lg mb-6">11 Page Types Per Theme</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9632;</span> Dashboard</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#8644;</span> AG Grid Tables</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9634;</span> Basic Tables</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9998;</span> Forms</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9635;</span> Cards & Lists</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9636;</span> Charts</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9679;</span> Profile</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9881;</span> Settings</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9993;</span> Invoice</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#8594;</span> Sign In</div>
+        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">!</span> Error 404</div>
+      </div>
+    </div>
+
+    <!-- Design Comparison -->
+    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl overflow-hidden mb-12">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-zinc-800">
+        <h2 class="font-bold">Design Comparison</h2>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 dark:border-zinc-800 text-left text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
+            <th class="px-6 py-3 font-medium">Attribute</th>
+            <th class="px-6 py-3 font-medium text-indigo-600 dark:text-indigo-400">A: Horizon Pro</th>
+            <th class="px-6 py-3 font-medium text-emerald-600 dark:text-emerald-400">B: Terminal</th>
+            <th class="px-6 py-3 font-medium text-violet-600 dark:text-violet-400">C: Glass</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Primary Color</td><td class="px-6 py-3">Indigo #4f46e5</td><td class="px-6 py-3">Emerald #10b981</td><td class="px-6 py-3">Violet #7c3aed</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Font</td><td class="px-6 py-3">System / Inter</td><td class="px-6 py-3">JetBrains Mono</td><td class="px-6 py-3">Plus Jakarta Sans</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Card Style</td><td class="px-6 py-3">Shadow, no border (light)</td><td class="px-6 py-3">Border, no shadow</td><td class="px-6 py-3">Glass + backdrop-blur</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Sidebar</td><td class="px-6 py-3">16rem, labeled groups</td><td class="px-6 py-3">3.5rem icons, expands</td><td class="px-6 py-3">15rem, glass effect</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Density</td><td class="px-6 py-3">Comfortable</td><td class="px-6 py-3">Compact</td><td class="px-6 py-3">Spacious</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Border Radius</td><td class="px-6 py-3">0.75rem (xl)</td><td class="px-6 py-3">0.5rem (lg)</td><td class="px-6 py-3">1rem (2xl)</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Default Theme</td><td class="px-6 py-3">Light</td><td class="px-6 py-3">Dark</td><td class="px-6 py-3">Light</td></tr>
+          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Inspiration</td><td class="px-6 py-3">Linear, Vercel</td><td class="px-6 py-3">Bloomberg, Refinitiv</td><td class="px-6 py-3">Raycast, Arc</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Links to other docs -->
+    <div class="text-sm text-gray-500 dark:text-zinc-400 space-y-1">
+      <p><a href="docs/agency-review-round-1.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 1: Discovery & Audit</a></p>
+      <p><a href="docs/agency-review-round-2.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 2: Design System</a></p>
+      <p><a href="docs/agency-review-round-3.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 3: Final Spec</a></p>
+      <p><a href="docs/implementation-plan.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Implementation Plan</a></p>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 mt-12">
+    <div class="max-w-6xl mx-auto px-6 py-4 text-xs text-gray-400 dark:text-zinc-600 text-center">
+      Horizon UI Design Templates &bull; 3 themes &times; 11 pages &bull; Tailwind CSS &bull; AG Grid &bull; Responsive
+    </div>
+  </footer>
+
+  <script>
+    const saved = localStorage.getItem('hz-theme');
+    if (saved === 'dark') document.getElementById('html-root').classList.add('dark');
+    else document.getElementById('html-root').classList.remove('dark');
+  </script>
+</body>
+</html>
