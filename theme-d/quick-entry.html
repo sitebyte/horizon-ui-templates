@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon — Quick Entry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
+  <style>
+    /* Quick entry strip */
+    .qe-strip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .qe-field { display: flex; flex-direction: column; gap: 0.125rem; }
+    .qe-label {
+      font-size: 0.5625rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    .qe-dir-group { display: flex; gap: 0.125rem; }
+    .qe-dir-btn {
+      width: 2rem;
+      height: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.25rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      transition: all 0.12s;
+      background: var(--input-bg);
+      color: var(--text-3);
+    }
+    .qe-dir-btn.buy-active { background: rgba(6,182,212,0.15); border-color: var(--accent); color: var(--accent); }
+    .qe-dir-btn.sell-active { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+    .qe-dir-btn:hover { border-color: var(--text-3); }
+
+    /* Counterparty dropdown */
+    .qe-cpty-wrap { position: relative; }
+    .qe-cpty-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-2);
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.375rem;
+      max-height: 10rem;
+      overflow-y: auto;
+      z-index: 50;
+      margin-top: 0.125rem;
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+    }
+    .qe-cpty-dropdown.show { display: block; }
+    .qe-cpty-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.375rem 0.5rem;
+      font-size: 0.6875rem;
+      color: var(--text-1);
+      transition: background 0.1s;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+    .qe-cpty-option:hover, .qe-cpty-option.highlighted {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    /* Grid wrapper */
+    .grid-wrapper {
+      flex: 1;
+      min-height: 24rem;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border: 0.0625rem solid var(--border);
+    }
+    .grid-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.625rem;
+      color: var(--text-3);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-top: none;
+      border-radius: 0 0 0.5rem 0.5rem;
+    }
+
+    .qe-submit-btn {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      font-weight: 600;
+      gap: 0.375rem;
+    }
+    .qe-submit-btn:hover { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div id="hz-app">
+
+    <!-- Quick Entry Strip -->
+    <div class="qe-strip fade-in" id="qe-form">
+      <div class="qe-field">
+        <span class="qe-label">Dir</span>
+        <div class="qe-dir-group">
+          <button class="qe-dir-btn buy-active" id="qe-buy" onclick="setDir('B')" tabindex="1">B<span class="hz-key-hint" style="margin-left:0.125rem;font-size:0.4375rem">B</span></button>
+          <button class="qe-dir-btn" id="qe-sell" onclick="setDir('S')" tabindex="2">S<span class="hz-key-hint" style="margin-left:0.125rem;font-size:0.4375rem">S</span></button>
+        </div>
+      </div>
+
+      <div class="qe-field" style="flex:1;min-width:8rem;">
+        <span class="qe-label">Counterparty</span>
+        <div class="qe-cpty-wrap">
+          <input class="hz-input w-full" id="qe-cpty" placeholder="Type to search..." autocomplete="off" tabindex="3" />
+          <div class="qe-cpty-dropdown" id="qe-cpty-dd"></div>
+        </div>
+      </div>
+
+      <div class="qe-field" style="width:6.5rem;">
+        <span class="qe-label">Volume (MMBtu)</span>
+        <input class="hz-input w-full" id="qe-volume" type="text" value="3200000" tabindex="4" style="font-variant-numeric:tabular-nums;" />
+      </div>
+
+      <div class="qe-field" style="width:5rem;">
+        <span class="qe-label">Benchmark</span>
+        <select class="hz-input w-full" id="qe-bench" tabindex="5">
+          <option>JKM</option>
+          <option>TTF</option>
+          <option>HH</option>
+        </select>
+      </div>
+
+      <div class="qe-field" style="width:5rem;">
+        <span class="qe-label">Premium</span>
+        <input class="hz-input w-full" id="qe-price" type="text" placeholder="0.00" tabindex="6" style="font-variant-numeric:tabular-nums;" />
+      </div>
+
+      <div class="qe-field" style="width:5.5rem;">
+        <span class="qe-label">Month</span>
+        <select class="hz-input w-full" id="qe-month" tabindex="7"></select>
+      </div>
+
+      <div class="qe-field" style="align-self:flex-end;">
+        <button class="hz-btn qe-submit-btn" id="qe-submit" onclick="submitTrade()" tabindex="8">
+          Submit <span class="hz-key-hint">&#9166;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Blotter Grid -->
+    <div class="fade-in-d1">
+      <div class="grid-wrapper">
+        <div id="blotter-grid" style="width:100%;height:24rem;"></div>
+      </div>
+      <div class="grid-footer">
+        <span id="grid-count">15 trades</span>
+        <span id="grid-selected">0 selected</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="shell.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <script>
+    initShell('quick-entry', 'Quick Entry');
+
+    /* ---- Populate months ---- */
+    const monthSel = document.getElementById('qe-month');
+    const now = new Date();
+    for (let i = 1; i <= 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      const opt = document.createElement('option');
+      opt.value = label;
+      opt.textContent = label;
+      monthSel.appendChild(opt);
+    }
+
+    /* ---- Direction ---- */
+    let currentDir = 'B';
+    function setDir(d) {
+      currentDir = d;
+      document.getElementById('qe-buy').className = 'qe-dir-btn' + (d === 'B' ? ' buy-active' : '');
+      document.getElementById('qe-sell').className = 'qe-dir-btn' + (d === 'S' ? ' sell-active' : '');
+    }
+
+    /* ---- Counterparty Search ---- */
+    const COUNTERPARTIES = ['Shell', 'JERA', 'QatarEnergy', 'TotalEnergies', 'Cheniere', 'KOGAS', 'Woodside', 'BP', 'Petronas', 'ExxonMobil'];
+    const cptyInput = document.getElementById('qe-cpty');
+    const cptyDd = document.getElementById('qe-cpty-dd');
+    let cptyHighlight = -1;
+    let cptyFiltered = [];
+
+    cptyInput.addEventListener('input', () => {
+      const q = cptyInput.value.trim().toLowerCase();
+      if (q.length < 2) { cptyDd.classList.remove('show'); return; }
+      cptyFiltered = COUNTERPARTIES.filter(c => c.toLowerCase().includes(q));
+      cptyHighlight = cptyFiltered.length > 0 ? 0 : -1;
+      renderCptyDd();
+      cptyDd.classList.add('show');
+    });
+
+    cptyInput.addEventListener('keydown', e => {
+      if (!cptyDd.classList.contains('show')) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); cptyHighlight = Math.min(cptyHighlight + 1, cptyFiltered.length - 1); renderCptyDd(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); cptyHighlight = Math.max(cptyHighlight - 1, 0); renderCptyDd(); }
+      if (e.key === 'Enter' && cptyHighlight >= 0) {
+        e.preventDefault();
+        cptyInput.value = cptyFiltered[cptyHighlight];
+        cptyDd.classList.remove('show');
+        // Move to next field
+        document.getElementById('qe-volume').focus();
+      }
+      if (e.key === 'Escape') { cptyDd.classList.remove('show'); }
+    });
+
+    cptyInput.addEventListener('blur', () => {
+      setTimeout(() => cptyDd.classList.remove('show'), 150);
+    });
+
+    function renderCptyDd() {
+      cptyDd.innerHTML = cptyFiltered.map((c, i) =>
+        `<button class="qe-cpty-option ${i === cptyHighlight ? 'highlighted' : ''}" onmousedown="selectCpty('${c}')">${c}</button>`
+      ).join('');
+    }
+
+    function selectCpty(name) {
+      cptyInput.value = name;
+      cptyDd.classList.remove('show');
+      document.getElementById('qe-volume').focus();
+    }
+
+    /* ---- Submit Trade ---- */
+    function submitTrade() {
+      const cpty = cptyInput.value.trim();
+      const vol = document.getElementById('qe-volume').value.trim();
+      const price = document.getElementById('qe-price').value.trim();
+      if (!cpty || !vol) { showToast('Please fill required fields', 'error'); return; }
+
+      // Add to grid
+      const refNum = 'T-2026-' + String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0');
+      const newRow = {
+        time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        dir: currentDir,
+        ref: refNum,
+        counterparty: cpty,
+        volume: parseInt(vol) || 3200000,
+        price: price ? parseFloat(price).toFixed(2) : '0.00',
+        bench: document.getElementById('qe-bench').value,
+        month: document.getElementById('qe-month').value,
+        status: 'Pending'
+      };
+      gridApi.applyTransaction({ add: [newRow], addIndex: 0 });
+      updateGridFooter();
+
+      showToast('Trade captured — ' + refNum);
+
+      // Reset form
+      cptyInput.value = '';
+      document.getElementById('qe-price').value = '';
+      setDir('B');
+      document.getElementById('qe-buy').focus();
+    }
+
+    /* ---- Keyboard: B/S in quick entry, Enter to submit ---- */
+    document.addEventListener('keydown', e => {
+      // Skip if command palette is open
+      if (document.getElementById('hz-cmdk-overlay').style.display !== 'none') return;
+      // Skip if focused on a text input (except for B/S)
+      const active = document.activeElement;
+      const inInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+
+      if (e.key === 'b' && !inInput && !e.metaKey && !e.ctrlKey) { e.preventDefault(); setDir('B'); document.getElementById('qe-buy').focus(); }
+      if (e.key === 's' && !inInput && !e.metaKey && !e.ctrlKey) { e.preventDefault(); setDir('S'); document.getElementById('qe-sell').focus(); }
+
+      // Enter to submit (when in the form area)
+      if (e.key === 'Enter' && inInput) {
+        const form = document.getElementById('qe-form');
+        if (form.contains(active) && active.id !== 'qe-cpty') {
+          e.preventDefault();
+          submitTrade();
+        }
+      }
+    });
+
+    /* ---- AG Grid ---- */
+    const TRADE_DATA = [
+      { time: '09:41:02', dir: 'B', ref: 'T-2026-0147', counterparty: 'JERA', volume: 3200000, price: '14.60', bench: 'JKM', month: 'Jun-26', status: 'Confirmed' },
+      { time: '09:38:15', dir: 'S', ref: 'T-2026-0146', counterparty: 'Shell', volume: 2800000, price: '14.55', bench: 'JKM', month: 'Jul-26', status: 'Confirmed' },
+      { time: '09:35:44', dir: 'B', ref: 'T-2026-0145', counterparty: 'TotalEnergies', volume: 1600000, price: '12.95', bench: 'TTF', month: 'Jun-26', status: 'Pending' },
+      { time: '09:31:20', dir: 'B', ref: 'T-2026-0144', counterparty: 'QatarEnergy', volume: 3200000, price: '14.30', bench: 'JKM', month: 'Aug-26', status: 'Confirmed' },
+      { time: '09:28:08', dir: 'S', ref: 'T-2026-0143', counterparty: 'Cheniere', volume: 3200000, price: '3.55', bench: 'HH', month: 'May-26', status: 'Draft' },
+      { time: '09:22:33', dir: 'B', ref: 'T-2026-0142', counterparty: 'KOGAS', volume: 4800000, price: '14.70', bench: 'JKM', month: 'Jun-26', status: 'Confirmed' },
+      { time: '09:18:55', dir: 'S', ref: 'T-2026-0141', counterparty: 'Woodside', volume: 1600000, price: '13.10', bench: 'TTF', month: 'Jul-26', status: 'Pending' },
+      { time: '09:14:12', dir: 'B', ref: 'T-2026-0140', counterparty: 'BP', volume: 3200000, price: '14.45', bench: 'JKM', month: 'May-26', status: 'Confirmed' },
+      { time: '09:10:44', dir: 'S', ref: 'T-2026-0139', counterparty: 'JERA', volume: 1600000, price: '14.50', bench: 'JKM', month: 'Jun-26', status: 'Confirmed' },
+      { time: '09:05:28', dir: 'B', ref: 'T-2026-0138', counterparty: 'Petronas', volume: 3200000, price: '12.85', bench: 'TTF', month: 'Aug-26', status: 'Draft' },
+      { time: '08:58:16', dir: 'S', ref: 'T-2026-0137', counterparty: 'Shell', volume: 4800000, price: '14.35', bench: 'JKM', month: 'Jul-26', status: 'Confirmed' },
+      { time: '08:52:40', dir: 'B', ref: 'T-2026-0136', counterparty: 'TotalEnergies', volume: 1600000, price: '3.48', bench: 'HH', month: 'Jun-26', status: 'Pending' },
+      { time: '08:45:33', dir: 'S', ref: 'T-2026-0135', counterparty: 'QatarEnergy', volume: 3200000, price: '14.40', bench: 'JKM', month: 'May-26', status: 'Confirmed' },
+      { time: '08:40:10', dir: 'B', ref: 'T-2026-0134', counterparty: 'KOGAS', volume: 3200000, price: '14.65', bench: 'JKM', month: 'Jun-26', status: 'Confirmed' },
+      { time: '08:35:22', dir: 'S', ref: 'T-2026-0133', counterparty: 'ExxonMobil', volume: 1600000, price: '12.90', bench: 'TTF', month: 'Jul-26', status: 'Draft' },
+    ];
+
+    function dirCellRenderer(params) {
+      if (!params.value) return '';
+      const isBuy = params.value === 'B';
+      return `<span style="color:${isBuy ? 'var(--accent)' : 'var(--red)'};font-weight:700;">${params.value}</span>`;
+    }
+    function volumeCellRenderer(params) {
+      if (!params.value) return '';
+      return `<span style="font-variant-numeric:tabular-nums;">${Number(params.value).toLocaleString()}</span>`;
+    }
+    function statusCellRenderer(params) {
+      if (!params.value) return '';
+      const colors = { Confirmed: 'var(--green)', Pending: 'var(--amber)', Draft: 'var(--text-3)' };
+      const c = colors[params.value] || 'var(--text-3)';
+      return `<span style="display:inline-flex;align-items:center;gap:0.25rem;"><span style="width:0.375rem;height:0.375rem;border-radius:50%;background:${c};display:inline-block;"></span>${params.value}</span>`;
+    }
+
+    const columnDefs = [
+      { headerCheckboxSelection: true, checkboxSelection: true, width: 40, maxWidth: 40, resizable: false, sortable: false, filter: false },
+      { field: 'time', headerName: 'Time', width: 90 },
+      { field: 'dir', headerName: 'Dir', width: 55, cellRenderer: dirCellRenderer },
+      { field: 'ref', headerName: 'Ref', width: 110 },
+      { field: 'counterparty', headerName: 'Counterparty', flex: 1, minWidth: 110 },
+      { field: 'volume', headerName: 'Volume', width: 105, cellRenderer: volumeCellRenderer, type: 'numericColumn' },
+      { field: 'price', headerName: 'Price', width: 75, type: 'numericColumn' },
+      { field: 'bench', headerName: 'Bench', width: 65 },
+      { field: 'month', headerName: 'Month', width: 70 },
+      { field: 'status', headerName: 'Status', width: 100, cellRenderer: statusCellRenderer },
+    ];
+
+    const gridOptions = {
+      columnDefs,
+      rowData: TRADE_DATA,
+      rowSelection: 'multiple',
+      rowHeight: 28,
+      headerHeight: 32,
+      animateRows: true,
+      defaultColDef: {
+        sortable: true,
+        filter: true,
+        resizable: true,
+      },
+      onSelectionChanged: updateGridFooter,
+      getRowId: params => params.data.ref,
+    };
+
+    let gridApi;
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridDiv = document.getElementById('blotter-grid');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      gridDiv.className = isDark ? 'ag-theme-quartz-dark' : 'ag-theme-quartz';
+      gridApi = agGrid.createGrid(gridDiv, gridOptions);
+      updateGridFooter();
+
+      // Watch theme changes
+      const obs = new MutationObserver(() => {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        gridDiv.className = dark ? 'ag-theme-quartz-dark' : 'ag-theme-quartz';
+      });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    });
+
+    function updateGridFooter() {
+      if (!gridApi) return;
+      let totalRows = 0;
+      gridApi.forEachNode(() => totalRows++);
+      const selCount = gridApi.getSelectedRows().length;
+      document.getElementById('grid-count').textContent = totalRows + ' trades';
+      document.getElementById('grid-selected').textContent = selCount + ' selected';
+    }
+  </script>
+</body>
+</html>

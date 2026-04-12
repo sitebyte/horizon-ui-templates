@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon — Blotter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
+  <style>
+    .blotter-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .blotter-search {
+      width: 14rem;
+      max-width: 100%;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .filter-pill {
+      padding: 0.1875rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.625rem;
+      font-weight: 500;
+      border: 0.0625rem solid var(--border);
+      color: var(--text-2);
+      background: transparent;
+      transition: all 0.12s;
+    }
+    .filter-pill:hover { border-color: var(--text-3); color: var(--text-0); }
+    .filter-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+    .blotter-grid-wrap {
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      flex: 1;
+    }
+    .blotter-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.625rem;
+      color: var(--text-3);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-top: none;
+      border-radius: 0 0 0.5rem 0.5rem;
+    }
+    .toolbar-right {
+      display: flex;
+      gap: 0.375rem;
+      margin-left: auto;
+    }
+
+    /* Detail drawer */
+    .detail-drawer {
+      display: none;
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--accent);
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .detail-drawer.open { display: block; }
+    .detail-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--accent-bg);
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .detail-drawer-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .detail-drawer-body {
+      padding: 0.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+      gap: 0.5rem;
+      font-size: 0.6875rem;
+    }
+    .detail-field-label {
+      font-size: 0.5625rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .detail-field-value {
+      color: var(--text-0);
+      margin-top: 0.0625rem;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div id="hz-app">
+
+    <!-- Toolbar -->
+    <div class="blotter-toolbar fade-in">
+      <input class="hz-input blotter-search" id="bl-search" placeholder="Search trades..." />
+      <div class="filter-pills">
+        <button class="filter-pill active" data-filter="All" onclick="setFilter('All', this)">All</button>
+        <button class="filter-pill" data-filter="Confirmed" onclick="setFilter('Confirmed', this)">Confirmed</button>
+        <button class="filter-pill" data-filter="Pending" onclick="setFilter('Pending', this)">Pending</button>
+        <button class="filter-pill" data-filter="Draft" onclick="setFilter('Draft', this)">Draft</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="hz-btn sm" id="col-toggle-btn" onclick="toggleColPanel()">Columns</button>
+        <button class="hz-btn sm" onclick="exportCsv()">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="fade-in-d1">
+      <div class="blotter-grid-wrap">
+        <div id="blotter-grid" style="width:100%;height:32rem;"></div>
+      </div>
+      <div class="blotter-footer">
+        <span id="bl-count">22 trades</span>
+        <span id="bl-selected">0 selected</span>
+      </div>
+    </div>
+
+    <!-- Detail drawer (shown on Enter / double-click) -->
+    <div class="detail-drawer" id="detail-drawer">
+      <div class="detail-drawer-header">
+        <span class="detail-drawer-title" id="detail-title">Trade Detail</span>
+        <button class="drill-close" onclick="closeDetail()" style="color:var(--text-3);width:1.5rem;height:1.5rem;display:flex;align-items:center;justify-content:center;border-radius:0.25rem;">&times;</button>
+      </div>
+      <div class="detail-drawer-body" id="detail-body"></div>
+    </div>
+
+  </div>
+
+  <script src="shell.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <script>
+    initShell('blotter', 'Trade Blotter');
+
+    const TRADE_DATA = [
+      { time: '09:41:02', dir: 'B', ref: 'T-2026-0147', counterparty: 'JERA', volume: 3200000, price: 14.60, bench: 'JKM', month: 'Jun-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:38:15', dir: 'S', ref: 'T-2026-0146', counterparty: 'Shell', volume: 2800000, price: 14.55, bench: 'JKM', month: 'Jul-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:35:44', dir: 'B', ref: 'T-2026-0145', counterparty: 'TotalEnergies', volume: 1600000, price: 12.95, bench: 'TTF', month: 'Jun-26', status: 'Pending', trader: 'JChen', book: 'LNG-EUR' },
+      { time: '09:31:20', dir: 'B', ref: 'T-2026-0144', counterparty: 'QatarEnergy', volume: 3200000, price: 14.30, bench: 'JKM', month: 'Aug-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:28:08', dir: 'S', ref: 'T-2026-0143', counterparty: 'Cheniere', volume: 3200000, price: 3.55, bench: 'HH', month: 'May-26', status: 'Draft', trader: 'MJones', book: 'LNG-NAM' },
+      { time: '09:22:33', dir: 'B', ref: 'T-2026-0142', counterparty: 'KOGAS', volume: 4800000, price: 14.70, bench: 'JKM', month: 'Jun-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:18:55', dir: 'S', ref: 'T-2026-0141', counterparty: 'Woodside', volume: 1600000, price: 13.10, bench: 'TTF', month: 'Jul-26', status: 'Pending', trader: 'JChen', book: 'LNG-EUR' },
+      { time: '09:14:12', dir: 'B', ref: 'T-2026-0140', counterparty: 'BP', volume: 3200000, price: 14.45, bench: 'JKM', month: 'May-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:10:44', dir: 'S', ref: 'T-2026-0139', counterparty: 'JERA', volume: 1600000, price: 14.50, bench: 'JKM', month: 'Jun-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '09:05:28', dir: 'B', ref: 'T-2026-0138', counterparty: 'Petronas', volume: 3200000, price: 12.85, bench: 'TTF', month: 'Aug-26', status: 'Draft', trader: 'JChen', book: 'LNG-EUR' },
+      { time: '08:58:16', dir: 'S', ref: 'T-2026-0137', counterparty: 'Shell', volume: 4800000, price: 14.35, bench: 'JKM', month: 'Jul-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '08:52:40', dir: 'B', ref: 'T-2026-0136', counterparty: 'TotalEnergies', volume: 1600000, price: 3.48, bench: 'HH', month: 'Jun-26', status: 'Pending', trader: 'MJones', book: 'LNG-NAM' },
+      { time: '08:45:33', dir: 'S', ref: 'T-2026-0135', counterparty: 'QatarEnergy', volume: 3200000, price: 14.40, bench: 'JKM', month: 'May-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '08:40:10', dir: 'B', ref: 'T-2026-0134', counterparty: 'KOGAS', volume: 3200000, price: 14.65, bench: 'JKM', month: 'Jun-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '08:35:22', dir: 'S', ref: 'T-2026-0133', counterparty: 'ExxonMobil', volume: 1600000, price: 12.90, bench: 'TTF', month: 'Jul-26', status: 'Draft', trader: 'JChen', book: 'LNG-EUR' },
+      { time: '08:28:05', dir: 'B', ref: 'T-2026-0132', counterparty: 'Shell', volume: 3200000, price: 14.55, bench: 'JKM', month: 'Sep-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '08:22:48', dir: 'S', ref: 'T-2026-0131', counterparty: 'Cheniere', volume: 1600000, price: 3.52, bench: 'HH', month: 'Jul-26', status: 'Pending', trader: 'MJones', book: 'LNG-NAM' },
+      { time: '08:15:33', dir: 'B', ref: 'T-2026-0130', counterparty: 'BP', volume: 800000, price: 12.88, bench: 'TTF', month: 'Jun-26', status: 'Confirmed', trader: 'JChen', book: 'LNG-EUR' },
+      { time: '08:10:18', dir: 'S', ref: 'T-2026-0129', counterparty: 'Woodside', volume: 3200000, price: 14.48, bench: 'JKM', month: 'Aug-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '08:02:44', dir: 'B', ref: 'T-2026-0128', counterparty: 'Shell', volume: 800000, price: 14.52, bench: 'JKM', month: 'May-26', status: 'Confirmed', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '07:55:20', dir: 'B', ref: 'T-2026-0127', counterparty: 'JERA', volume: 4800000, price: 14.58, bench: 'JKM', month: 'Oct-26', status: 'Draft', trader: 'ASmith', book: 'LNG-APAC' },
+      { time: '07:48:12', dir: 'S', ref: 'T-2026-0126', counterparty: 'Petronas', volume: 1600000, price: 12.78, bench: 'TTF', month: 'Sep-26', status: 'Pending', trader: 'JChen', book: 'LNG-EUR' },
+    ];
+
+    function dirRenderer(p) {
+      if (!p.value) return '';
+      const c = p.value === 'B' ? 'var(--accent)' : 'var(--red)';
+      return `<span style="color:${c};font-weight:700;">${p.value}</span>`;
+    }
+    function volRenderer(p) {
+      if (p.value == null) return '';
+      return `<span style="font-variant-numeric:tabular-nums;">${Number(p.value).toLocaleString()}</span>`;
+    }
+    function priceRenderer(p) {
+      if (p.value == null) return '';
+      return `<span style="font-variant-numeric:tabular-nums;">$${Number(p.value).toFixed(2)}</span>`;
+    }
+    function statusRenderer(p) {
+      if (!p.value) return '';
+      const colors = { Confirmed: 'var(--green)', Pending: 'var(--amber)', Draft: 'var(--text-3)' };
+      const c = colors[p.value] || 'var(--text-3)';
+      return `<span style="display:inline-flex;align-items:center;gap:0.25rem;"><span style="width:0.375rem;height:0.375rem;border-radius:50%;background:${c};display:inline-block;"></span>${p.value}</span>`;
+    }
+
+    const columnDefs = [
+      { headerCheckboxSelection: true, checkboxSelection: true, width: 40, maxWidth: 40, resizable: false, sortable: false, filter: false },
+      { field: 'time', headerName: 'Time', width: 90 },
+      { field: 'dir', headerName: 'Dir', width: 50, cellRenderer: dirRenderer },
+      { field: 'ref', headerName: 'Ref', width: 115 },
+      { field: 'counterparty', headerName: 'Counterparty', flex: 1, minWidth: 110 },
+      { field: 'volume', headerName: 'Volume', width: 105, cellRenderer: volRenderer, type: 'numericColumn' },
+      { field: 'price', headerName: 'Price', width: 80, cellRenderer: priceRenderer, type: 'numericColumn' },
+      { field: 'bench', headerName: 'Bench', width: 65 },
+      { field: 'month', headerName: 'Month', width: 70 },
+      { field: 'status', headerName: 'Status', width: 95, cellRenderer: statusRenderer },
+      { field: 'trader', headerName: 'Trader', width: 75 },
+      { field: 'book', headerName: 'Book', width: 90 },
+    ];
+
+    let gridApi;
+    const gridOptions = {
+      columnDefs,
+      rowData: TRADE_DATA,
+      rowSelection: 'multiple',
+      rowHeight: 28,
+      headerHeight: 32,
+      animateRows: true,
+      defaultColDef: { sortable: true, filter: true, resizable: true },
+      onSelectionChanged: updateFooter,
+      onRowDoubleClicked: (e) => showDetail(e.data),
+      getRowId: p => p.data.ref,
+      onCellKeyDown: (e) => {
+        if (e.event.key === 'Enter') showDetail(e.data);
+      },
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const gridDiv = document.getElementById('blotter-grid');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      gridDiv.className = isDark ? 'ag-theme-quartz-dark' : 'ag-theme-quartz';
+      gridApi = agGrid.createGrid(gridDiv, gridOptions);
+      updateFooter();
+
+      // Theme observer
+      new MutationObserver(() => {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        gridDiv.className = dark ? 'ag-theme-quartz-dark' : 'ag-theme-quartz';
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      // Search
+      document.getElementById('bl-search').addEventListener('input', e => {
+        gridApi.setGridOption('quickFilterText', e.target.value);
+        updateFooter();
+      });
+
+      // Context menu via right-click on grid rows
+      gridDiv.addEventListener('contextmenu', e => {
+        const rowEl = e.target.closest('.ag-row');
+        if (!rowEl) return;
+        const rowIndex = parseInt(rowEl.getAttribute('row-index'));
+        const rowNode = gridApi.getDisplayedRowAtIndex(rowIndex);
+        if (!rowNode) return;
+        const data = rowNode.data;
+        showContextMenu(e, [
+          { label: 'View Detail', action: `showDetailByRef('${data.ref}')` },
+          { label: 'Amend Trade', action: `showToast('Amend ${data.ref} — not implemented')` },
+          { label: 'Cancel Trade', action: `showToast('Cancel ${data.ref} — not implemented','error')` },
+          { label: 'Nominate Cargo', action: `showToast('Nominate for ${data.ref}')` },
+        ]);
+      });
+    });
+
+    function updateFooter() {
+      if (!gridApi) return;
+      let count = 0;
+      gridApi.forEachNodeAfterFilter(() => count++);
+      const sel = gridApi.getSelectedRows().length;
+      document.getElementById('bl-count').textContent = count + ' trades';
+      document.getElementById('bl-selected').textContent = sel + ' selected';
+    }
+
+    let currentFilter = 'All';
+    function setFilter(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      if (status === 'All') {
+        gridApi.setGridOption('isExternalFilterPresent', () => false);
+      } else {
+        gridApi.setGridOption('isExternalFilterPresent', () => true);
+        gridApi.setGridOption('doesExternalFilterPass', node => node.data.status === status);
+      }
+      gridApi.onFilterChanged();
+      updateFooter();
+    }
+
+    function exportCsv() {
+      gridApi.exportDataAsCsv({ fileName: 'blotter-export.csv' });
+      showToast('CSV exported');
+    }
+
+    function toggleColPanel() {
+      // Simple column visibility toggle
+      const cols = gridApi.getColumns();
+      const hidden = cols.filter(c => !c.isVisible());
+      if (hidden.length > 0) {
+        hidden.forEach(c => gridApi.setColumnVisible(c, true));
+        showToast('All columns shown');
+      } else {
+        // Hide trader and book columns as example
+        gridApi.setColumnVisible('trader', false);
+        gridApi.setColumnVisible('book', false);
+        showToast('Trader & Book columns hidden');
+      }
+    }
+
+    function showDetail(data) {
+      if (!data) return;
+      const drawer = document.getElementById('detail-drawer');
+      document.getElementById('detail-title').textContent = 'Trade ' + data.ref;
+      const fields = [
+        ['Reference', data.ref],
+        ['Direction', data.dir === 'B' ? 'Buy' : 'Sell'],
+        ['Counterparty', data.counterparty],
+        ['Volume', Number(data.volume).toLocaleString() + ' MMBtu'],
+        ['Price', '$' + Number(data.price).toFixed(2)],
+        ['Benchmark', data.bench],
+        ['Month', data.month],
+        ['Status', data.status],
+        ['Trader', data.trader],
+        ['Book', data.book],
+        ['Time', data.time],
+      ];
+      document.getElementById('detail-body').innerHTML = fields.map(([l, v]) =>
+        `<div><div class="detail-field-label">${l}</div><div class="detail-field-value">${v}</div></div>`
+      ).join('');
+      drawer.classList.add('open');
+      drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showDetailByRef(ref) {
+      const row = TRADE_DATA.find(r => r.ref === ref);
+      if (row) showDetail(row);
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-drawer').classList.remove('open');
+    }
+  </script>
+</body>
+</html>

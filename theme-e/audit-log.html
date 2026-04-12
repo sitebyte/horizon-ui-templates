@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Log — Horizon Back Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{accent:'#2563eb','accent-hover':'#1d4ed8'}}}}
+</script>
+<style>
+  *,*::before,*::after{box-sizing:border-box}body{font-family:'Inter',sans-serif}
+  .sidebar-item{transition:all .15s ease}.sidebar-item:hover{background:rgba(37,99,235,.08)}
+  .dark .sidebar-item:hover{background:rgba(37,99,235,.15)}
+  .sidebar-item.active{background:rgba(37,99,235,.1);color:#2563eb;font-weight:600}
+  .dark .sidebar-item.active{background:rgba(37,99,235,.2)}
+  .sub-menu{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;max-height:0;opacity:0}
+  .sub-menu.open{max-height:25rem;opacity:1}
+  .badge{font-size:.625rem;min-width:1.25rem;height:1.25rem;display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;font-weight:600}
+  .cmd-palette-overlay{transition:opacity .15s ease}
+  @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{color:#2563eb}
+  th .sort-icon{opacity:0.3;transition:opacity .15s}
+  th.sorted .sort-icon{opacity:1}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 min-h-screen">
+
+<!-- Command Palette -->
+<div id="cmdPalette" class="cmd-palette-overlay fixed inset-0 bg-black/50 z-50 hidden items-start justify-center pt-[20vh]" onclick="if(event.target===this)closePalette()">
+  <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-zinc-700">
+      <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="cmdInput" type="text" placeholder="Type a command or search..." class="flex-1 bg-transparent outline-none text-sm" oninput="filterCommands(this.value)">
+      <kbd class="text-xs bg-slate-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded">Esc</kbd>
+    </div>
+    <div id="cmdResults" class="max-h-80 overflow-y-auto p-2"></div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white dark:bg-zinc-800 border-r border-slate-200 dark:border-zinc-700 z-40 flex flex-col transition-transform duration-200">
+  <div class="h-16 flex items-center px-5 border-b border-slate-200 dark:border-zinc-700">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div>
+      <span class="font-bold text-base">Horizon</span>
+      <span class="text-xs text-slate-400 font-medium">Back Office</span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="sidebarNav">
+    <div class="px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Overview</div>
+    <a href="index.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      Dashboard
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Settlement</div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('settlement-invoices')" class="sidebar-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Invoice Queue
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">3</span>
+          <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </span>
+      </button>
+      <div id="settlement-invoices" class="sub-menu pl-9 space-y-0.5">
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Provisional</a>
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Final</a>
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Disputed</a>
+      </div>
+    </div>
+    <a href="reconciliation.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Reconciliation
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Operations</div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('ops-nominations')" class="sidebar-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Nominations
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">2</span>
+          <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </span>
+      </button>
+      <div id="ops-nominations" class="sub-menu pl-9 space-y-0.5">
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">ADP Schedule</a>
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Cargo Nominations</a>
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Vessel Nominations</a>
+      </div>
+    </div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('ops-contracts')" class="sidebar-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Contract Management
+        </span>
+        <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div id="ops-contracts" class="sub-menu pl-9 space-y-0.5">
+        <a href="contracts.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Active Contracts</a>
+        <a href="contracts.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">New Contract</a>
+      </div>
+    </div>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Reporting</div>
+    <a href="audit-log.html" class="sidebar-item active flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Audit Log
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin</div>
+    <a href="settings.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-200 dark:border-zinc-700">
+    <button onclick="openPalette()" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      Search
+      <kbd class="ml-auto text-xs bg-slate-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded">&#8984;K</kbd>
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="ml-0 md:ml-64 min-h-screen flex flex-col">
+  <header class="h-16 bg-white dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 flex items-center justify-between px-6 sticky top-0 z-30">
+    <div class="flex items-center gap-4">
+      <button class="md:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <nav class="text-sm text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
+        <a href="index.html" class="hover:text-accent">Home</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="hover:text-accent">Reporting</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800 dark:text-zinc-100 font-medium">Audit Log</span>
+      </nav>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" title="Toggle theme">
+        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+      <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700 relative">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+      <div class="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-semibold text-sm">JC</div>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold">Audit Log</h1>
+        <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Complete record of all system actions and changes</p>
+      </div>
+      <button class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">Entity Type</label>
+          <select id="filterEntity" onchange="applyFilters()" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option value="All">All</option>
+            <option value="Trade">Trade</option>
+            <option value="Invoice">Invoice</option>
+            <option value="Nomination">Nomination</option>
+            <option value="Contract">Contract</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">Date From</label>
+          <input type="date" id="filterDateFrom" onchange="applyFilters()" value="2026-04-01" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">Date To</label>
+          <input type="date" id="filterDateTo" onchange="applyFilters()" value="2026-04-11" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div class="flex-1 min-w-[12rem]">
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1">Search</label>
+          <div class="relative">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="filterSearch" type="text" placeholder="Search by user, ref, details..." oninput="applyFilters()" class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/50">
+              <th class="sortable text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider" onclick="sortTable(0)">
+                Timestamp <span class="sort-icon">&#9650;</span>
+              </th>
+              <th class="sortable text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider" onclick="sortTable(1)">
+                User <span class="sort-icon">&#9650;</span>
+              </th>
+              <th class="sortable text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider" onclick="sortTable(2)">
+                Action <span class="sort-icon">&#9650;</span>
+              </th>
+              <th class="sortable text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider" onclick="sortTable(3)">
+                Entity Type <span class="sort-icon">&#9650;</span>
+              </th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Entity Ref</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Details</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-zinc-700">
+        <span id="pageInfo" class="text-xs text-slate-500 dark:text-zinc-400">Showing 1-15 of 47</span>
+        <div class="flex items-center gap-2">
+          <button id="btnPrev" onclick="changePage(-1)" disabled class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+          <button id="btnNext" onclick="changePage(1)" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function initTheme(){const t=localStorage.getItem('horizon-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}}
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.documentElement.classList.toggle('light');localStorage.setItem('horizon-theme',document.documentElement.classList.contains('dark')?'dark':'light')}
+initTheme();
+function toggleSubmenu(id){const el=document.getElementById(id);el.classList.toggle('open');const btn=el.previousElementSibling;const chev=btn.querySelector('.chevron');if(chev)chev.style.transform=el.classList.contains('open')?'rotate(180deg)':''}
+
+// Audit data
+const allData=[
+  {ts:'2026-04-11 09:47:22',user:'J. Cobley',action:'Created',entity:'Trade',ref:'BUY-20260411-0023',details:'New buy trade with JERA Co. — 3.4M MMBtu FOB'},
+  {ts:'2026-04-11 09:35:10',user:'M. Al-Rashid',action:'Approved',entity:'Invoice',ref:'INV-2026-0039',details:'Final invoice approved — $32.1M Shell Western'},
+  {ts:'2026-04-11 08:12:45',user:'S. Kobayashi',action:'Created',entity:'Nomination',ref:'NOM-Q2-004',details:'Vessel nomination for SPOT-JERA-Q2'},
+  {ts:'2026-04-10 17:30:00',user:'L. Tan',action:'Updated',entity:'Invoice',ref:'INV-2026-0041',details:'Disputed amount revised from $1.2M to $0.8M'},
+  {ts:'2026-04-10 16:15:33',user:'P. Dupont',action:'Updated',entity:'Contract',ref:'SPA-SHELL-2026',details:'Amendment: pricing premium changed +$0.15/MMBtu'},
+  {ts:'2026-04-10 14:22:11',user:'J. Cobley',action:'Approved',entity:'Nomination',ref:'NOM-Q2-002',details:'Cargo nomination approved for CARGO-Q2-02'},
+  {ts:'2026-04-10 11:05:44',user:'M. Al-Rashid',action:'Created',entity:'Invoice',ref:'INV-2026-0042',details:'Provisional invoice generated — $45.6M Shell Western'},
+  {ts:'2026-04-09 16:45:20',user:'S. Kobayashi',action:'Created',entity:'Trade',ref:'SELL-20260409-0022',details:'Spot sale to Petronas — 1.9M MMBtu DES'},
+  {ts:'2026-04-09 14:30:15',user:'L. Tan',action:'Approved',entity:'Invoice',ref:'INV-2026-0038',details:'Final invoice approved — $28.4M QatarEnergy'},
+  {ts:'2026-04-09 10:20:00',user:'P. Dupont',action:'Cancelled',entity:'Nomination',ref:'NOM-Q1-012',details:'Nomination cancelled — vessel scheduling conflict'},
+  {ts:'2026-04-08 15:55:30',user:'J. Cobley',action:'Created',entity:'Contract',ref:'SPOT-JERA-Q2',details:'New spot contract with JERA Co.'},
+  {ts:'2026-04-08 13:40:22',user:'M. Al-Rashid',action:'Updated',entity:'Trade',ref:'BUY-20260405-0021',details:'Pricing amended: JKM premium +$0.25 to +$0.40'},
+  {ts:'2026-04-08 11:15:45',user:'S. Kobayashi',action:'Created',entity:'Nomination',ref:'NOM-Q2-003',details:'ADP nomination for MSA-TOTAL-2026 May cargo'},
+  {ts:'2026-04-07 16:30:00',user:'L. Tan',action:'Updated',entity:'Invoice',ref:'INV-2026-0037',details:'Quality adjustment applied — -$0.3M for BTU variance'},
+  {ts:'2026-04-07 14:20:10',user:'P. Dupont',action:'Approved',entity:'Contract',ref:'MSA-TOTAL-2026',details:'Contract renewal approved — 2026-2031 term'},
+  {ts:'2026-04-07 10:05:30',user:'J. Cobley',action:'Created',entity:'Trade',ref:'BUY-20260407-0020',details:'Term purchase from QatarEnergy — 3.4M MMBtu'},
+  {ts:'2026-04-06 17:45:00',user:'M. Al-Rashid',action:'Cancelled',entity:'Invoice',ref:'INV-2026-0036',details:'Invoice voided — duplicate entry detected'},
+  {ts:'2026-04-06 15:30:22',user:'S. Kobayashi',action:'Updated',entity:'Nomination',ref:'NOM-Q2-001',details:'Vessel changed from Global Spirit to Al Dafna'},
+  {ts:'2026-04-06 12:10:15',user:'L. Tan',action:'Created',entity:'Invoice',ref:'INV-2026-0040',details:'Provisional invoice — $18.7M TotalEnergies'},
+  {ts:'2026-04-05 16:55:40',user:'P. Dupont',action:'Updated',entity:'Contract',ref:'SPA-QATAR-2026',details:'ACQ volume updated: 13.6M to 14.2M MMBtu/year'},
+  {ts:'2026-04-05 14:20:30',user:'J. Cobley',action:'Approved',entity:'Trade',ref:'SELL-20260403-0019',details:'Trade validation approved — compliance check passed'},
+  {ts:'2026-04-05 11:45:00',user:'M. Al-Rashid',action:'Created',entity:'Nomination',ref:'NOM-Q2-001',details:'Q2 ADP nomination for SPA-QATAR-2026'},
+  {ts:'2026-04-04 17:00:00',user:'S. Kobayashi',action:'Updated',entity:'Invoice',ref:'INV-2026-0035',details:'Demurrage charge added — $125,000'},
+  {ts:'2026-04-04 14:30:10',user:'L. Tan',action:'Approved',entity:'Invoice',ref:'INV-2026-0034',details:'Final invoice approved — $41.2M Chevron LNG'},
+  {ts:'2026-04-04 10:15:45',user:'P. Dupont',action:'Created',entity:'Trade',ref:'SELL-20260404-0018',details:'Spot sale to Woodside — 2.1M MMBtu FOB'},
+  {ts:'2026-04-03 16:40:20',user:'J. Cobley',action:'Updated',entity:'Contract',ref:'SPA-SHELL-2026',details:'Delivery window extended by 5 days'},
+  {ts:'2026-04-03 13:25:00',user:'M. Al-Rashid',action:'Created',entity:'Invoice',ref:'INV-2026-0039',details:'Provisional invoice — $32.1M Shell Western'},
+  {ts:'2026-04-03 10:50:30',user:'S. Kobayashi',action:'Cancelled',entity:'Trade',ref:'BUY-20260401-0016',details:'Trade cancelled — counterparty withdrew offer'},
+  {ts:'2026-04-02 17:15:00',user:'L. Tan',action:'Updated',entity:'Nomination',ref:'NOM-Q1-011',details:'Discharge port changed from Incheon to Sodegaura'},
+  {ts:'2026-04-02 14:00:45',user:'P. Dupont',action:'Created',entity:'Nomination',ref:'NOM-Q1-011',details:'Late Q1 cargo nomination for SPA-SHELL-2026'},
+  {ts:'2026-04-02 11:30:20',user:'J. Cobley',action:'Approved',entity:'Invoice',ref:'INV-2026-0033',details:'Disputed invoice resolved — $0.5M adjustment'},
+  {ts:'2026-04-01 16:45:30',user:'M. Al-Rashid',action:'Created',entity:'Trade',ref:'BUY-20260401-0017',details:'Term purchase from Shell — 2.8M MMBtu DES'},
+  {ts:'2026-04-01 14:20:15',user:'S. Kobayashi',action:'Updated',entity:'Contract',ref:'MSA-TOTAL-2026',details:'Take-or-pay min changed from 80% to 85%'},
+  {ts:'2026-04-01 11:10:00',user:'L. Tan',action:'Approved',entity:'Nomination',ref:'NOM-Q1-010',details:'Final Q1 vessel nomination approved'},
+  {ts:'2026-04-01 09:30:45',user:'P. Dupont',action:'Created',entity:'Invoice',ref:'INV-2026-0037',details:'Provisional invoice — $22.8M BP Gas Marketing'},
+  {ts:'2026-04-01 08:15:00',user:'J. Cobley',action:'Updated',entity:'Trade',ref:'SELL-20260328-0015',details:'Volume tolerance updated from 5% to 7.5%'},
+  {ts:'2026-03-31 17:30:00',user:'M. Al-Rashid',action:'Approved',entity:'Contract',ref:'SPA-QATAR-2026',details:'Annual review completed — terms renewed unchanged'},
+  {ts:'2026-03-31 15:00:20',user:'S. Kobayashi',action:'Created',entity:'Trade',ref:'SELL-20260331-0014',details:'Spot sale to KOGAS — 3.0M MMBtu DES'},
+  {ts:'2026-03-31 12:40:00',user:'L. Tan',action:'Updated',entity:'Invoice',ref:'INV-2026-0032',details:'Payment received — marked as settled'},
+  {ts:'2026-03-31 10:15:30',user:'P. Dupont',action:'Cancelled',entity:'Nomination',ref:'NOM-Q1-009',details:'Nomination withdrawn — cargo rescheduled to Q2'},
+  {ts:'2026-03-30 16:50:00',user:'J. Cobley',action:'Created',entity:'Contract',ref:'MSA-TOTAL-2026',details:'New MSA with TotalEnergies — 5yr term'},
+  {ts:'2026-03-30 14:25:15',user:'M. Al-Rashid',action:'Updated',entity:'Trade',ref:'BUY-20260328-0013',details:'Counterparty credit limit flag cleared'},
+  {ts:'2026-03-30 11:10:00',user:'S. Kobayashi',action:'Approved',entity:'Invoice',ref:'INV-2026-0031',details:'Final invoice approved — $36.9M JERA Co.'},
+  {ts:'2026-03-29 17:00:00',user:'L. Tan',action:'Created',entity:'Nomination',ref:'NOM-Q1-009',details:'Cargo nomination for SPA-QATAR-2026 March'},
+  {ts:'2026-03-29 14:30:30',user:'P. Dupont',action:'Updated',entity:'Contract',ref:'SPA-SHELL-2026',details:'Credit terms updated — payment net-30 to net-45'},
+  {ts:'2026-03-29 10:45:00',user:'J. Cobley',action:'Created',entity:'Invoice',ref:'INV-2026-0035',details:'Provisional invoice — $41.2M Chevron LNG'},
+  {ts:'2026-03-28 16:15:20',user:'M. Al-Rashid',action:'Approved',entity:'Trade',ref:'SELL-20260325-0012',details:'Trade validation approved after amendment'},
+  {ts:'2026-03-28 13:00:00',user:'S. Kobayashi',action:'Updated',entity:'Nomination',ref:'NOM-Q1-008',details:'Loading window shifted by 3 days'},
+];
+
+let filteredData=[...allData];
+let sortCol=-1;
+let sortAsc=true;
+let currentPage=0;
+const pageSize=15;
+
+function applyFilters(){
+  const entity=document.getElementById('filterEntity').value;
+  const search=document.getElementById('filterSearch').value.toLowerCase();
+  filteredData=allData.filter(r=>{
+    if(entity!=='All'&&r.entity!==entity)return false;
+    if(search&&!Object.values(r).some(v=>v.toLowerCase().includes(search)))return false;
+    return true;
+  });
+  currentPage=0;
+  renderTable();
+}
+
+function sortTable(col){
+  const keys=['ts','user','action','entity'];
+  if(sortCol===col){sortAsc=!sortAsc}else{sortCol=col;sortAsc=true}
+  const key=keys[col];
+  filteredData.sort((a,b)=>{
+    const va=a[key],vb=b[key];
+    return sortAsc?va.localeCompare(vb):vb.localeCompare(va);
+  });
+  document.querySelectorAll('th.sortable').forEach((th,i)=>{
+    th.classList.toggle('sorted',i===col);
+    th.querySelector('.sort-icon').innerHTML=i===col?(sortAsc?'&#9650;':'&#9660;'):'&#9650;';
+  });
+  currentPage=0;
+  renderTable();
+}
+
+function changePage(dir){
+  currentPage+=dir;
+  renderTable();
+}
+
+function renderTable(){
+  const start=currentPage*pageSize;
+  const end=Math.min(start+pageSize,filteredData.length);
+  const page=filteredData.slice(start,end);
+  const tbody=document.getElementById('auditTableBody');
+  const actionColors={Created:'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',Updated:'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',Approved:'bg-accent/10 text-accent',Cancelled:'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'};
+  tbody.innerHTML=page.map(r=>`<tr class="border-b border-slate-100 dark:border-zinc-700/50 hover:bg-slate-50 dark:hover:bg-zinc-700/30"><td class="py-2.5 px-4 text-xs text-slate-500 dark:text-zinc-400 font-mono whitespace-nowrap">${r.ts}</td><td class="py-2.5 px-4 font-medium whitespace-nowrap">${r.user}</td><td class="py-2.5 px-4"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${actionColors[r.action]||''}">${r.action}</span></td><td class="py-2.5 px-4"><span class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300">${r.entity}</span></td><td class="py-2.5 px-4 font-mono text-xs">${r.ref}</td><td class="py-2.5 px-4 text-xs text-slate-500 dark:text-zinc-400 max-w-xs truncate">${r.details}</td></tr>`).join('');
+  document.getElementById('pageInfo').textContent=`Showing ${start+1}-${end} of ${filteredData.length}`;
+  document.getElementById('btnPrev').disabled=currentPage===0;
+  document.getElementById('btnNext').disabled=end>=filteredData.length;
+}
+renderTable();
+
+// Command palette
+const commands=[
+  {label:'Dashboard',href:'index.html',section:'Navigate'},
+  {label:'Invoice Queue',href:'invoices.html',section:'Navigate'},
+  {label:'Reconciliation',href:'reconciliation.html',section:'Navigate'},
+  {label:'New Trade',href:'trade-entry.html',section:'Navigate'},
+  {label:'Nominations',href:'nominations.html',section:'Navigate'},
+  {label:'Contract Wizard',href:'contracts.html',section:'Navigate'},
+  {label:'Audit Log',href:'audit-log.html',section:'Navigate'},
+  {label:'Settings',href:'settings.html',section:'Navigate'},
+  {label:'Toggle Dark Mode',action:()=>toggleTheme(),section:'Actions'},
+  {label:'Sign Out',href:'signin.html',section:'Actions'},
+];
+function openPalette(){document.getElementById('cmdPalette').classList.remove('hidden');document.getElementById('cmdPalette').classList.add('flex');document.getElementById('cmdInput').value='';document.getElementById('cmdInput').focus();renderCommands(commands)}
+function closePalette(){document.getElementById('cmdPalette').classList.add('hidden');document.getElementById('cmdPalette').classList.remove('flex')}
+function renderCommands(cmds){const r=document.getElementById('cmdResults');let html='';let last='';cmds.forEach((c,i)=>{if(c.section!==last){html+=`<div class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase">${c.section}</div>`;last=c.section}html+=`<button class="cmd-item w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-accent/10 flex items-center gap-2 focus:bg-accent/10 outline-none" onclick="${c.action?'closePalette();toggleTheme()':`window.location.href=\'${c.href}\'`}">${c.label}</button>`});r.innerHTML=html||'<div class="px-3 py-4 text-sm text-slate-400 text-center">No results</div>'}
+function filterCommands(q){renderCommands(commands.filter(c=>c.label.toLowerCase().includes(q.toLowerCase())))}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openPalette()}if(e.key==='Escape')closePalette()});
+</script>
+</body>
+</html>

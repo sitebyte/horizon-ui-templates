@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Contract — Horizon Back Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{accent:'#2563eb','accent-hover':'#1d4ed8'}}}}
+</script>
+<style>
+  *,*::before,*::after{box-sizing:border-box}body{font-family:'Inter',sans-serif}
+  .sidebar-item{transition:all .15s ease}.sidebar-item:hover{background:rgba(37,99,235,.08)}
+  .dark .sidebar-item:hover{background:rgba(37,99,235,.15)}
+  .sidebar-item.active{background:rgba(37,99,235,.1);color:#2563eb;font-weight:600}
+  .dark .sidebar-item.active{background:rgba(37,99,235,.2)}
+  .sub-menu{overflow:hidden;transition:max-height .25s ease,opacity .2s ease;max-height:0;opacity:0}
+  .sub-menu.open{max-height:25rem;opacity:1}
+  .badge{font-size:.625rem;min-width:1.25rem;height:1.25rem;display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;font-weight:600}
+  .cmd-palette-overlay{transition:opacity .15s ease}
+  @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}}
+  .step-circle{width:2.5rem;height:2.5rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.875rem;transition:all .2s ease}
+  .step-circle.active{background:#2563eb;color:white}
+  .step-circle.completed{background:#16a34a;color:white}
+  .step-circle.inactive{background:#e2e8f0;color:#94a3b8}
+  .dark .step-circle.inactive{background:#3f3f46;color:#71717a}
+  .step-line{height:0.125rem;flex:1;transition:background .2s ease}
+  .step-line.active{background:#2563eb}
+  .step-line.completed{background:#16a34a}
+  .step-line.inactive{background:#e2e8f0}
+  .dark .step-line.inactive{background:#3f3f46}
+  .radio-card{transition:all .15s ease;cursor:pointer}
+  .radio-card.selected{border-color:#2563eb;background:rgba(37,99,235,.05)}
+  .dark .radio-card.selected{background:rgba(37,99,235,.1)}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:text-zinc-100 min-h-screen">
+
+<!-- Command Palette -->
+<div id="cmdPalette" class="cmd-palette-overlay fixed inset-0 bg-black/50 z-50 hidden items-start justify-center pt-[20vh]" onclick="if(event.target===this)closePalette()">
+  <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-zinc-700">
+      <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input id="cmdInput" type="text" placeholder="Type a command or search..." class="flex-1 bg-transparent outline-none text-sm" oninput="filterCommands(this.value)">
+      <kbd class="text-xs bg-slate-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded">Esc</kbd>
+    </div>
+    <div id="cmdResults" class="max-h-80 overflow-y-auto p-2"></div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white dark:bg-zinc-800 border-r border-slate-200 dark:border-zinc-700 z-40 flex flex-col transition-transform duration-200">
+  <div class="h-16 flex items-center px-5 border-b border-slate-200 dark:border-zinc-700">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div>
+      <span class="font-bold text-base">Horizon</span>
+      <span class="text-xs text-slate-400 font-medium">Back Office</span>
+    </div>
+  </div>
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1" id="sidebarNav">
+    <div class="px-2 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Overview</div>
+    <a href="index.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      Dashboard
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Settlement</div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('settlement-invoices')" class="sidebar-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Invoice Queue
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">3</span>
+          <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </span>
+      </button>
+      <div id="settlement-invoices" class="sub-menu pl-9 space-y-0.5">
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Provisional</a>
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Final</a>
+        <a href="invoices.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Disputed</a>
+      </div>
+    </div>
+    <a href="reconciliation.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Reconciliation
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Operations</div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('ops-nominations')" class="sidebar-item w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Nominations
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">2</span>
+          <svg class="w-3.5 h-3.5 transition-transform chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </span>
+      </button>
+      <div id="ops-nominations" class="sub-menu pl-9 space-y-0.5">
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">ADP Schedule</a>
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Cargo Nominations</a>
+        <a href="nominations.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Vessel Nominations</a>
+      </div>
+    </div>
+    <div class="sidebar-group">
+      <button onclick="toggleSubmenu('ops-contracts')" class="sidebar-item active w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm">
+        <span class="flex items-center gap-2.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Contract Management
+        </span>
+        <svg class="w-3.5 h-3.5 transition-transform chevron" style="transform:rotate(180deg)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div id="ops-contracts" class="sub-menu open pl-9 space-y-0.5">
+        <a href="contracts.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">Active Contracts</a>
+        <a href="contracts.html" class="sidebar-item block px-2.5 py-1.5 rounded-lg text-sm text-slate-600 dark:text-zinc-400">New Contract</a>
+      </div>
+    </div>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Reporting</div>
+    <a href="audit-log.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Audit Log
+    </a>
+
+    <div class="px-2 pt-4 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Admin</div>
+    <a href="settings.html" class="sidebar-item flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="px-4 py-3 border-t border-slate-200 dark:border-zinc-700">
+    <button onclick="openPalette()" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      Search
+      <kbd class="ml-auto text-xs bg-slate-100 dark:bg-zinc-700 px-1.5 py-0.5 rounded">&#8984;K</kbd>
+    </button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="ml-0 md:ml-64 min-h-screen flex flex-col">
+  <header class="h-16 bg-white dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700 flex items-center justify-between px-6 sticky top-0 z-30">
+    <div class="flex items-center gap-4">
+      <button class="md:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <nav class="text-sm text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
+        <a href="index.html" class="hover:text-accent">Home</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="hover:text-accent">Admin</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="hover:text-accent">Contracts</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800 dark:text-zinc-100 font-medium">New</span>
+      </nav>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors" title="Toggle theme">
+        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+      <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-700 relative">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+      <div class="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-semibold text-sm">JC</div>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 space-y-6">
+    <div>
+      <h1 class="text-xl font-bold">New Contract</h1>
+      <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Follow the steps below to create a new contract</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-5">
+      <div class="flex items-center gap-0 max-w-2xl mx-auto">
+        <div class="flex flex-col items-center gap-1.5">
+          <div id="stepCircle1" class="step-circle active">1</div>
+          <span id="stepLabel1" class="text-xs font-medium text-accent">Parties</span>
+        </div>
+        <div id="stepLine1" class="step-line inactive"></div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div id="stepCircle2" class="step-circle inactive">2</div>
+          <span id="stepLabel2" class="text-xs font-medium text-slate-400 dark:text-zinc-500">Pricing</span>
+        </div>
+        <div id="stepLine2" class="step-line inactive"></div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div id="stepCircle3" class="step-circle inactive">3</div>
+          <span id="stepLabel3" class="text-xs font-medium text-slate-400 dark:text-zinc-500">Volume</span>
+        </div>
+        <div id="stepLine3" class="step-line inactive"></div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div id="stepCircle4" class="step-circle inactive">4</div>
+          <span id="stepLabel4" class="text-xs font-medium text-slate-400 dark:text-zinc-500">Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 1: Parties -->
+    <div id="step1" class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-5 space-y-5">
+      <h2 class="text-base font-semibold">Step 1: Contract Type &amp; Parties</h2>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-2">Contract Type</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="contractTypeCards">
+          <div onclick="selectContractType(this,'SPA')" class="radio-card selected border-2 border-accent rounded-xl p-4 text-center">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <p class="text-sm font-semibold">SPA</p>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Sale &amp; Purchase</p>
+          </div>
+          <div onclick="selectContractType(this,'MSA')" class="radio-card border-2 border-slate-200 dark:border-zinc-600 rounded-xl p-4 text-center">
+            <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            </div>
+            <p class="text-sm font-semibold">MSA</p>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Master Service</p>
+          </div>
+          <div onclick="selectContractType(this,'Spot')" class="radio-card border-2 border-slate-200 dark:border-zinc-600 rounded-xl p-4 text-center">
+            <div class="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <p class="text-sm font-semibold">Spot</p>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Single Cargo</p>
+          </div>
+          <div onclick="selectContractType(this,'Tender')" class="radio-card border-2 border-slate-200 dark:border-zinc-600 rounded-xl p-4 text-center">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mx-auto mb-2">
+              <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            </div>
+            <p class="text-sm font-semibold">Tender</p>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">Competitive Bid</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Seller</label>
+          <select id="wizSeller" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>QatarEnergy</option><option>Shell Western LNG</option><option>TotalEnergies</option><option>Chevron LNG</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Buyer</label>
+          <select id="wizBuyer" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>JERA Co.</option><option>Petronas LNG</option><option>Woodside Energy</option><option>BP Gas Marketing</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Start Date</label>
+          <input id="wizStart" type="date" value="2026-04-01" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">End Date</label>
+          <input id="wizEnd" type="date" value="2046-03-31" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button onclick="goToStep(2)" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover transition-colors">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Pricing -->
+    <div id="step2" class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-5 space-y-5 hidden">
+      <h2 class="text-base font-semibold">Step 2: Pricing Basis</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Pricing Type</label>
+          <select id="wizPricingType" onchange="onWizPricingChange(this.value)" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option value="hub-indexed">Hub Indexed</option><option value="oil-indexed">Oil Indexed</option><option value="fixed">Fixed Price</option><option value="hybrid">Hybrid</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Currency</label>
+          <select id="wizCurrency" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>USD</option><option>EUR</option><option>GBP</option><option>JPY</option>
+          </select>
+        </div>
+      </div>
+      <div id="wizPricingHub" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Benchmark</label>
+          <select id="wizBenchmark" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>JKM (Platts)</option><option>TTF (ICE)</option><option>Henry Hub (NYMEX)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Premium ($/MMBtu)</label>
+          <input id="wizPremium" type="number" step="0.01" value="0.50" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Averaging</label>
+          <select id="wizAveraging" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>Month Ahead</option><option>Delivery Month</option><option>3-Month Average</option>
+          </select>
+        </div>
+      </div>
+      <div id="wizPricingOil" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Oil Benchmark</label>
+          <select class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>Brent (ICE)</option><option>WTI (NYMEX)</option><option>JCC</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Slope (%)</label>
+          <input type="number" step="0.1" value="14.85" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Constant ($/MMBtu)</label>
+          <input type="number" step="0.01" value="0.50" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+      </div>
+      <div id="wizPricingFixed" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Fixed Price ($/MMBtu)</label>
+          <input type="number" step="0.01" value="12.50" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+      </div>
+      <div class="flex justify-between">
+        <button onclick="goToStep(1)" class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">Back</button>
+        <button onclick="goToStep(3)" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover transition-colors">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Volume -->
+    <div id="step3" class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-5 space-y-5 hidden">
+      <h2 class="text-base font-semibold">Step 3: Volume Terms</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">ACQ Volume (MMBtu/year)</label>
+          <input id="wizACQ" type="number" value="13600000" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Minimum Take (%)</label>
+          <input id="wizMinTake" type="number" value="85" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Maximum Take (%)</label>
+          <input id="wizMaxTake" type="number" value="115" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Delivery Terms</label>
+          <select id="wizDelivTerms" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>FOB</option><option>DES</option><option>CIF</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-zinc-400 mb-1.5">Cargo Frequency</label>
+          <select id="wizFrequency" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none">
+            <option>Monthly</option><option>Quarterly</option><option>Semi-Annual</option><option>Annual</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-between">
+        <button onclick="goToStep(2)" class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">Back</button>
+        <button onclick="goToStep(4)" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover transition-colors">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Review -->
+    <div id="step4" class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-700 p-5 space-y-5 hidden">
+      <h2 class="text-base font-semibold">Step 4: Review &amp; Submit</h2>
+      <div id="reviewSummary" class="space-y-4"></div>
+      <div class="flex justify-between">
+        <button onclick="goToStep(3)" class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">Back</button>
+        <div class="flex gap-3">
+          <button class="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-zinc-600 hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors">Save Draft</button>
+          <button onclick="alert('Contract created successfully!')" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-accent-hover transition-colors">Submit Contract</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function initTheme(){const t=localStorage.getItem('horizon-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.classList.remove('light')}}
+function toggleTheme(){document.documentElement.classList.toggle('dark');document.documentElement.classList.toggle('light');localStorage.setItem('horizon-theme',document.documentElement.classList.contains('dark')?'dark':'light')}
+initTheme();
+function toggleSubmenu(id){const el=document.getElementById(id);el.classList.toggle('open');const btn=el.previousElementSibling;const chev=btn.querySelector('.chevron');if(chev)chev.style.transform=el.classList.contains('open')?'rotate(180deg)':''}
+
+let currentStep=1;
+let selectedType='SPA';
+
+function selectContractType(el,type){
+  selectedType=type;
+  document.querySelectorAll('#contractTypeCards .radio-card').forEach(c=>{c.classList.remove('selected');c.classList.add('border-slate-200','dark:border-zinc-600');c.classList.remove('border-accent')});
+  el.classList.add('selected','border-accent');el.classList.remove('border-slate-200','dark:border-zinc-600');
+}
+
+function onWizPricingChange(val){
+  document.getElementById('wizPricingHub').classList.toggle('hidden',val!=='hub-indexed');
+  document.getElementById('wizPricingOil').classList.toggle('hidden',val!=='oil-indexed');
+  document.getElementById('wizPricingFixed').classList.toggle('hidden',val!=='fixed');
+}
+
+function goToStep(step){
+  for(let i=1;i<=4;i++){
+    document.getElementById('step'+i).classList.toggle('hidden',i!==step);
+    const circle=document.getElementById('stepCircle'+i);
+    const label=document.getElementById('stepLabel'+i);
+    if(i<step){circle.className='step-circle completed';label.className='text-xs font-medium text-green-600'}
+    else if(i===step){circle.className='step-circle active';label.className='text-xs font-medium text-accent'}
+    else{circle.className='step-circle inactive';label.className='text-xs font-medium text-slate-400 dark:text-zinc-500'}
+    if(i<4){
+      const line=document.getElementById('stepLine'+i);
+      if(i<step)line.className='step-line completed';
+      else if(i===step)line.className='step-line active';
+      else line.className='step-line inactive';
+    }
+  }
+  currentStep=step;
+  if(step===4)renderReview();
+}
+
+function renderReview(){
+  const s=document.getElementById('reviewSummary');
+  const sections=[
+    {title:'Contract Type & Parties',items:[
+      ['Type',selectedType],
+      ['Seller',document.getElementById('wizSeller').value],
+      ['Buyer',document.getElementById('wizBuyer').value],
+      ['Start Date',document.getElementById('wizStart').value],
+      ['End Date',document.getElementById('wizEnd').value],
+    ]},
+    {title:'Pricing',items:[
+      ['Pricing Type',document.getElementById('wizPricingType').value],
+      ['Currency',document.getElementById('wizCurrency').value],
+    ]},
+    {title:'Volume Terms',items:[
+      ['ACQ Volume',Number(document.getElementById('wizACQ').value).toLocaleString()+' MMBtu/year'],
+      ['Min Take',document.getElementById('wizMinTake').value+'%'],
+      ['Max Take',document.getElementById('wizMaxTake').value+'%'],
+      ['Delivery Terms',document.getElementById('wizDelivTerms').value],
+      ['Cargo Frequency',document.getElementById('wizFrequency').value],
+    ]},
+  ];
+  s.innerHTML=sections.map(sec=>`<div class="border border-slate-200 dark:border-zinc-700 rounded-lg p-4"><h3 class="text-sm font-semibold mb-3">${sec.title}</h3><div class="grid grid-cols-2 gap-2">${sec.items.map(([k,v])=>`<div class="text-xs text-slate-500 dark:text-zinc-400">${k}</div><div class="text-sm font-medium">${v}</div>`).join('')}</div></div>`).join('');
+}
+
+// Command palette
+const commands=[
+  {label:'Dashboard',href:'index.html',section:'Navigate'},
+  {label:'Invoice Queue',href:'invoices.html',section:'Navigate'},
+  {label:'Reconciliation',href:'reconciliation.html',section:'Navigate'},
+  {label:'New Trade',href:'trade-entry.html',section:'Navigate'},
+  {label:'Nominations',href:'nominations.html',section:'Navigate'},
+  {label:'Contract Wizard',href:'contracts.html',section:'Navigate'},
+  {label:'Audit Log',href:'audit-log.html',section:'Navigate'},
+  {label:'Settings',href:'settings.html',section:'Navigate'},
+  {label:'Toggle Dark Mode',action:()=>toggleTheme(),section:'Actions'},
+  {label:'Sign Out',href:'signin.html',section:'Actions'},
+];
+function openPalette(){document.getElementById('cmdPalette').classList.remove('hidden');document.getElementById('cmdPalette').classList.add('flex');document.getElementById('cmdInput').value='';document.getElementById('cmdInput').focus();renderCommands(commands)}
+function closePalette(){document.getElementById('cmdPalette').classList.add('hidden');document.getElementById('cmdPalette').classList.remove('flex')}
+function renderCommands(cmds){const r=document.getElementById('cmdResults');let html='';let last='';cmds.forEach((c,i)=>{if(c.section!==last){html+=`<div class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase">${c.section}</div>`;last=c.section}html+=`<button class="cmd-item w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-accent/10 flex items-center gap-2 focus:bg-accent/10 outline-none" onclick="${c.action?'closePalette();toggleTheme()':`window.location.href=\'${c.href}\'`}">${c.label}</button>`});r.innerHTML=html||'<div class="px-3 py-4 text-sm text-slate-400 text-center">No results</div>'}
+function filterCommands(q){renderCommands(commands.filter(c=>c.label.toLowerCase().includes(q.toLowerCase())))}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openPalette()}if(e.key==='Escape')closePalette()});
+</script>
+</body>
+</html>

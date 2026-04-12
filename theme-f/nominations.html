@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nominations — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+          colors: {
+            primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
+            violet: { 400:'#a78bfa',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9' },
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    [x-cloak]{display:none!important}.sidebar-transition{transition:width .2s ease,padding .2s ease}.ticker-scroll{animation:ticker 30s linear infinite}@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.fade-in{animation:fadeIn .2s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(.25rem)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex flex-col bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 sidebar-transition" style="width:15rem;">
+  <div class="flex items-center gap-2.5 h-12 px-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
+    <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-violet-600 shrink-0"><svg class="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
+    <span class="sidebar-label font-bold text-sm tracking-tight text-slate-900 dark:text-white truncate">Horizon ETRM</span>
+    <button onclick="toggleSidebar()" class="ml-auto p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg></button>
+  </div>
+  <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-700 shrink-0"><select id="sidebarRole" onchange="setRole(this.value)" class="sidebar-label w-full text-xs font-medium rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500"><option value="trader">Trader</option><option value="operations">Operations</option><option value="manager">Manager</option></select></div>
+  <nav class="flex-1 overflow-y-auto py-2 px-2 space-y-0.5 text-sm">
+    <div class="mb-2"><p class="sidebar-label px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Favorites</p><p class="sidebar-label px-2 py-1 text-xs text-slate-400 dark:text-slate-500 italic">No pinned items</p></div>
+    <div class="mb-1"><p class="sidebar-label px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Trading</p></div>
+    <a href="index.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6z"/></svg><span class="sidebar-label">Dashboard</span></a>
+    <a href="quick-entry.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg><span class="sidebar-label">Quick Entry</span></a>
+    <a href="blotter.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25"/></svg><span class="sidebar-label">Blotter</span></a>
+    <a href="positions.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75"/></svg><span class="sidebar-label">Positions</span></a>
+    <div><button onclick="toggleAccordion('curves-sub')" class="nav-item w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg><span class="sidebar-label flex-1 text-left">Curves</span><svg class="sidebar-label w-3 h-3 text-slate-400 transition-transform" id="curves-sub-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg></button><div id="curves-sub" class="hidden ml-6 space-y-0.5 mt-0.5"><a href="#" class="sidebar-label block px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400">Forward Curves</a><a href="#" class="sidebar-label block px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400">Spread Monitor</a></div></div>
+    <a href="#" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623"/></svg><span class="sidebar-label">Hedge Book</span></a>
+    <div class="mt-3 mb-1"><p class="sidebar-label px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Operations</p></div>
+    <a href="#" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6"/></svg><span class="sidebar-label">Cargo Board</span></a>
+    <div><button onclick="toggleAccordion('nom-sub')" class="nav-item w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 font-medium"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg><span class="sidebar-label flex-1 text-left">Nominations</span><span class="sidebar-label inline-flex items-center justify-center px-1.5 py-0.5 text-[0.625rem] font-semibold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">2</span></button><div id="nom-sub" class="ml-6 space-y-0.5 mt-0.5"><a href="nominations.html" class="sidebar-label block px-2 py-1 rounded text-xs text-primary-600 dark:text-primary-400 font-medium bg-primary-50/50 dark:bg-primary-900/10">ADP Schedule</a><a href="nominations.html" class="sidebar-label block px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400">Cargo Nominations</a><a href="nominations.html" class="sidebar-label block px-2 py-1 rounded text-xs text-slate-500 dark:text-slate-400">Vessel Nominations</a></div></div>
+    <div class="mt-3 mb-1"><p class="sidebar-label px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Settlement</p></div>
+    <a href="invoices.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75"/></svg><span class="sidebar-label flex-1">Invoice Queue</span><span class="sidebar-label inline-flex items-center justify-center px-1.5 py-0.5 text-[0.625rem] font-semibold rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">3</span></a>
+    <a href="reconciliation.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg><span class="sidebar-label">Reconciliation</span></a>
+    <div class="mt-3 mb-1"><p class="sidebar-label px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Admin</p></div>
+    <a href="trade-form.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5"/></svg><span class="sidebar-label">Contracts</span></a>
+    <a href="settings.html" class="nav-item flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281"/></svg><span class="sidebar-label">Settings</span></a>
+  </nav>
+  <div class="px-3 py-3 border-t border-slate-200 dark:border-slate-700 shrink-0"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold shrink-0">JC</div><div class="sidebar-label overflow-hidden"><p class="text-xs font-medium text-slate-900 dark:text-white truncate">Jon Cobley</p><p class="text-[0.625rem] text-slate-500 truncate">Senior Trader</p></div></div></div>
+</aside>
+
+<!-- ===== MAIN AREA ===== -->
+<div id="main-wrapper" class="transition-all duration-200" style="margin-left:15rem;">
+  <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-700">
+    <div id="ticker-bar" class="h-7 bg-slate-900 dark:bg-slate-950 text-xs font-mono overflow-hidden flex items-center">
+      <div class="ticker-scroll whitespace-nowrap flex items-center gap-8 px-4">
+        <span class="text-emerald-400">JKM Jun <span class="font-semibold">$12.45</span> <span class="text-emerald-300">+0.23</span></span><span class="text-emerald-400">JKM Jul <span class="font-semibold">$12.18</span> <span class="text-emerald-300">+0.15</span></span><span class="text-red-400">TTF Jun <span class="font-semibold">$11.82</span> <span class="text-red-300">-0.08</span></span><span class="text-emerald-400">TTF Jul <span class="font-semibold">$11.95</span> <span class="text-emerald-300">+0.11</span></span><span class="text-red-400">HH Jun <span class="font-semibold">$2.34</span> <span class="text-red-300">-0.03</span></span><span class="text-emerald-400">HH Jul <span class="font-semibold">$2.41</span> <span class="text-emerald-300">+0.05</span></span><span class="text-emerald-400">Brent <span class="font-semibold">$78.42</span> <span class="text-emerald-300">+1.12</span></span><span class="text-red-400">NBP <span class="font-semibold">$10.55</span> <span class="text-red-300">-0.19</span></span>
+        <span class="text-emerald-400">JKM Jun <span class="font-semibold">$12.45</span> <span class="text-emerald-300">+0.23</span></span><span class="text-emerald-400">JKM Jul <span class="font-semibold">$12.18</span> <span class="text-emerald-300">+0.15</span></span><span class="text-red-400">TTF Jun <span class="font-semibold">$11.82</span> <span class="text-red-300">-0.08</span></span><span class="text-emerald-400">TTF Jul <span class="font-semibold">$11.95</span> <span class="text-emerald-300">+0.11</span></span><span class="text-red-400">HH Jun <span class="font-semibold">$2.34</span> <span class="text-red-300">-0.03</span></span><span class="text-emerald-400">HH Jul <span class="font-semibold">$2.41</span> <span class="text-emerald-300">+0.05</span></span><span class="text-emerald-400">Brent <span class="font-semibold">$78.42</span> <span class="text-emerald-300">+1.12</span></span><span class="text-red-400">NBP <span class="font-semibold">$10.55</span> <span class="text-red-300">-0.19</span></span>
+      </div>
+    </div>
+    <div class="flex items-center justify-between h-11 px-4">
+      <div class="flex items-center gap-2 text-sm"><span class="text-slate-400">Horizon</span><svg class="w-3 h-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg><span class="font-medium text-slate-700 dark:text-slate-200">Nominations</span></div>
+      <div class="flex items-center gap-2">
+        <button onclick="openCmdK()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><span class="hidden sm:inline">Search</span><kbd class="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-[0.625rem] font-mono">&#8984;K</kbd></button>
+        <button onclick="toggleTicker()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5"/></svg></button>
+        <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"><svg id="theme-sun" class="w-4 h-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg><svg id="theme-moon" class="w-4 h-4 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="p-5 space-y-5">
+    <!-- Cascading Nomination Form -->
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">New Nomination</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Contract -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Contract</label>
+          <select id="nom-contract" onchange="onContractChange()" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="">Select contract...</option>
+            <option value="SPA-001">SPA-001 — Shell (FOB Sabine Pass)</option>
+            <option value="SPA-002">SPA-002 — JERA (DES Yokohama)</option>
+            <option value="SPA-003">SPA-003 — TotalEnergies (FOB Cameron)</option>
+            <option value="SPOT-010">SPOT-010 — Vitol (DES Incheon)</option>
+          </select>
+        </div>
+        <!-- Cargo (cascading) -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Cargo</label>
+          <select id="nom-cargo" onchange="onCargoChange()" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500" disabled>
+            <option value="">Select cargo...</option>
+          </select>
+        </div>
+        <!-- Volume (pre-filled) -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Volume (MT)</label>
+          <input id="nom-volume" type="text" readonly class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-600 text-slate-700 dark:text-slate-200 focus:outline-none" />
+        </div>
+        <!-- Dates (pre-filled) -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Loading Window</label>
+          <input id="nom-dates" type="text" readonly class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-600 text-slate-700 dark:text-slate-200 focus:outline-none" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        <!-- Vessel -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Vessel</label>
+          <select id="nom-vessel" onchange="onVesselChange()" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500" disabled>
+            <option value="">Select vessel...</option>
+          </select>
+        </div>
+        <!-- ETA -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">ETA at Loading Port</label>
+          <input id="nom-eta" type="text" readonly class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-600 text-slate-700 dark:text-slate-200 focus:outline-none" />
+        </div>
+        <!-- Capacity -->
+        <div>
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Vessel Capacity</label>
+          <input id="nom-cap" type="text" readonly class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-600 text-slate-700 dark:text-slate-200 focus:outline-none" />
+        </div>
+        <!-- Submit -->
+        <div class="flex items-end">
+          <button onclick="submitNomination()" class="w-full px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-primary-600 to-violet-600 text-white hover:from-primary-700 hover:to-violet-700 shadow-sm transition">Submit Nomination</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nomination Schedule -->
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
+      <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Nomination Schedule</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+              <th class="text-left pb-2 font-medium">Nom ID</th>
+              <th class="text-left pb-2 font-medium">Contract</th>
+              <th class="text-left pb-2 font-medium">Cargo</th>
+              <th class="text-right pb-2 font-medium">Volume</th>
+              <th class="text-left pb-2 font-medium">Vessel</th>
+              <th class="text-left pb-2 font-medium">Window</th>
+              <th class="text-left pb-2 font-medium">Status</th>
+              <th class="text-left pb-2 font-medium">Deadline</th>
+            </tr>
+          </thead>
+          <tbody id="nom-table" class="font-mono">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- CMD+K -->
+<div id="cmdk-overlay" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-[15vh]" onclick="if(event.target===this)closeCmdK()">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg overflow-hidden">
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><input id="cmdk-input" type="text" placeholder="Search..." class="flex-1 bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none" oninput="filterCmdK(this.value)" /><kbd class="text-[0.625rem] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-400">ESC</kbd></div>
+    <div id="cmdk-results" class="max-h-80 overflow-y-auto py-2">
+      <p class="px-4 py-1 text-[0.625rem] font-semibold uppercase tracking-wider text-slate-400">Pages</p>
+      <a href="index.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="dashboard">Dashboard</a>
+      <a href="quick-entry.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="quick entry">Quick Entry</a>
+      <a href="blotter.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="blotter">Blotter</a>
+      <a href="positions.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="positions">Positions</a>
+      <a href="trade-form.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="trade form">Trade Form</a>
+      <a href="invoices.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="invoices">Invoice Queue</a>
+      <a href="nominations.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="nominations">Nominations</a>
+      <a href="reconciliation.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="reconciliation">Reconciliation</a>
+      <a href="settings.html" class="cmdk-item flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer" data-search="settings">Settings</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-4 right-4 z-50 hidden"><div class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm shadow-lg"><svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span id="toast-msg">Success</span></div></div>
+
+<script>
+function initTheme(){if(localStorage.getItem('horizon-theme')==='dark')document.documentElement.classList.add('dark')}
+function toggleTheme(){document.documentElement.classList.toggle('dark');localStorage.setItem('horizon-theme',document.documentElement.classList.contains('dark')?'dark':'light')}
+initTheme();
+let sidebarCollapsed=false;
+function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;const sb=document.getElementById('sidebar'),mw=document.getElementById('main-wrapper');if(sidebarCollapsed){sb.style.width='3.5rem';mw.style.marginLeft='3.5rem';document.querySelectorAll('.sidebar-label').forEach(el=>el.style.display='none')}else{sb.style.width='15rem';mw.style.marginLeft='15rem';document.querySelectorAll('.sidebar-label').forEach(el=>el.style.display='')}}
+function toggleAccordion(id){const el=document.getElementById(id),arrow=document.getElementById(id+'-arrow');el.classList.toggle('hidden');if(arrow)arrow.style.transform=el.classList.contains('hidden')?'':'rotate(180deg)'}
+function toggleTicker(){const tb=document.getElementById('ticker-bar');tb.style.display=tb.style.display==='none'?'':'none'}
+function openCmdK(){document.getElementById('cmdk-overlay').classList.remove('hidden');document.getElementById('cmdk-input').value='';document.getElementById('cmdk-input').focus();filterCmdK('')}
+function closeCmdK(){document.getElementById('cmdk-overlay').classList.add('hidden')}
+function filterCmdK(q){document.querySelectorAll('.cmdk-item').forEach(item=>{const text=(item.textContent+' '+(item.dataset.search||'')).toLowerCase();item.style.display=text.includes(q.toLowerCase())?'':'none'})}
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmdK()}if(e.key==='Escape')closeCmdK()});
+function setRole(role){document.getElementById('sidebarRole').value=role}
+function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2500)}
+
+// Cascading data
+const contractData={
+  'SPA-001':{cargoes:[{id:'C-2406',vol:'65,000',window:'15-20 Jun 26'},{id:'C-2407',vol:'65,000',window:'12-17 Jul 26'}],port:'Sabine Pass'},
+  'SPA-002':{cargoes:[{id:'C-2408',vol:'70,000',window:'1-5 Jul 26'},{id:'C-2409',vol:'70,000',window:'20-25 Aug 26'}],port:'Ras Laffan'},
+  'SPA-003':{cargoes:[{id:'C-2410',vol:'55,000',window:'8-12 Jun 26'}],port:'Cameron LNG'},
+  'SPOT-010':{cargoes:[{id:'C-2411',vol:'68,000',window:'25-30 Jun 26'}],port:'Bintulu'},
+};
+
+const vessels=[
+  {name:'Arctic Spirit',cap:'170,000',eta:{
+    'Sabine Pass':'14 Jun 26','Cameron LNG':'13 Jun 26','Ras Laffan':'28 Jun 26','Bintulu':'22 Jun 26'}},
+  {name:'LNG Pioneer',cap:'162,000',eta:{
+    'Sabine Pass':'16 Jun 26','Cameron LNG':'15 Jun 26','Ras Laffan':'1 Jul 26','Bintulu':'25 Jun 26'}},
+  {name:'Pacific Breeze',cap:'174,000',eta:{
+    'Sabine Pass':'20 Jun 26','Cameron LNG':'19 Jun 26','Ras Laffan':'5 Jul 26','Bintulu':'28 Jun 26'}},
+  {name:'Al Dafna',cap:'210,000',eta:{
+    'Sabine Pass':'22 Jun 26','Cameron LNG':'21 Jun 26','Ras Laffan':'30 Jun 26','Bintulu':'3 Jul 26'}},
+];
+
+let currentPort='';
+
+function onContractChange(){
+  const c=document.getElementById('nom-contract').value;
+  const cargo=document.getElementById('nom-cargo');
+  cargo.innerHTML='<option value="">Select cargo...</option>';
+  document.getElementById('nom-volume').value='';
+  document.getElementById('nom-dates').value='';
+  document.getElementById('nom-vessel').innerHTML='<option value="">Select vessel...</option>';
+  document.getElementById('nom-vessel').disabled=true;
+  document.getElementById('nom-eta').value='';
+  document.getElementById('nom-cap').value='';
+  if(!c||!contractData[c]){cargo.disabled=true;return}
+  currentPort=contractData[c].port;
+  contractData[c].cargoes.forEach(cg=>{cargo.innerHTML+=`<option value="${cg.id}" data-vol="${cg.vol}" data-window="${cg.window}">${cg.id}</option>`});
+  cargo.disabled=false;
+}
+
+function onCargoChange(){
+  const cargo=document.getElementById('nom-cargo');
+  const opt=cargo.options[cargo.selectedIndex];
+  document.getElementById('nom-volume').value=opt.dataset.vol||'';
+  document.getElementById('nom-dates').value=opt.dataset.window||'';
+  // Enable vessel
+  const vs=document.getElementById('nom-vessel');
+  vs.innerHTML='<option value="">Select vessel...</option>';
+  vessels.forEach(v=>{vs.innerHTML+=`<option value="${v.name}" data-cap="${v.cap}" data-eta="${v.eta[currentPort]||'TBD'}">${v.name} (${v.cap} m3)</option>`});
+  vs.disabled=!cargo.value;
+  document.getElementById('nom-eta').value='';
+  document.getElementById('nom-cap').value='';
+}
+
+function onVesselChange(){
+  const vs=document.getElementById('nom-vessel');
+  const opt=vs.options[vs.selectedIndex];
+  document.getElementById('nom-eta').value=opt.dataset.eta||'';
+  document.getElementById('nom-cap').value=opt.dataset.cap?opt.dataset.cap+' m3':'';
+}
+
+let nomIdCounter=2427;
+function submitNomination(){
+  const contract=document.getElementById('nom-contract').value;
+  const cargo=document.getElementById('nom-cargo').value;
+  const vessel=document.getElementById('nom-vessel').value;
+  if(!contract||!cargo||!vessel){showToast('Please complete all fields');return}
+  const vol=document.getElementById('nom-volume').value;
+  const window=document.getElementById('nom-dates').value;
+  const id='N-'+nomIdCounter++;
+  // Add to table
+  const tbody=document.getElementById('nom-table');
+  const tr=document.createElement('tr');
+  tr.className='border-b border-slate-100 dark:border-slate-700/50';
+  tr.innerHTML=`<td class="py-2.5 pr-3 text-primary-600 dark:text-primary-400">${id}</td><td class="py-2.5 pr-3 text-slate-700 dark:text-slate-300">${contract}</td><td class="py-2.5 pr-3">${cargo}</td><td class="py-2.5 pr-3 text-right">${vol}</td><td class="py-2.5 pr-3 text-slate-700 dark:text-slate-300">${vessel}</td><td class="py-2.5 pr-3">${window}</td><td class="py-2.5 pr-3"><span class="inline-flex px-1.5 py-0.5 rounded-full text-[0.625rem] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">Submitted</span></td><td class="py-2.5 text-slate-500">12 Apr 26</td>`;
+  tbody.insertBefore(tr,tbody.firstChild);
+  showToast('Nomination '+id+' submitted');
+  // Reset
+  document.getElementById('nom-contract').value='';
+  document.getElementById('nom-cargo').innerHTML='<option value="">Select cargo...</option>';
+  document.getElementById('nom-cargo').disabled=true;
+  document.getElementById('nom-volume').value='';
+  document.getElementById('nom-dates').value='';
+  document.getElementById('nom-vessel').innerHTML='<option value="">Select vessel...</option>';
+  document.getElementById('nom-vessel').disabled=true;
+  document.getElementById('nom-eta').value='';
+  document.getElementById('nom-cap').value='';
+}
+
+// Initial schedule
+document.addEventListener('DOMContentLoaded',()=>{
+  const data=[
+    {id:'N-2426',contract:'SPA-001',cargo:'C-2405',vol:'65,000',vessel:'Arctic Spirit',window:'1-5 Jun 26',status:'Submitted',deadline:'12 Apr 26'},
+    {id:'N-2425',contract:'SPA-002',cargo:'C-2404',vol:'70,000',vessel:'LNG Pioneer',window:'20-25 May 26',status:'Accepted',deadline:'10 Apr 26'},
+    {id:'N-2424',contract:'SPA-003',cargo:'C-2403',vol:'55,000',vessel:'Pacific Breeze',window:'12-16 May 26',status:'Accepted',deadline:'8 Apr 26'},
+    {id:'N-2423',contract:'SPOT-010',cargo:'C-2402',vol:'68,000',vessel:'Al Dafna',window:'5-10 May 26',status:'Loaded',deadline:'5 Apr 26'},
+    {id:'N-2422',contract:'SPA-001',cargo:'C-2401',vol:'65,000',vessel:'Arctic Spirit',window:'20-25 Apr 26',status:'Loaded',deadline:'1 Apr 26'},
+    {id:'N-2421',contract:'SPA-002',cargo:'C-2400',vol:'70,000',vessel:'LNG Pioneer',window:'10-15 Apr 26',status:'Discharged',deadline:'28 Mar 26'},
+  ];
+  const tbody=document.getElementById('nom-table');
+  data.forEach(d=>{
+    const stCls=d.status==='Submitted'?'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400':d.status==='Accepted'?'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400':d.status==='Loaded'?'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400':'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400';
+    tbody.innerHTML+=`<tr class="border-b border-slate-100 dark:border-slate-700/50"><td class="py-2.5 pr-3 text-primary-600 dark:text-primary-400">${d.id}</td><td class="py-2.5 pr-3 text-slate-700 dark:text-slate-300">${d.contract}</td><td class="py-2.5 pr-3">${d.cargo}</td><td class="py-2.5 pr-3 text-right">${d.vol}</td><td class="py-2.5 pr-3 text-slate-700 dark:text-slate-300">${d.vessel}</td><td class="py-2.5 pr-3">${d.window}</td><td class="py-2.5 pr-3"><span class="inline-flex px-1.5 py-0.5 rounded-full text-[0.625rem] font-semibold ${stCls}">${d.status}</span></td><td class="py-2.5 text-slate-500">${d.deadline}</td></tr>`;
+  });
+});
+</script>
+</body>
+</html>

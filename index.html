@@ -6,9 +6,7 @@
   <title>Horizon UI — Design Template Library</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = { darkMode: 'class' }
-  </script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <style>
     body { font-family: 'Inter', -apple-system, sans-serif; }
     .theme-card { transition: transform 0.2s, box-shadow 0.2s; }
@@ -18,169 +16,202 @@
 <body class="bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 min-h-screen">
 
   <header class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">HORIZON</span>
         <span class="text-xs text-gray-400 dark:text-zinc-500">Design Template Library</span>
+        <span class="text-xs px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-medium">6 Themes &bull; 62 Pages</span>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-gray-500 dark:text-zinc-400">Horizon UI Templates</span>
-        <button onclick="document.getElementById('html-root').classList.toggle('dark');localStorage.setItem('hz-theme',document.getElementById('html-root').classList.contains('dark')?'dark':'light')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700">&#9789;</button>
-      </div>
+      <button onclick="document.getElementById('html-root').classList.toggle('dark');localStorage.setItem('hz-theme',document.getElementById('html-root').classList.contains('dark')?'dark':'light')" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-700">&#9789;</button>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-6 py-10">
+  <main class="max-w-7xl mx-auto px-6 py-10">
 
     <div class="mb-10">
-      <h1 class="text-3xl font-bold mb-2">3 Design Themes &times; 11 Pages Each</h1>
-      <p class="text-gray-500 dark:text-zinc-400 max-w-2xl">Three visually distinct design languages, each applied to the same set of page types. Every page is fully responsive (rem-based, no fixed pixels), includes dark/light theme toggle, and uses real Tailwind CSS patterns.</p>
+      <h1 class="text-3xl font-bold mb-2">Horizon UI Template Library</h1>
+      <p class="text-gray-500 dark:text-zinc-400 max-w-3xl">6 visually distinct design themes for enterprise trading applications. Themes A-C demonstrate page types and visual variation. Themes D-F demonstrate advanced interaction patterns: multi-level menus, keyboard-first design, front office vs back office workflows, AG Grid inline editing, and cascading forms.</p>
     </div>
 
-    <!-- Theme Cards -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+    <!-- Phase 1: Visual Themes -->
+    <div class="mb-4">
+      <h2 class="text-lg font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider text-xs mb-4">Phase 1 — Visual Design Themes</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
 
       <!-- Theme A -->
       <a href="theme-a/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
-        <div class="h-44 bg-gradient-to-br from-indigo-50 to-slate-100 dark:from-indigo-950/30 dark:to-zinc-900 p-5 flex flex-col justify-between">
+        <div class="h-32 bg-gradient-to-br from-indigo-50 to-slate-100 dark:from-indigo-950/30 dark:to-zinc-900 p-4 flex flex-col justify-between">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">H</div>
+            <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">H</div>
             <span class="font-semibold text-indigo-900 dark:text-indigo-300 text-sm">Horizon Pro</span>
           </div>
-          <div class="flex gap-2">
-            <div class="w-6 h-6 rounded-full bg-indigo-600"></div>
-            <div class="w-6 h-6 rounded-full bg-slate-400"></div>
-            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
-            <div class="w-6 h-6 rounded-full bg-rose-500"></div>
-            <div class="w-6 h-6 rounded-full bg-amber-400"></div>
-          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-indigo-600"></div><div class="w-5 h-5 rounded-full bg-slate-400"></div><div class="w-5 h-5 rounded-full bg-emerald-500"></div><div class="w-5 h-5 rounded-full bg-rose-500"></div></div>
         </div>
-        <div class="p-5">
-          <h3 class="font-bold text-lg mb-1">Clean Enterprise</h3>
-          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Indigo accent, shadow cards, 16rem sidebar, comfortable spacing. Inspired by Linear, Vercel, modern SaaS dashboards.</p>
-          <div class="flex flex-wrap gap-1.5 text-xs">
-            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">System fonts</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Shadow cards</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Wide sidebar</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">Comfortable</span>
-          </div>
+        <div class="p-4">
+          <h3 class="font-bold mb-1">Clean Enterprise</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">Indigo accent, shadow cards, wide sidebar, comfortable spacing. Linear/Vercel inspired.</p>
+          <div class="text-xs text-gray-400">11 pages &bull; AG Grid &bull; Dark/Light</div>
         </div>
       </a>
 
       <!-- Theme B -->
       <a href="theme-b/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
-        <div class="h-44 bg-gradient-to-br from-gray-900 to-emerald-950 p-5 flex flex-col justify-between">
+        <div class="h-32 bg-gradient-to-br from-gray-900 to-emerald-950 p-4 flex flex-col justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-emerald-400 font-mono font-bold text-lg">&#9670;</span>
+            <span class="text-emerald-400 font-mono font-bold">&#9670;</span>
             <span class="font-mono font-semibold text-emerald-400 text-sm">HORIZON</span>
           </div>
-          <div class="flex gap-2">
-            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
-            <div class="w-6 h-6 rounded-full bg-gray-600"></div>
-            <div class="w-6 h-6 rounded-full bg-blue-500"></div>
-            <div class="w-6 h-6 rounded-full bg-red-500"></div>
-            <div class="w-6 h-6 rounded-full bg-amber-500"></div>
-          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-emerald-500"></div><div class="w-5 h-5 rounded-full bg-gray-600"></div><div class="w-5 h-5 rounded-full bg-blue-500"></div><div class="w-5 h-5 rounded-full bg-red-500"></div></div>
         </div>
-        <div class="p-5">
-          <h3 class="font-bold text-lg mb-1">Trading Terminal</h3>
-          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Emerald accent, monospace-heavy, narrow icon sidebar, compact density. Inspired by Bloomberg, Refinitiv, professional trading desks.</p>
-          <div class="flex flex-wrap gap-1.5 text-xs">
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">JetBrains Mono</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Border cards</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Icon sidebar</span>
-            <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">Dense</span>
-          </div>
+        <div class="p-4">
+          <h3 class="font-bold mb-1">Trading Terminal</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">Emerald accent, monospace-heavy, icon sidebar, compact. Bloomberg inspired.</p>
+          <div class="text-xs text-gray-400">11 pages &bull; AG Grid &bull; Dark/Light</div>
         </div>
       </a>
 
       <!-- Theme C -->
       <a href="theme-c/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
-        <div class="h-44 bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/20 p-5 flex flex-col justify-between">
+        <div class="h-32 bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/20 p-4 flex flex-col justify-between">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">JC</div>
+            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">JC</div>
             <span class="font-semibold text-violet-900 dark:text-violet-300 text-sm">Meridian Glass</span>
           </div>
-          <div class="flex gap-2">
-            <div class="w-6 h-6 rounded-full bg-violet-600"></div>
-            <div class="w-6 h-6 rounded-full bg-purple-400"></div>
-            <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
-            <div class="w-6 h-6 rounded-full bg-rose-400"></div>
-            <div class="w-6 h-6 rounded-full bg-stone-400"></div>
-          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-violet-600"></div><div class="w-5 h-5 rounded-full bg-purple-400"></div><div class="w-5 h-5 rounded-full bg-emerald-500"></div><div class="w-5 h-5 rounded-full bg-rose-400"></div></div>
         </div>
-        <div class="p-5">
-          <h3 class="font-bold text-lg mb-1">Premium Glass</h3>
-          <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">Violet gradients, backdrop-blur glassmorphism, Plus Jakarta Sans, spacious. Inspired by Raycast, Arc browser, premium fintech.</p>
-          <div class="flex flex-wrap gap-1.5 text-xs">
-            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Jakarta Sans</span>
-            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Glass cards</span>
-            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Full sidebar</span>
-            <span class="px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">Spacious</span>
-          </div>
+        <div class="p-4">
+          <h3 class="font-bold mb-1">Premium Glass</h3>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">Violet gradients, backdrop-blur glass, Plus Jakarta Sans, spacious. Raycast/Arc inspired.</p>
+          <div class="text-xs text-gray-400">12 pages &bull; AG Grid &bull; Dark/Light</div>
         </div>
       </a>
 
     </div>
 
-    <!-- Page Types Included -->
-    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-8 mb-12">
-      <h2 class="font-bold text-lg mb-6">11 Page Types Per Theme</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9632;</span> Dashboard</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#8644;</span> AG Grid Tables</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9634;</span> Basic Tables</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9998;</span> Forms</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9635;</span> Cards & Lists</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9636;</span> Charts</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9679;</span> Profile</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9881;</span> Settings</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#9993;</span> Invoice</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">&#8594;</span> Sign In</div>
-        <div class="flex items-center gap-3 text-sm"><span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">!</span> Error 404</div>
-      </div>
+    <!-- Phase 2: Advanced Interaction Themes -->
+    <div class="mb-4">
+      <h2 class="text-lg font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider text-xs mb-1">Phase 2 — Advanced Interaction Patterns</h2>
+      <p class="text-xs text-gray-400 dark:text-zinc-500 mb-4">Multi-level menus, keyboard-first design, front/back office workflows, AG Grid inline editing, cascading forms</p>
     </div>
 
-    <!-- Design Comparison -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+
+      <!-- Theme D -->
+      <a href="theme-d/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-cyan-400 dark:border-cyan-600">
+        <div class="h-32 bg-gradient-to-br from-gray-950 to-cyan-950 p-4 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-mono font-bold text-lg">&#9670;</span>
+            <span class="font-mono font-semibold text-cyan-400 text-sm">FRONT OFFICE</span>
+          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-cyan-500"></div><div class="w-5 h-5 rounded-full bg-gray-700"></div><div class="w-5 h-5 rounded-full bg-green-500"></div><div class="w-5 h-5 rounded-full bg-red-500"></div></div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-bold">Front Office Workspace</h3>
+            <span class="text-[0.625rem] px-1.5 py-0.5 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-full font-medium">NEW</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">Quick trade entry (keyboard B/S + Tab + Enter), AG Grid blotter with context menu, position ladder drill-down, keyboard shortcuts.</p>
+          <div class="text-xs text-gray-400">7 pages &bull; AG Grid &bull; Keyboard-first</div>
+        </div>
+      </a>
+
+      <!-- Theme E -->
+      <a href="theme-e/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-blue-400 dark:border-blue-600">
+        <div class="h-32 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-950/30 dark:to-zinc-900 p-4 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold">H</div>
+            <span class="font-semibold text-blue-900 dark:text-blue-300 text-sm">Back Office Hub</span>
+          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-blue-600"></div><div class="w-5 h-5 rounded-full bg-slate-400"></div><div class="w-5 h-5 rounded-full bg-emerald-500"></div><div class="w-5 h-5 rounded-full bg-amber-500"></div></div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-bold">Back Office Operations</h3>
+            <span class="text-[0.625rem] px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full font-medium">NEW</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">AG Grid inline status editing + bulk approve, cascading nomination form, contract wizard, side-by-side reconciliation, audit log.</p>
+          <div class="text-xs text-gray-400">10 pages &bull; AG Grid inline edit &bull; Workflows</div>
+        </div>
+      </a>
+
+      <!-- Theme F -->
+      <a href="theme-f/index.html" class="theme-card block rounded-2xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-indigo-400 dark:border-violet-600 relative">
+        <div class="absolute top-3 right-3 z-10">
+          <span class="px-2 py-0.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[0.625rem] font-bold rounded-full uppercase tracking-wider">Recommended</span>
+        </div>
+        <div class="h-32 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-4 flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white text-xs font-bold">H</div>
+            <span class="font-semibold text-white text-sm">Unified ETRM</span>
+          </div>
+          <div class="flex gap-1.5"><div class="w-5 h-5 rounded-full bg-indigo-400"></div><div class="w-5 h-5 rounded-full bg-violet-400"></div><div class="w-5 h-5 rounded-full bg-emerald-400"></div><div class="w-5 h-5 rounded-full bg-rose-400"></div></div>
+        </div>
+        <div class="p-4">
+          <div class="flex items-center gap-2 mb-1">
+            <h3 class="font-bold">Unified ETRM</h3>
+            <span class="text-[0.625rem] px-1.5 py-0.5 bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-full font-medium">NEW</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-zinc-400 mb-2">Role selector (Trader/Ops/Manager), BOTH quick entry AND full forms, dense blotter AND comfortable invoices, cascading forms, everything.</p>
+          <div class="text-xs text-gray-400">11 pages &bull; Role-adaptive &bull; Full patterns</div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Comparison Table -->
     <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl overflow-hidden mb-12">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-zinc-800">
         <h2 class="font-bold">Design Comparison</h2>
       </div>
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-gray-100 dark:border-zinc-800 text-left text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
-            <th class="px-6 py-3 font-medium">Attribute</th>
-            <th class="px-6 py-3 font-medium text-indigo-600 dark:text-indigo-400">A: Horizon Pro</th>
-            <th class="px-6 py-3 font-medium text-emerald-600 dark:text-emerald-400">B: Terminal</th>
-            <th class="px-6 py-3 font-medium text-violet-600 dark:text-violet-400">C: Glass</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Primary Color</td><td class="px-6 py-3">Indigo #4f46e5</td><td class="px-6 py-3">Emerald #10b981</td><td class="px-6 py-3">Violet #7c3aed</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Font</td><td class="px-6 py-3">System / Inter</td><td class="px-6 py-3">JetBrains Mono</td><td class="px-6 py-3">Plus Jakarta Sans</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Card Style</td><td class="px-6 py-3">Shadow, no border (light)</td><td class="px-6 py-3">Border, no shadow</td><td class="px-6 py-3">Glass + backdrop-blur</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Sidebar</td><td class="px-6 py-3">16rem, labeled groups</td><td class="px-6 py-3">3.5rem icons, expands</td><td class="px-6 py-3">15rem, glass effect</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Density</td><td class="px-6 py-3">Comfortable</td><td class="px-6 py-3">Compact</td><td class="px-6 py-3">Spacious</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Border Radius</td><td class="px-6 py-3">0.75rem (xl)</td><td class="px-6 py-3">0.5rem (lg)</td><td class="px-6 py-3">1rem (2xl)</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Default Theme</td><td class="px-6 py-3">Light</td><td class="px-6 py-3">Dark</td><td class="px-6 py-3">Light</td></tr>
-          <tr><td class="px-6 py-3 text-gray-500 dark:text-zinc-400">Inspiration</td><td class="px-6 py-3">Linear, Vercel</td><td class="px-6 py-3">Bloomberg, Refinitiv</td><td class="px-6 py-3">Raycast, Arc</td></tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-100 dark:border-zinc-800 text-left text-xs text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
+              <th class="px-4 py-3 font-medium">Attribute</th>
+              <th class="px-3 py-3 font-medium text-indigo-600 dark:text-indigo-400">A</th>
+              <th class="px-3 py-3 font-medium text-emerald-600 dark:text-emerald-400">B</th>
+              <th class="px-3 py-3 font-medium text-violet-600 dark:text-violet-400">C</th>
+              <th class="px-3 py-3 font-medium text-cyan-600 dark:text-cyan-400">D</th>
+              <th class="px-3 py-3 font-medium text-blue-600 dark:text-blue-400">E</th>
+              <th class="px-3 py-3 font-medium text-indigo-600 dark:text-violet-400">F</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-zinc-800 text-xs">
+            <tr><td class="px-4 py-2 text-gray-500">Audience</td><td class="px-3 py-2">General</td><td class="px-3 py-2">General</td><td class="px-3 py-2">General</td><td class="px-3 py-2 font-medium">Front Office</td><td class="px-3 py-2 font-medium">Back Office</td><td class="px-3 py-2 font-medium">Both</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Accent</td><td class="px-3 py-2">Indigo</td><td class="px-3 py-2">Emerald</td><td class="px-3 py-2">Violet</td><td class="px-3 py-2">Cyan/Teal</td><td class="px-3 py-2">Blue</td><td class="px-3 py-2">Indigo+Violet</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Density</td><td class="px-3 py-2">Comfortable</td><td class="px-3 py-2">Compact</td><td class="px-3 py-2">Spacious</td><td class="px-3 py-2">Ultra-compact</td><td class="px-3 py-2">Comfortable</td><td class="px-3 py-2">Adaptive</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Menu</td><td class="px-3 py-2">Single-level</td><td class="px-3 py-2">Single-level</td><td class="px-3 py-2">Single-level</td><td class="px-3 py-2">Multi-level</td><td class="px-3 py-2">Multi-level + badges</td><td class="px-3 py-2">Multi-level + roles</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Quick Entry</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Inline Grid Edit</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">&#10003;</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Cascading Forms</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">&#10003;</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Contract Wizard</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">-</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Reconciliation</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">&#10003;</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Role Selector</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Keyboard Shortcuts</td><td class="px-3 py-2">Toggle only</td><td class="px-3 py-2">Toggle only</td><td class="px-3 py-2">Toggle only</td><td class="px-3 py-2">Full system</td><td class="px-3 py-2">Cmd+K</td><td class="px-3 py-2">Full system</td></tr>
+            <tr><td class="px-4 py-2 text-gray-500">Drill-Down</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td><td class="px-3 py-2">-</td><td class="px-3 py-2">&#10003;</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Links to other docs -->
-    <div class="text-sm text-gray-500 dark:text-zinc-400 space-y-1">
-      <p><a href="docs/agency-review-round-1.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 1: Discovery & Audit</a></p>
-      <p><a href="docs/agency-review-round-2.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 2: Design System</a></p>
-      <p><a href="docs/agency-review-round-3.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Agency Round 3: Final Spec</a></p>
-      <p><a href="docs/implementation-plan.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">Implementation Plan</a></p>
+    <!-- Docs -->
+    <div class="text-sm text-gray-500 dark:text-zinc-400">
+      <h2 class="font-bold text-gray-900 dark:text-white mb-3">Analysis Documents</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <a href="docs/agency-review-round-1.md" class="hover:text-indigo-600 dark:hover:text-indigo-400">Phase 1: Agency Round 1 — Discovery & Audit</a>
+        <a href="docs/agency-review-round-2.md" class="hover:text-indigo-600 dark:hover:text-indigo-400">Phase 1: Agency Round 2 — Design System</a>
+        <a href="docs/agency-review-round-3.md" class="hover:text-indigo-600 dark:hover:text-indigo-400">Phase 1: Agency Round 3 — Final Spec</a>
+        <a href="docs/implementation-plan.md" class="hover:text-indigo-600 dark:hover:text-indigo-400">Phase 1: Implementation Plan</a>
+      </div>
     </div>
 
   </main>
 
   <footer class="border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 mt-12">
-    <div class="max-w-6xl mx-auto px-6 py-4 text-xs text-gray-400 dark:text-zinc-600 text-center">
-      Horizon UI Design Templates &bull; 3 themes &times; 11 pages &bull; Tailwind CSS &bull; AG Grid &bull; Responsive
+    <div class="max-w-7xl mx-auto px-6 py-4 text-xs text-gray-400 dark:text-zinc-600 text-center">
+      Horizon UI Templates &bull; 6 themes &bull; 62 pages &bull; Tailwind CSS &bull; AG Grid &bull; Responsive &bull; Dark/Light
     </div>
   </footer>
 

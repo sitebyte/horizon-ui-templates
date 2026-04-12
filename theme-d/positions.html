@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon — Positions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    .pos-table-wrap {
+      overflow: auto;
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--card-bg);
+    }
+    .pos-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.6875rem;
+      min-width: 36rem;
+    }
+    .pos-table th {
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-3);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 0.0625rem solid var(--border);
+      background: var(--card-bg);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .pos-table th:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: var(--card-bg);
+    }
+    .pos-table td {
+      padding: 0;
+      border-bottom: 0.0625rem solid var(--border);
+      border-right: 0.0625rem solid var(--border);
+      text-align: center;
+      height: 3rem;
+      vertical-align: middle;
+    }
+    .pos-table td:last-child { border-right: none; }
+    .pos-table td:first-child {
+      text-align: left;
+      padding: 0.375rem 0.75rem;
+      font-weight: 700;
+      color: var(--text-0);
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 1;
+      border-right: 0.0625rem solid var(--border);
+      width: 5rem;
+    }
+    .pos-cell {
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s;
+      font-variant-numeric: tabular-nums;
+    }
+    .pos-cell:hover { background: var(--hover); }
+    .pos-cell.selected { outline: 0.125rem solid var(--accent); outline-offset: -0.125rem; border-radius: 0.125rem; }
+    .pos-cell .vol {
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .pos-cell .pnl {
+      font-size: 0.5625rem;
+      margin-top: 0.0625rem;
+    }
+    .pos-cell.long .vol { color: var(--green); }
+    .pos-cell.short .vol { color: var(--red); }
+    .pos-cell.long { background: var(--green-dim); }
+    .pos-cell.short { background: var(--red-dim); }
+
+    /* Drill-down panel */
+    .drill-panel {
+      display: none;
+      margin-top: 0.75rem;
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--accent);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    .drill-panel.open { display: block; }
+    .drill-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--accent-bg);
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .drill-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .drill-close {
+      color: var(--text-3);
+      font-size: 0.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.25rem;
+    }
+    .drill-close:hover { color: var(--text-0); background: var(--hover); }
+    .drill-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.6875rem;
+    }
+    .drill-table th {
+      padding: 0.375rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-3);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .drill-table td {
+      padding: 0.25rem 0.75rem;
+      border-bottom: 0.0625rem solid var(--border);
+      height: 1.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Totals row */
+    .pos-table tr.totals-row td {
+      font-weight: 700;
+      color: var(--text-0);
+      border-top: 0.125rem solid var(--border);
+      background: var(--bg-2);
+    }
+
+    .section-title {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.375rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="hz-app">
+
+    <div class="section-title fade-in">Position Ladder — Benchmark x Month</div>
+
+    <div class="pos-table-wrap fade-in-d1">
+      <table class="pos-table" id="pos-grid">
+        <thead>
+          <tr>
+            <th>Bench</th>
+            <th>May-26</th>
+            <th>Jun-26</th>
+            <th>Jul-26</th>
+            <th>Aug-26</th>
+            <th>Sep-26</th>
+            <th>Oct-26</th>
+          </tr>
+        </thead>
+        <tbody id="pos-body"></tbody>
+      </table>
+    </div>
+
+    <div class="drill-panel" id="drill-panel">
+      <div class="drill-header">
+        <span class="drill-title" id="drill-title">Trades for JKM Jun-26</span>
+        <button class="drill-close" onclick="closeDrill()">&times;</button>
+      </div>
+      <table class="drill-table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Dir</th>
+            <th>Volume</th>
+            <th>Price</th>
+            <th>Counterparty</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="drill-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script src="shell.js"></script>
+  <script>
+    initShell('positions', 'Positions');
+
+    const MONTHS = ['May-26', 'Jun-26', 'Jul-26', 'Aug-26', 'Sep-26', 'Oct-26'];
+    const BENCHMARKS = ['JKM', 'TTF', 'HH'];
+
+    // Position data: bench -> month -> { vol, pnl }
+    const POS_DATA = {
+      JKM: {
+        'May-26': { vol: 800000, pnl: 142000 },
+        'Jun-26': { vol: 1200000, pnl: 285000 },
+        'Jul-26': { vol: -400000, pnl: -62000 },
+        'Aug-26': { vol: 200000, pnl: 18000 },
+        'Sep-26': { vol: 600000, pnl: 94000 },
+        'Oct-26': { vol: -200000, pnl: -31000 },
+      },
+      TTF: {
+        'May-26': { vol: -300000, pnl: -48000 },
+        'Jun-26': { vol: 500000, pnl: 76000 },
+        'Jul-26': { vol: 600000, pnl: 102000 },
+        'Aug-26': { vol: -100000, pnl: -15000 },
+        'Sep-26': { vol: 300000, pnl: 52000 },
+        'Oct-26': { vol: 400000, pnl: 68000 },
+      },
+      HH: {
+        'May-26': { vol: 150000, pnl: 22000 },
+        'Jun-26': { vol: -200000, pnl: -34000 },
+        'Jul-26': { vol: 350000, pnl: 58000 },
+        'Aug-26': { vol: 100000, pnl: 12000 },
+        'Sep-26': { vol: -150000, pnl: -24000 },
+        'Oct-26': { vol: 250000, pnl: 42000 },
+      }
+    };
+
+    // Drill-down detail data
+    const DRILL_DATA = {
+      'JKM|May-26': [
+        { ref: 'T-2026-0140', dir: 'B', volume: 3200000, price: '14.45', cpty: 'BP', status: 'Confirmed' },
+        { ref: 'T-2026-0135', dir: 'S', volume: 3200000, price: '14.40', cpty: 'QatarEnergy', status: 'Confirmed' },
+        { ref: 'T-2026-0128', dir: 'B', volume: 800000, price: '14.52', cpty: 'Shell', status: 'Confirmed' },
+      ],
+      'JKM|Jun-26': [
+        { ref: 'T-2026-0147', dir: 'B', volume: 3200000, price: '14.60', cpty: 'JERA', status: 'Confirmed' },
+        { ref: 'T-2026-0142', dir: 'B', volume: 4800000, price: '14.70', cpty: 'KOGAS', status: 'Confirmed' },
+        { ref: 'T-2026-0139', dir: 'S', volume: 1600000, price: '14.50', cpty: 'JERA', status: 'Confirmed' },
+      ],
+      'JKM|Jul-26': [
+        { ref: 'T-2026-0146', dir: 'S', volume: 2800000, price: '14.55', cpty: 'Shell', status: 'Confirmed' },
+        { ref: 'T-2026-0137', dir: 'S', volume: 4800000, price: '14.35', cpty: 'Shell', status: 'Confirmed' },
+      ],
+      'TTF|Jun-26': [
+        { ref: 'T-2026-0145', dir: 'B', volume: 1600000, price: '12.95', cpty: 'TotalEnergies', status: 'Pending' },
+        { ref: 'T-2026-0130', dir: 'B', volume: 800000, price: '12.88', cpty: 'BP', status: 'Confirmed' },
+      ],
+      'HH|May-26': [
+        { ref: 'T-2026-0143', dir: 'S', volume: 3200000, price: '3.55', cpty: 'Cheniere', status: 'Draft' },
+        { ref: 'T-2026-0125', dir: 'B', volume: 3350000, price: '3.42', cpty: 'Woodside', status: 'Confirmed' },
+      ],
+    };
+
+    function fmtVol(v) {
+      const abs = Math.abs(v);
+      if (abs >= 1000000) return (v > 0 ? '+' : '') + (v / 1000000).toFixed(1) + 'M';
+      if (abs >= 1000) return (v > 0 ? '+' : '') + (v / 1000).toFixed(0) + 'K';
+      return (v > 0 ? '+' : '') + v;
+    }
+    function fmtPnl(v) {
+      const sign = v >= 0 ? '+' : '';
+      return sign + '$' + (Math.abs(v) / 1000).toFixed(0) + 'K';
+    }
+
+    let selectedCell = null;
+
+    function renderGrid() {
+      const tbody = document.getElementById('pos-body');
+      let html = '';
+
+      // Data rows
+      BENCHMARKS.forEach(bench => {
+        html += `<tr><td>${bench}</td>`;
+        MONTHS.forEach(month => {
+          const d = POS_DATA[bench][month] || { vol: 0, pnl: 0 };
+          const cls = d.vol > 0 ? 'long' : d.vol < 0 ? 'short' : '';
+          const pnlCls = d.pnl >= 0 ? 'text-green' : 'text-red';
+          const selCls = selectedCell === `${bench}|${month}` ? ' selected' : '';
+          html += `<td><div class="pos-cell ${cls}${selCls}" data-bench="${bench}" data-month="${month}" onclick="drillDown('${bench}','${month}')">
+            <span class="vol">${fmtVol(d.vol)}</span>
+            <span class="pnl ${pnlCls}">${fmtPnl(d.pnl)}</span>
+          </div></td>`;
+        });
+        html += '</tr>';
+      });
+
+      // Totals row
+      html += '<tr class="totals-row"><td>Total</td>';
+      MONTHS.forEach(month => {
+        let totalVol = 0, totalPnl = 0;
+        BENCHMARKS.forEach(b => {
+          const d = POS_DATA[b][month] || { vol: 0, pnl: 0 };
+          totalVol += d.vol;
+          totalPnl += d.pnl;
+        });
+        const cls = totalVol > 0 ? 'text-green' : totalVol < 0 ? 'text-red' : '';
+        const pnlCls = totalPnl >= 0 ? 'text-green' : 'text-red';
+        html += `<td style="padding:0.25rem 0.5rem;text-align:center;font-variant-numeric:tabular-nums;">
+          <div class="${cls}" style="font-weight:700;font-size:0.75rem;">${fmtVol(totalVol)}</div>
+          <div class="${pnlCls}" style="font-size:0.5625rem;">${fmtPnl(totalPnl)}</div>
+        </td>`;
+      });
+      html += '</tr>';
+
+      tbody.innerHTML = html;
+    }
+
+    function drillDown(bench, month) {
+      const key = `${bench}|${month}`;
+      selectedCell = key;
+      renderGrid();
+
+      const panel = document.getElementById('drill-panel');
+      const title = document.getElementById('drill-title');
+      const body = document.getElementById('drill-body');
+
+      title.textContent = `Trades for ${bench} ${month}`;
+
+      const trades = DRILL_DATA[key];
+      if (!trades) {
+        body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:0.75rem;">No trades for this cell</td></tr>`;
+      } else {
+        body.innerHTML = trades.map(t => {
+          const dirColor = t.dir === 'B' ? 'var(--accent)' : 'var(--red)';
+          return `<tr>
+            <td style="color:var(--accent);">${t.ref}</td>
+            <td style="color:${dirColor};font-weight:700;">${t.dir}</td>
+            <td style="font-variant-numeric:tabular-nums;">${Number(t.volume).toLocaleString()}</td>
+            <td style="font-variant-numeric:tabular-nums;">$${t.price}</td>
+            <td>${t.cpty}</td>
+            <td>${t.status}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      panel.classList.add('open');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function closeDrill() {
+      document.getElementById('drill-panel').classList.remove('open');
+      selectedCell = null;
+      renderGrid();
+    }
+
+    renderGrid();
+  </script>
+</body>
+</html>
