@@ -219,6 +219,13 @@
           <label class="block text-[0.625rem] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Volume (MT)</label>
           <input id="qe-volume" type="text" placeholder="65,000" class="w-24 px-2.5 py-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500" />
         </div>
+        <!-- Incoterms -->
+        <div>
+          <label class="block text-[0.625rem] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Incoterms</label>
+          <select id="qe-incoterm" class="px-2.5 py-1.5 text-xs font-mono rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500">
+            <option>DES</option><option>FOB</option><option>CIF</option><option>DAP</option>
+          </select>
+        </div>
         <!-- Benchmark -->
         <div>
           <label class="block text-[0.625rem] font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider">Benchmark</label>
@@ -241,6 +248,20 @@
         <!-- Submit -->
         <button type="submit" class="px-4 py-1.5 text-xs font-semibold rounded-md bg-gradient-to-r from-primary-600 to-violet-600 text-white hover:from-primary-700 hover:to-violet-700 transition shadow-sm">Enter Trade</button>
       </form>
+    </div>
+
+    <!-- Confirmation Bar -->
+    <div id="confirm-bar" class="hidden rounded-xl border-2 border-amber-400 dark:border-amber-500 bg-amber-50 dark:bg-amber-900/30 px-4 py-3 fade-in">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2 min-w-0">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+          <span id="confirm-summary" class="text-sm font-medium text-amber-900 dark:text-amber-100 truncate"></span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="confirm-btn" onclick="confirmTrade()" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm">Confirm (Enter)</button>
+          <button onclick="cancelConfirm()" class="px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-500 text-slate-600 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancel (Esc)</button>
+        </div>
+      </div>
     </div>
 
     <!-- AG Grid Blotter -->
@@ -282,8 +303,9 @@
 <!-- ===== TOAST ===== -->
 <div id="toast" class="fixed bottom-4 right-4 z-50 hidden">
   <div class="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm shadow-lg">
-    <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <span id="toast-msg">Success</span>
+    <button id="toast-undo" class="hidden ml-2 px-2 py-0.5 text-xs font-semibold rounded bg-white/20 dark:bg-slate-900/20 hover:bg-white/30 dark:hover:bg-slate-900/30 transition" onclick="undoLastTrade()">Undo (<span id="undo-countdown">5</span>s)</button>
   </div>
 </div>
 
@@ -307,16 +329,52 @@ function toggleTicker(){const tb=document.getElementById('ticker-bar');tb.style.
 function openCmdK(){document.getElementById('cmdk-overlay').classList.remove('hidden');document.getElementById('cmdk-input').value='';document.getElementById('cmdk-input').focus();filterCmdK('')}
 function closeCmdK(){document.getElementById('cmdk-overlay').classList.add('hidden')}
 function filterCmdK(q){const items=document.querySelectorAll('.cmdk-item');const query=q.toLowerCase();items.forEach(item=>{const text=(item.textContent+' '+(item.dataset.search||'')).toLowerCase();item.style.display=text.includes(query)?'':'none'})}
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmdK()}if(e.key==='Escape')closeCmdK()});
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmdK();return}
+  if(e.key==='Escape'){
+    if(pendingTrade){cancelConfirm();e.preventDefault();return}
+    closeCmdK();return;
+  }
+  if(e.key==='Enter'&&pendingTrade){
+    const bar=document.getElementById('confirm-bar');
+    if(!bar.classList.contains('hidden')){e.preventDefault();confirmTrade();return}
+  }
+});
 
 // ===== ROLE =====
 function setRole(role){document.getElementById('sidebarRole').value=role}
 
 // ===== TOAST =====
-function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2500)}
+let toastTimeout=null;
+let undoInterval=null;
+function showToast(msg,undoable){
+  const t=document.getElementById('toast');
+  const undoBtn=document.getElementById('toast-undo');
+  document.getElementById('toast-msg').textContent=msg;
+  if(toastTimeout)clearTimeout(toastTimeout);
+  if(undoInterval)clearInterval(undoInterval);
+  if(undoable){
+    undoBtn.classList.remove('hidden');
+    let seconds=5;
+    document.getElementById('undo-countdown').textContent=seconds;
+    undoInterval=setInterval(()=>{
+      seconds--;
+      document.getElementById('undo-countdown').textContent=seconds;
+      if(seconds<=0){clearInterval(undoInterval);undoBtn.classList.add('hidden');lastAddedTrade=null}
+    },1000);
+    toastTimeout=setTimeout(()=>{t.classList.add('hidden');undoBtn.classList.add('hidden');lastAddedTrade=null},5500);
+  }else{
+    undoBtn.classList.add('hidden');
+    toastTimeout=setTimeout(()=>t.classList.add('hidden'),2500);
+  }
+  t.classList.remove('hidden');
+}
 
 // ===== QUICK ENTRY =====
 let currentSide='B';
+let pendingTrade=null;
+let lastAddedTrade=null;
+let lastAddedFormValues=null;
 const counterparties=['Shell','TotalEnergies','JERA','BP','Chevron','QatarEnergy','Cheniere','Equinor','ENI','Petronas','Vitol','Trafigura','Gunvor','Glencore','Mitsui'];
 
 function setSide(side){
@@ -338,26 +396,80 @@ function selectCpty(name){document.getElementById('qe-cpty').value=name;document
 // B/S keyboard toggle
 document.addEventListener('keydown',e=>{
   if(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA')return;
-  if(e.key==='b'||e.key==='B')setSide('B');
-  if(e.key==='s'||e.key==='S')setSide('S');
+  if(e.key==='b'||e.key==='B'){if(!pendingTrade)setSide('B')}
+  if(e.key==='s'||e.key==='S'){if(!pendingTrade)setSide('S')}
 });
+
+function formatVolume(v){return v?parseInt(v.replace(/,/g,'')).toLocaleString():'0'}
 
 let tradeIdCounter=1016;
 function submitQuickTrade(e){
   e.preventDefault();
+  if(pendingTrade)return false;
   const side=document.getElementById('qe-side').value;
   const cpty=document.getElementById('qe-cpty').value;
   const vol=document.getElementById('qe-volume').value;
   const bench=document.getElementById('qe-benchmark').value;
   const price=document.getElementById('qe-price').value;
   const month=document.getElementById('qe-month').value;
+  const incoterm=document.getElementById('qe-incoterm').value;
   if(!cpty||!vol||!price){showToast('Please fill all required fields');return false}
-  const newTrade={tradeId:'T-'+tradeIdCounter++,side,counterparty:cpty,volume:parseInt(vol.replace(/,/g,''))||0,benchmark:bench,price:parseFloat(price)||0,delivery:month,status:'Confirmed',trader:'JC',timestamp:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),type:'Physical',incoterm:side==='B'?'FOB':'DES'};
-  gridApi.applyTransaction({add:[newTrade],addIndex:0});
+  pendingTrade={tradeId:'T-'+tradeIdCounter++,side,counterparty:cpty,volume:parseInt(vol.replace(/,/g,''))||0,benchmark:bench,price:parseFloat(price)||0,delivery:month,status:'Confirmed',trader:'JC',timestamp:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),type:'Physical',incoterm:incoterm};
+  const sideLabel=side==='B'?'BUY':'SELL';
+  const volFormatted=formatVolume(vol);
+  const priceSign=parseFloat(price)>=0?'+':'';
+  document.getElementById('confirm-summary').textContent=`${sideLabel} ${volFormatted} MT ${bench} ${priceSign}$${parseFloat(price).toFixed(2)} ${month} ${incoterm} from ${cpty}`;
+  const bar=document.getElementById('confirm-bar');
+  bar.classList.remove('hidden');
+  document.getElementById('confirm-btn').focus();
+  return false;
+}
+
+function confirmTrade(){
+  if(!pendingTrade)return;
+  const trade=pendingTrade;
+  const formValues={cpty:document.getElementById('qe-cpty').value,vol:document.getElementById('qe-volume').value,price:document.getElementById('qe-price').value,side:trade.side,bench:trade.benchmark,month:trade.delivery,incoterm:trade.incoterm};
+  gridApi.applyTransaction({add:[trade],addIndex:0});
   document.getElementById('qe-cpty').value='';document.getElementById('qe-volume').value='';document.getElementById('qe-price').value='';
   document.getElementById('trade-count').textContent=gridApi.getDisplayedRowCount()+' trades';
-  showToast(`Trade ${newTrade.tradeId} entered — ${side==='B'?'Buy':'Sell'} ${vol} MT ${bench} @ $${price}`);
-  return false;
+  lastAddedTrade=trade;
+  lastAddedFormValues=formValues;
+  document.getElementById('confirm-bar').classList.add('hidden');
+  pendingTrade=null;
+  showToast(`Trade ${trade.tradeId} entered — ${trade.side==='B'?'Buy':'Sell'} ${trade.volume.toLocaleString()} MT ${trade.benchmark} @ $${trade.price.toFixed(2)}`,true);
+  document.getElementById('qe-cpty').focus();
+}
+
+function cancelConfirm(){
+  tradeIdCounter--;
+  pendingTrade=null;
+  document.getElementById('confirm-bar').classList.add('hidden');
+  document.getElementById('qe-cpty').focus();
+}
+
+function undoLastTrade(){
+  if(!lastAddedTrade)return;
+  const trade=lastAddedTrade;
+  const formVals=lastAddedFormValues;
+  gridApi.applyTransaction({remove:[trade]});
+  document.getElementById('trade-count').textContent=gridApi.getDisplayedRowCount()+' trades';
+  if(formVals){
+    setSide(formVals.side);
+    document.getElementById('qe-cpty').value=formVals.cpty;
+    document.getElementById('qe-volume').value=formVals.vol;
+    document.getElementById('qe-price').value=formVals.price;
+    document.getElementById('qe-benchmark').value=formVals.bench;
+    document.getElementById('qe-month').value=formVals.month;
+    document.getElementById('qe-incoterm').value=formVals.incoterm;
+  }
+  lastAddedTrade=null;
+  lastAddedFormValues=null;
+  if(toastTimeout)clearTimeout(toastTimeout);
+  if(undoInterval)clearInterval(undoInterval);
+  document.getElementById('toast').classList.add('hidden');
+  document.getElementById('toast-undo').classList.add('hidden');
+  showToast('Trade undone — form restored');
+  tradeIdCounter--;
 }
 
 // ===== AG GRID =====

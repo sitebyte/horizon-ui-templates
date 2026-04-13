@@ -132,6 +132,8 @@
         Export CSV
       </button>
       <span class="text-xs text-slate-500 font-mono ml-auto" id="row-count">24 trades</span>
+      <span class="mx-2 text-slate-300 dark:text-slate-600">|</span>
+      <span id="total-pnl" class="text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400">Total Unrealized P&amp;L: --</span>
     </div>
 
     <!-- AG Grid -->
@@ -188,31 +190,45 @@ function showToast(msg){const t=document.getElementById('toast');document.getEle
 
 let gridApi;let selectedRow=null;let activeStatusFilter='all';
 
+const benchmarkPrices={JKM:14.60,TTF:12.65,HH:3.55,Brent:82.40};
+
+function calcMtm(data){if(!data||data.price==null||!data.benchmark)return null;const spot=benchmarkPrices[data.benchmark];if(spot==null)return null;return data.side==='B'?(spot-data.price):(data.price-spot)}
+function calcUnrealPnl(data){const mtm=calcMtm(data);if(mtm==null||data.volume==null)return null;return mtm*data.volume}
+function formatPnlSuffix(v){if(v==null)return '\u2013';const abs=Math.abs(v);const sign=v<0?'-$':'$';if(abs>=1e6)return sign+(abs/1e6).toFixed(2)+'M';if(abs>=1e3)return sign+Math.round(abs/1e3)+'K';return sign+abs.toFixed(0)}
+function escapeHtml(str){if(str==null)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+
+function updateTotalPnl(){
+  let total=0;
+  gridApi.forEachNodeAfterFilter(node=>{total+=calcUnrealPnl(node.data)||0});
+  const el=document.getElementById('total-pnl');
+  if(el){const color=total>=0?'text-emerald-600 dark:text-emerald-400':'text-red-600 dark:text-red-400';const sign=total>=0?'+':'';el.className='text-xs font-mono font-semibold '+color;el.textContent='Total Unrealized P&L: '+sign+formatPnlSuffix(total)}
+}
+
 const tradeData=[
-  {tradeId:'T-1024',side:'B',counterparty:'Shell',volume:65000,benchmark:'JKM',price:12.45,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:42',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
-  {tradeId:'T-1023',side:'S',counterparty:'JERA',volume:70000,benchmark:'JKM',price:12.52,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:38',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1022',side:'B',counterparty:'TotalEnergies',volume:55000,benchmark:'TTF',price:11.82,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:31',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
-  {tradeId:'T-1021',side:'S',counterparty:'BP',volume:60000,benchmark:'TTF',price:11.95,delivery:'Jul 26',status:'Pending',trader:'SM',timestamp:'2026-04-11 09:25',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
-  {tradeId:'T-1020',side:'B',counterparty:'Chevron',volume:72000,benchmark:'HH',price:2.34,delivery:'Aug 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:18',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
-  {tradeId:'T-1019',side:'S',counterparty:'Vitol',volume:68000,benchmark:'JKM',price:12.38,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-11 09:12',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1018',side:'B',counterparty:'Petronas',volume:45000,benchmark:'JKM',price:12.41,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:05',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
-  {tradeId:'T-1017',side:'S',counterparty:'QatarEnergy',volume:80000,benchmark:'JKM',price:12.55,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-11 08:58',type:'Physical',incoterm:'DES',portfolio:'Middle East'},
-  {tradeId:'T-1016',side:'B',counterparty:'Equinor',volume:50000,benchmark:'TTF',price:11.78,delivery:'Sep 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-11 08:51',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
-  {tradeId:'T-1015',side:'S',counterparty:'Cheniere',volume:75000,benchmark:'HH',price:2.38,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 08:44',type:'Physical',incoterm:'DES',portfolio:'Americas'},
-  {tradeId:'T-1014',side:'B',counterparty:'Trafigura',volume:62000,benchmark:'JKM',price:12.33,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 16:37',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
-  {tradeId:'T-1013',side:'S',counterparty:'Glencore',volume:58000,benchmark:'TTF',price:11.89,delivery:'Aug 26',status:'Cancelled',trader:'AK',timestamp:'2026-04-10 16:30',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
-  {tradeId:'T-1012',side:'B',counterparty:'Mitsui',volume:66000,benchmark:'JKM',price:12.48,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-10 15:22',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
-  {tradeId:'T-1011',side:'S',counterparty:'ENI',volume:54000,benchmark:'TTF',price:11.92,delivery:'Jun 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 15:15',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
-  {tradeId:'T-1010',side:'B',counterparty:'Gunvor',volume:71000,benchmark:'HH',price:2.31,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 14:08',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
-  {tradeId:'T-1009',side:'S',counterparty:'Shell',volume:48000,benchmark:'JKM',price:12.51,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-10 13:42',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1008',side:'B',counterparty:'BP',volume:63000,benchmark:'TTF',price:11.85,delivery:'Sep 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-10 11:35',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
-  {tradeId:'T-1007',side:'S',counterparty:'TotalEnergies',volume:57000,benchmark:'JKM',price:12.44,delivery:'Oct 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 10:28',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1006',side:'B',counterparty:'Vitol',volume:69000,benchmark:'HH',price:2.36,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 16:55',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
-  {tradeId:'T-1005',side:'S',counterparty:'JERA',volume:74000,benchmark:'JKM',price:12.49,delivery:'Jul 26',status:'Cancelled',trader:'RP',timestamp:'2026-04-09 15:41',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1004',side:'B',counterparty:'Chevron',volume:52000,benchmark:'TTF',price:11.79,delivery:'Aug 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-09 14:22',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
-  {tradeId:'T-1003',side:'S',counterparty:'Petronas',volume:67000,benchmark:'JKM',price:12.57,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 11:18',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
-  {tradeId:'T-1002',side:'B',counterparty:'Equinor',volume:59000,benchmark:'TTF',price:11.88,delivery:'Oct 26',status:'Pending',trader:'SM',timestamp:'2026-04-09 10:05',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
-  {tradeId:'T-1001',side:'S',counterparty:'Mitsui',volume:73000,benchmark:'JKM',price:12.42,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-08 16:50',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:1,tradeId:'T-1024',side:'B',counterparty:'Shell',volume:65000,benchmark:'JKM',price:12.45,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:42',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:2,tradeId:'T-1023',side:'S',counterparty:'JERA',volume:70000,benchmark:'JKM',price:12.52,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:38',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:3,tradeId:'T-1022',side:'B',counterparty:'TotalEnergies',volume:55000,benchmark:'TTF',price:11.82,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:31',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:4,tradeId:'T-1021',side:'S',counterparty:'BP',volume:60000,benchmark:'TTF',price:11.95,delivery:'Jul 26',status:'Pending',trader:'SM',timestamp:'2026-04-11 09:25',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:5,tradeId:'T-1020',side:'B',counterparty:'Chevron',volume:72000,benchmark:'HH',price:2.34,delivery:'Aug 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:18',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:6,tradeId:'T-1019',side:'S',counterparty:'Vitol',volume:68000,benchmark:'JKM',price:12.38,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-11 09:12',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:7,tradeId:'T-1018',side:'B',counterparty:'Petronas',volume:45000,benchmark:'JKM',price:12.41,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:05',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:8,tradeId:'T-1017',side:'S',counterparty:'QatarEnergy',volume:80000,benchmark:'JKM',price:12.55,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-11 08:58',type:'Physical',incoterm:'DES',portfolio:'Middle East'},
+  {id:9,tradeId:'T-1016',side:'B',counterparty:'Equinor',volume:50000,benchmark:'TTF',price:11.78,delivery:'Sep 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-11 08:51',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:10,tradeId:'T-1015',side:'S',counterparty:'Cheniere',volume:75000,benchmark:'HH',price:2.38,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 08:44',type:'Physical',incoterm:'DES',portfolio:'Americas'},
+  {id:11,tradeId:'T-1014',side:'B',counterparty:'Trafigura',volume:62000,benchmark:'JKM',price:12.33,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 16:37',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:12,tradeId:'T-1013',side:'S',counterparty:'Glencore',volume:58000,benchmark:'TTF',price:11.89,delivery:'Aug 26',status:'Cancelled',trader:'AK',timestamp:'2026-04-10 16:30',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:13,tradeId:'T-1012',side:'B',counterparty:'Mitsui',volume:66000,benchmark:'JKM',price:12.48,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-10 15:22',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:14,tradeId:'T-1011',side:'S',counterparty:'ENI',volume:54000,benchmark:'TTF',price:11.92,delivery:'Jun 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 15:15',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:15,tradeId:'T-1010',side:'B',counterparty:'Gunvor',volume:71000,benchmark:'HH',price:2.31,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 14:08',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:16,tradeId:'T-1009',side:'S',counterparty:'Shell',volume:48000,benchmark:'JKM',price:12.51,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-10 13:42',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:17,tradeId:'T-1008',side:'B',counterparty:'BP',volume:63000,benchmark:'TTF',price:11.85,delivery:'Sep 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-10 11:35',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:18,tradeId:'T-1007',side:'S',counterparty:'TotalEnergies',volume:57000,benchmark:'JKM',price:12.44,delivery:'Oct 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 10:28',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:19,tradeId:'T-1006',side:'B',counterparty:'Vitol',volume:69000,benchmark:'HH',price:2.36,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 16:55',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:20,tradeId:'T-1005',side:'S',counterparty:'JERA',volume:74000,benchmark:'JKM',price:12.49,delivery:'Jul 26',status:'Cancelled',trader:'RP',timestamp:'2026-04-09 15:41',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:21,tradeId:'T-1004',side:'B',counterparty:'Chevron',volume:52000,benchmark:'TTF',price:11.79,delivery:'Aug 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-09 14:22',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:22,tradeId:'T-1003',side:'S',counterparty:'Petronas',volume:67000,benchmark:'JKM',price:12.57,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 11:18',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:23,tradeId:'T-1002',side:'B',counterparty:'Equinor',volume:59000,benchmark:'TTF',price:11.88,delivery:'Oct 26',status:'Pending',trader:'SM',timestamp:'2026-04-09 10:05',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:24,tradeId:'T-1001',side:'S',counterparty:'Mitsui',volume:73000,benchmark:'JKM',price:12.42,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-08 16:50',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
 ];
 
 function applyGridTheme(){const g=document.getElementById('blotter-grid');if(document.documentElement.classList.contains('dark')){g.classList.remove('ag-theme-quartz');g.classList.add('ag-theme-quartz-dark')}else{g.classList.remove('ag-theme-quartz-dark');g.classList.add('ag-theme-quartz')}}
@@ -235,7 +251,7 @@ function ctxAction(action){
   if(!selectedRow)return;
   if(action==='view')showToast('Viewing '+selectedRow.tradeId);
   else if(action==='amend')showToast('Amending '+selectedRow.tradeId);
-  else if(action==='cancel'){selectedRow.status='Cancelled';gridApi.applyTransaction({update:[selectedRow]});showToast(selectedRow.tradeId+' cancelled')}
+  else if(action==='cancel'){selectedRow.status='Cancelled';gridApi.applyTransaction({update:[selectedRow]});updateTotalPnl();showToast(selectedRow.tradeId+' cancelled')}
 }
 
 document.addEventListener('click',()=>document.getElementById('context-menu').classList.add('hidden'));
@@ -244,16 +260,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   applyGridTheme();
   const colDefs=[
     {field:'tradeId',headerName:'ID',width:90,cellClass:'font-mono text-xs',pinned:'left'},
-    {field:'side',width:55,cellRenderer:p=>p.value==='B'?'<span class="inline-flex items-center justify-center w-5 h-5 rounded text-[0.625rem] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">B</span>':'<span class="inline-flex items-center justify-center w-5 h-5 rounded text-[0.625rem] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">S</span>'},
+    {field:'side',width:55,cellRenderer:p=>{if(p.value==null)return'\u2013';const v=escapeHtml(p.value);return v==='B'?'<span class="inline-flex items-center justify-center w-5 h-5 rounded text-[0.625rem] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">B</span>':'<span class="inline-flex items-center justify-center w-5 h-5 rounded text-[0.625rem] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400">S</span>'}},
     {field:'counterparty',width:130},
-    {field:'volume',width:100,cellClass:'font-mono text-right',valueFormatter:p=>p.value?p.value.toLocaleString():''},
+    {field:'volume',width:100,cellClass:'font-mono text-right',valueFormatter:p=>p.value!=null?p.value.toLocaleString():'\u2013'},
     {field:'benchmark',width:90},
-    {field:'price',width:95,cellClass:'font-mono text-right',valueFormatter:p=>'$'+p.value.toFixed(2)},
+    {field:'price',width:95,cellClass:'font-mono text-right',valueFormatter:p=>p.value!=null?'$'+p.value.toFixed(2):'\u2013'},
+    {field:'mtm',headerName:'MTM',width:100,cellClass:'font-mono text-right',valueGetter:p=>calcMtm(p.data),valueFormatter:p=>p.value!=null?'$'+p.value.toFixed(2):'\u2013',cellStyle:p=>{if(p.value==null)return null;return{color:p.value>=0?'#059669':'#dc2626'}},comparator:(a,b)=>(a||0)-(b||0)},
+    {field:'unrealPnl',headerName:'Unreal P&L',width:120,cellClass:'font-mono text-right',valueGetter:p=>calcUnrealPnl(p.data),valueFormatter:p=>p.value!=null?formatPnlSuffix(p.value):'\u2013',cellStyle:p=>{if(p.value==null)return null;return{color:p.value>=0?'#059669':'#dc2626'}},comparator:(a,b)=>(a||0)-(b||0)},
     {field:'delivery',width:85},
     {field:'incoterm',width:75},
     {field:'type',width:80},
     {field:'portfolio',width:110},
-    {field:'status',width:100,cellRenderer:p=>{const cls=p.value==='Confirmed'?'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400':p.value==='Pending'?'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400':'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400';return`<span class="inline-flex px-1.5 py-0.5 rounded-full text-[0.625rem] font-semibold ${cls}">${p.value}</span>`}},
+    {field:'status',width:100,cellRenderer:p=>{if(p.value==null)return'\u2013';const v=escapeHtml(p.value);const cls=v==='Confirmed'?'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400':v==='Pending'?'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400':'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400';return'<span class="inline-flex px-1.5 py-0.5 rounded-full text-[0.625rem] font-semibold '+cls+'">'+v+'</span>'}},
     {field:'trader',width:65,cellClass:'font-mono'},
     {field:'timestamp',headerName:'Time',width:140,cellClass:'font-mono text-xs'},
   ];
@@ -263,12 +281,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   colDefs.forEach((c,i)=>{
     const div=document.createElement('div');
     div.className='flex items-center gap-2';
-    div.innerHTML=`<input type="checkbox" checked class="rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500" onchange="toggleCol('${c.field}',this.checked)" /><span class="text-xs text-slate-600 dark:text-slate-300">${c.headerName||c.field}</span>`;
+    div.innerHTML='<input type="checkbox" checked class="rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500" onchange="toggleCol(\''+escapeHtml(c.field)+'\',this.checked)" /><span class="text-xs text-slate-600 dark:text-slate-300">'+escapeHtml(c.headerName||c.field)+'</span>';
     colPanel.appendChild(div);
   });
 
   const gridOptions={
     columnDefs:colDefs,rowData:tradeData,rowHeight:30,headerHeight:32,
+    getRowId:params=>String(params.data.id),
     defaultColDef:{sortable:true,filter:true,resizable:true,cellClass:'text-xs'},
     rowSelection:'single',animateRows:true,suppressCellFocus:true,
     isExternalFilterPresent:()=>activeStatusFilter!=='all',
@@ -281,7 +300,9 @@ document.addEventListener('DOMContentLoaded',()=>{
       menu.style.top=e.event.clientY+'px';
       menu.classList.remove('hidden');
     },
-    onFirstDataRendered:()=>{document.getElementById('row-count').textContent=gridApi.getDisplayedRowCount()+' trades'}
+    onFirstDataRendered:()=>{document.getElementById('row-count').textContent=gridApi.getDisplayedRowCount()+' trades';updateTotalPnl()},
+    onFilterChanged:()=>{document.getElementById('row-count').textContent=gridApi.getDisplayedRowCount()+' trades';updateTotalPnl()},
+    onSortChanged:()=>{updateTotalPnl()}
   };
   gridApi=agGrid.createGrid(document.getElementById('blotter-grid'),gridOptions);
 });
