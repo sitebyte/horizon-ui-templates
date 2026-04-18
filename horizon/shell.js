@@ -78,16 +78,16 @@ const MENU = [
       { label: 'Positions', icon: 'bar-chart-2', href: 'positions.html', key: 'positions' },
       {
         label: 'Curves', icon: 'trending-up', key: 'curves', children: [
-          { label: 'Forward Curves', href: '#forward-curves' },
-          { label: 'Spread Monitor', href: '#spread-monitor' },
+          { label: 'Forward Curves', href: 'curves.html' },
+          { label: 'Spread Monitor', href: 'curves.html' },
         ]
       },
-      { label: 'Hedge Book', icon: 'shield', href: '#hedges', key: 'hedges' },
+      { label: 'Hedge Book', icon: 'shield', href: 'hedges.html', key: 'hedges' },
     ]
   },
   {
     group: 'PHYSICAL', defaultOpen: true, items: [
-      { label: 'Cargo Board', icon: 'truck', href: '#cargo-board', key: 'cargo-board' },
+      { label: 'Cargo Board', icon: 'truck', href: 'cargo-board.html', key: 'cargo-board' },
       {
         label: 'Nominations', icon: 'file-text', key: 'nominations', href: 'nominations.html', badge: { count: 2, color: 'amber' }, children: [
           { label: 'ADP Schedule', href: 'nominations.html' },
@@ -287,6 +287,9 @@ var CMD_ACTIONS = [
   { label: 'Go to Reconciliation', keys: 'G R', group: 'Navigate', action: function() { location.href = 'reconciliation.html'; } },
   { label: 'Go to Contracts', keys: 'G C', group: 'Navigate', action: function() { location.href = 'contracts.html'; } },
   { label: 'Go to Audit Log', keys: 'G A', group: 'Navigate', action: function() { location.href = 'audit-log.html'; } },
+  { label: 'Go to Forward Curves', keys: 'G F', group: 'Navigate', action: function() { location.href = 'curves.html'; } },
+  { label: 'Go to Hedge Book', keys: 'G H', group: 'Navigate', action: function() { location.href = 'hedges.html'; } },
+  { label: 'Go to Cargo Board', keys: 'G G', group: 'Navigate', action: function() { location.href = 'cargo-board.html'; } },
   { label: 'Go to Settings', keys: 'G S', group: 'Navigate', action: function() { location.href = 'settings.html'; } },
   { label: 'Toggle Theme', keys: 'T', group: 'Actions', action: function() { toggleTheme(); } },
   { label: 'Toggle Sidebar', keys: '&#8984;B', group: 'Actions', action: function() { toggleSidebar(); } },

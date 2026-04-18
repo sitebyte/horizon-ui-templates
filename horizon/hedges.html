@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hedge Book — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Skeleton */
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    /* KPI cards */
+    .hedge-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-6); }
+
+    /* Hedge ratio bars */
+    .ratio-section { margin-bottom: var(--sp-6); }
+    .ratio-row { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .ratio-label { width: 5rem; font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); flex-shrink: 0; }
+    .ratio-track { flex: 1; height: 1.5rem; background: var(--surface-elevated); border-radius: var(--radius-sm); overflow: hidden; position: relative; }
+    .ratio-fill { height: 100%; border-radius: var(--radius-sm); transition: width 0.8s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: var(--sp-2); }
+    .ratio-fill.green { background: linear-gradient(90deg, rgba(34,197,94,0.3), rgba(34,197,94,0.6)); }
+    .ratio-fill.amber { background: linear-gradient(90deg, rgba(245,158,11,0.3), rgba(245,158,11,0.6)); }
+    .ratio-fill.red { background: linear-gradient(90deg, rgba(239,68,68,0.3), rgba(239,68,68,0.6)); }
+    .ratio-pct { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; color: var(--text-primary); width: 3.5rem; text-align: right; flex-shrink: 0; }
+
+    /* Paper trades table */
+    .paper-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .paper-table th { text-align: left; padding: var(--sp-2) var(--sp-3); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.625rem; letter-spacing: 0.05em; border-bottom: 0.0625rem solid var(--border); background: var(--card-bg); position: sticky; top: 0; z-index: 1; font-family: var(--font-ui); }
+    .paper-table td { padding: var(--sp-2) var(--sp-3); border-bottom: 0.0625rem solid var(--border-subtle); color: var(--text-secondary); }
+    .paper-table tr:hover td { background: var(--hover); }
+    .paper-table .mono { font-family: var(--font-mono); }
+
+    /* Direction badge */
+    .dir-badge { display: inline-flex; align-items: center; justify-content: center; padding: 0.125rem var(--sp-2); border-radius: var(--radius-full); font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+    .dir-badge.buy { background: var(--green-dim); color: var(--green); }
+    .dir-badge.sell { background: var(--red-dim); color: var(--red); }
+
+    /* Status badge */
+    .status-badge { display: inline-flex; align-items: center; padding: 0.125rem var(--sp-2); border-radius: var(--radius-full); font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .status-badge.active { background: var(--green-dim); color: var(--green); }
+    .status-badge.pending { background: var(--amber-dim); color: var(--amber); }
+    .status-badge.expired { background: var(--surface-elevated); color: var(--text-muted); }
+    .status-badge.exercised { background: var(--blue-dim); color: var(--blue); }
+
+    /* Physical vs Paper comparison */
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); margin-top: var(--sp-6); }
+    @media (max-width: 48rem) { .comparison-grid { grid-template-columns: 1fr; } }
+    .comp-side { background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-4); }
+    .comp-side-title { font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-3); display: flex; align-items: center; gap: var(--sp-2); }
+    .comp-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-2) 0; border-bottom: 0.0625rem solid var(--border-subtle); }
+    .comp-row:last-child { border-bottom: none; }
+    .comp-row-label { font-size: var(--text-xs); color: var(--text-muted); }
+    .comp-row-val { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 600; }
+    .comp-row-val.long { color: var(--green); }
+    .comp-row-val.short { color: var(--red); }
+    .comp-row-val.neutral { color: var(--text-primary); }
+
+    /* Summary row */
+    .summary-row { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3) 0; border-top: 0.125rem solid var(--border); margin-top: var(--sp-2); }
+    .summary-row-label { font-size: var(--text-sm); font-weight: 700; color: var(--text-primary); }
+    .summary-row-val { font-family: var(--font-mono); font-size: var(--text-base); font-weight: 700; }
+
+    .section-title { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-1); }
+    .section-sub { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--sp-4); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem;">
+        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
+      </div>
+      <div class="hz-skeleton" style="height:8rem; border-radius:0.5rem;"></div>
+      <div class="hz-skeleton" style="height:16rem; border-radius:0.5rem;"></div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="hedges-content" style="display:none;">
+
+    <!-- KPI Summary -->
+    <div class="hedge-kpis" id="hedge-kpis"></div>
+
+    <!-- Hedge Ratio by Quarter -->
+    <div class="hz-card fade-in-d2 ratio-section">
+      <div style="font-weight:600; color:var(--text-primary); font-size:var(--text-sm); margin-bottom:var(--sp-3);">Hedge Ratio by Quarter</div>
+      <div id="ratio-bars"></div>
+    </div>
+
+    <!-- Paper Trades Table -->
+    <div class="hz-card fade-in-d3" style="overflow-x:auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp-3);">
+        <span style="font-weight:600; color:var(--text-primary); font-size:var(--text-sm);">Paper Trades</span>
+        <span style="font-size:var(--text-xs); color:var(--text-muted);">8 trades</span>
+      </div>
+      <table class="paper-table">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Instrument</th>
+            <th>Benchmark</th>
+            <th>Direction</th>
+            <th style="text-align:right;">Lots</th>
+            <th style="text-align:right;">Price</th>
+            <th>Status</th>
+            <th>Expiry</th>
+          </tr>
+        </thead>
+        <tbody id="paper-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Physical vs Paper Comparison -->
+    <div class="comparison-grid" id="comparison-grid"></div>
+
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('hedges', 'Hedge Book');
+
+var kpis = [
+  { label: 'Physical Exposure', value: '2.4M', unit: 'MMBtu', delta: '+180k vs last week', deltaClass: 'positive' },
+  { label: 'Paper Exposure', value: '-1.8M', unit: 'MMBtu', delta: '-220k vs last week', deltaClass: 'negative' },
+  { label: 'Net Exposure', value: '+620k', unit: 'MMBtu', delta: 'Long bias', deltaClass: 'positive' },
+  { label: 'Overall Hedge Ratio', value: '74%', unit: '', delta: 'Target: 85%', deltaClass: 'negative' }
+];
+
+var ratios = [
+  { quarter: 'Q2 2026', pct: 92, color: 'green' },
+  { quarter: 'Q3 2026', pct: 68, color: 'amber' },
+  { quarter: 'Q4 2026', pct: 31, color: 'red' },
+  { quarter: 'Q1 2027', pct: 8, color: 'red' }
+];
+
+var paperTrades = [
+  { ref: 'H-2041', instrument: 'Futures', benchmark: 'JKM', direction: 'Buy', lots: 120, price: 14.15, status: 'Active', expiry: '2026-06-28' },
+  { ref: 'H-2039', instrument: 'Swap', benchmark: 'TTF', direction: 'Sell', lots: 85, price: 12.72, status: 'Active', expiry: '2026-07-31' },
+  { ref: 'H-2037', instrument: 'Futures', benchmark: 'JKM', direction: 'Buy', lots: 200, price: 14.08, status: 'Active', expiry: '2026-08-28' },
+  { ref: 'H-2035', instrument: 'Option', benchmark: 'JKM', direction: 'Buy', lots: 50, price: 0.45, status: 'Active', expiry: '2026-09-30' },
+  { ref: 'H-2033', instrument: 'Swap', benchmark: 'HH', direction: 'Sell', lots: 150, price: 3.38, status: 'Pending', expiry: '2026-07-15' },
+  { ref: 'H-2031', instrument: 'Futures', benchmark: 'TTF', direction: 'Buy', lots: 90, price: 12.65, status: 'Active', expiry: '2026-10-31' },
+  { ref: 'H-2028', instrument: 'Option', benchmark: 'TTF', direction: 'Sell', lots: 60, price: 0.38, status: 'Exercised', expiry: '2026-05-31' },
+  { ref: 'H-2025', instrument: 'Futures', benchmark: 'HH', direction: 'Buy', lots: 110, price: 3.35, status: 'Expired', expiry: '2026-04-30' }
+];
+
+var comparisonData = {
+  physical: {
+    JKM: { long: 840000, short: -230000 },
+    TTF: { long: 430000, short: -390000 },
+    HH: { long: 670000, short: -135000 }
+  },
+  paper: {
+    JKM: { long: 134000, short: -23000 },
+    TTF: { long: 131000, short: -143000 },
+    HH: { long: 48000, short: -19000 }
+  }
+};
+
+function renderKPIs() {
+  var container = document.getElementById('hedge-kpis');
+  var html = '';
+  kpis.forEach(function(k, i) {
+    html += '<div class="hz-kpi fade-in-d' + (i + 1) + '">';
+    html += '  <div class="hz-kpi-label">' + k.label + '</div>';
+    html += '  <div class="hz-kpi-value">' + k.value + '<span style="font-size:var(--text-sm); color:var(--text-muted); margin-left:var(--sp-1); font-weight:400;">' + k.unit + '</span></div>';
+    html += '  <div class="hz-kpi-delta ' + k.deltaClass + '">' + k.delta + '</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderRatios() {
+  var container = document.getElementById('ratio-bars');
+  var html = '';
+  ratios.forEach(function(r) {
+    html += '<div class="ratio-row">';
+    html += '  <div class="ratio-label">' + r.quarter + '</div>';
+    html += '  <div class="ratio-track">';
+    html += '    <div class="ratio-fill ' + r.color + '" style="width:' + r.pct + '%;">';
+    html += '    </div>';
+    html += '  </div>';
+    html += '  <div class="ratio-pct">' + r.pct + '%</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderPaperTrades() {
+  var tbody = document.getElementById('paper-tbody');
+  var html = '';
+  paperTrades.forEach(function(t) {
+    var dirClass = t.direction === 'Buy' ? 'buy' : 'sell';
+    var stClass = t.status.toLowerCase();
+    html += '<tr>';
+    html += '<td style="color:var(--accent); font-weight:600;">' + t.ref + '</td>';
+    html += '<td>' + t.instrument + '</td>';
+    html += '<td class="mono" style="font-weight:600;">' + t.benchmark + '</td>';
+    html += '<td><span class="dir-badge ' + dirClass + '">' + t.direction + '</span></td>';
+    html += '<td style="text-align:right;" class="mono">' + t.lots + '</td>';
+    html += '<td style="text-align:right;" class="mono">$' + t.price.toFixed(2) + '</td>';
+    html += '<td><span class="status-badge ' + stClass + '">' + t.status + '</span></td>';
+    html += '<td class="mono" style="color:var(--text-tertiary);">' + t.expiry + '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function renderComparison() {
+  var container = document.getElementById('comparison-grid');
+  var benchmarks = ['JKM', 'TTF', 'HH'];
+
+  // Physical side
+  var html = '<div class="comp-side fade-in-d4">';
+  html += '<div class="comp-side-title"><span style="display:inline-block; width:0.5rem; height:0.5rem; border-radius:50%; background:var(--accent);"></span> Physical Positions</div>';
+  var physNetTotal = 0;
+  benchmarks.forEach(function(b) {
+    var d = comparisonData.physical[b];
+    var net = d.long + d.short;
+    physNetTotal += net;
+    html += '<div class="comp-row">';
+    html += '  <div class="comp-row-label">' + b + '</div>';
+    html += '  <div style="display:flex; gap:var(--sp-4); align-items:center;">';
+    html += '    <span class="comp-row-val long">+' + (d.long / 1000).toFixed(0) + 'k</span>';
+    html += '    <span class="comp-row-val short">' + (d.short / 1000).toFixed(0) + 'k</span>';
+    html += '    <span class="comp-row-val ' + (net >= 0 ? 'long' : 'short') + '">' + (net >= 0 ? '+' : '') + (net / 1000).toFixed(0) + 'k</span>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  html += '<div class="summary-row">';
+  html += '  <div class="summary-row-label">Total Physical</div>';
+  html += '  <div class="summary-row-val ' + (physNetTotal >= 0 ? 'long' : 'short') + '">' + (physNetTotal >= 0 ? '+' : '') + (physNetTotal / 1000).toFixed(0) + 'k MMBtu</div>';
+  html += '</div>';
+  html += '</div>';
+
+  // Paper side
+  html += '<div class="comp-side fade-in-d5">';
+  html += '<div class="comp-side-title"><span style="display:inline-block; width:0.5rem; height:0.5rem; border-radius:50%; background:var(--amber);"></span> Paper Positions</div>';
+  var paperNetTotal = 0;
+  benchmarks.forEach(function(b) {
+    var d = comparisonData.paper[b];
+    var net = d.long + d.short;
+    paperNetTotal += net;
+    html += '<div class="comp-row">';
+    html += '  <div class="comp-row-label">' + b + '</div>';
+    html += '  <div style="display:flex; gap:var(--sp-4); align-items:center;">';
+    html += '    <span class="comp-row-val long">+' + (d.long / 1000).toFixed(0) + 'k</span>';
+    html += '    <span class="comp-row-val short">' + (d.short / 1000).toFixed(0) + 'k</span>';
+    html += '    <span class="comp-row-val ' + (net >= 0 ? 'long' : 'short') + '">' + (net >= 0 ? '+' : '') + (net / 1000).toFixed(0) + 'k</span>';
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  // Per-benchmark hedge ratios
+  html += '<div style="margin-top:var(--sp-3); padding-top:var(--sp-3); border-top:0.0625rem solid var(--border);">';
+  html += '<div style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--sp-2); font-weight:600;">HEDGE RATIOS</div>';
+  benchmarks.forEach(function(b) {
+    var phys = comparisonData.physical[b].long + comparisonData.physical[b].short;
+    var pap = comparisonData.paper[b].long + comparisonData.paper[b].short;
+    var ratio = phys !== 0 ? Math.round(Math.abs(pap / phys) * 100) : 0;
+    var rColor = ratio >= 80 ? 'green' : ratio >= 50 ? 'amber' : 'red';
+    html += '<div class="comp-row">';
+    html += '  <div class="comp-row-label">' + b + ' Hedge Ratio</div>';
+    html += '  <div class="comp-row-val" style="color:var(--' + rColor + ');">' + ratio + '%</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="summary-row">';
+  html += '  <div class="summary-row-label">Total Paper</div>';
+  html += '  <div class="summary-row-val ' + (paperNetTotal >= 0 ? 'long' : 'short') + '">' + (paperNetTotal >= 0 ? '+' : '') + (paperNetTotal / 1000).toFixed(0) + 'k MMBtu</div>';
+  html += '</div>';
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderKPIs();
+  renderRatios();
+  renderPaperTrades();
+  renderComparison();
+  setTimeout(function() {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(function() {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('hedges-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+
+<!-- Back to Index -->
+<a href="../index.html"
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
+</body>
+</html>

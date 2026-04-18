@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cargo Board — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Skeleton */
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    /* Phase strip */
+    .phase-strip { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-bottom: var(--sp-6); }
+    .phase-pill { display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-full); font-size: var(--text-xs); color: var(--text-secondary); font-weight: 500; }
+    .phase-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; flex-shrink: 0; }
+    .phase-dot.planning { background: #64748b; }
+    .phase-dot.nomination { background: #3b82f6; }
+    .phase-dot.loading { background: #f59e0b; }
+    .phase-dot.transit { background: #6366f1; }
+    .phase-dot.discharge { background: #10b981; }
+    .phase-dot.settlement { background: #22c55e; }
+    .phase-count { font-family: var(--font-mono); font-weight: 700; color: var(--text-primary); }
+
+    /* Gantt container */
+    .gantt-wrap { background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; }
+
+    /* Gantt header */
+    .gantt-header { display: flex; border-bottom: 0.0625rem solid var(--border); position: sticky; top: 0; z-index: 2; background: var(--card-bg); }
+    .gantt-label-header { width: 16rem; min-width: 16rem; padding: var(--sp-2) var(--sp-3); font-size: 0.625rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-right: 0.0625rem solid var(--border); display: flex; align-items: center; }
+    .gantt-timeline-header { flex: 1; display: flex; min-width: 36rem; }
+    .gantt-month-col { flex: 1; text-align: center; padding: var(--sp-2) 0; font-size: 0.625rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-right: 0.0625rem solid var(--border-subtle); }
+    .gantt-month-col:last-child { border-right: none; }
+
+    /* Gantt rows */
+    .gantt-row { display: flex; border-bottom: 0.0625rem solid var(--border-subtle); cursor: pointer; transition: background var(--transition-fast); }
+    .gantt-row:hover { background: var(--hover); }
+    .gantt-row:last-child { border-bottom: none; }
+    .gantt-row.expanded { background: var(--accent-bg2); }
+    .gantt-label { width: 16rem; min-width: 16rem; padding: var(--sp-3); border-right: 0.0625rem solid var(--border); display: flex; flex-direction: column; gap: 0.125rem; }
+    .gantt-label-ref { font-size: var(--text-xs); font-weight: 700; color: var(--accent-light); font-family: var(--font-mono); }
+    .gantt-label-vessel { font-size: var(--text-xs); color: var(--text-primary); font-weight: 500; }
+    .gantt-label-route { font-size: 0.5625rem; color: var(--text-muted); }
+
+    /* Gantt timeline area */
+    .gantt-timeline { flex: 1; position: relative; min-width: 36rem; min-height: 3.5rem; }
+
+    /* Gantt bar */
+    .gantt-bar { position: absolute; top: 50%; transform: translateY(-50%); height: 1.5rem; border-radius: var(--radius-sm); display: flex; align-items: center; padding: 0 var(--sp-2); font-size: 0.5rem; font-weight: 600; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 2rem; z-index: 1; }
+    .gantt-bar.planning { background: #64748b; }
+    .gantt-bar.nomination { background: #3b82f6; }
+    .gantt-bar.loading { background: #f59e0b; color: #1a1a1e; }
+    .gantt-bar.transit { background: #6366f1; }
+    .gantt-bar.discharge { background: #10b981; }
+    .gantt-bar.settlement { background: #22c55e; }
+
+    /* Detail panel */
+    .gantt-detail { display: none; border-bottom: 0.0625rem solid var(--border); background: var(--surface-base); }
+    .gantt-detail.open { display: block; animation: fadeIn 0.2s ease; }
+    .gantt-detail-inner { padding: var(--sp-4); display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--sp-4); }
+    .detail-field { display: flex; flex-direction: column; gap: 0.125rem; }
+    .detail-label { font-size: 0.5625rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .detail-value { font-size: var(--text-sm); color: var(--text-primary); font-weight: 500; }
+    .detail-value.mono { font-family: var(--font-mono); }
+    .detail-transitions { margin-top: var(--sp-2); padding-top: var(--sp-3); border-top: 0.0625rem solid var(--border-subtle); grid-column: 1 / -1; }
+    .transition-row { display: inline-flex; align-items: center; gap: var(--sp-2); margin-right: var(--sp-4); margin-bottom: var(--sp-1); font-size: var(--text-xs); color: var(--text-tertiary); }
+    .transition-dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; flex-shrink: 0; }
+
+    /* Legend */
+    .legend { display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-4); padding: var(--sp-3); }
+    .legend-item { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--text-xs); color: var(--text-muted); }
+    .legend-swatch { width: 0.75rem; height: 0.75rem; border-radius: var(--radius-sm); }
+    .legend-swatch.planning { background: #64748b; }
+    .legend-swatch.nomination { background: #3b82f6; }
+    .legend-swatch.loading { background: #f59e0b; }
+    .legend-swatch.transit { background: #6366f1; }
+    .legend-swatch.discharge { background: #10b981; }
+    .legend-swatch.settlement { background: #22c55e; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:flex; gap:0.5rem;">
+        <div class="hz-skeleton" style="height:2rem; width:6rem; border-radius:624.9375rem;"></div>
+        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
+        <div class="hz-skeleton" style="height:2rem; width:5rem; border-radius:624.9375rem;"></div>
+        <div class="hz-skeleton" style="height:2rem; width:6rem; border-radius:624.9375rem;"></div>
+        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
+        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
+      </div>
+      <div class="hz-skeleton" style="height:2.5rem; border-radius:0.5rem;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="cargo-content" style="display:none;">
+
+    <!-- Phase summary strip -->
+    <div class="phase-strip fade-in" id="phase-strip"></div>
+
+    <!-- Gantt chart -->
+    <div class="gantt-wrap fade-in-d1" id="gantt-chart"></div>
+
+    <!-- Legend -->
+    <div class="legend fade-in-d2">
+      <div class="legend-item"><div class="legend-swatch planning"></div> Planning</div>
+      <div class="legend-item"><div class="legend-swatch nomination"></div> Nomination</div>
+      <div class="legend-item"><div class="legend-swatch loading"></div> Loading</div>
+      <div class="legend-item"><div class="legend-swatch transit"></div> In Transit</div>
+      <div class="legend-item"><div class="legend-swatch discharge"></div> Discharge</div>
+      <div class="legend-item"><div class="legend-swatch settlement"></div> Settlement</div>
+    </div>
+
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('cargo-board', 'Cargo Board');
+
+// Timeline range: Jun 1 - Nov 30 2026
+var timeStart = new Date(2026, 5, 1);  // Jun 1
+var timeEnd = new Date(2026, 11, 1);   // Dec 1
+var totalDays = (timeEnd - timeStart) / (1000 * 60 * 60 * 24);
+var ganttMonths = ['Jun','Jul','Aug','Sep','Oct','Nov'];
+
+var cargos = [
+  {
+    ref: 'CRG-2041', vessel: 'LNG Sokoto', route: 'Bonny Island \u2192 Montoir',
+    phase: 'planning', start: '2026-06-05', end: '2026-07-12', barLabel: 'Planning',
+    laycan: '2026-06-10 / 2026-06-15', eta: '2026-07-08', volume: '65,000 MT',
+    quality: 'Bonny Light LNG, CV 1,075 BTU/scf', vesselIMO: '9784321',
+    transitions: [
+      { phase: 'planning', date: '2026-05-28', color: '#64748b' }
+    ]
+  },
+  {
+    ref: 'CRG-2039', vessel: 'Al Hamra', route: 'Ras Laffan \u2192 Sodegaura',
+    phase: 'nomination', start: '2026-06-15', end: '2026-08-10', barLabel: 'Nomination',
+    laycan: '2026-06-20 / 2026-06-25', eta: '2026-08-02', volume: '72,000 MT',
+    quality: 'Qatargas LNG, CV 1,090 BTU/scf', vesselIMO: '9812456',
+    transitions: [
+      { phase: 'planning', date: '2026-05-15', color: '#64748b' },
+      { phase: 'nomination', date: '2026-06-10', color: '#3b82f6' }
+    ]
+  },
+  {
+    ref: 'CRG-2037', vessel: 'Pacific Breeze', route: 'Sabine Pass \u2192 Dahej',
+    phase: 'loading', start: '2026-06-20', end: '2026-08-25', barLabel: 'Loading',
+    laycan: '2026-06-18 / 2026-06-22', eta: '2026-08-18', volume: '68,500 MT',
+    quality: 'Sabine Pass LNG, CV 1,065 BTU/scf', vesselIMO: '9756789',
+    transitions: [
+      { phase: 'planning', date: '2026-05-01', color: '#64748b' },
+      { phase: 'nomination', date: '2026-05-20', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-06-20', color: '#f59e0b' }
+    ]
+  },
+  {
+    ref: 'CRG-2035', vessel: 'LNG Benue', route: 'Bintulu \u2192 Incheon',
+    phase: 'transit', start: '2026-06-08', end: '2026-07-15', barLabel: 'In Transit',
+    laycan: '2026-06-05 / 2026-06-10', eta: '2026-07-12', volume: '66,200 MT',
+    quality: 'MLNG Tiga, CV 1,080 BTU/scf', vesselIMO: '9823456',
+    transitions: [
+      { phase: 'planning', date: '2026-04-15', color: '#64748b' },
+      { phase: 'nomination', date: '2026-05-01', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-06-05', color: '#f59e0b' },
+      { phase: 'transit', date: '2026-06-08', color: '#6366f1' }
+    ]
+  },
+  {
+    ref: 'CRG-2033', vessel: 'Gaslog Salem', route: 'Tangguh \u2192 Futtsu',
+    phase: 'transit', start: '2026-07-01', end: '2026-08-18', barLabel: 'In Transit',
+    laycan: '2026-06-28 / 2026-07-02', eta: '2026-08-14', volume: '70,100 MT',
+    quality: 'Tangguh LNG, CV 1,072 BTU/scf', vesselIMO: '9867890',
+    transitions: [
+      { phase: 'planning', date: '2026-05-10', color: '#64748b' },
+      { phase: 'nomination', date: '2026-05-28', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-06-28', color: '#f59e0b' },
+      { phase: 'transit', date: '2026-07-01', color: '#6366f1' }
+    ]
+  },
+  {
+    ref: 'CRG-2031', vessel: 'Dapeng Star', route: 'Ras Laffan \u2192 Rudong',
+    phase: 'transit', start: '2026-07-10', end: '2026-09-05', barLabel: 'In Transit',
+    laycan: '2026-07-08 / 2026-07-12', eta: '2026-08-30', volume: '74,500 MT',
+    quality: 'Qatargas LNG, CV 1,090 BTU/scf', vesselIMO: '9745678',
+    transitions: [
+      { phase: 'planning', date: '2026-05-20', color: '#64748b' },
+      { phase: 'nomination', date: '2026-06-08', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-07-08', color: '#f59e0b' },
+      { phase: 'transit', date: '2026-07-10', color: '#6366f1' }
+    ]
+  },
+  {
+    ref: 'CRG-2028', vessel: 'Maran Gas Coronis', route: 'Cameron \u2192 Huelva',
+    phase: 'discharge', start: '2026-06-01', end: '2026-07-05', barLabel: 'Discharge',
+    laycan: '2026-05-28 / 2026-06-02', eta: '2026-07-01', volume: '67,800 MT',
+    quality: 'Cameron LNG, CV 1,068 BTU/scf', vesselIMO: '9834567',
+    transitions: [
+      { phase: 'planning', date: '2026-04-01', color: '#64748b' },
+      { phase: 'nomination', date: '2026-04-20', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-05-28', color: '#f59e0b' },
+      { phase: 'transit', date: '2026-06-01', color: '#6366f1' },
+      { phase: 'discharge', date: '2026-07-01', color: '#10b981' }
+    ]
+  },
+  {
+    ref: 'CRG-2025', vessel: 'Flex Endeavour', route: 'Hammerfest \u2192 Zeebrugge',
+    phase: 'settlement', start: '2026-06-01', end: '2026-06-25', barLabel: 'Settlement',
+    laycan: '2026-05-15 / 2026-05-20', eta: '2026-06-10', volume: '71,300 MT',
+    quality: 'Sn\u00f8hvit LNG, CV 1,058 BTU/scf', vesselIMO: '9878901',
+    transitions: [
+      { phase: 'planning', date: '2026-03-15', color: '#64748b' },
+      { phase: 'nomination', date: '2026-04-05', color: '#3b82f6' },
+      { phase: 'loading', date: '2026-05-15', color: '#f59e0b' },
+      { phase: 'transit', date: '2026-05-18', color: '#6366f1' },
+      { phase: 'discharge', date: '2026-06-10', color: '#10b981' },
+      { phase: 'settlement', date: '2026-06-18', color: '#22c55e' }
+    ]
+  }
+];
+
+// Add extra cargos for nomination/planning/settlement/transit counts
+var phaseCounts = { planning: 0, nomination: 0, loading: 0, transit: 0, discharge: 0, settlement: 0 };
+cargos.forEach(function(c) { phaseCounts[c.phase]++; });
+
+function dateToPct(dateStr) {
+  var d = new Date(dateStr);
+  var diff = (d - timeStart) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.min(100, (diff / totalDays) * 100));
+}
+
+function renderPhaseStrip() {
+  var container = document.getElementById('phase-strip');
+  var phases = [
+    { name: 'Planning', key: 'planning' },
+    { name: 'Nomination', key: 'nomination' },
+    { name: 'Loading', key: 'loading' },
+    { name: 'In Transit', key: 'transit' },
+    { name: 'Discharge', key: 'discharge' },
+    { name: 'Settlement', key: 'settlement' }
+  ];
+  var html = '';
+  phases.forEach(function(p) {
+    html += '<div class="phase-pill">';
+    html += '  <div class="phase-dot ' + p.key + '"></div>';
+    html += '  <span>' + p.name + '</span>';
+    html += '  <span class="phase-count">' + phaseCounts[p.key] + '</span>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderGantt() {
+  var container = document.getElementById('gantt-chart');
+  var html = '';
+
+  // Header
+  html += '<div class="gantt-header">';
+  html += '  <div class="gantt-label-header">Cargo</div>';
+  html += '  <div class="gantt-timeline-header">';
+  ganttMonths.forEach(function(m) {
+    html += '<div class="gantt-month-col">' + m + ' 26</div>';
+  });
+  html += '  </div>';
+  html += '</div>';
+
+  // Rows
+  cargos.forEach(function(cargo, idx) {
+    var leftPct = dateToPct(cargo.start);
+    var rightPct = dateToPct(cargo.end);
+    var widthPct = rightPct - leftPct;
+    if (widthPct < 3) widthPct = 3;
+
+    html += '<div class="gantt-row" data-idx="' + idx + '" onclick="toggleDetail(' + idx + ')">';
+
+    // Label
+    html += '  <div class="gantt-label">';
+    html += '    <div class="gantt-label-ref">' + cargo.ref + '</div>';
+    html += '    <div class="gantt-label-vessel">' + cargo.vessel + '</div>';
+    html += '    <div class="gantt-label-route">' + cargo.route + '</div>';
+    html += '  </div>';
+
+    // Timeline area
+    html += '  <div class="gantt-timeline">';
+    // Month grid lines
+    for (var i = 1; i < ganttMonths.length; i++) {
+      var linePct = (i / ganttMonths.length) * 100;
+      html += '<div style="position:absolute; left:' + linePct + '%; top:0; bottom:0; width:0.0625rem; background:var(--border-subtle);"></div>';
+    }
+    // Bar
+    html += '    <div class="gantt-bar ' + cargo.phase + '" style="left:' + leftPct + '%; width:' + widthPct + '%;">' + cargo.barLabel + '</div>';
+    html += '  </div>';
+
+    html += '</div>';
+
+    // Detail panel
+    html += '<div class="gantt-detail" id="detail-' + idx + '">';
+    html += '  <div class="gantt-detail-inner">';
+    html += '    <div class="detail-field"><div class="detail-label">Laycan</div><div class="detail-value mono">' + cargo.laycan + '</div></div>';
+    html += '    <div class="detail-field"><div class="detail-label">ETA</div><div class="detail-value mono">' + cargo.eta + '</div></div>';
+    html += '    <div class="detail-field"><div class="detail-label">Volume</div><div class="detail-value mono">' + cargo.volume + '</div></div>';
+    html += '    <div class="detail-field"><div class="detail-label">Vessel</div><div class="detail-value">' + cargo.vessel + ' (IMO ' + cargo.vesselIMO + ')</div></div>';
+    html += '    <div class="detail-field"><div class="detail-label">Quality</div><div class="detail-value">' + cargo.quality + '</div></div>';
+    html += '    <div class="detail-field"><div class="detail-label">Current Phase</div><div class="detail-value"><span class="hz-badge ' + (cargo.phase === 'transit' || cargo.phase === 'loading' ? 'amber' : cargo.phase === 'settlement' || cargo.phase === 'discharge' ? 'green' : cargo.phase === 'nomination' ? 'blue' : 'neutral') + '">' + cargo.barLabel + '</span></div></div>';
+
+    // Status transitions
+    html += '    <div class="detail-transitions">';
+    html += '      <div class="detail-label" style="margin-bottom:var(--sp-2);">Status Transitions</div>';
+    cargo.transitions.forEach(function(t) {
+      html += '<div class="transition-row"><div class="transition-dot" style="background:' + t.color + ';"></div>' + t.phase.charAt(0).toUpperCase() + t.phase.slice(1) + ' <span class="mono" style="color:var(--text-muted);">' + t.date + '</span></div>';
+    });
+    html += '    </div>';
+
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+var openDetail = null;
+function toggleDetail(idx) {
+  var panel = document.getElementById('detail-' + idx);
+  var row = document.querySelector('.gantt-row[data-idx="' + idx + '"]');
+  if (openDetail !== null && openDetail !== idx) {
+    document.getElementById('detail-' + openDetail).classList.remove('open');
+    var prevRow = document.querySelector('.gantt-row[data-idx="' + openDetail + '"]');
+    if (prevRow) prevRow.classList.remove('expanded');
+  }
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  row.classList.toggle('expanded', !isOpen);
+  openDetail = isOpen ? null : idx;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderPhaseStrip();
+  renderGantt();
+  setTimeout(function() {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(function() {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('cargo-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+
+<!-- Back to Index -->
+<a href="../index.html"
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
+</body>
+</html>

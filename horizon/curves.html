@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forward Curves — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Skeleton */
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    /* Benchmark cards */
+    .curve-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-6); }
+    .curve-card { background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-4); }
+    .curve-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+    .curve-card-bench { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); }
+    .curve-card-price { font-family: var(--font-mono); font-size: var(--text-hero); font-weight: 600; color: var(--text-primary); line-height: 1.1; }
+    .curve-card-delta { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 500; margin-top: var(--sp-1); }
+    .curve-card-delta.up { color: var(--green); }
+    .curve-card-delta.down { color: var(--red); }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: var(--sp-2); height: 8rem; margin-top: var(--sp-3); padding-top: var(--sp-2); }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+    .bar-price { font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-tertiary); white-space: nowrap; }
+    .bar-fill { width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0; min-height: 0.25rem; transition: height 0.5s ease; }
+    .bar-fill.jkm { background: var(--gradient); }
+    .bar-fill.ttf { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .bar-fill.hh { background: linear-gradient(135deg, #22c55e, #10b981); }
+    .bar-label { font-size: 0.5625rem; color: var(--text-muted); font-family: var(--font-ui); white-space: nowrap; }
+
+    /* Comparison table */
+    .comp-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: var(--text-xs); }
+    .comp-table th { text-align: center; padding: var(--sp-2) var(--sp-3); font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.5625rem; letter-spacing: 0.05em; border-bottom: 0.0625rem solid var(--border); background: var(--card-bg); font-family: var(--font-ui); }
+    .comp-table th:first-child { text-align: left; }
+    .comp-table td { padding: var(--sp-2) var(--sp-3); text-align: center; border-bottom: 0.0625rem solid var(--border-subtle); color: var(--text-secondary); }
+    .comp-table td:first-child { text-align: left; font-weight: 600; color: var(--text-primary); font-family: var(--font-ui); }
+    .comp-table tr:hover td { background: var(--hover); }
+    .spread-pos { color: var(--green); font-weight: 600; }
+    .spread-neg { color: var(--red); font-weight: 600; }
+
+    /* Section divider */
+    .section-divider { border: none; border-top: 0.0625rem solid var(--border); margin: var(--sp-8) 0; }
+    .section-title { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-1); }
+    .section-sub { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--sp-4); }
+
+    /* Spread monitor */
+    .spread-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); gap: var(--sp-4); }
+    .spread-card { background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-4); }
+    .spread-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
+    .spread-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+    .spread-val { font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .spread-val.positive { color: var(--green); }
+    .spread-val.negative { color: var(--red); }
+
+    /* Range bar */
+    .range-bar-wrap { position: relative; height: 1.5rem; background: var(--surface-elevated); border-radius: var(--radius-sm); margin: var(--sp-3) 0; overflow: visible; }
+    .range-bar-fill { position: absolute; top: 0; bottom: 0; border-radius: var(--radius-sm); }
+    .range-bar-fill.positive { background: var(--green-dim); }
+    .range-bar-fill.negative { background: var(--red-dim); }
+    .range-bar-marker { position: absolute; top: -0.125rem; bottom: -0.125rem; width: 0.1875rem; border-radius: var(--radius-sm); background: var(--text-primary); z-index: 2; }
+    .range-bar-labels { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.5625rem; color: var(--text-muted); margin-top: var(--sp-1); }
+    .range-bar-threshold { position: absolute; top: -0.25rem; bottom: -0.25rem; width: 0.125rem; z-index: 1; }
+    .range-bar-threshold.amber { background: var(--amber); opacity: 0.6; }
+    .range-bar-threshold.red { background: var(--red); opacity: 0.6; }
+    .range-bar-threshold-label { position: absolute; top: -1rem; font-family: var(--font-mono); font-size: 0.5rem; white-space: nowrap; }
+    .range-bar-threshold-label.amber { color: var(--amber); }
+    .range-bar-threshold-label.red { color: var(--red); }
+
+    /* Mini chart */
+    .mini-chart { display: flex; align-items: flex-end; gap: 0.125rem; height: 3rem; margin-top: var(--sp-3); }
+    .mini-bar { flex: 1; border-radius: var(--radius-sm) var(--radius-sm) 0 0; min-height: 0.125rem; transition: height 0.3s ease; }
+    .mini-bar.positive { background: var(--green); opacity: 0.7; }
+    .mini-bar.negative { background: var(--red); opacity: 0.7; }
+    .mini-chart-label { display: flex; justify-content: space-between; font-size: 0.5rem; color: var(--text-muted); margin-top: var(--sp-1); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem;">
+        <div class="hz-skeleton" style="height:14rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:14rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:14rem; border-radius:0.5rem;"></div>
+      </div>
+      <div class="hz-skeleton" style="height:12rem; border-radius:0.5rem;"></div>
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.75rem;">
+        <div class="hz-skeleton" style="height:10rem; border-radius:0.5rem;"></div>
+        <div class="hz-skeleton" style="height:10rem; border-radius:0.5rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="curves-content" style="display:none;">
+
+    <!-- Forward Curves Section -->
+    <div style="margin-bottom: var(--sp-2);">
+      <div class="section-title fade-in">Forward Curves</div>
+      <div class="section-sub fade-in">6-month forward price curves for LNG benchmarks</div>
+    </div>
+
+    <div class="curve-cards" id="curve-cards"></div>
+
+    <!-- Comparison Table -->
+    <div class="hz-card fade-in-d2" style="overflow-x:auto; margin-bottom: var(--sp-6);">
+      <div style="font-weight:600; color:var(--text-primary); font-size:var(--text-sm); margin-bottom:var(--sp-3);">Benchmark Comparison</div>
+      <table class="comp-table" id="comp-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>JKM</th>
+            <th>TTF</th>
+            <th>HH</th>
+            <th>JKM-TTF</th>
+            <th>JKM-HH</th>
+          </tr>
+        </thead>
+        <tbody id="comp-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Spread Monitor Section -->
+    <hr class="section-divider" id="spread-monitor" />
+    <div style="margin-bottom: var(--sp-2);">
+      <div class="section-title fade-in-d3">Spread Monitor</div>
+      <div class="section-sub fade-in-d3">Inter-benchmark spread tracking with alert thresholds</div>
+    </div>
+
+    <div class="spread-cards" id="spread-cards"></div>
+
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('curves', 'Forward Curves');
+
+var months = ['Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26'];
+
+var forwardData = {
+  JKM: {
+    current: 14.25, delta: +0.35, deltaPct: +2.5,
+    forwards: [14.25, 14.18, 14.42, 14.55, 14.71, 14.88]
+  },
+  TTF: {
+    current: 12.80, delta: -0.15, deltaPct: -1.2,
+    forwards: [12.80, 12.73, 12.91, 13.02, 13.18, 13.34]
+  },
+  HH: {
+    current: 3.42, delta: +0.02, deltaPct: +0.6,
+    forwards: [3.42, 3.38, 3.45, 3.51, 3.58, 3.65]
+  }
+};
+
+var spreadData = {
+  'JKM-TTF': {
+    current: 1.45, min30d: 0.92, max30d: 2.18,
+    history: [1.12, 1.28, 0.92, 1.35, 1.51, 1.68, 1.44, 1.55, 1.38, 1.45],
+    amberThreshold: 1.80, redThreshold: 2.10
+  },
+  'JKM-HH': {
+    current: 10.83, min30d: 9.45, max30d: 12.20,
+    history: [10.15, 10.42, 9.88, 10.55, 10.71, 11.05, 10.92, 10.68, 10.75, 10.83],
+    amberThreshold: 11.50, redThreshold: 12.00
+  }
+};
+
+function renderCurveCards() {
+  var container = document.getElementById('curve-cards');
+  var html = '';
+  var benchClasses = { JKM: 'jkm', TTF: 'ttf', HH: 'hh' };
+
+  Object.keys(forwardData).forEach(function(bench, idx) {
+    var d = forwardData[bench];
+    var isUp = d.delta >= 0;
+    var maxPrice = Math.max.apply(null, d.forwards);
+    var minPrice = Math.min.apply(null, d.forwards);
+    var range = maxPrice - minPrice || 1;
+
+    html += '<div class="curve-card fade-in-d' + (idx + 1) + '">';
+    html += '  <div class="curve-card-header">';
+    html += '    <span class="curve-card-bench">' + bench + '</span>';
+    html += '    <span class="hz-badge ' + (isUp ? 'green' : 'red') + '">' + (isUp ? 'BULL' : 'BEAR') + '</span>';
+    html += '  </div>';
+    html += '  <div class="curve-card-price">$' + d.current.toFixed(2) + '</div>';
+    html += '  <div class="curve-card-delta ' + (isUp ? 'up' : 'down') + '">';
+    html += (isUp ? '&#9650; ' : '&#9660; ') + '$' + Math.abs(d.delta).toFixed(2) + ' (' + (isUp ? '+' : '') + d.deltaPct.toFixed(1) + '%)';
+    html += '  </div>';
+
+    // Bar chart
+    html += '  <div class="bar-chart">';
+    d.forwards.forEach(function(price, i) {
+      var heightPct = ((price - minPrice) / range) * 70 + 30;
+      html += '<div class="bar-col">';
+      html += '  <div class="bar-price">$' + price.toFixed(2) + '</div>';
+      html += '  <div class="bar-fill ' + benchClasses[bench] + '" style="height:' + heightPct + '%;"></div>';
+      html += '  <div class="bar-label">' + months[i].replace(' 26', '') + '</div>';
+      html += '</div>';
+    });
+    html += '  </div>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function renderCompTable() {
+  var tbody = document.getElementById('comp-tbody');
+  var html = '';
+
+  months.forEach(function(m, i) {
+    var jkm = forwardData.JKM.forwards[i];
+    var ttf = forwardData.TTF.forwards[i];
+    var hh = forwardData.HH.forwards[i];
+    var jkmTtf = jkm - ttf;
+    var jkmHh = jkm - hh;
+
+    html += '<tr>';
+    html += '<td>' + m + '</td>';
+    html += '<td>$' + jkm.toFixed(2) + '</td>';
+    html += '<td>$' + ttf.toFixed(2) + '</td>';
+    html += '<td>$' + hh.toFixed(2) + '</td>';
+    html += '<td class="' + (jkmTtf >= 0 ? 'spread-pos' : 'spread-neg') + '">$' + jkmTtf.toFixed(2) + '</td>';
+    html += '<td class="' + (jkmHh >= 0 ? 'spread-pos' : 'spread-neg') + '">$' + jkmHh.toFixed(2) + '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+function renderSpreadCards() {
+  var container = document.getElementById('spread-cards');
+  var html = '';
+  var idx = 0;
+
+  Object.keys(spreadData).forEach(function(name) {
+    var d = spreadData[name];
+    var isPos = d.current >= 0;
+    var range = d.max30d - d.min30d || 1;
+    var markerPct = ((d.current - d.min30d) / range) * 100;
+    var amberPct = ((d.amberThreshold - d.min30d) / range) * 100;
+    var redPct = ((d.redThreshold - d.min30d) / range) * 100;
+
+    var histMax = Math.max.apply(null, d.history);
+    var histMin = Math.min.apply(null, d.history);
+    var histRange = histMax - histMin || 1;
+
+    html += '<div class="spread-card fade-in-d' + (idx + 3) + '">';
+    html += '  <div class="spread-header">';
+    html += '    <span class="spread-name">' + name + ' Spread</span>';
+    html += '    <span class="hz-badge ' + (d.current < d.amberThreshold ? 'green' : d.current < d.redThreshold ? 'amber' : 'red') + '">';
+    html += (d.current < d.amberThreshold ? 'NORMAL' : d.current < d.redThreshold ? 'ELEVATED' : 'ALERT');
+    html += '    </span>';
+    html += '  </div>';
+    html += '  <div class="spread-val ' + (isPos ? 'positive' : 'negative') + '">$' + d.current.toFixed(2) + '</div>';
+
+    // Range bar
+    html += '  <div class="range-bar-wrap">';
+    html += '    <div class="range-bar-fill ' + (isPos ? 'positive' : 'negative') + '" style="left:0; width:' + markerPct + '%;"></div>';
+    html += '    <div class="range-bar-marker" style="left:' + markerPct + '%;"></div>';
+    // Threshold lines
+    if (amberPct >= 0 && amberPct <= 100) {
+      html += '    <div class="range-bar-threshold amber" style="left:' + amberPct + '%;"><span class="range-bar-threshold-label amber">$' + d.amberThreshold.toFixed(2) + '</span></div>';
+    }
+    if (redPct >= 0 && redPct <= 100) {
+      html += '    <div class="range-bar-threshold red" style="left:' + redPct + '%;"><span class="range-bar-threshold-label red">$' + d.redThreshold.toFixed(2) + '</span></div>';
+    }
+    html += '  </div>';
+    html += '  <div class="range-bar-labels"><span>$' + d.min30d.toFixed(2) + '</span><span style="color:var(--text-tertiary);">30-day range</span><span>$' + d.max30d.toFixed(2) + '</span></div>';
+
+    // Mini chart
+    html += '  <div style="margin-top:var(--sp-4);">';
+    html += '    <div style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--sp-1);">10-Day History</div>';
+    html += '    <div class="mini-chart">';
+    d.history.forEach(function(val) {
+      var heightPct = ((val - histMin) / histRange) * 80 + 20;
+      var barClass = val >= d.amberThreshold ? 'negative' : 'positive';
+      html += '<div class="mini-bar ' + barClass + '" style="height:' + heightPct + '%;"></div>';
+    });
+    html += '    </div>';
+    html += '    <div class="mini-chart-label"><span>10d ago</span><span>Today</span></div>';
+    html += '  </div>';
+
+    html += '</div>';
+    idx++;
+  });
+
+  container.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderCurveCards();
+  renderCompTable();
+  renderSpreadCards();
+  setTimeout(function() {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(function() {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('curves-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+
+<!-- Back to Index -->
+<a href="../index.html"
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
+</body>
+</html>
