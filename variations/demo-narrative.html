@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon — The Most Accurate LNG Trading Platform</title>
+  <link href="../horizon/shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../horizon/shell.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+  <style>
+    /* Demo narrative - standalone page, no sidebar shell */
+    body {
+      background: var(--surface-canvas);
+    }
+
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+
+    /* Sticky nav */
+    .demo-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(1rem);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      padding: 0 var(--sp-6);
+      height: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease;
+    }
+    [data-theme="light"] .demo-nav {
+      background: rgba(248, 250, 252, 0.9);
+    }
+    .demo-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: var(--text-base);
+    }
+    .demo-nav-brand-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: var(--radius-md);
+      background: var(--gradient);
+    }
+    .demo-nav-links {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      font-size: var(--text-xs);
+    }
+    .demo-nav-links a {
+      color: var(--text-muted);
+      transition: color var(--transition-fast);
+      font-weight: 500;
+    }
+    .demo-nav-links a:hover { color: var(--text-primary); }
+
+    /* Hero section */
+    .demo-hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--sp-8) var(--sp-6);
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -25%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(ellipse at 50% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    [data-theme="light"] .demo-hero::before {
+      background: radial-gradient(ellipse at 50% 50%, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
+    }
+    .demo-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-1) var(--sp-3);
+      border-radius: var(--radius-full);
+      background: var(--accent-bg);
+      border: 0.0625rem solid rgba(79, 70, 229, 0.2);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      color: var(--accent-light);
+      margin-bottom: var(--sp-6);
+    }
+    .demo-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      max-width: 50rem;
+      margin-bottom: var(--sp-4);
+    }
+    .demo-hero h1 .gradient-text {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .demo-hero-sub {
+      font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+      color: var(--text-tertiary);
+      max-width: 36rem;
+      line-height: 1.6;
+      margin-bottom: var(--sp-8);
+    }
+    .demo-hero-stats {
+      display: flex;
+      gap: var(--sp-8);
+      margin-top: var(--sp-4);
+    }
+    .demo-hero-stat {
+      text-align: center;
+    }
+    .demo-hero-stat-value {
+      font-family: var(--font-mono);
+      font-size: var(--text-hero);
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .demo-hero-stat-label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: var(--sp-1);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-2);
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      animation: bounce 2s ease infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(0.5rem); }
+    }
+
+    /* Section styles */
+    .demo-section {
+      padding: 5rem var(--sp-6);
+      max-width: 64rem;
+      margin: 0 auto;
+      position: relative;
+    }
+    .demo-section-num {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--sp-2);
+    }
+    .demo-section h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-3);
+      letter-spacing: -0.01em;
+    }
+    .demo-section-desc {
+      font-size: var(--text-base);
+      color: var(--text-tertiary);
+      max-width: 36rem;
+      line-height: 1.7;
+      margin-bottom: var(--sp-6);
+    }
+
+    /* Feature card (screenshot mock) */
+    .demo-feature-card {
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.15);
+    }
+    .demo-feature-titlebar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--surface-base);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+    }
+    .demo-feature-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+    }
+    .demo-feature-content {
+      padding: var(--sp-4);
+    }
+
+    /* Keystroke annotation */
+    .ks-annotation {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem var(--sp-2);
+      background: var(--accent-bg);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-light);
+      border: 0.0625rem solid rgba(79, 70, 229, 0.2);
+    }
+
+    /* Differentiator grid */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: var(--sp-4);
+    }
+    .diff-card {
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .diff-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.25rem var(--accent-bg);
+    }
+    .diff-card-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--sp-3);
+      color: #fff;
+    }
+    .diff-card h3 {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-1);
+    }
+    .diff-card p {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+
+    /* CTA Section */
+    .demo-cta {
+      text-align: center;
+      padding: 6rem var(--sp-6);
+      position: relative;
+    }
+    .demo-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .demo-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-8);
+      background: var(--gradient);
+      color: #fff;
+      font-weight: 600;
+      font-size: var(--text-base);
+      border-radius: var(--radius-lg);
+      border: none;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      box-shadow: 0 0.25rem 1rem rgba(79, 70, 229, 0.3);
+    }
+    .demo-cta-btn:hover {
+      transform: translateY(-0.125rem);
+      box-shadow: 0 0.5rem 1.5rem rgba(79, 70, 229, 0.4);
+    }
+
+    /* Before/After position card */
+    .position-compare {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--sp-3);
+      align-items: center;
+    }
+    .position-compare-arrow {
+      color: var(--accent-light);
+      font-size: 1.5rem;
+    }
+
+    /* Compact mini-table for demo */
+    .demo-mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+    }
+    .demo-mini-table th {
+      padding: var(--sp-1) var(--sp-2);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.5625rem;
+      letter-spacing: 0.05em;
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .demo-mini-table td {
+      padding: var(--sp-1) var(--sp-2);
+      color: var(--text-secondary);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+    }
+
+    /* Footer */
+    .demo-footer {
+      border-top: 0.0625rem solid var(--border);
+      padding: var(--sp-6);
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* Section divider */
+    .section-divider {
+      width: 3rem;
+      height: 0.125rem;
+      background: var(--gradient);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--sp-4);
+    }
+
+    /* Responsive */
+    @media (max-width: 48rem) {
+      .demo-hero-stats { flex-direction: column; gap: var(--sp-4); }
+      .position-compare { grid-template-columns: 1fr; }
+      .position-compare-arrow { transform: rotate(90deg); justify-self: center; }
+      .demo-nav-links { display: none; }
+    }
+
+    /* Scroll-triggered animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="demo-nav">
+  <div class="demo-nav-brand">
+    <div class="demo-nav-brand-icon">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+    </div>
+    Horizon
+  </div>
+  <div class="demo-nav-links">
+    <a href="#briefing">Briefing</a>
+    <a href="#trade">Trade</a>
+    <a href="#impact">Impact</a>
+    <a href="#deadlines">Deadlines</a>
+    <a href="#settlement">Settlement</a>
+    <a href="#lifecycle">Lifecycle</a>
+    <a href="#different">Why Us</a>
+    <button class="hz-btn sm primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Request Pilot</button>
+  </div>
+  <button class="hz-btn sm" onclick="toggleTheme()" style="margin-left:var(--sp-2);">
+    <span id="demo-theme-icon"></span>
+  </button>
+</nav>
+
+<!-- 1. Hero -->
+<section class="demo-hero" id="hero">
+  <div class="demo-hero-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+    LNG ETRM Platform
+  </div>
+  <h1>
+    The Most <span class="gradient-text">Accurate</span> LNG Trading Platform
+  </h1>
+  <p class="demo-hero-sub">
+    From trade capture to final settlement. AI-first reasoning, real-time market data, and zero manual calculation errors. Built for the way LNG actually trades.
+  </p>
+  <div class="flex gap-3">
+    <button class="demo-cta-btn" onclick="document.getElementById('briefing').scrollIntoView({behavior:'smooth'})">
+      See How It Works
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    </button>
+    <button class="hz-btn lg" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Request Pilot</button>
+  </div>
+  <div class="demo-hero-stats">
+    <div class="demo-hero-stat">
+      <div class="demo-hero-stat-value">8s</div>
+      <div class="demo-hero-stat-label">Trade Capture</div>
+    </div>
+    <div class="demo-hero-stat">
+      <div class="demo-hero-stat-value">0</div>
+      <div class="demo-hero-stat-label">Manual Calculations</div>
+    </div>
+    <div class="demo-hero-stat">
+      <div class="demo-hero-stat-value">100%</div>
+      <div class="demo-hero-stat-label">Settlement Accuracy</div>
+    </div>
+    <div class="demo-hero-stat">
+      <div class="demo-hero-stat-value">8</div>
+      <div class="demo-hero-stat-label">Lifecycle Stages</div>
+    </div>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll to explore</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+  </div>
+</section>
+
+<!-- 2. Morning Briefing -->
+<section class="demo-section reveal" id="briefing">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">01 / Morning Briefing</div>
+  <h2>Your Day Starts with Context, Not Clicks</h2>
+  <p class="demo-section-desc">
+    The dashboard adapts to your role. Traders see positions and P&L. Operations sees deadlines and cargo status. Managers see risk and team activity. One login, three different views.
+  </p>
+
+  <div class="demo-feature-card">
+    <div class="demo-feature-titlebar">
+      <div class="demo-feature-dot" style="background:#ef4444;"></div>
+      <div class="demo-feature-dot" style="background:#f59e0b;"></div>
+      <div class="demo-feature-dot" style="background:#22c55e;"></div>
+      <span class="text-xs" style="color:var(--text-muted);margin-left:var(--sp-2);">Dashboard - Trader View</span>
+    </div>
+    <div class="demo-feature-content">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+        <div class="hz-kpi" style="padding:var(--sp-3);">
+          <span class="hz-kpi-label" style="font-size:0.5625rem;">Net Position</span>
+          <span class="hz-kpi-value" style="font-size:var(--text-xl);">6.4M</span>
+          <span class="hz-kpi-delta positive" style="font-size:0.5625rem;">+3.2M vs yesterday</span>
+        </div>
+        <div class="hz-kpi" style="padding:var(--sp-3);">
+          <span class="hz-kpi-label" style="font-size:0.5625rem;">Unrealized P&amp;L</span>
+          <span class="hz-kpi-value text-green" style="font-size:var(--text-xl);">+$2.1M</span>
+          <span class="hz-kpi-delta positive" style="font-size:0.5625rem;">+$340K today</span>
+        </div>
+        <div class="hz-kpi" style="padding:var(--sp-3);">
+          <span class="hz-kpi-label" style="font-size:0.5625rem;">Hedge Ratio</span>
+          <span class="hz-kpi-value" style="font-size:var(--text-xl);">78%</span>
+          <span class="hz-kpi-delta negative" style="font-size:0.5625rem;">-4% from target</span>
+        </div>
+        <div class="hz-kpi" style="padding:var(--sp-3);">
+          <span class="hz-kpi-label" style="font-size:0.5625rem;">Trades Today</span>
+          <span class="hz-kpi-value" style="font-size:var(--text-xl);">3</span>
+          <span class="hz-kpi-delta" style="font-size:0.5625rem;color:var(--text-muted);">2 buy, 1 sell</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="hz-badge green">Trader</span>
+        <span class="hz-badge neutral">Operations</span>
+        <span class="hz-badge neutral">Manager</span>
+        <span class="text-xs" style="color:var(--text-muted);margin-left:auto;">Role-adaptive views</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Enter a Trade -->
+<section class="demo-section reveal" id="trade">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">02 / Trade Capture</div>
+  <h2>Enter a Trade in 8 Seconds</h2>
+  <p class="demo-section-desc">
+    The quick entry strip is designed for minimum keystrokes. Press B for Buy, type 2 characters to select a counterparty, Tab past pre-filled fields, Enter to submit, Enter again to confirm.
+  </p>
+
+  <div class="demo-feature-card">
+    <div class="demo-feature-titlebar">
+      <div class="demo-feature-dot" style="background:#ef4444;"></div>
+      <div class="demo-feature-dot" style="background:#f59e0b;"></div>
+      <div class="demo-feature-dot" style="background:#22c55e;"></div>
+      <span class="text-xs" style="color:var(--text-muted);margin-left:var(--sp-2);">Quick Entry - Speed Mode</span>
+    </div>
+    <div class="demo-feature-content">
+      <!-- Keystroke flow annotation -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <div class="ks-annotation">
+          <span class="hz-key-hint" style="background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green);">B</span>
+          Buy
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint">s</span><span class="hz-key-hint">h</span>
+          Shell Trading
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint">Tab</span>
+          Skip pre-filled volume
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint">Tab</span>
+          Auto-benchmark
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint">+</span><span class="hz-key-hint">.</span><span class="hz-key-hint">5</span>
+          Premium
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint" style="background:var(--accent-bg);border-color:rgba(79,70,229,0.3);color:var(--accent-light);">&crarr;</span>
+          Submit
+        </div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="ks-annotation">
+          <span class="hz-key-hint" style="background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green);">&crarr;</span>
+          Confirm
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold" style="color:var(--accent-light);">Result:</span>
+        <span class="text-xs" style="color:var(--text-secondary);">8 keystrokes. Under 8 seconds. Trade committed with P&L calculated instantly.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. See the Impact -->
+<section class="demo-section reveal" id="impact">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">03 / Position Impact</div>
+  <h2>See the Impact Instantly</h2>
+  <p class="demo-section-desc">
+    The position ladder updates the moment a trade is confirmed. No batch processing, no overnight runs. Your P&L, WACOG, and hedge ratio reflect reality in real time.
+  </p>
+
+  <div class="position-compare">
+    <!-- Before -->
+    <div class="demo-feature-card">
+      <div class="demo-feature-titlebar">
+        <span class="text-xs font-medium" style="color:var(--text-muted);">Before Trade</span>
+      </div>
+      <div class="demo-feature-content" style="padding:var(--sp-3);">
+        <table class="demo-mini-table">
+          <thead>
+            <tr><th>Month</th><th style="text-align:right;">Net</th><th style="text-align:right;">P&L</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Jun-26</td><td style="text-align:right;" class="text-red">-1.6M</td><td style="text-align:right;" class="text-red">-$128K</td></tr>
+            <tr><td>Jul-26</td><td style="text-align:right;" class="text-green">1.6M</td><td style="text-align:right;" class="text-green">+$412K</td></tr>
+            <tr><td>Aug-26</td><td style="text-align:right;" class="text-red">-1.6M</td><td style="text-align:right;" class="text-red">-$128K</td></tr>
+            <tr style="border-top:0.125rem solid var(--border-strong);"><td style="font-weight:700;">Total</td><td style="text-align:right;font-weight:700;">-1.6M</td><td style="text-align:right;font-weight:700;" class="text-green">+$156K</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="position-compare-arrow">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </div>
+
+    <!-- After -->
+    <div class="demo-feature-card" style="border-color:var(--accent);">
+      <div class="demo-feature-titlebar" style="background:var(--accent-bg);">
+        <span class="text-xs font-medium" style="color:var(--accent-light);">After Trade (BUY 3.2M JKM Jun-26)</span>
+      </div>
+      <div class="demo-feature-content" style="padding:var(--sp-3);">
+        <table class="demo-mini-table">
+          <thead>
+            <tr><th>Month</th><th style="text-align:right;">Net</th><th style="text-align:right;">P&L</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--green-dim);"><td>Jun-26</td><td style="text-align:right;font-weight:700;" class="text-green">1.6M</td><td style="text-align:right;" class="text-green">+$208K</td></tr>
+            <tr><td>Jul-26</td><td style="text-align:right;" class="text-green">1.6M</td><td style="text-align:right;" class="text-green">+$412K</td></tr>
+            <tr><td>Aug-26</td><td style="text-align:right;" class="text-red">-1.6M</td><td style="text-align:right;" class="text-red">-$128K</td></tr>
+            <tr style="border-top:0.125rem solid var(--border-strong);"><td style="font-weight:700;">Total</td><td style="text-align:right;font-weight:700;" class="text-green">1.6M</td><td style="text-align:right;font-weight:700;" class="text-green">+$492K</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Never Miss a Deadline -->
+<section class="demo-section reveal" id="deadlines">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">04 / Nomination & Scheduling</div>
+  <h2>Never Miss a Deadline</h2>
+  <p class="demo-section-desc">
+    Cascading nomination forms auto-populate from the trade. Select a contract, the cargoes appear. Pick a cargo, the vessels appear. Choose a vessel, the ETA calculates. Every field linked to source data.
+  </p>
+
+  <div class="demo-feature-card">
+    <div class="demo-feature-titlebar">
+      <div class="demo-feature-dot" style="background:#ef4444;"></div>
+      <div class="demo-feature-dot" style="background:#f59e0b;"></div>
+      <div class="demo-feature-dot" style="background:#22c55e;"></div>
+      <span class="text-xs" style="color:var(--text-muted);margin-left:var(--sp-2);">Nominations - Cascading Form</span>
+    </div>
+    <div class="demo-feature-content">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="hz-label">Contract</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green);">SPA-2026-SHELL-001</div>
+        </div>
+        <div>
+          <label class="hz-label">Cargo</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green);">C-2026-089</div>
+        </div>
+        <div>
+          <label class="hz-label">Vessel</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;background:var(--green-dim);border-color:rgba(34,197,94,0.3);color:var(--green);">Al Dafna (Q-Max)</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <label class="hz-label">Laycan</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;">1-15 Jun 2026</div>
+        </div>
+        <div>
+          <label class="hz-label">ETA Load</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;color:var(--accent-light);">3 Jun (auto)</div>
+        </div>
+        <div>
+          <label class="hz-label">ETA Discharge</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;color:var(--accent-light);">16 Jun (auto)</div>
+        </div>
+        <div>
+          <label class="hz-label">ADP Due</label>
+          <div class="hz-input font-mono" style="display:flex;align-items:center;color:var(--red);">15 Apr (4 days)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Settlement Without Errors -->
+<section class="demo-section reveal" id="settlement">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">05 / Settlement</div>
+  <h2>Settlement Without Errors</h2>
+  <p class="demo-section-desc">
+    Every number on the invoice is calculated, not typed. Volume comes from the B/L. Price comes from the contract formula. Quality adjustments and demurrage are auto-computed with full formula transparency.
+  </p>
+
+  <div class="demo-feature-card">
+    <div class="demo-feature-titlebar">
+      <div class="demo-feature-dot" style="background:#ef4444;"></div>
+      <div class="demo-feature-dot" style="background:#f59e0b;"></div>
+      <div class="demo-feature-dot" style="background:#22c55e;"></div>
+      <span class="text-xs" style="color:var(--text-muted);margin-left:var(--sp-2);">Invoice - Calculated Fields</span>
+    </div>
+    <div class="demo-feature-content">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between p-2 rounded" style="background:var(--surface-base);">
+          <div class="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="text-xs" style="color:var(--text-secondary);">Volume (from B/L)</span>
+          </div>
+          <span class="text-xs font-mono" style="color:var(--text-primary);">3,196,900 MMBtu</span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded" style="background:var(--surface-base);">
+          <div class="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="text-xs" style="color:var(--text-secondary);">Price (Avg JKM May + $0.50)</span>
+          </div>
+          <span class="text-xs font-mono" style="color:var(--text-primary);">$14.72/MMBtu</span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded" style="background:var(--surface-base);">
+          <div class="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="text-xs" style="color:var(--text-secondary);">Quality Adj. (GHV 1,042 vs 1,050)</span>
+          </div>
+          <span class="text-xs font-mono text-red">-$296,930</span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded" style="background:var(--surface-base);">
+          <div class="flex items-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="text-xs" style="color:var(--text-secondary);">Demurrage (24h over x $45K/hr)</span>
+          </div>
+          <span class="text-xs font-mono text-red">-$1,080,000</span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded" style="border:0.0625rem solid var(--accent);background:var(--accent-bg);">
+          <span class="text-xs font-semibold" style="color:var(--accent-light);">INVOICE TOTAL</span>
+          <span class="text-sm font-mono font-bold" style="color:var(--text-primary);">$45,661,478</span>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="hz-badge green">6/6 checks passed</span>
+        <span class="text-xs" style="color:var(--text-muted);">All values verified against source documents</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Full Lifecycle -->
+<section class="demo-section reveal" id="lifecycle">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">06 / Trade Lifecycle</div>
+  <h2>The Full Lifecycle in One View</h2>
+  <p class="demo-section-desc">
+    From capture to P&L realization. Eight stages, one continuous timeline. Every document, every approval, every calculation linked and auditable. This is the golden path.
+  </p>
+
+  <div class="demo-feature-card">
+    <div class="demo-feature-titlebar">
+      <div class="demo-feature-dot" style="background:#ef4444;"></div>
+      <div class="demo-feature-dot" style="background:#f59e0b;"></div>
+      <div class="demo-feature-dot" style="background:#22c55e;"></div>
+      <span class="text-xs font-mono" style="color:var(--text-muted);margin-left:var(--sp-2);">BUY-2026-0411-A3F</span>
+    </div>
+    <div class="demo-feature-content" style="padding:var(--sp-3) var(--sp-4);">
+      <div class="flex flex-col gap-3">
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--green);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--green);">1. CAPTURE</div>
+            <div class="text-xs" style="color:var(--text-secondary);">BUY 3.2M MMBtu JKM+$0.50 DES Jun-26 from Shell</div>
+          </div>
+          <span class="text-xs font-mono ml-auto" style="color:var(--text-muted);">12 Apr</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--green);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--green);">2. APPROVAL</div>
+            <div class="text-xs" style="color:var(--text-secondary);">Credit PASS ($22M headroom) | Position: 3.2M to 6.4M Long</div>
+          </div>
+          <span class="text-xs font-mono ml-auto" style="color:var(--text-muted);">12 Apr</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--green);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--green);">3. NOMINATION</div>
+            <div class="text-xs" style="color:var(--text-secondary);">Vessel: Al Dafna | Laycan: 1-15 Jun 2026</div>
+          </div>
+          <span class="text-xs font-mono ml-auto" style="color:var(--text-muted);">15 Apr</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--green);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--green);">4. LOADING</div>
+            <div class="text-xs" style="color:var(--text-secondary);">B/L: 3,198,450 MMBtu | GHV: 1,048 BTU/scf</div>
+          </div>
+          <span class="text-xs font-mono ml-auto" style="color:var(--text-muted);">5 Jun</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--accent);box-shadow:0 0 0 0.1875rem var(--accent-bg);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--accent-light);">5. VOYAGE (LIVE)</div>
+            <div class="text-xs" style="color:var(--text-secondary);">In transit to Sodegaura | ETA: 17 Jun | BOG: -1,550 MMBtu</div>
+          </div>
+          <span class="text-xs font-mono ml-auto" style="color:var(--accent-light);">Now</span>
+        </div>
+        <div class="flex items-start gap-3" style="opacity:0.5;">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--surface-elevated);border:0.125rem solid var(--border-strong);"></div>
+          <div>
+            <div class="text-xs font-semibold" style="color:var(--text-muted);">6. DISCHARGE &rarr; 7. SETTLEMENT &rarr; 8. P&L</div>
+            <div class="text-xs" style="color:var(--text-muted);">Expected P&L: +$1,120,000</div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-center">
+        <a href="../horizon/lifecycle.html" class="hz-btn sm primary" style="text-decoration:none;">
+          View Full Lifecycle Page
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. What Makes Us Different -->
+<section class="demo-section reveal" id="different">
+  <div class="section-divider"></div>
+  <div class="demo-section-num">07 / Differentiators</div>
+  <h2>What Makes Horizon Different</h2>
+  <p class="demo-section-desc">
+    We built Horizon from scratch for LNG physical trading. Not adapted from power. Not a financial trading platform with a commodity skin. Purpose-built.
+  </p>
+
+  <div class="diff-grid">
+    <div class="diff-card">
+      <div class="diff-card-icon" style="background:var(--gradient);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+      </div>
+      <h3>AI-First Architecture</h3>
+      <p>Claude AI reasons about your trades, not just displays them. Market context, position analysis, and scenario modeling built into the core, not bolted on.</p>
+    </div>
+    <div class="diff-card">
+      <div class="diff-card-icon" style="background:linear-gradient(135deg, #22c55e, #16a34a);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Real Market Data</h3>
+      <p>Live prices from EIA, CME/ICE, and AIS vessel tracking. No mock data, ever. The system shows you what it actually knows and is honest about what it does not.</p>
+    </div>
+    <div class="diff-card">
+      <div class="diff-card-icon" style="background:linear-gradient(135deg, #f59e0b, #d97706);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>8-Second Trade Capture</h3>
+      <p>Keyboard-first design means fewer clicks, fewer errors. Pre-filled fields, auto-selected benchmarks, and single-key direction toggles. Bloomberg Terminal speed, ETRM functionality.</p>
+    </div>
+    <div class="diff-card">
+      <div class="diff-card-icon" style="background:linear-gradient(135deg, #ef4444, #dc2626);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Zero Manual Calculations</h3>
+      <p>Every invoice line is calculated from source documents. Quality adjustments, demurrage, pricing formulas: all auto-computed with full audit trail. Override requires a reason and a second approver.</p>
+    </div>
+    <div class="diff-card">
+      <div class="diff-card-icon" style="background:linear-gradient(135deg, #3b82f6, #2563eb);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+      </div>
+      <h3>Full Lifecycle Traceability</h3>
+      <p>Eight stages from capture to realized P&L. Every document, approval, and amendment linked. The golden path view tells the story of every cargo in one scrollable page.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. CTA -->
+<section class="demo-cta reveal" id="cta">
+  <h2 style="font-size:clamp(1.5rem, 3vw, 2.5rem);font-weight:800;color:var(--text-primary);margin-bottom:var(--sp-3);letter-spacing:-0.02em;position:relative;">
+    Ready to See It Live?
+  </h2>
+  <p class="text-base mb-6" style="color:var(--text-tertiary);max-width:28rem;margin-left:auto;margin-right:auto;line-height:1.7;position:relative;">
+    We will set up a 15-minute guided pilot with your data. No slide decks. No screenshots. Just the system, running, with your trades.
+  </p>
+  <button class="demo-cta-btn" onclick="showToast('Pilot request submitted. We will be in touch within 24 hours.', 'success')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+    Request a Pilot
+  </button>
+  <p class="text-xs mt-4" style="color:var(--text-muted);position:relative;">No commitment. No credit card. 15 minutes of your time.</p>
+</section>
+
+<!-- Footer -->
+<footer class="demo-footer">
+  <div class="flex items-center justify-center gap-2 mb-2">
+    <div style="width:1.25rem;height:1.25rem;border-radius:var(--radius-sm);background:var(--gradient);display:flex;align-items:center;justify-content:center;">
+      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+    </div>
+    <span style="font-weight:600;color:var(--text-secondary);">Horizon ETRM</span>
+  </div>
+  <p>AI-first LNG trading and risk management. Built for accuracy.</p>
+  <p class="mt-2" style="color:var(--border-strong);">Project Horizon &copy; 2026</p>
+</footer>
+
+<script>
+  // Initialize theme (no sidebar shell for this page)
+  initTheme();
+
+  // Theme toggle icon
+  function updateDemoThemeIcon() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var el = document.getElementById('demo-theme-icon');
+    if (el) el.innerHTML = svg(isDark ? 'sun' : 'moon', 14);
+  }
+  updateDemoThemeIcon();
+  var demoObserver = new MutationObserver(updateDemoThemeIcon);
+  demoObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Toast container for the CTA button
+  // (showToast is available from shell.js)
+
+  // Scroll-triggered reveal animations
+  var revealElements = document.querySelectorAll('.reveal');
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+  revealElements.forEach(function(el) {
+    revealObserver.observe(el);
+  });
+</script>
+
+</body>
+</html>
