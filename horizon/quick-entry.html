@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Entry — Horizon ETRM</title>
+  <link href="shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/dist/ag-grid-community.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Quick Entry Strip -->
+  <div class="hz-card mb-4 fade-in">
+    <div class="hz-card-header">
+      <div class="hz-card-title">Quick Trade Entry</div>
+      <div class="flex items-center gap-2">
+        <span class="hz-key-hint">B</span><span class="text-xs" style="color:var(--text-muted);">Buy</span>
+        <span class="hz-key-hint">S</span><span class="text-xs" style="color:var(--text-muted);">Sell</span>
+        <span class="hz-key-hint">Tab</span><span class="text-xs" style="color:var(--text-muted);">Next field</span>
+        <span class="hz-key-hint">Enter</span><span class="text-xs" style="color:var(--text-muted);">Submit</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 items-end" id="entry-form">
+      <!-- Direction -->
+      <div>
+        <label class="hz-label">Direction</label>
+        <div class="flex gap-1">
+          <button id="btn-buy" class="hz-btn sm flex-1 active" onclick="setDirection('BUY')" style="background:var(--green);border-color:var(--green);color:#fff;">BUY</button>
+          <button id="btn-sell" class="hz-btn sm flex-1" onclick="setDirection('SELL')">SELL</button>
+        </div>
+      </div>
+
+      <!-- Counterparty (combobox) -->
+      <div>
+        <label class="hz-label">Counterparty</label>
+        <div class="hz-combobox" id="counterparty-combo">
+          <input class="hz-combobox-input" placeholder="Search..." tabindex="1" />
+          <div class="hz-combobox-dropdown"></div>
+          <div class="hz-combobox-context" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div>
+        <label class="hz-label">Volume (MMBtu)</label>
+        <input type="text" class="hz-input font-mono" id="entry-volume" placeholder="3,200,000" tabindex="2" />
+      </div>
+
+      <!-- Index -->
+      <div>
+        <label class="hz-label">Price Index</label>
+        <select class="hz-input" id="entry-index" tabindex="3">
+          <option>JKM</option>
+          <option>TTF</option>
+          <option>HH</option>
+          <option>Brent</option>
+        </select>
+      </div>
+
+      <!-- Premium -->
+      <div>
+        <label class="hz-label">Premium ($/MMBtu)</label>
+        <input type="text" class="hz-input font-mono" id="entry-premium" placeholder="+0.50" tabindex="4" />
+      </div>
+
+      <!-- Delivery -->
+      <div>
+        <label class="hz-label">Delivery</label>
+        <select class="hz-input" id="entry-delivery" tabindex="5">
+          <option>Jun-26</option>
+          <option>Jul-26</option>
+          <option>Aug-26</option>
+          <option>Sep-26</option>
+          <option>Oct-26</option>
+          <option>Q3-26</option>
+          <option>Q4-26</option>
+        </select>
+      </div>
+
+      <!-- Terms -->
+      <div>
+        <label class="hz-label">Terms</label>
+        <select class="hz-input" id="entry-terms" tabindex="6">
+          <option>FOB</option>
+          <option>DES</option>
+          <option>CIF</option>
+          <option>DAP</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <div>
+        <label class="hz-label">&nbsp;</label>
+        <button class="hz-btn primary w-full" id="btn-submit" onclick="submitEntry()" tabindex="7">
+          Enter Trade
+        </button>
+      </div>
+    </div>
+
+    <!-- Confirmation Bar (hidden by default) -->
+    <div id="confirm-bar" class="hz-confirm-bar mt-3" style="display:none;">
+      <div style="color:var(--accent-light);flex-shrink:0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <span class="hz-confirm-text" id="confirm-text"></span>
+      <div class="flex gap-2 shrink-0">
+        <button class="hz-btn sm primary" onclick="confirmEntry()">
+          <span class="hz-key-hint" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:#fff;">Enter</span>
+          Confirm
+        </button>
+        <button class="hz-btn sm" onclick="cancelEntry()">
+          <span class="hz-key-hint">Esc</span>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AG Grid Blotter -->
+  <div class="hz-card fade-in-d2">
+    <div class="hz-card-header">
+      <div>
+        <div class="hz-card-title">Trade Blotter</div>
+        <div class="hz-card-subtitle">Today's trades with live P&amp;L</div>
+      </div>
+      <div class="flex gap-2">
+        <button class="hz-btn sm">Export CSV</button>
+      </div>
+    </div>
+    <div id="trade-grid" style="height:20rem;width:100%;" class="ag-theme-quartz-dark"></div>
+  </div>
+
+  <!-- Empty state (shown when no trades) -->
+  <div id="empty-blotter" class="hz-card fade-in-d2" style="display:none;">
+    <div class="hz-empty">
+      <svg class="hz-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <div class="hz-empty-title">No trades yet today</div>
+      <div class="hz-empty-desc">Use the quick entry form above or press <kbd class="hz-key-hint">N</kbd> to create your first trade.</div>
+      <button class="hz-btn primary" onclick="document.querySelector('#entry-volume').focus();">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Trade
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('quick-entry', 'Quick Entry');
+
+  // ---- Trade state ----
+  var direction = 'BUY';
+  var pendingTrade = null;
+  var tradeIdCounter = 1;
+
+  var BLOTTER_DATA = [
+    { id: 'BUY-2026-0411-A3F', dir: 'BUY', cpty: 'Shell Trading', vol: 3200000, index: 'JKM', prem: 0.50, delivery: 'Jun-26', terms: 'DES', price: 14.75, mtm: 340000, pnl: 208000, status: 'Confirmed', time: '09:42' },
+    { id: 'SELL-2026-0411-B7C', dir: 'SELL', cpty: 'TotalEnergies', vol: 1600000, index: 'JKM', prem: 0.25, delivery: 'Jul-26', terms: 'FOB', price: 14.10, mtm: -85000, pnl: -42000, status: 'Confirmed', time: '10:15' },
+    { id: 'BUY-2026-0411-D2E', dir: 'BUY', cpty: 'BP Gas Marketing', vol: 4800000, index: 'TTF', prem: -0.10, delivery: 'Sep-26', terms: 'DES', price: 12.70, mtm: 520000, pnl: 1600000, status: 'Pending', time: '11:30' },
+  ];
+
+  // ---- Direction toggle ----
+  function setDirection(dir) {
+    direction = dir;
+    var buyBtn = document.getElementById('btn-buy');
+    var sellBtn = document.getElementById('btn-sell');
+    if (dir === 'BUY') {
+      buyBtn.className = 'hz-btn sm flex-1';
+      buyBtn.style.cssText = 'background:var(--green);border-color:var(--green);color:#fff;';
+      sellBtn.className = 'hz-btn sm flex-1';
+      sellBtn.style.cssText = '';
+    } else {
+      sellBtn.className = 'hz-btn sm flex-1';
+      sellBtn.style.cssText = 'background:var(--red);border-color:var(--red);color:#fff;';
+      buyBtn.className = 'hz-btn sm flex-1';
+      buyBtn.style.cssText = '';
+    }
+  }
+
+  // ---- B/S keyboard shortcut ----
+  document.addEventListener('keydown', function(e) {
+    // Only when not in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    if (document.getElementById('hz-cmdk-overlay').style.display !== 'none') return;
+
+    if (e.key === 'b' || e.key === 'B') { setDirection('BUY'); }
+    if (e.key === 's' || e.key === 'S') { setDirection('SELL'); }
+  });
+
+  // ---- Counterparty combobox ----
+  setTimeout(function() {
+    var combo = document.getElementById('counterparty-combo');
+    if (combo) {
+      initCombobox(combo, [
+        { label: 'Shell Trading', value: 'shell', context: 'Shell Energy Trading \u2014 UK \u2014 Credit: $22M headroom' },
+        { label: 'TotalEnergies', value: 'total', context: 'TotalEnergies Gas & Power \u2014 FR \u2014 Credit: $18M headroom' },
+        { label: 'BP Gas Marketing', value: 'bp', context: 'BP Gas Marketing Ltd \u2014 UK \u2014 Credit: $31M headroom' },
+        { label: 'Chevron', value: 'chevron', context: 'Chevron Natural Gas \u2014 US \u2014 Credit: $45M headroom' },
+        { label: 'Equinor', value: 'equinor', context: 'Equinor ASA \u2014 NO \u2014 Credit: $28M headroom' },
+        { label: 'Gunvor', value: 'gunvor', context: 'Gunvor Group \u2014 CH \u2014 Credit: $15M headroom' },
+        { label: 'Vitol', value: 'vitol', context: 'Vitol SA \u2014 CH \u2014 Credit: $20M headroom' },
+        { label: 'Trafigura', value: 'trafigura', context: 'Trafigura Pte Ltd \u2014 SG \u2014 Credit: $12M headroom' },
+        { label: "Woodside O'Brien", value: 'woodside', context: 'Woodside Energy \u2014 AU \u2014 Credit: $35M headroom' },
+      ]);
+    }
+  }, 600);
+
+  // ---- Submit / Confirm flow ----
+  function submitEntry() {
+    var vol = document.getElementById('entry-volume').value;
+    var idx = document.getElementById('entry-index').value;
+    var prem = document.getElementById('entry-premium').value;
+    var delivery = document.getElementById('entry-delivery').value;
+    var terms = document.getElementById('entry-terms').value;
+    var combo = document.getElementById('counterparty-combo');
+    var cpty = combo && combo.combobox ? combo.combobox.getValue() : '';
+
+    if (!vol) {
+      showToast('Please enter a volume', 'error');
+      document.getElementById('entry-volume').focus();
+      return;
+    }
+
+    pendingTrade = {
+      dir: direction,
+      cpty: cpty || 'Unknown',
+      vol: vol.replace(/,/g, ''),
+      index: idx,
+      prem: prem || '0',
+      delivery: delivery,
+      terms: terms
+    };
+
+    // Show confirmation bar
+    var confirmBar = document.getElementById('confirm-bar');
+    var confirmText = document.getElementById('confirm-text');
+    confirmText.textContent = direction + ' ' + vol + ' MMBtu ' + idx + (prem ? '+' + prem : '') + ' ' + terms + ' ' + delivery + ' from ' + (cpty || 'Unknown');
+    confirmBar.style.display = '';
+    document.getElementById('entry-form').style.opacity = '0.5';
+    document.getElementById('entry-form').style.pointerEvents = 'none';
+  }
+
+  function confirmEntry() {
+    if (!pendingTrade) return;
+
+    var newId = pendingTrade.dir + '-2026-0411-' + String.fromCharCode(65 + tradeIdCounter) + tradeIdCounter + 'F';
+    tradeIdCounter++;
+
+    var newTrade = {
+      id: newId,
+      dir: pendingTrade.dir,
+      cpty: pendingTrade.cpty,
+      vol: parseInt(pendingTrade.vol) || 0,
+      index: pendingTrade.index,
+      prem: parseFloat(pendingTrade.prem) || 0,
+      delivery: pendingTrade.delivery,
+      terms: pendingTrade.terms,
+      price: pendingTrade.index === 'JKM' ? 14.75 : pendingTrade.index === 'TTF' ? 12.90 : 3.42,
+      mtm: Math.round((Math.random() - 0.3) * 500000),
+      pnl: Math.round((Math.random() - 0.3) * 300000),
+      status: 'Confirmed',
+      time: new Date().toTimeString().slice(0, 5)
+    };
+
+    BLOTTER_DATA.unshift(newTrade);
+    if (gridApi) gridApi.setGridOption('rowData', BLOTTER_DATA);
+
+    // Reset
+    cancelEntry();
+    showToast('Trade ' + newId + ' committed', 'success', function() {
+      BLOTTER_DATA.shift();
+      if (gridApi) gridApi.setGridOption('rowData', BLOTTER_DATA);
+      showToast('Trade undone', 'warning');
+    });
+  }
+
+  function cancelEntry() {
+    pendingTrade = null;
+    document.getElementById('confirm-bar').style.display = 'none';
+    document.getElementById('entry-form').style.opacity = '';
+    document.getElementById('entry-form').style.pointerEvents = '';
+  }
+
+  // Enter key in form submits, Enter during confirmation confirms
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && pendingTrade) {
+      e.preventDefault();
+      confirmEntry();
+      return;
+    }
+    if (e.key === 'Escape' && pendingTrade) {
+      e.preventDefault();
+      cancelEntry();
+      return;
+    }
+  });
+
+  // ---- AG Grid Setup ----
+  var gridApi = null;
+
+  setTimeout(function() {
+    var gridDiv = document.getElementById('trade-grid');
+    if (!gridDiv || typeof agGrid === 'undefined') return;
+
+    gridDiv.className = getAgTheme();
+
+    var columnDefs = [
+      { field: 'id', headerName: 'Trade ID', width: 180, pinned: 'left' },
+      { field: 'time', headerName: 'Time', width: 80 },
+      {
+        field: 'dir', headerName: 'B/S', width: 70,
+        cellStyle: function(p) {
+          if (p.value === 'BUY') return { color: 'var(--green)', fontWeight: 600 };
+          if (p.value === 'SELL') return { color: 'var(--red)', fontWeight: 600 };
+          return null;
+        }
+      },
+      { field: 'cpty', headerName: 'Counterparty', width: 150 },
+      { field: 'vol', headerName: 'Volume', width: 120, valueFormatter: numberFormatter, cellStyle: { fontFamily: 'var(--font-mono)' } },
+      { field: 'index', headerName: 'Index', width: 80 },
+      {
+        field: 'prem', headerName: 'Premium', width: 100,
+        valueFormatter: function(p) {
+          if (p.value == null) return '';
+          return (p.value >= 0 ? '+' : '') + p.value.toFixed(2);
+        },
+        cellStyle: { fontFamily: 'var(--font-mono)' }
+      },
+      { field: 'delivery', headerName: 'Delivery', width: 100 },
+      { field: 'terms', headerName: 'Terms', width: 70 },
+      {
+        field: 'price', headerName: 'Price', width: 100,
+        valueFormatter: function(p) { return p.value != null ? '$' + p.value.toFixed(2) : ''; },
+        cellStyle: { fontFamily: 'var(--font-mono)' }
+      },
+      { field: 'mtm', headerName: 'MTM', width: 110, valueFormatter: pnlFormatter, cellStyle: pnlCellStyle },
+      { field: 'pnl', headerName: 'P&L', width: 110, valueFormatter: pnlFormatter, cellStyle: pnlCellStyle },
+      {
+        field: 'status', headerName: 'Status', width: 110,
+        cellRenderer: function(p) {
+          if (!p.value) return '';
+          var cls = p.value === 'Confirmed' ? 'green' : p.value === 'Pending' ? 'amber' : 'neutral';
+          return '<span class="hz-badge ' + cls + '">' + p.value + '</span>';
+        }
+      },
+    ];
+
+    var gridOptions = {
+      columnDefs: columnDefs,
+      rowData: BLOTTER_DATA,
+      defaultColDef: {
+        sortable: true,
+        resizable: true,
+        suppressMovable: true,
+      },
+      getRowId: function(params) { return params.data.id; },
+      animateRows: true,
+      rowSelection: 'single',
+      headerHeight: 36,
+      rowHeight: 32,
+    };
+
+    gridApi = agGrid.createGrid(gridDiv, gridOptions);
+  }, 600);
+</script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Entry — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    .form-grid { display:grid; grid-template-columns:1fr 20rem; gap:0.75rem; }
+    @media (max-width:60rem) { .form-grid { grid-template-columns:1fr; } }
+
+    .form-section { margin-bottom:0.75rem; }
+    .form-section-title { font-size:0.6875rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; padding-bottom:0.25rem; border-bottom:0.0625rem solid var(--border); font-family:'Inter',sans-serif; }
+    .form-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(10rem,1fr)); gap:0.5rem; margin-bottom:0.5rem; }
+    .form-group { display:flex; flex-direction:column; gap:0.1875rem; }
+    .form-label { font-size:0.625rem; font-weight:500; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif; }
+    .form-error { font-size:0.5625rem; color:var(--red); font-family:'Inter',sans-serif; min-height:0.75rem; }
+    .hz-input.error { border-color:var(--red); }
+
+    /* Combobox */
+    .combo-wrap { position:relative; }
+    .combo-list { position:absolute; top:100%; left:0; right:0; z-index:30; background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:0.375rem; max-height:10rem; overflow-y:auto; display:none; box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3); }
+    .combo-list.open { display:block; }
+    .combo-item { padding:0.25rem 0.5rem; font-size:0.6875rem; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
+    .combo-item:hover, .combo-item.active { background:var(--accent-bg); color:var(--accent); }
+    .combo-item .credit { font-size:0.5625rem; color:var(--text-muted); }
+    .combo-item .credit.low { color:var(--red); }
+
+    /* Direction toggle */
+    .dir-toggle { display:flex; gap:0.25rem; }
+    .dir-btn { flex:1; padding:0.375rem 0.75rem; border:0.0625rem solid var(--border); border-radius:0.375rem; font-size:0.6875rem; font-weight:600; text-align:center; cursor:pointer; transition:all 0.15s; background:transparent; color:var(--text-tertiary); }
+    .dir-btn.buy.active { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+    .dir-btn.sell.active { background:var(--red-dim); border-color:var(--red); color:var(--red); }
+
+    /* Position impact preview */
+    .impact-card { background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:0.375rem; padding:0.625rem; position:sticky; top:3.5rem; }
+    .impact-row { display:flex; justify-content:space-between; align-items:center; padding:0.1875rem 0; font-size:0.6875rem; }
+    .impact-label { color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .impact-val { font-weight:600; color:var(--text-primary); }
+    .impact-divider { border-top:0.0625rem solid var(--border); margin:0.375rem 0; }
+    .impact-delta { font-size:0.5625rem; padding:0.0625rem 0.25rem; border-radius:0.125rem; }
+    .impact-delta.pos { background:var(--green-dim); color:var(--green); }
+    .impact-delta.neg { background:var(--red-dim); color:var(--red); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:grid; grid-template-columns:1fr 20rem; gap:0.75rem;">
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:8rem; height:0.875rem; margin-bottom:0.75rem;"></div>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
+          <div class="hz-skeleton" style="flex:1; height:2rem;"></div>
+          <div class="hz-skeleton" style="flex:1; height:2rem;"></div>
+        </div>
+        <div class="hz-skeleton" style="width:6rem; height:0.875rem; margin-bottom:0.5rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:1.75rem; margin-bottom:0.5rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:0.875rem; margin-bottom:0.5rem;"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+        </div>
+      </div>
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:8rem; height:0.875rem; margin-bottom:0.75rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:0.875rem; margin-bottom:0.375rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:0.875rem; margin-bottom:0.375rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:0.875rem; margin-bottom:0.375rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:0.875rem; margin-bottom:0.375rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="form-content" style="display:none;">
+    <div class="form-grid">
+      <!-- Left: Form -->
+      <div class="hz-card fade-in">
+        <!-- Direction -->
+        <div class="form-section">
+          <div class="form-section-title">Direction</div>
+          <div class="dir-toggle">
+            <button class="dir-btn buy active" onclick="setDirection('B')">BUY</button>
+            <button class="dir-btn sell" onclick="setDirection('S')">SELL</button>
+          </div>
+        </div>
+
+        <!-- Counterparty -->
+        <div class="form-section">
+          <div class="form-section-title">Counterparty</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Entity</label>
+              <div class="combo-wrap">
+                <input id="cpty-input" type="text" class="hz-input" style="width:100%;" placeholder="Search counterparty..." autocomplete="off" oninput="filterCpty(this.value)" onfocus="openCptyList()" onblur="setTimeout(()=>closeCptyList(),200)" onkeydown="cptyKeydown(event)" />
+                <div id="cpty-list" class="combo-list"></div>
+              </div>
+              <div id="cpty-error" class="form-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Credit Remaining</label>
+              <div id="credit-display" style="font-size:0.75rem; font-weight:600; color:var(--text-muted); padding-top:0.25rem;">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="form-section">
+          <div class="form-section-title">Pricing</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Pricing Type</label>
+              <select id="pricing-type" class="hz-input" style="width:100%;" onchange="onPricingTypeChange()">
+                <option value="fixed">Fixed Price</option>
+                <option value="oil-indexed">Oil-Indexed</option>
+                <option value="hub-indexed" selected>Hub-Indexed</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-group" id="benchmark-group">
+              <label class="form-label">Benchmark</label>
+              <select id="benchmark" class="hz-input" style="width:100%;" onchange="updatePreview()">
+                <option value="JKM">JKM</option>
+                <option value="TTF">TTF</option>
+                <option value="HH">Henry Hub</option>
+                <option value="Brent">Brent</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" id="price-group">
+              <label class="form-label">Price ($/MMBtu)</label>
+              <input id="price" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="12.45" onblur="validatePrice()" oninput="updatePreview()" />
+              <div id="price-error" class="form-error"></div>
+            </div>
+            <div class="form-group" id="premium-group">
+              <label class="form-label">Premium/Discount</label>
+              <input id="premium" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="+0.15" oninput="updatePreview()" />
+            </div>
+          </div>
+          <div class="form-row" id="oil-slope-row" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Oil Slope (%)</label>
+              <input id="oil-slope" type="number" class="hz-input" style="width:100%;" step="0.1" placeholder="13.5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Oil Index</label>
+              <select id="oil-index" class="hz-input" style="width:100%;">
+                <option value="Brent">Brent</option>
+                <option value="JCC">JCC</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="form-section">
+          <div class="form-section-title">Volume</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Quantity (MMBtu)</label>
+              <input id="volume" type="number" class="hz-input" style="width:100%;" placeholder="65000" min="1000" max="500000" onblur="validateVolume()" oninput="updatePreview()" />
+              <div id="volume-error" class="form-error"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tolerance (%)</label>
+              <input id="tolerance" type="number" class="hz-input" style="width:100%;" step="0.5" value="5" placeholder="5" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery -->
+        <div class="form-section">
+          <div class="form-section-title">Delivery</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Incoterm</label>
+              <select id="incoterm" class="hz-input" style="width:100%;" onchange="updatePreview()">
+                <option value="FOB">FOB</option>
+                <option value="DES">DES</option>
+                <option value="CIF">CIF</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Delivery Window</label>
+              <select id="delivery" class="hz-input" style="width:100%;" onchange="updatePreview()">
+                <option value="Jun 26">Jun 2026</option>
+                <option value="Jul 26">Jul 2026</option>
+                <option value="Aug 26">Aug 2026</option>
+                <option value="Sep 26">Sep 2026</option>
+                <option value="Oct 26">Oct 2026</option>
+                <option value="Nov 26">Nov 2026</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Load Port</label>
+              <div class="combo-wrap">
+                <input id="port-input" type="text" class="hz-input" style="width:100%;" placeholder="Search port..." autocomplete="off" oninput="filterPorts(this.value)" onfocus="openPortList()" onblur="setTimeout(()=>closePortList(),200)" onkeydown="portKeydown(event)" />
+                <div id="port-list" class="combo-list"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Delivery Start</label>
+              <input id="del-start" type="date" class="hz-input" style="width:100%;" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Delivery End</label>
+              <input id="del-end" type="date" class="hz-input" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:0.5rem; justify-content:flex-end; padding-top:0.5rem; border-top:0.0625rem solid var(--border);">
+          <button class="hz-btn" onclick="resetForm()">Reset</button>
+          <button class="hz-btn primary" onclick="submitTrade()">Submit Trade</button>
+        </div>
+      </div>
+
+      <!-- Right: Position Impact Preview -->
+      <div>
+        <div class="impact-card fade-in-d1">
+          <div style="font-size:0.6875rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Position Impact Preview</div>
+          <div class="impact-row"><span class="impact-label">Direction</span><span class="impact-val" id="prev-dir">BUY</span></div>
+          <div class="impact-row"><span class="impact-label">Counterparty</span><span class="impact-val" id="prev-cpty">--</span></div>
+          <div class="impact-row"><span class="impact-label">Benchmark</span><span class="impact-val" id="prev-bench">JKM</span></div>
+          <div class="impact-row"><span class="impact-label">Price</span><span class="impact-val" id="prev-price">--</span></div>
+          <div class="impact-row"><span class="impact-label">Volume</span><span class="impact-val" id="prev-vol">--</span></div>
+          <div class="impact-row"><span class="impact-label">Delivery</span><span class="impact-val" id="prev-del">Jun 2026</span></div>
+          <div class="impact-row"><span class="impact-label">Incoterm</span><span class="impact-val" id="prev-inco">FOB</span></div>
+          <div class="impact-divider"></div>
+          <div style="font-size:0.625rem; font-weight:600; color:var(--text-tertiary); margin-bottom:0.375rem; text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif;">After Trade</div>
+          <div class="impact-row">
+            <span class="impact-label">Net Position</span>
+            <span class="impact-val" id="prev-net">+450k</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">Change</span>
+            <span id="prev-delta" class="impact-delta pos">+65k</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">New WACOG</span>
+            <span class="impact-val" id="prev-wacog">$12.46</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">Est. MTM</span>
+            <span class="impact-val" id="prev-mtm" style="color:var(--green);">+$139K</span>
+          </div>
+          <div class="impact-divider"></div>
+          <div style="font-size:0.5625rem; color:var(--text-muted); font-family:'Inter',sans-serif;">Estimate based on current spot prices. Actual P&L may differ.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('trade-form', 'Trade Entry');
+
+/* Data */
+const counterparties = [
+  { name:'Shell', credit:25000000 },
+  { name:'JERA', credit:18000000 },
+  { name:'TotalEnergies', credit:22000000 },
+  { name:'BP', credit:30000000 },
+  { name:'Chevron', credit:20000000 },
+  { name:'Vitol', credit:8000000 },
+  { name:'Petronas', credit:15000000 },
+  { name:'QatarEnergy', credit:35000000 },
+  { name:'Equinor', credit:12000000 },
+  { name:'Cheniere', credit:17000000 },
+  { name:'Trafigura', credit:6500000 },
+  { name:'Glencore', credit:9000000 },
+  { name:'Mitsui', credit:14000000 },
+  { name:'ENI', credit:11000000 },
+  { name:'Gunvor', credit:4500000 },
+];
+
+const ports = [
+  'Ras Laffan, Qatar','Bonny Island, Nigeria','Sabine Pass, USA','Darwin, Australia',
+  'Hammerfest, Norway','Bintulu, Malaysia','Sakhalin, Russia','Arzew, Algeria',
+  'Point Fortin, Trinidad','Idku, Egypt','Tangguh, Indonesia','Gladstone, Australia',
+  'Cameron, USA','Freeport, USA','Corpus Christi, USA'
+];
+
+const spotPrices = { JKM: 14.60, TTF: 12.65, HH: 3.55, Brent: 82.40 };
+const currentPositions = { JKM: { 'Jun 26': 450000 }, TTF: { 'Jun 26': -300000 }, HH: { 'Jun 26': 120000 } };
+
+let direction = 'B';
+let selectedCpty = null;
+let cptyIdx = -1;
+let portIdx = -1;
+
+function setDirection(dir) {
+  direction = dir;
+  document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.dir-btn.' + (dir === 'B' ? 'buy' : 'sell')).classList.add('active');
+  updatePreview();
+}
+
+/* Counterparty combobox */
+function filterCpty(q) {
+  const list = document.getElementById('cpty-list');
+  const filtered = counterparties.filter(c => c.name.toLowerCase().includes(q.toLowerCase()));
+  cptyIdx = -1;
+  renderCptyList(filtered);
+  list.classList.add('open');
+}
+function renderCptyList(items) {
+  const list = document.getElementById('cpty-list');
+  list.innerHTML = items.map((c, i) => {
+    const creditStr = '$' + (c.credit / 1e6).toFixed(1) + 'M';
+    const cls = c.credit < 7000000 ? 'credit low' : 'credit';
+    return '<div class="combo-item' + (i === cptyIdx ? ' active' : '') + '" onmousedown="selectCpty(\'' + c.name + '\')" data-idx="' + i + '">' +
+      '<span>' + c.name + '</span><span class="' + cls + '">' + creditStr + '</span></div>';
+  }).join('');
+}
+function openCptyList() { filterCpty(document.getElementById('cpty-input').value); }
+function closeCptyList() { document.getElementById('cpty-list').classList.remove('open'); }
+function selectCpty(name) {
+  const cpty = counterparties.find(c => c.name === name);
+  if (!cpty) return;
+  selectedCpty = cpty;
+  document.getElementById('cpty-input').value = cpty.name;
+  document.getElementById('credit-display').textContent = '$' + (cpty.credit / 1e6).toFixed(1) + 'M';
+  document.getElementById('credit-display').style.color = cpty.credit < 7000000 ? 'var(--red)' : 'var(--green)';
+  document.getElementById('cpty-error').textContent = '';
+  document.getElementById('cpty-input').classList.remove('error');
+  closeCptyList();
+  updatePreview();
+}
+function cptyKeydown(e) {
+  const list = document.getElementById('cpty-list');
+  const items = list.querySelectorAll('.combo-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); cptyIdx = Math.min(cptyIdx + 1, items.length - 1); highlightCptyItem(items); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); cptyIdx = Math.max(cptyIdx - 1, 0); highlightCptyItem(items); }
+  else if (e.key === 'Enter' && cptyIdx >= 0 && items[cptyIdx]) { e.preventDefault(); items[cptyIdx].dispatchEvent(new Event('mousedown')); }
+  else if (e.key === 'Escape') { closeCptyList(); }
+  else if (e.key === 'Tab') { closeCptyList(); }
+}
+function highlightCptyItem(items) {
+  items.forEach((it, i) => it.classList.toggle('active', i === cptyIdx));
+  if (items[cptyIdx]) items[cptyIdx].scrollIntoView({ block: 'nearest' });
+}
+
+/* Port combobox */
+function filterPorts(q) {
+  const list = document.getElementById('port-list');
+  const filtered = ports.filter(p => p.toLowerCase().includes(q.toLowerCase()));
+  portIdx = -1;
+  list.innerHTML = filtered.map((p, i) => '<div class="combo-item' + (i === portIdx ? ' active' : '') + '" onmousedown="selectPort(\'' + p + '\')">' + p + '</div>').join('');
+  list.classList.add('open');
+}
+function openPortList() { filterPorts(document.getElementById('port-input').value); }
+function closePortList() { document.getElementById('port-list').classList.remove('open'); }
+function selectPort(name) {
+  document.getElementById('port-input').value = name;
+  closePortList();
+}
+function portKeydown(e) {
+  const list = document.getElementById('port-list');
+  const items = list.querySelectorAll('.combo-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); portIdx = Math.min(portIdx + 1, items.length - 1); items.forEach((it, i) => it.classList.toggle('active', i === portIdx)); if (items[portIdx]) items[portIdx].scrollIntoView({ block: 'nearest' }); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); portIdx = Math.max(portIdx - 1, 0); items.forEach((it, i) => it.classList.toggle('active', i === portIdx)); }
+  else if (e.key === 'Enter' && portIdx >= 0 && items[portIdx]) { e.preventDefault(); items[portIdx].dispatchEvent(new Event('mousedown')); }
+  else if (e.key === 'Escape') { closePortList(); }
+  else if (e.key === 'Tab') { closePortList(); }
+}
+
+/* Pricing type change */
+function onPricingTypeChange() {
+  const pt = document.getElementById('pricing-type').value;
+  document.getElementById('oil-slope-row').style.display = (pt === 'oil-indexed' || pt === 'hybrid') ? '' : 'none';
+  document.getElementById('benchmark-group').style.display = pt === 'fixed' ? 'none' : '';
+  document.getElementById('premium-group').style.display = (pt === 'hub-indexed' || pt === 'hybrid') ? '' : 'none';
+  updatePreview();
+}
+
+/* Validation */
+function validatePrice() {
+  const el = document.getElementById('price');
+  const err = document.getElementById('price-error');
+  const v = parseFloat(el.value);
+  if (isNaN(v) || v <= 0) { el.classList.add('error'); err.textContent = 'Price must be a positive number'; return false; }
+  el.classList.remove('error'); err.textContent = ''; return true;
+}
+function validateVolume() {
+  const el = document.getElementById('volume');
+  const err = document.getElementById('volume-error');
+  const v = parseInt(el.value);
+  if (isNaN(v) || v < 1000) { el.classList.add('error'); err.textContent = 'Min volume: 1,000 MMBtu'; return false; }
+  if (v > 500000) { el.classList.add('error'); err.textContent = 'Max volume: 500,000 MMBtu'; return false; }
+  el.classList.remove('error'); err.textContent = ''; return true;
+}
+
+/* Preview update */
+function updatePreview() {
+  document.getElementById('prev-dir').textContent = direction === 'B' ? 'BUY' : 'SELL';
+  document.getElementById('prev-dir').style.color = direction === 'B' ? 'var(--green)' : 'var(--red)';
+  document.getElementById('prev-cpty').textContent = selectedCpty ? selectedCpty.name : '--';
+  const bench = document.getElementById('benchmark').value;
+  document.getElementById('prev-bench').textContent = bench;
+  const price = parseFloat(document.getElementById('price').value);
+  document.getElementById('prev-price').textContent = isNaN(price) ? '--' : '$' + price.toFixed(2);
+  const vol = parseInt(document.getElementById('volume').value);
+  document.getElementById('prev-vol').textContent = isNaN(vol) ? '--' : vol.toLocaleString() + ' MMBtu';
+  document.getElementById('prev-del').textContent = document.getElementById('delivery').value;
+  document.getElementById('prev-inco').textContent = document.getElementById('incoterm').value;
+
+  // Position impact
+  const del = document.getElementById('delivery').value;
+  const curPos = (currentPositions[bench] && currentPositions[bench][del]) || 0;
+  const delta = isNaN(vol) ? 0 : (direction === 'B' ? vol : -vol);
+  const newPos = curPos + delta;
+
+  const fmtK = v => { const abs = Math.abs(v); return (v >= 0 ? '+' : '-') + (abs >= 1000 ? Math.round(abs/1000) + 'k' : abs); };
+  document.getElementById('prev-net').textContent = fmtK(newPos);
+  document.getElementById('prev-net').style.color = newPos >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const deltaEl = document.getElementById('prev-delta');
+  deltaEl.textContent = fmtK(delta);
+  deltaEl.className = 'impact-delta ' + (delta >= 0 ? 'pos' : 'neg');
+
+  if (!isNaN(price)) {
+    document.getElementById('prev-wacog').textContent = '$' + price.toFixed(2);
+    const spot = spotPrices[bench] || 0;
+    const mtm = direction === 'B' ? (spot - price) * (isNaN(vol) ? 0 : vol) : (price - spot) * (isNaN(vol) ? 0 : vol);
+    const mtmStr = (mtm >= 0 ? '+$' : '-$') + Math.round(Math.abs(mtm) / 1000) + 'K';
+    document.getElementById('prev-mtm').textContent = mtmStr;
+    document.getElementById('prev-mtm').style.color = mtm >= 0 ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+function resetForm() {
+  document.querySelectorAll('input:not([type=date])').forEach(i => i.value = '');
+  document.querySelectorAll('.form-error').forEach(e => e.textContent = '');
+  document.querySelectorAll('.hz-input.error').forEach(i => i.classList.remove('error'));
+  selectedCpty = null;
+  document.getElementById('credit-display').textContent = '--';
+  document.getElementById('credit-display').style.color = 'var(--text-muted)';
+  setDirection('B');
+  updatePreview();
+}
+
+function submitTrade() {
+  let valid = true;
+  if (!selectedCpty) {
+    document.getElementById('cpty-error').textContent = 'Counterparty is required';
+    document.getElementById('cpty-input').classList.add('error');
+    valid = false;
+  }
+  if (!validatePrice()) valid = false;
+  if (!validateVolume()) valid = false;
+  if (!valid) { showToast('Please fix validation errors', 'error'); return; }
+  showToast('Trade submitted: ' + direction + ' ' + parseInt(document.getElementById('volume').value).toLocaleString() + ' MMBtu @ $' + parseFloat(document.getElementById('price').value).toFixed(2), 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  onPricingTypeChange();
+  updatePreview();
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('form-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

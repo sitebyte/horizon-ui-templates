@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reconciliation — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    .recon-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    @media (max-width:48rem) { .recon-grid { grid-template-columns:1fr; } }
+
+    .recon-header { font-size:0.6875rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif; display:flex; align-items:center; gap:0.375rem; }
+    .recon-header .badge { font-size:0.5625rem; padding:0.0625rem 0.375rem; border-radius:1rem; font-weight:600; }
+    .recon-header .badge.prov { background:var(--amber-dim); color:var(--amber); }
+    .recon-header .badge.final { background:var(--green-dim); color:var(--green); }
+
+    .recon-row { display:flex; justify-content:space-between; padding:0.25rem 0; font-size:0.6875rem; border-bottom:0.0625rem solid var(--border); }
+    .recon-row:last-child { border-bottom:none; }
+    .recon-label { color:var(--text-tertiary); font-family:'Inter',sans-serif; }
+    .recon-val { font-weight:500; color:var(--text-primary); }
+    .recon-val.diff { color:var(--red); font-weight:700; }
+    .recon-val.match { color:var(--green); }
+    .recon-highlight { background:var(--red-dim); padding:0.0625rem 0.25rem; border-radius:0.125rem; }
+
+    .tol-bar { display:flex; align-items:center; gap:0.5rem; margin:0.375rem 0; }
+    .tol-track { flex:1; height:0.375rem; background:var(--surface-elevated); border-radius:0.1875rem; position:relative; overflow:hidden; }
+    .tol-fill { height:100%; border-radius:0.1875rem; transition:width 0.5s ease; }
+    .tol-fill.ok { background:var(--green); }
+    .tol-fill.warn { background:var(--amber); }
+    .tol-fill.fail { background:var(--red); }
+
+    .recon-actions { display:flex; gap:0.375rem; margin-top:0.5rem; padding-top:0.5rem; border-top:0.0625rem solid var(--border); }
+
+    .recon-selector { display:flex; gap:0.25rem; margin-bottom:0.75rem; }
+    .recon-sel-btn { padding:0.25rem 0.625rem; border:0.0625rem solid var(--border); border-radius:0.375rem; font-size:0.625rem; font-weight:500; color:var(--text-tertiary); cursor:pointer; transition:all 0.15s; background:transparent; }
+    .recon-sel-btn:hover { border-color:var(--text-muted); }
+    .recon-sel-btn.active { background:var(--accent); border-color:var(--accent); color:#000; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:flex; gap:0.25rem;">
+        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="hz-card"><div class="hz-skeleton" style="width:100%; height:12rem;"></div></div>
+        <div class="hz-card"><div class="hz-skeleton" style="width:100%; height:12rem;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="recon-content" style="display:none;">
+    <!-- Cargo selector -->
+    <div class="recon-selector fade-in">
+      <button class="recon-sel-btn active" onclick="loadRecon(0, this)">C-2406 (Shell)</button>
+      <button class="recon-sel-btn" onclick="loadRecon(1, this)">C-2405 (JERA)</button>
+      <button class="recon-sel-btn" onclick="loadRecon(2, this)">C-2404 (TotalEnergies)</button>
+    </div>
+
+    <!-- Side-by-side -->
+    <div class="recon-grid fade-in-d1">
+      <!-- Provisional -->
+      <div class="hz-card">
+        <div class="recon-header">Provisional Invoice <span class="badge prov">Provisional</span></div>
+        <div id="prov-rows"></div>
+      </div>
+      <!-- Final -->
+      <div class="hz-card">
+        <div class="recon-header">Final Invoice <span class="badge final">Final</span></div>
+        <div id="final-rows"></div>
+      </div>
+    </div>
+
+    <!-- Tolerance check -->
+    <div class="hz-card fade-in-d2" style="margin-top:0.75rem;">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Tolerance Check</div>
+      <div id="tol-checks"></div>
+      <div class="recon-actions">
+        <button class="hz-btn primary" onclick="approveRecon()">Approve Reconciliation</button>
+        <button class="hz-btn" onclick="flagRecon()">Flag for Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('reconciliation', 'Reconciliation');
+
+const reconData = [
+  {
+    cargo: 'C-2406', counterparty: 'Shell',
+    prov: { volume: 64800, price: 12.45, amount: 806760, quality: 1042, heating: 22450 },
+    final: { volume: 65120, price: 12.45, amount: 810744, quality: 1038, heating: 22480 },
+    tolerance: { volume: 0.5, amount: 1.0 }
+  },
+  {
+    cargo: 'C-2405', counterparty: 'JERA',
+    prov: { volume: 69500, price: 12.52, amount: 870140, quality: 1045, heating: 22420 },
+    final: { volume: 70200, price: 12.52, amount: 878904, quality: 1041, heating: 22410 },
+    tolerance: { volume: 0.5, amount: 1.0 }
+  },
+  {
+    cargo: 'C-2404', counterparty: 'TotalEnergies',
+    prov: { volume: 54500, price: 11.82, amount: 644190, quality: 1040, heating: 22380 },
+    final: { volume: 55800, price: 11.82, amount: 659556, quality: 1044, heating: 22395 },
+    tolerance: { volume: 0.5, amount: 1.0 }
+  }
+];
+
+let currentRecon = 0;
+
+function loadRecon(idx, btn) {
+  currentRecon = idx;
+  document.querySelectorAll('.recon-sel-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const d = reconData[idx];
+  const prov = d.prov;
+  const fin = d.final;
+
+  const fields = [
+    { label: 'Volume (MMBtu)', pv: prov.volume.toLocaleString(), fv: fin.volume.toLocaleString(), match: prov.volume === fin.volume },
+    { label: 'Price ($/MMBtu)', pv: '$' + prov.price.toFixed(2), fv: '$' + fin.price.toFixed(2), match: prov.price === fin.price },
+    { label: 'Total Amount', pv: '$' + prov.amount.toLocaleString(), fv: '$' + fin.amount.toLocaleString(), match: prov.amount === fin.amount },
+    { label: 'Quality (BTU/SCF)', pv: prov.quality.toString(), fv: fin.quality.toString(), match: prov.quality === fin.quality },
+    { label: 'Heating Value', pv: prov.heating.toLocaleString(), fv: fin.heating.toLocaleString(), match: prov.heating === fin.heating },
+  ];
+
+  const provEl = document.getElementById('prov-rows');
+  const finalEl = document.getElementById('final-rows');
+  provEl.innerHTML = '';
+  finalEl.innerHTML = '';
+
+  fields.forEach(f => {
+    provEl.innerHTML += '<div class="recon-row"><span class="recon-label">' + f.label + '</span><span class="recon-val ' + (f.match ? 'match' : '') + '">' + f.pv + '</span></div>';
+    finalEl.innerHTML += '<div class="recon-row"><span class="recon-label">' + f.label + '</span><span class="recon-val ' + (f.match ? 'match' : 'diff') + '">' + (f.match ? f.fv : '<span class="recon-highlight">' + f.fv + '</span>') + '</span></div>';
+  });
+
+  // Tolerance checks
+  const volDiff = Math.abs(fin.volume - prov.volume) / prov.volume * 100;
+  const amtDiff = Math.abs(fin.amount - prov.amount) / prov.amount * 100;
+
+  const tolEl = document.getElementById('tol-checks');
+  tolEl.innerHTML = '';
+
+  [
+    { label: 'Volume Variance', pct: volDiff, limit: d.tolerance.volume },
+    { label: 'Amount Variance', pct: amtDiff, limit: d.tolerance.amount }
+  ].forEach(t => {
+    const ratio = Math.min(t.pct / t.limit * 100, 100);
+    const cls = t.pct <= t.limit * 0.5 ? 'ok' : t.pct <= t.limit ? 'warn' : 'fail';
+    const status = t.pct <= t.limit ? 'Within tolerance' : 'EXCEEDS tolerance';
+    const statusColor = t.pct <= t.limit ? 'var(--green)' : 'var(--red)';
+
+    tolEl.innerHTML += '<div style="margin-bottom:0.5rem;">' +
+      '<div style="display:flex; justify-content:space-between; font-size:0.625rem; margin-bottom:0.1875rem;">' +
+      '<span style="color:var(--text-tertiary); font-family:Inter,sans-serif;">' + t.label + '</span>' +
+      '<span style="font-weight:600; color:' + statusColor + ';">' + t.pct.toFixed(2) + '% / ' + t.limit + '% &mdash; ' + status + '</span>' +
+      '</div>' +
+      '<div class="tol-bar"><div class="tol-track"><div class="tol-fill ' + cls + '" style="width:' + ratio + '%;"></div></div></div>' +
+      '</div>';
+  });
+}
+
+function approveRecon() {
+  showToast('Reconciliation approved for ' + reconData[currentRecon].cargo, 'success');
+}
+function flagRecon() {
+  showToast(reconData[currentRecon].cargo + ' flagged for review', 'error');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadRecon(0, null);
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('recon-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

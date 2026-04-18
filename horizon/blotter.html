@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blotter — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Skeleton loader */
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    .hz-skeleton-row { display:flex; gap:0.5rem; padding:0.375rem 0.5rem; border-bottom:0.0625rem solid var(--border); }
+    .hz-skeleton-cell { height:0.875rem; flex:1; }
+    .hz-skeleton-cell.w-sm { max-width:4rem; }
+    .hz-skeleton-cell.w-md { max-width:6rem; }
+    .hz-skeleton-cell.w-lg { max-width:10rem; }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+    /* Column toggle panel */
+    .hz-col-panel { position:absolute; right:0; top:100%; margin-top:0.25rem; background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:0.375rem; padding:0.5rem; z-index:20; min-width:10rem; box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3); display:none; }
+    .hz-col-panel.open { display:block; }
+    .hz-col-item { display:flex; align-items:center; gap:0.375rem; padding:0.1875rem 0.25rem; font-size:0.6875rem; color:var(--text-secondary); cursor:pointer; }
+    .hz-col-item input { accent-color: var(--accent); }
+    /* Filter pills */
+    .hz-pill { padding:0.1875rem 0.5rem; border-radius:1rem; font-size:0.625rem; font-weight:500; border:0.0625rem solid var(--border); color:var(--text-tertiary); background:transparent; transition: all 0.15s; cursor:pointer; }
+    .hz-pill:hover { border-color:var(--text-muted); color:var(--text-secondary); }
+    .hz-pill.active { background:var(--accent); border-color:var(--accent); color:#000; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton shown initially -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
+      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+        <div class="hz-skeleton" style="width:12rem; height:1.75rem;"></div>
+        <div class="hz-skeleton" style="width:4rem; height:1.75rem;"></div>
+        <div class="hz-skeleton" style="width:4rem; height:1.75rem;"></div>
+        <div class="hz-skeleton" style="width:4rem; height:1.75rem;"></div>
+        <div style="flex:1;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.75rem;"></div>
+      </div>
+      <div class="hz-card" style="padding:0;">
+        <div style="padding:0.375rem 0.5rem; border-bottom:0.0625rem solid var(--border); display:flex; gap:0.5rem;">
+          <div class="hz-skeleton hz-skeleton-cell w-sm"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-sm"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-lg"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-md"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-md"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-md"></div>
+          <div class="hz-skeleton hz-skeleton-cell w-md"></div>
+        </div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+        <div class="hz-skeleton-row"><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-sm"></div><div class="hz-skeleton hz-skeleton-cell w-lg"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div><div class="hz-skeleton hz-skeleton-cell w-md"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content (hidden until loaded) -->
+  <div id="blotter-content" style="display:none;">
+    <!-- Toolbar -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+      <div style="position:relative; flex:1; max-width:14rem;">
+        <input id="grid-search" type="text" class="hz-input" placeholder="Search trades..." style="width:100%; padding-left:1.75rem;" oninput="onSearchChanged()" />
+        <svg style="position:absolute; left:0.5rem; top:50%; transform:translateY(-50%); color:var(--text-muted);" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div style="display:flex; gap:0.25rem;">
+        <button class="hz-pill active" data-status="all" onclick="filterStatus('all')">All</button>
+        <button class="hz-pill" data-status="Confirmed" onclick="filterStatus('Confirmed')">Confirmed</button>
+        <button class="hz-pill" data-status="Pending" onclick="filterStatus('Pending')">Pending</button>
+        <button class="hz-pill" data-status="Cancelled" onclick="filterStatus('Cancelled')">Cancelled</button>
+      </div>
+      <div style="position:relative;">
+        <button class="hz-btn sm" onclick="toggleColPanel()">Columns</button>
+        <div id="col-panel" class="hz-col-panel"></div>
+      </div>
+      <button class="hz-btn sm" onclick="exportCsv()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+      <span style="margin-left:auto; font-size:0.625rem; color:var(--text-muted);" id="row-count">24 trades</span>
+      <span style="color:var(--border-subtle);">|</span>
+      <span id="total-pnl" style="font-size:0.625rem; font-weight:600; color:var(--green);">Total Unrealized P&L: --</span>
+    </div>
+    <!-- AG Grid -->
+    <div id="blotter-grid" class="ag-theme-quartz-dark" style="height:calc(100vh - 8.5rem); width:100%;"></div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('blotter', 'Blotter');
+
+/* --- Utilities --- */
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+const benchmarkPrices = { JKM: 14.60, TTF: 12.65, HH: 3.55, Brent: 82.40 };
+
+function calcMtm(data) {
+  if (!data || data.price == null || !data.benchmark) return null;
+  const spot = benchmarkPrices[data.benchmark];
+  if (spot == null) return null;
+  return data.side === 'B' ? (spot - data.price) : (data.price - spot);
+}
+function calcUnrealPnl(data) {
+  const mtm = calcMtm(data);
+  if (mtm == null || data.volume == null) return null;
+  return mtm * data.volume;
+}
+function formatPnl(v) {
+  if (v == null) return '\u2013';
+  const abs = Math.abs(v);
+  const sign = v < 0 ? '-$' : '$';
+  if (abs >= 1e6) return sign + (abs / 1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return sign + Math.round(abs / 1e3) + 'K';
+  return sign + abs.toFixed(0);
+}
+
+/* --- Trade Data (24 rows) --- */
+const tradeData = [
+  {id:1,tradeId:'T-1024',side:'B',counterparty:'Shell',volume:65000,benchmark:'JKM',price:12.45,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:42',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:2,tradeId:'T-1023',side:'S',counterparty:'JERA',volume:70000,benchmark:'JKM',price:12.52,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:38',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:3,tradeId:'T-1022',side:'B',counterparty:'TotalEnergies',volume:55000,benchmark:'TTF',price:11.82,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:31',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:4,tradeId:'T-1021',side:'S',counterparty:'BP',volume:60000,benchmark:'TTF',price:11.95,delivery:'Jul 26',status:'Pending',trader:'SM',timestamp:'2026-04-11 09:25',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:5,tradeId:'T-1020',side:'B',counterparty:'Chevron',volume:72000,benchmark:'HH',price:2.34,delivery:'Aug 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 09:18',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:6,tradeId:'T-1019',side:'S',counterparty:'Vitol',volume:68000,benchmark:'JKM',price:12.38,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-11 09:12',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:7,tradeId:'T-1018',side:'B',counterparty:'Petronas',volume:45000,benchmark:'JKM',price:12.41,delivery:'Jul 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-11 09:05',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:8,tradeId:'T-1017',side:'S',counterparty:'QatarEnergy',volume:80000,benchmark:'JKM',price:12.55,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-11 08:58',type:'Physical',incoterm:'DES',portfolio:'Middle East'},
+  {id:9,tradeId:'T-1016',side:'B',counterparty:'Equinor',volume:50000,benchmark:'TTF',price:11.78,delivery:'Sep 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-11 08:51',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:10,tradeId:'T-1015',side:'S',counterparty:'Cheniere',volume:75000,benchmark:'HH',price:2.38,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-11 08:44',type:'Physical',incoterm:'DES',portfolio:'Americas'},
+  {id:11,tradeId:'T-1014',side:'B',counterparty:'Trafigura',volume:62000,benchmark:'JKM',price:12.33,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 16:37',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:12,tradeId:'T-1013',side:'S',counterparty:'Glencore',volume:58000,benchmark:'TTF',price:11.89,delivery:'Aug 26',status:'Cancelled',trader:'AK',timestamp:'2026-04-10 16:30',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:13,tradeId:'T-1012',side:'B',counterparty:'Mitsui',volume:66000,benchmark:'JKM',price:12.48,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-10 15:22',type:'Physical',incoterm:'FOB',portfolio:'Pacific'},
+  {id:14,tradeId:'T-1011',side:'S',counterparty:'ENI',volume:54000,benchmark:'TTF',price:11.92,delivery:'Jun 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 15:15',type:'Physical',incoterm:'DES',portfolio:'Atlantic'},
+  {id:15,tradeId:'T-1010',side:'B',counterparty:'Gunvor',volume:71000,benchmark:'HH',price:2.31,delivery:'Jul 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-10 14:08',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:16,tradeId:'T-1009',side:'S',counterparty:'Shell',volume:48000,benchmark:'JKM',price:12.51,delivery:'Aug 26',status:'Pending',trader:'JC',timestamp:'2026-04-10 13:42',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:17,tradeId:'T-1008',side:'B',counterparty:'BP',volume:63000,benchmark:'TTF',price:11.85,delivery:'Sep 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-10 11:35',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:18,tradeId:'T-1007',side:'S',counterparty:'TotalEnergies',volume:57000,benchmark:'JKM',price:12.44,delivery:'Oct 26',status:'Confirmed',trader:'SM',timestamp:'2026-04-10 10:28',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:19,tradeId:'T-1006',side:'B',counterparty:'Vitol',volume:69000,benchmark:'HH',price:2.36,delivery:'Jun 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 16:55',type:'Physical',incoterm:'FOB',portfolio:'Americas'},
+  {id:20,tradeId:'T-1005',side:'S',counterparty:'JERA',volume:74000,benchmark:'JKM',price:12.49,delivery:'Jul 26',status:'Cancelled',trader:'RP',timestamp:'2026-04-09 15:41',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:21,tradeId:'T-1004',side:'B',counterparty:'Chevron',volume:52000,benchmark:'TTF',price:11.79,delivery:'Aug 26',status:'Confirmed',trader:'AK',timestamp:'2026-04-09 14:22',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:22,tradeId:'T-1003',side:'S',counterparty:'Petronas',volume:67000,benchmark:'JKM',price:12.57,delivery:'Sep 26',status:'Confirmed',trader:'JC',timestamp:'2026-04-09 11:18',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+  {id:23,tradeId:'T-1002',side:'B',counterparty:'Equinor',volume:59000,benchmark:'TTF',price:11.88,delivery:'Oct 26',status:'Pending',trader:'SM',timestamp:'2026-04-09 10:05',type:'Physical',incoterm:'FOB',portfolio:'Atlantic'},
+  {id:24,tradeId:'T-1001',side:'S',counterparty:'Mitsui',volume:73000,benchmark:'JKM',price:12.42,delivery:'Jun 26',status:'Confirmed',trader:'RP',timestamp:'2026-04-08 16:50',type:'Physical',incoterm:'DES',portfolio:'Pacific'},
+];
+
+let gridApi;
+let activeStatusFilter = 'all';
+
+function updateTotalPnl() {
+  let total = 0;
+  gridApi.forEachNodeAfterFilter(node => { total += calcUnrealPnl(node.data) || 0; });
+  const el = document.getElementById('total-pnl');
+  if (!el) return;
+  const sign = total >= 0 ? '+' : '';
+  el.style.color = total >= 0 ? 'var(--green)' : 'var(--red)';
+  el.textContent = 'Total Unrealized P&L: ' + sign + formatPnl(total);
+}
+
+function onSearchChanged() {
+  gridApi.setGridOption('quickFilterText', document.getElementById('grid-search').value);
+}
+
+function filterStatus(status) {
+  activeStatusFilter = status;
+  document.querySelectorAll('.hz-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === status);
+  });
+  gridApi.onFilterChanged();
+}
+
+function exportCsv() { gridApi.exportDataAsCsv({ fileName: 'blotter-export.csv' }); }
+
+function toggleColPanel() { document.getElementById('col-panel').classList.toggle('open'); }
+
+function toggleCol(field, visible) { gridApi.setColumnsVisible([field], visible); }
+
+/* --- Context menu --- */
+let selectedRow = null;
+function ctxAction(action) {
+  closeContextMenu();
+  if (!selectedRow) return;
+  if (action === 'view') showToast('Viewing ' + selectedRow.tradeId);
+  else if (action === 'amend') showToast('Amending ' + selectedRow.tradeId);
+  else if (action === 'cancel') {
+    selectedRow.status = 'Cancelled';
+    gridApi.applyTransaction({ update: [selectedRow] });
+    updateTotalPnl();
+    showToast(selectedRow.tradeId + ' cancelled');
+  }
+}
+
+/* --- Init Grid --- */
+document.addEventListener('DOMContentLoaded', () => {
+  const colDefs = [
+    { field:'tradeId', headerName:'ID', width:90, pinned:'left' },
+    { field:'side', width:55, cellRenderer: p => {
+      if (p.value == null) return '\u2013';
+      const v = escapeHtml(p.value);
+      return v === 'B'
+        ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:0.1875rem;font-size:0.5625rem;font-weight:700;background:var(--green-dim);color:var(--green);">B</span>'
+        : '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:0.1875rem;font-size:0.5625rem;font-weight:700;background:var(--red-dim);color:var(--red);">S</span>';
+    }},
+    { field:'counterparty', width:120 },
+    { field:'volume', width:90, type:'rightAligned', valueFormatter: p => p.value != null ? p.value.toLocaleString() : '\u2013' },
+    { field:'benchmark', width:80 },
+    { field:'price', width:85, type:'rightAligned', valueFormatter: p => p.value != null ? '$' + p.value.toFixed(2) : '\u2013' },
+    { field:'mtm', headerName:'MTM', width:90, type:'rightAligned',
+      valueGetter: p => calcMtm(p.data),
+      valueFormatter: p => p.value != null ? '$' + p.value.toFixed(2) : '\u2013',
+      cellStyle: p => { if (p.value == null) return null; return { color: p.value >= 0 ? 'var(--green)' : 'var(--red)' }; },
+      comparator: (a, b) => (a || 0) - (b || 0)
+    },
+    { field:'unrealPnl', headerName:'Unreal P&L', width:110, type:'rightAligned',
+      valueGetter: p => calcUnrealPnl(p.data),
+      valueFormatter: p => p.value != null ? formatPnl(p.value) : '\u2013',
+      cellStyle: p => { if (p.value == null) return null; return { color: p.value >= 0 ? 'var(--green)' : 'var(--red)' }; },
+      comparator: (a, b) => (a || 0) - (b || 0)
+    },
+    { field:'delivery', width:80 },
+    { field:'incoterm', width:70 },
+    { field:'type', width:75 },
+    { field:'portfolio', width:100 },
+    { field:'status', width:95, cellRenderer: p => {
+      if (p.value == null) return '\u2013';
+      const v = escapeHtml(p.value);
+      const styles = {
+        'Confirmed': 'background:var(--green-dim);color:var(--green)',
+        'Pending': 'background:var(--amber-dim);color:var(--amber)',
+        'Cancelled': 'background:var(--surface-elevated);color:var(--text-muted)',
+      };
+      return '<span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;' + (styles[v] || '') + '">' + v + '</span>';
+    }},
+    { field:'trader', width:55 },
+    { field:'timestamp', headerName:'Time', width:130 },
+  ];
+
+  // Build column toggle panel
+  const colPanel = document.getElementById('col-panel');
+  colDefs.forEach(c => {
+    const name = c.headerName || c.field;
+    const div = document.createElement('div');
+    div.className = 'hz-col-item';
+    div.innerHTML = '<input type="checkbox" checked onchange="toggleCol(\'' + escapeHtml(c.field) + '\',this.checked)" /><span>' + escapeHtml(name) + '</span>';
+    colPanel.appendChild(div);
+  });
+
+  const gridOptions = {
+    columnDefs: colDefs,
+    rowData: tradeData,
+    getRowId: params => String(params.data.id),
+    defaultColDef: { sortable: true, filter: true, resizable: true },
+    rowSelection: 'single',
+    animateRows: true,
+    suppressCellFocus: true,
+    isExternalFilterPresent: () => activeStatusFilter !== 'all',
+    doesExternalFilterPass: node => node.data.status === activeStatusFilter,
+    onCellContextMenu: e => {
+      e.event.preventDefault();
+      selectedRow = e.data;
+      showContextMenu(e.event, [
+        { label: 'View Trade', action: "ctxAction('view')" },
+        { label: 'Amend Trade', action: "ctxAction('amend')" },
+        { label: 'Cancel Trade', action: "ctxAction('cancel')" },
+      ]);
+    },
+    onFirstDataRendered: () => {
+      document.getElementById('row-count').textContent = gridApi.getDisplayedRowCount() + ' trades';
+      updateTotalPnl();
+    },
+    onFilterChanged: () => {
+      document.getElementById('row-count').textContent = gridApi.getDisplayedRowCount() + ' trades';
+      updateTotalPnl();
+    },
+  };
+
+  gridApi = agGrid.createGrid(document.getElementById('blotter-grid'), gridOptions);
+
+  // Theme-aware grid
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridEl = document.getElementById('blotter-grid');
+  gridEl.classList.toggle('ag-theme-quartz-dark', isDark);
+  gridEl.classList.toggle('ag-theme-quartz', !isDark);
+
+  // Show content after skeleton delay
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('blotter-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+
+// Close column panel on outside click
+document.addEventListener('click', e => {
+  const panel = document.getElementById('col-panel');
+  if (panel && !e.target.closest('.hz-col-panel') && !e.target.closest('[onclick*="toggleColPanel"]')) {
+    panel.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

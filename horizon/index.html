@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Horizon ETRM</title>
+  <link href="shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- ===== TRADER VIEW ===== -->
+  <div id="view-trader" style="display:none;">
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="hz-kpi fade-in-d1">
+        <span class="hz-kpi-label">Net Position</span>
+        <span class="hz-kpi-value">6.4M</span>
+        <span class="hz-kpi-delta positive">+3.2M vs yesterday</span>
+      </div>
+      <div class="hz-kpi fade-in-d2">
+        <span class="hz-kpi-label">Unrealized P&amp;L</span>
+        <span class="hz-kpi-value text-green">+$2.1M</span>
+        <span class="hz-kpi-delta positive">+$340K today</span>
+      </div>
+      <div class="hz-kpi fade-in-d3">
+        <span class="hz-kpi-label">Hedge Ratio</span>
+        <span class="hz-kpi-value">78%</span>
+        <span class="hz-kpi-delta negative">-4% from target</span>
+      </div>
+      <div class="hz-kpi fade-in-d4">
+        <span class="hz-kpi-label">Trades Today</span>
+        <span class="hz-kpi-value">3</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">2 buy, 1 sell</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Mini Position Ladder -->
+      <div class="lg:col-span-2 hz-card fade-in-d3">
+        <div class="hz-card-header">
+          <div>
+            <div class="hz-card-title">Position Ladder</div>
+            <div class="hz-card-subtitle">JKM — Net position by delivery month</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="hz-btn sm active">JKM</button>
+            <button class="hz-btn sm">TTF</button>
+            <button class="hz-btn sm">HH</button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="hz-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th style="text-align:right;">Long</th>
+                <th style="text-align:right;">Short</th>
+                <th style="text-align:right;">Net</th>
+                <th style="text-align:right;">WACOG</th>
+                <th style="text-align:right;">MTM P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="position-ladder-body">
+              <tr>
+                <td>Jun-26</td>
+                <td style="text-align:right;" class="font-mono text-green">3.2M</td>
+                <td style="text-align:right;" class="font-mono text-red">-1.6M</td>
+                <td style="text-align:right;" class="font-mono" style="font-weight:600;">1.6M</td>
+                <td style="text-align:right;" class="font-mono">$14.12</td>
+                <td style="text-align:right;" class="font-mono text-green">+$208K</td>
+              </tr>
+              <tr>
+                <td>Jul-26</td>
+                <td style="text-align:right;" class="font-mono text-green">4.8M</td>
+                <td style="text-align:right;" class="font-mono text-red">-3.2M</td>
+                <td style="text-align:right;" class="font-mono">1.6M</td>
+                <td style="text-align:right;" class="font-mono">$13.85</td>
+                <td style="text-align:right;" class="font-mono text-green">+$412K</td>
+              </tr>
+              <tr>
+                <td>Aug-26</td>
+                <td style="text-align:right;" class="font-mono text-green">3.2M</td>
+                <td style="text-align:right;" class="font-mono text-red">-4.8M</td>
+                <td style="text-align:right;" class="font-mono text-red">-1.6M</td>
+                <td style="text-align:right;" class="font-mono">$14.50</td>
+                <td style="text-align:right;" class="font-mono text-red">-$128K</td>
+              </tr>
+              <tr>
+                <td>Sep-26</td>
+                <td style="text-align:right;" class="font-mono text-green">6.4M</td>
+                <td style="text-align:right;" class="font-mono text-red">-3.2M</td>
+                <td style="text-align:right;" class="font-mono">3.2M</td>
+                <td style="text-align:right;" class="font-mono">$13.20</td>
+                <td style="text-align:right;" class="font-mono text-green">+$1.6M</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:0.125rem solid var(--border-strong);">
+                <td style="font-weight:600;color:var(--text-primary);">Total</td>
+                <td style="text-align:right;" class="font-mono text-green" style="font-weight:600;">17.6M</td>
+                <td style="text-align:right;" class="font-mono text-red" style="font-weight:600;">-12.8M</td>
+                <td style="text-align:right;" class="font-mono" style="font-weight:700;color:var(--text-primary);">4.8M</td>
+                <td style="text-align:right;" class="font-mono">$13.92</td>
+                <td style="text-align:right;" class="font-mono text-green" style="font-weight:600;">+$2.1M</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Market Alerts -->
+      <div class="hz-card fade-in-d4">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Market Alerts</div>
+          <span class="hz-badge amber">3 active</span>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="p-3 rounded-lg" style="background:var(--amber-dim);border:0.0625rem solid rgba(245,158,11,0.2);">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="hz-dot amber"></span>
+              <span class="text-sm font-medium" style="color:var(--amber);">JKM Spread Alert</span>
+            </div>
+            <p class="text-xs" style="color:var(--text-tertiary);">Jun/Jul spread widened to $0.30 — above $0.25 threshold</p>
+            <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">11 Apr 08:42</p>
+          </div>
+          <div class="p-3 rounded-lg" style="background:var(--red-dim);border:0.0625rem solid rgba(239,68,68,0.2);">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="hz-dot red"></span>
+              <span class="text-sm font-medium" style="color:var(--red);">Position Limit</span>
+            </div>
+            <p class="text-xs" style="color:var(--text-tertiary);">Sep-26 net position at 80% of $4M limit</p>
+            <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">11 Apr 09:15</p>
+          </div>
+          <div class="p-3 rounded-lg" style="background:var(--blue-dim);border:0.0625rem solid rgba(59,130,246,0.2);">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="hz-dot blue"></span>
+              <span class="text-sm font-medium" style="color:var(--blue);">Credit Watch</span>
+            </div>
+            <p class="text-xs" style="color:var(--text-tertiary);">Shell Trading credit headroom below $25M threshold</p>
+            <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">10 Apr 16:30</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OPERATIONS VIEW ===== -->
+  <div id="view-operations" style="display:none;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="hz-kpi fade-in-d1">
+        <span class="hz-kpi-label">Pending Invoices</span>
+        <span class="hz-kpi-value text-amber">3</span>
+        <span class="hz-kpi-delta" style="color:var(--amber);">$12.4M total</span>
+      </div>
+      <div class="hz-kpi fade-in-d2">
+        <span class="hz-kpi-label">Open Nominations</span>
+        <span class="hz-kpi-value">2</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">Next: 15 Apr</span>
+      </div>
+      <div class="hz-kpi fade-in-d3">
+        <span class="hz-kpi-label">Pending Validations</span>
+        <span class="hz-kpi-value text-red">5</span>
+        <span class="hz-kpi-delta negative">2 overdue</span>
+      </div>
+      <div class="hz-kpi fade-in-d4">
+        <span class="hz-kpi-label">Vessels In Transit</span>
+        <span class="hz-kpi-value">4</span>
+        <span class="hz-kpi-delta positive">All on schedule</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Upcoming Deadlines -->
+      <div class="hz-card fade-in-d3">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Upcoming Deadlines</div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between p-2 rounded" style="background:var(--hover);">
+            <div>
+              <div class="text-sm font-medium" style="color:var(--text-primary);">ADP Nomination — Jun 2026</div>
+              <div class="text-xs" style="color:var(--text-muted);">Vessel: Al Dafna | Cargo: 3.2M MMBtu</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-mono" style="color:var(--red);">Due 15 Apr</div>
+              <span class="hz-badge red">4 days</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded" style="background:var(--hover);">
+            <div>
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Invoice Reconciliation — SELL-2026-0328</div>
+              <div class="text-xs" style="color:var(--text-muted);">Counterparty: TotalEnergies</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-mono" style="color:var(--amber);">Due 18 Apr</div>
+              <span class="hz-badge amber">7 days</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded" style="background:var(--hover);">
+            <div>
+              <div class="text-sm font-medium" style="color:var(--text-primary);">B/L Documentation — Cargo C-2026-089</div>
+              <div class="text-xs" style="color:var(--text-muted);">Loading port: Sabine Pass</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-mono" style="color:var(--text-muted);">Due 22 Apr</div>
+              <span class="hz-badge neutral">11 days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cargo Pipeline -->
+      <div class="hz-card fade-in-d4">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Cargo Pipeline</div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-dot green pulse"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Al Dafna</div>
+              <div class="text-xs" style="color:var(--text-muted);">Sabine Pass &rarr; Sodegaura</div>
+            </div>
+            <div class="text-right">
+              <span class="hz-badge green">In Transit</span>
+              <div class="text-xs font-mono mt-1" style="color:var(--text-muted);">ETA 17 Jun</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-dot blue"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">LNG Abuja</div>
+              <div class="text-xs" style="color:var(--text-muted);">Bonny Island &rarr; Gate Terminal</div>
+            </div>
+            <div class="text-right">
+              <span class="hz-badge blue">Loading</span>
+              <div class="text-xs font-mono mt-1" style="color:var(--text-muted);">ETD 14 Apr</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-dot amber"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Gaslog Salem</div>
+              <div class="text-xs" style="color:var(--text-muted);">Ras Laffan &rarr; Incheon</div>
+            </div>
+            <div class="text-right">
+              <span class="hz-badge amber">Nominated</span>
+              <div class="text-xs font-mono mt-1" style="color:var(--text-muted);">Laycan 1-10 May</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MANAGER VIEW ===== -->
+  <div id="view-manager" style="display:none;">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="hz-kpi fade-in-d1">
+        <span class="hz-kpi-label">Portfolio P&amp;L (MTD)</span>
+        <span class="hz-kpi-value text-green">+$4.8M</span>
+        <span class="hz-kpi-delta positive">+12% vs target</span>
+      </div>
+      <div class="hz-kpi fade-in-d2">
+        <span class="hz-kpi-label">VaR (95%)</span>
+        <span class="hz-kpi-value">$1.2M</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">Limit: $3M</span>
+      </div>
+      <div class="hz-kpi fade-in-d3">
+        <span class="hz-kpi-label">Active Trades</span>
+        <span class="hz-kpi-value">47</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">12 pending approval</span>
+      </div>
+      <div class="hz-kpi fade-in-d4">
+        <span class="hz-kpi-label">Credit Utilization</span>
+        <span class="hz-kpi-value">62%</span>
+        <span class="hz-kpi-delta negative">+8% this week</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Team Activity -->
+      <div class="hz-card fade-in-d3">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Team Activity</div>
+          <span class="text-xs" style="color:var(--text-muted);">Last 24h</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:var(--gradient);">JC</div>
+            <div class="flex-1">
+              <div class="text-sm" style="color:var(--text-primary);"><strong>J. Cobley</strong> entered BUY 3.2M JKM Jun-26</div>
+              <div class="text-xs font-mono" style="color:var(--text-muted);">09:42 today</div>
+            </div>
+            <span class="hz-badge green">+$340K MTM</span>
+          </div>
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:linear-gradient(135deg, #22c55e, #16a34a);">SK</div>
+            <div class="flex-1">
+              <div class="text-sm" style="color:var(--text-primary);"><strong>S. Kumar</strong> nominated vessel Al Dafna</div>
+              <div class="text-xs font-mono" style="color:var(--text-muted);">08:15 today</div>
+            </div>
+            <span class="hz-badge blue">Ops</span>
+          </div>
+          <div class="flex items-center gap-3 p-2 rounded" style="background:var(--hover);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:linear-gradient(135deg, #f59e0b, #d97706);">RM</div>
+            <div class="flex-1">
+              <div class="text-sm" style="color:var(--text-primary);"><strong>R. Mehta</strong> approved credit extension for Shell</div>
+              <div class="text-xs font-mono" style="color:var(--text-muted);">16:30 yesterday</div>
+            </div>
+            <span class="hz-badge amber">Credit</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Overview -->
+      <div class="hz-card fade-in-d4">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Risk Overview</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Position Limit Usage</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">4.8M / 10M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:48%;background:var(--green);"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Credit Utilization</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$62M / $100M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:62%;background:var(--amber);"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">VaR vs Limit</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$1.2M / $3M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:40%;background:var(--green);"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Hedge Ratio</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">78% / 85% target</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:78%;background:var(--blue);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('dashboard', 'Dashboard');
+
+  // Role-adaptive view switching
+  function onRoleChange(role) {
+    document.getElementById('view-trader').style.display = role === 'trader' ? '' : 'none';
+    document.getElementById('view-operations').style.display = role === 'operations' ? '' : 'none';
+    document.getElementById('view-manager').style.display = role === 'manager' ? '' : 'none';
+  }
+
+  // Set initial view after skeleton
+  setTimeout(function() {
+    onRoleChange(getRole());
+  }, 520);
+</script>
+</body>
+</html>

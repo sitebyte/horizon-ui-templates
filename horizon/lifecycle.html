@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Lifecycle — Horizon ETRM</title>
+  <link href="shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+  <style>
+    .lifecycle-timeline {
+      position: relative;
+      padding-left: 2.5rem;
+      margin-left: 1rem;
+    }
+    .lifecycle-timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.9375rem;
+      top: 1rem;
+      bottom: 1rem;
+      width: 0.125rem;
+      background: linear-gradient(to bottom, var(--green), var(--accent), var(--accent-violet), var(--border));
+    }
+    .lc-step {
+      position: relative;
+      padding-bottom: 2rem;
+    }
+    .lc-step:last-child { padding-bottom: 0; }
+    .lc-dot {
+      position: absolute;
+      left: -1.625rem;
+      top: 0.125rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: box-shadow 0.3s ease;
+    }
+    .lc-dot.complete {
+      background: var(--green);
+      box-shadow: 0 0 0 0.25rem var(--green-dim);
+    }
+    .lc-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 0 0.25rem var(--accent-bg);
+      animation: activePulse 2s infinite;
+    }
+    .lc-dot.pending {
+      background: var(--surface-elevated);
+      border: 0.125rem solid var(--border-strong);
+    }
+    .lc-dot.settlement {
+      background: var(--accent-violet);
+      box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.15);
+    }
+    .lc-dot svg { width: 0.75rem; height: 0.75rem; color: #fff; }
+    @keyframes activePulse {
+      0%, 100% { box-shadow: 0 0 0 0.25rem var(--accent-bg); }
+      50% { box-shadow: 0 0 0 0.5rem rgba(79, 70, 229, 0.05); }
+    }
+    .lc-phase {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.25rem;
+    }
+    .lc-phase-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 0.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      font-weight: 700;
+    }
+    .lc-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .lc-detail {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.7;
+    }
+    .lc-detail .val {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+    .lc-detail .highlight {
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+    }
+    .lc-meta {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .lc-expand {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface-base);
+      border: 0.0625rem solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+    .lc-expand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.375rem 0;
+      font-size: var(--text-sm);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+    }
+    .lc-expand-row:last-child { border-bottom: none; }
+    .lc-expand-label { color: var(--text-muted); }
+    .lc-expand-value { font-family: var(--font-mono); color: var(--text-primary); }
+    .lc-pnl-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .lc-pnl-item {
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      background: var(--surface-base);
+      border: 0.0625rem solid var(--border-subtle);
+    }
+    .lc-pnl-item .pnl-label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .lc-pnl-item .pnl-val {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Trade header -->
+  <div class="flex items-center justify-between mb-5 fade-in">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-mono px-2 py-1 rounded" style="background:var(--green-dim);color:var(--green);font-weight:600;">BUY</span>
+        <h1 class="text-xl font-bold" style="color:var(--text-primary);font-family:var(--font-mono);">BUY-2026-0411-A3F</h1>
+      </div>
+      <p class="text-sm mt-1" style="color:var(--text-muted);">Shell Trading &mdash; 3,200,000 MMBtu JKM+$0.50 DES Jun-26</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="hz-btn sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Export
+      </button>
+      <button class="hz-btn sm primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Lifecycle Timeline -->
+  <div class="hz-card fade-in-d1">
+    <div class="lifecycle-timeline">
+
+      <!-- 1. CAPTURE -->
+      <div class="lc-step">
+        <div class="lc-dot complete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="lc-phase" style="color:var(--green);">
+          <span class="lc-phase-num" style="background:var(--green-dim);color:var(--green);">1</span>
+          CAPTURE
+        </div>
+        <div class="lc-title">Trade Created</div>
+        <div class="lc-detail">
+          <span class="highlight" style="background:var(--green-dim);color:var(--green);">BUY</span>
+          <span class="val">3,200,000</span> MMBtu at <span class="val">JKM+$0.50</span> <span class="val">DES</span> <span class="val">Jun-26</span> from <strong style="color:var(--text-primary);">Shell Trading</strong>
+        </div>
+        <div class="lc-meta">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          12 Apr 2026, 09:42 &mdash; j.cobley
+        </div>
+        <div class="lc-expand">
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Trade Reference</span>
+            <span class="lc-expand-value">BUY-2026-0411-A3F</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Counterparty</span>
+            <span class="lc-expand-value">Shell Energy Trading</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Volume</span>
+            <span class="lc-expand-value">3,200,000 MMBtu</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Pricing</span>
+            <span class="lc-expand-value">JKM + $0.50/MMBtu</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Delivery Terms</span>
+            <span class="lc-expand-value">DES Jun-2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. APPROVAL -->
+      <div class="lc-step">
+        <div class="lc-dot complete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="lc-phase" style="color:var(--green);">
+          <span class="lc-phase-num" style="background:var(--green-dim);color:var(--green);">2</span>
+          APPROVAL
+        </div>
+        <div class="lc-title">Trade Approved</div>
+        <div class="lc-detail">
+          Credit check: <span class="highlight" style="background:var(--green-dim);color:var(--green);">PASS</span> (<span class="val">$22M</span> headroom)<br/>
+          Position impact: JKM Jun-26 <span class="val">3.2M</span> &rarr; <span class="val">6.4M</span> Long
+        </div>
+        <div class="lc-meta">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          12 Apr 2026, 10:15 &mdash; r.mehta (Credit Approver)
+        </div>
+      </div>
+
+      <!-- 3. NOMINATION -->
+      <div class="lc-step">
+        <div class="lc-dot complete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="lc-phase" style="color:var(--green);">
+          <span class="lc-phase-num" style="background:var(--green-dim);color:var(--green);">3</span>
+          NOMINATION
+        </div>
+        <div class="lc-title">Cargo Nominated</div>
+        <div class="lc-detail">
+          Vessel: <strong style="color:var(--text-primary);">Al Dafna</strong> (Q-Max, 266,000 m<sup>3</sup>)<br/>
+          Laycan: <span class="val">1&ndash;15 Jun 2026</span><br/>
+          ETA Load: <span class="val">3 Jun</span> &mdash; ETA Discharge: <span class="val">16 Jun</span>
+        </div>
+        <div class="lc-meta">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          15 Apr 2026 &mdash; s.kumar (Operations)
+        </div>
+      </div>
+
+      <!-- 4. LOADING -->
+      <div class="lc-step">
+        <div class="lc-dot complete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="lc-phase" style="color:var(--green);">
+          <span class="lc-phase-num" style="background:var(--green-dim);color:var(--green);">4</span>
+          LOADING
+        </div>
+        <div class="lc-title">Cargo Loaded &mdash; B/L Issued</div>
+        <div class="lc-detail">
+          B/L Quantity: <span class="val">3,198,450</span> MMBtu<br/>
+          Quality: GHV <span class="val">1,048</span> BTU/scf (contract: <span class="val">1,050</span>)
+          <span class="highlight" style="background:var(--amber-dim);color:var(--amber);">-0.19% deviation</span><br/>
+          Loading port: <strong style="color:var(--text-primary);">Sabine Pass LNG, Louisiana</strong>
+        </div>
+        <div class="lc-meta">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          5 Jun 2026 &mdash; Surveyor: SGS
+        </div>
+      </div>
+
+      <!-- 5. VOYAGE -->
+      <div class="lc-step">
+        <div class="lc-dot active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        </div>
+        <div class="lc-phase" style="color:var(--accent-light);">
+          <span class="lc-phase-num" style="background:var(--accent-bg);color:var(--accent-light);">5</span>
+          VOYAGE
+        </div>
+        <div class="lc-title">In Transit &rarr; Sodegaura, Japan</div>
+        <div class="lc-detail">
+          Current position: <span class="val">28.5&deg;N, 142.3&deg;E</span> (Pacific Ocean)<br/>
+          Speed: <span class="val">19.2</span> knots &mdash; ETA: <span class="val">17 Jun 2026</span><br/>
+          BOG estimate: <span class="val">-1,550</span> MMBtu (<span class="val">0.048%</span>)
+        </div>
+        <div class="lc-meta">
+          <span class="hz-dot green pulse" style="margin-right:0.25rem;"></span>
+          Live tracking &mdash; Last AIS update: 11 Apr 14:22 UTC
+        </div>
+        <div class="lc-expand">
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Departure</span>
+            <span class="lc-expand-value">5 Jun, Sabine Pass</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Destination</span>
+            <span class="lc-expand-value">Sodegaura LNG Terminal, Japan</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Distance Remaining</span>
+            <span class="lc-expand-value">2,840 nm</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Weather</span>
+            <span class="lc-expand-value">Fair &mdash; Tropical storm risk: Low</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. DISCHARGE -->
+      <div class="lc-step">
+        <div class="lc-dot pending"></div>
+        <div class="lc-phase" style="color:var(--text-muted);">
+          <span class="lc-phase-num" style="background:var(--surface-elevated);color:var(--text-muted);">6</span>
+          DISCHARGE
+        </div>
+        <div class="lc-title" style="color:var(--text-tertiary);">Pending Discharge</div>
+        <div class="lc-detail">
+          Expected outturn: <span class="val">3,196,900</span> MMBtu<br/>
+          Transit loss estimate: <span class="val">1,550</span> MMBtu (within <span class="val">0.1%</span> tolerance)<br/>
+          Discharge port: <strong style="color:var(--text-tertiary);">Sodegaura LNG Terminal, Japan</strong>
+        </div>
+        <div class="lc-meta">
+          Expected: 17 Jun 2026
+        </div>
+      </div>
+
+      <!-- 7. SETTLEMENT -->
+      <div class="lc-step">
+        <div class="lc-dot pending"></div>
+        <div class="lc-phase" style="color:var(--text-muted);">
+          <span class="lc-phase-num" style="background:var(--surface-elevated);color:var(--text-muted);">7</span>
+          SETTLEMENT
+        </div>
+        <div class="lc-title" style="color:var(--text-tertiary);">Pending Settlement</div>
+        <div class="lc-detail">
+          Provisional invoice: <span class="val">$45,578,025</span><br/>
+          Estimated final: <span class="val">$45,453,862</span> (quality adj: <span class="val" style="color:var(--red);">-$124,163</span>)
+        </div>
+        <div class="lc-expand">
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Pricing Date</span>
+            <span class="lc-expand-value">JKM Jun-26 settlement</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Base Price</span>
+            <span class="lc-expand-value">$14.25 + $0.50 = $14.75/MMBtu</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Provisional Amount</span>
+            <span class="lc-expand-value">$45,578,025</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Quality Adjustment</span>
+            <span class="lc-expand-value" style="color:var(--red);">-$124,163</span>
+          </div>
+          <div class="lc-expand-row">
+            <span class="lc-expand-label">Final Amount</span>
+            <span class="lc-expand-value" style="font-weight:700;">$45,453,862</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. P&L -->
+      <div class="lc-step">
+        <div class="lc-dot pending"></div>
+        <div class="lc-phase" style="color:var(--text-muted);">
+          <span class="lc-phase-num" style="background:var(--surface-elevated);color:var(--text-muted);">8</span>
+          P&amp;L
+        </div>
+        <div class="lc-title" style="color:var(--text-tertiary);">Estimated Realized P&amp;L</div>
+        <div class="lc-detail">
+          Total estimated: <span class="val" style="color:var(--green);font-size:var(--text-lg);font-weight:700;">+$1,120,000</span>
+        </div>
+        <div class="lc-pnl-grid">
+          <div class="lc-pnl-item">
+            <div class="pnl-label">Price</div>
+            <div class="pnl-val text-green">+$892K</div>
+          </div>
+          <div class="lc-pnl-item">
+            <div class="pnl-label">Quality</div>
+            <div class="pnl-val text-red">-$124K</div>
+          </div>
+          <div class="lc-pnl-item">
+            <div class="pnl-label">BOG</div>
+            <div class="pnl-val text-red">-$48K</div>
+          </div>
+          <div class="lc-pnl-item">
+            <div class="pnl-label">FX</div>
+            <div class="pnl-val text-green">+$400K</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('lifecycle', 'Trade Lifecycle');
+</script>
+</body>
+</html>

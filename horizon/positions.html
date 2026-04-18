@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Positions — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    /* Position ladder */
+    .pos-table { width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:0.6875rem; }
+    .pos-table th { text-align:center; padding:0.375rem 0.5rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; font-size:0.5625rem; letter-spacing:0.05em; border-bottom:0.0625rem solid var(--border); background:var(--card-bg); position:sticky; top:0; z-index:1; }
+    .pos-table th:first-child { text-align:left; }
+    .pos-table td { padding:0.25rem; text-align:center; border-bottom:0.0625rem solid var(--border); }
+    .pos-table td:first-child { text-align:left; font-weight:600; color:var(--text-primary); padding-left:0.5rem; }
+    .pos-table td:last-child { text-align:right; font-weight:600; padding-right:0.5rem; }
+    .pos-table tbody tr:hover td { background:var(--hover); }
+
+    /* Heat-map cells */
+    .pos-cell { border-radius:0.25rem; padding:0.375rem 0.5rem; cursor:pointer; transition:outline 0.15s, transform 0.1s; user-select:none; min-width:5.5rem; }
+    .pos-cell:hover { outline:0.125rem solid var(--accent); outline-offset:-0.0625rem; }
+    .pos-cell:focus { outline:0.125rem solid var(--accent); outline-offset:-0.0625rem; }
+    .pos-cell.selected { outline:0.125rem solid var(--accent); background:var(--accent-bg) !important; }
+    .pos-cell .vol { font-weight:600; font-size:0.6875rem; }
+    .pos-cell .wacog { font-size:0.5625rem; opacity:0.7; margin-top:0.0625rem; }
+    .pos-cell .pnl { font-size:0.5625rem; margin-top:0.0625rem; }
+    .pos-cell .split { font-size:0.5rem; opacity:0.5; margin-top:0.0625rem; }
+
+    /* Heat intensity: long */
+    .heat-long-1 { background: rgba(34,197,94,0.06); color: var(--green); }
+    .heat-long-2 { background: rgba(34,197,94,0.12); color: var(--green); }
+    .heat-long-3 { background: rgba(34,197,94,0.20); color: var(--green); }
+    .heat-long-4 { background: rgba(34,197,94,0.30); color: var(--green); }
+    /* Heat intensity: short */
+    .heat-short-1 { background: rgba(239,68,68,0.06); color: var(--red); }
+    .heat-short-2 { background: rgba(239,68,68,0.12); color: var(--red); }
+    .heat-short-3 { background: rgba(239,68,68,0.20); color: var(--red); }
+    .heat-short-4 { background: rgba(239,68,68,0.30); color: var(--red); }
+
+    /* Totals row */
+    .pos-table .totals-row td { font-weight:700; color:var(--text-primary); border-top:0.125rem solid var(--border); background:var(--surface-raised); }
+
+    /* Drill-down panel */
+    .drill-panel { display:none; }
+    .drill-panel.open { display:block; animation: fadeIn 0.2s ease; }
+    .drill-table { width:100%; border-collapse:collapse; font-size:0.6875rem; }
+    .drill-table th { text-align:left; padding:0.25rem 0.5rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; font-size:0.5625rem; border-bottom:0.0625rem solid var(--border); }
+    .drill-table td { padding:0.25rem 0.5rem; border-bottom:0.0625rem solid var(--border); color:var(--text-secondary); }
+    .drill-table tr:hover td { background:var(--hover); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:10rem; height:1rem; margin-bottom:0.75rem;"></div>
+        <div style="display:grid; grid-template-columns:5rem repeat(6,1fr) 4rem; gap:0.375rem;">
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+          <div class="hz-skeleton" style="height:0.75rem;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:5rem repeat(6,1fr) 4rem; gap:0.375rem; margin-top:0.5rem;">
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:5rem repeat(6,1fr) 4rem; gap:0.375rem; margin-top:0.375rem;">
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:5rem repeat(6,1fr) 4rem; gap:0.375rem; margin-top:0.375rem;">
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+          <div class="hz-skeleton" style="height:3rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="pos-content" style="display:none;">
+    <!-- Ladder -->
+    <div class="hz-card fade-in" style="overflow-x:auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+        <span style="font-weight:600; color:var(--text-primary); font-size:0.8125rem;">Position Ladder</span>
+        <span style="font-size:0.5625rem; color:var(--text-muted);">Arrow keys to navigate &middot; Enter to drill down</span>
+      </div>
+      <table class="pos-table">
+        <thead>
+          <tr>
+            <th style="width:5rem;">Benchmark</th>
+            <th>Jun 26</th>
+            <th>Jul 26</th>
+            <th>Aug 26</th>
+            <th>Sep 26</th>
+            <th>Oct 26</th>
+            <th>Nov 26</th>
+            <th style="width:4rem; text-align:right;">Net</th>
+          </tr>
+        </thead>
+        <tbody id="pos-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Drill-down panel -->
+    <div id="drill-panel" class="hz-card drill-panel fade-in-d1" style="margin-top:0.5rem;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+        <span id="drill-title" style="font-weight:600; color:var(--text-primary); font-size:0.8125rem;">Trades</span>
+        <button class="hz-btn sm" onclick="closeDrill()">Close</button>
+      </div>
+      <table class="drill-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th style="text-align:center;">Side</th>
+            <th>Counterparty</th>
+            <th style="text-align:right;">Volume</th>
+            <th style="text-align:right;">Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="drill-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('positions', 'Positions');
+
+const months = ['Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26'];
+
+const positions = {
+  JKM: {
+    'Jun 26': { vol:450000, wacog:12.46, pnl:285000, pnlPct:4.6, phys:380000, paper:70000 },
+    'Jul 26': { vol:200000, wacog:12.37, pnl:142000, pnlPct:5.7, phys:170000, paper:30000 },
+    'Aug 26': { vol:-150000, wacog:12.53, pnl:-98000, pnlPct:-5.2, phys:-128000, paper:-22000 },
+    'Sep 26': { vol:100000, wacog:12.52, pnl:56000, pnlPct:4.5, phys:66000, paper:34000 },
+    'Oct 26': { vol:-80000, wacog:12.44, pnl:-41000, pnlPct:-4.1, phys:-57000, paper:-23000 },
+    'Nov 26': { vol:320000, wacog:12.62, pnl:198000, pnlPct:4.9, phys:320000, paper:0 },
+  },
+  TTF: {
+    'Jun 26': { vol:-300000, wacog:11.87, pnl:-178000, pnlPct:-5.0, phys:-250000, paper:-50000 },
+    'Jul 26': { vol:180000, wacog:11.91, pnl:95000, pnlPct:4.4, phys:131000, paper:49000 },
+    'Aug 26': { vol:250000, wacog:11.84, pnl:167000, pnlPct:5.6, phys:200000, paper:50000 },
+    'Sep 26': { vol:-80000, wacog:11.81, pnl:-35000, pnlPct:-3.7, phys:-50000, paper:-30000 },
+    'Oct 26': { vol:140000, wacog:11.88, pnl:72000, pnlPct:4.3, phys:59000, paper:81000 },
+    'Nov 26': { vol:-60000, wacog:11.96, pnl:-28000, pnlPct:-3.9, phys:-60000, paper:0 },
+  },
+  HH: {
+    'Jun 26': { vol:120000, wacog:2.36, pnl:34000, pnlPct:12.0, phys:72000, paper:48000 },
+    'Jul 26': { vol:-90000, wacog:2.31, pnl:-22000, pnlPct:-10.6, phys:-71000, paper:-19000 },
+    'Aug 26': { vol:310000, wacog:2.35, pnl:89000, pnlPct:12.2, phys:310000, paper:0 },
+    'Sep 26': { vol:60000, wacog:2.39, pnl:15000, pnlPct:10.4, phys:60000, paper:0 },
+    'Oct 26': { vol:-45000, wacog:2.42, pnl:-11000, pnlPct:-10.2, phys:-45000, paper:0 },
+    'Nov 26': { vol:180000, wacog:2.44, pnl:52000, pnlPct:11.8, phys:180000, paper:0 },
+  }
+};
+
+const trades = {
+  'JKM|Jun 26':[{id:'T-1024',side:'B',cpty:'Shell',vol:65000,price:12.45,status:'Confirmed'},{id:'T-1023',side:'S',cpty:'JERA',vol:70000,price:12.52,status:'Confirmed'},{id:'T-1019',side:'S',cpty:'Vitol',vol:68000,price:12.38,status:'Confirmed'},{id:'T-1001',side:'S',cpty:'Mitsui',vol:73000,price:12.42,status:'Confirmed'}],
+  'JKM|Jul 26':[{id:'T-1018',side:'B',cpty:'Petronas',vol:45000,price:12.41,status:'Confirmed'},{id:'T-1014',side:'B',cpty:'Trafigura',vol:62000,price:12.33,status:'Confirmed'},{id:'T-1005',side:'S',cpty:'JERA',vol:74000,price:12.49,status:'Cancelled'}],
+  'JKM|Aug 26':[{id:'T-1017',side:'S',cpty:'QatarEnergy',vol:80000,price:12.55,status:'Pending'},{id:'T-1009',side:'S',cpty:'Shell',vol:48000,price:12.51,status:'Pending'}],
+  'JKM|Sep 26':[{id:'T-1012',side:'B',cpty:'Mitsui',vol:66000,price:12.48,status:'Confirmed'},{id:'T-1003',side:'S',cpty:'Petronas',vol:67000,price:12.57,status:'Confirmed'}],
+  'JKM|Oct 26':[{id:'T-1007',side:'S',cpty:'TotalEnergies',vol:57000,price:12.44,status:'Confirmed'}],
+  'JKM|Nov 26':[{id:'T-1050',side:'B',cpty:'BP',vol:320000,price:12.62,status:'Confirmed'}],
+  'TTF|Jun 26':[{id:'T-1011',side:'S',cpty:'ENI',vol:54000,price:11.92,status:'Confirmed'},{id:'T-1022',side:'B',cpty:'TotalEnergies',vol:55000,price:11.82,status:'Confirmed'}],
+  'TTF|Jul 26':[{id:'T-1021',side:'S',cpty:'BP',vol:60000,price:11.95,status:'Pending'},{id:'T-1010',side:'B',cpty:'Gunvor',vol:71000,price:11.88,status:'Confirmed'}],
+  'TTF|Aug 26':[{id:'T-1013',side:'S',cpty:'Glencore',vol:58000,price:11.89,status:'Cancelled'},{id:'T-1004',side:'B',cpty:'Chevron',vol:52000,price:11.79,status:'Confirmed'}],
+  'TTF|Sep 26':[{id:'T-1016',side:'B',cpty:'Equinor',vol:50000,price:11.78,status:'Confirmed'},{id:'T-1008',side:'B',cpty:'BP',vol:63000,price:11.85,status:'Confirmed'}],
+  'TTF|Oct 26':[{id:'T-1002',side:'B',cpty:'Equinor',vol:59000,price:11.88,status:'Pending'}],
+  'TTF|Nov 26':[{id:'T-1051',side:'S',cpty:'Shell',vol:60000,price:11.96,status:'Confirmed'}],
+  'HH|Jun 26':[{id:'T-1020',side:'B',cpty:'Chevron',vol:72000,price:2.34,status:'Confirmed'},{id:'T-1015',side:'S',cpty:'Cheniere',vol:75000,price:2.38,status:'Confirmed'},{id:'T-1006',side:'B',cpty:'Vitol',vol:69000,price:2.36,status:'Confirmed'}],
+  'HH|Jul 26':[{id:'T-1010B',side:'B',cpty:'Gunvor',vol:71000,price:2.31,status:'Confirmed'}],
+  'HH|Aug 26':[{id:'T-1052',side:'B',cpty:'Chevron',vol:310000,price:2.35,status:'Confirmed'}],
+  'HH|Sep 26':[{id:'T-1053',side:'B',cpty:'Cheniere',vol:60000,price:2.39,status:'Confirmed'}],
+  'HH|Oct 26':[{id:'T-1054',side:'S',cpty:'Vitol',vol:45000,price:2.42,status:'Confirmed'}],
+  'HH|Nov 26':[{id:'T-1055',side:'B',cpty:'BP',vol:180000,price:2.44,status:'Confirmed'}],
+};
+
+function formatVol(v) {
+  if (v == null) return '\u2013';
+  const abs = Math.abs(v);
+  const s = abs >= 1000000 ? (abs/1000000).toFixed(1)+'M' : abs >= 1000 ? Math.round(abs/1000)+'k' : abs.toString();
+  return (v >= 0 ? '+' : '-') + s;
+}
+function formatPnl(v) {
+  if (v == null) return '\u2013';
+  const abs = Math.abs(v);
+  const s = abs >= 1000000 ? '$'+(abs/1000000).toFixed(1)+'M' : '$'+Math.round(abs/1000)+'k';
+  return (v >= 0 ? '+' : '-') + s;
+}
+
+function heatClass(vol) {
+  const abs = Math.abs(vol);
+  const isLong = vol >= 0;
+  const prefix = isLong ? 'heat-long-' : 'heat-short-';
+  if (abs >= 300000) return prefix + '4';
+  if (abs >= 150000) return prefix + '3';
+  if (abs >= 80000) return prefix + '2';
+  return prefix + '1';
+}
+
+let selectedCell = null;
+let cellGrid = []; // [row][col] for keyboard nav
+
+function renderLadder() {
+  const tbody = document.getElementById('pos-tbody');
+  tbody.innerHTML = '';
+  cellGrid = [];
+  const benchmarks = ['JKM','TTF','HH'];
+
+  benchmarks.forEach((bench, ri) => {
+    const row = document.createElement('tr');
+    let html = '<td>' + bench + '</td>';
+    const rowCells = [];
+
+    months.forEach((m, ci) => {
+      const d = positions[bench][m];
+      if (!d) { html += '<td>-</td>'; rowCells.push(null); return; }
+      const heat = heatClass(d.vol);
+      const cellId = bench + '|' + m;
+      html += '<td><div class="pos-cell ' + heat + '" tabindex="0" data-cell="' + cellId + '" data-ri="' + ri + '" data-ci="' + ci + '" onclick="drillDown(\'' + bench + '\',\'' + m + '\',this)" onkeydown="cellKeydown(event,this)">' +
+        '<div class="vol">' + formatVol(d.vol) + '</div>' +
+        '<div class="wacog">WACOG $' + d.wacog.toFixed(2) + '</div>' +
+        '<div class="pnl">' + formatPnl(d.pnl) + ' (' + (d.pnlPct >= 0 ? '+' : '') + d.pnlPct.toFixed(1) + '%)</div>' +
+        '<div class="split">P:' + formatVol(d.phys) + ' / H:' + formatVol(d.paper) + '</div>' +
+        '</div></td>';
+      rowCells.push(cellId);
+    });
+
+    // Net column
+    let netVol = 0, netPnl = 0;
+    months.forEach(m => { const d = positions[bench][m]; if (d) { netVol += d.vol; netPnl += d.pnl; } });
+    const netColor = netVol >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+    html += '<td style="' + netColor + '"><div class="vol">' + formatVol(netVol) + '</div><div class="pnl" style="font-size:0.5rem;">' + formatPnl(netPnl) + '</div></td>';
+
+    row.innerHTML = html;
+    tbody.appendChild(row);
+    cellGrid.push(rowCells);
+  });
+
+  // Totals row
+  const totRow = document.createElement('tr');
+  totRow.className = 'totals-row';
+  let totHtml = '<td>Total</td>';
+  let grandNet = 0;
+  months.forEach(m => {
+    let mTotal = 0, mPnl = 0;
+    benchmarks.forEach(b => { const d = positions[b][m]; if (d) { mTotal += d.vol; mPnl += d.pnl; } });
+    grandNet += mTotal;
+    const c = mTotal >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+    totHtml += '<td style="' + c + '">' + formatVol(mTotal) + '</td>';
+  });
+  const gc = grandNet >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+  totHtml += '<td style="' + gc + '">' + formatVol(grandNet) + '</td>';
+  totRow.innerHTML = totHtml;
+  tbody.appendChild(totRow);
+}
+
+function drillDown(bench, month, cellEl) {
+  // Deselect previous
+  if (selectedCell) selectedCell.classList.remove('selected');
+  if (cellEl) { cellEl.classList.add('selected'); selectedCell = cellEl; }
+
+  const key = bench + '|' + month;
+  const t = trades[key] || [];
+  const panel = document.getElementById('drill-panel');
+  document.getElementById('drill-title').textContent = 'Trades \u2014 ' + bench + ' ' + month;
+  const tbody = document.getElementById('drill-tbody');
+  tbody.innerHTML = '';
+
+  if (t.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem; color:var(--text-muted);">No trades for this position</td></tr>';
+    panel.classList.add('open');
+    return;
+  }
+
+  t.forEach(tr => {
+    const sideStyle = tr.side === 'B'
+      ? 'background:var(--green-dim);color:var(--green)'
+      : 'background:var(--red-dim);color:var(--red)';
+    const stColor = tr.status === 'Confirmed' ? 'var(--green)' : tr.status === 'Pending' ? 'var(--amber)' : 'var(--text-muted)';
+    tbody.innerHTML += '<tr>' +
+      '<td style="color:var(--accent);">' + tr.id + '</td>' +
+      '<td style="text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:0.1875rem;font-size:0.5625rem;font-weight:700;' + sideStyle + '">' + tr.side + '</span></td>' +
+      '<td>' + tr.cpty + '</td>' +
+      '<td style="text-align:right;">' + tr.vol.toLocaleString() + '</td>' +
+      '<td style="text-align:right;">$' + tr.price.toFixed(2) + '</td>' +
+      '<td style="color:' + stColor + ';">' + tr.status + '</td>' +
+      '</tr>';
+  });
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDrill() {
+  document.getElementById('drill-panel').classList.remove('open');
+  if (selectedCell) { selectedCell.classList.remove('selected'); selectedCell = null; }
+}
+
+function cellKeydown(e, el) {
+  const ri = parseInt(el.dataset.ri);
+  const ci = parseInt(el.dataset.ci);
+  let nr = ri, nc = ci;
+
+  if (e.key === 'ArrowRight') { e.preventDefault(); nc = Math.min(ci + 1, months.length - 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); nc = Math.max(ci - 1, 0); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); nr = Math.min(ri + 1, cellGrid.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); nr = Math.max(ri - 1, 0); }
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    const cid = el.dataset.cell;
+    if (cid) { const [b, m] = cid.split('|'); drillDown(b, m, el); }
+    return;
+  }
+  else if (e.key === 'Escape') { e.preventDefault(); closeDrill(); return; }
+  else return;
+
+  if (nr !== ri || nc !== ci) {
+    const targetId = cellGrid[nr] && cellGrid[nr][nc];
+    if (targetId) {
+      const targetEl = document.querySelector('[data-cell="' + targetId + '"]');
+      if (targetEl) targetEl.focus();
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderLadder();
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('pos-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

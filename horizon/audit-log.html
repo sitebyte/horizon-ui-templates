@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Log — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    .hz-pill { padding:0.1875rem 0.5rem; border-radius:1rem; font-size:0.625rem; font-weight:500; border:0.0625rem solid var(--border); color:var(--text-tertiary); background:transparent; transition:all 0.15s; cursor:pointer; }
+    .hz-pill:hover { border-color:var(--text-muted); color:var(--text-secondary); }
+    .hz-pill.active { background:var(--accent); border-color:var(--accent); color:#000; }
+
+    /* Timeline */
+    .audit-timeline { position:relative; padding-left:1.5rem; }
+    .audit-timeline::before { content:''; position:absolute; left:0.5rem; top:0; bottom:0; width:0.0625rem; background:var(--border); }
+    .audit-entry { position:relative; margin-bottom:0.75rem; }
+    .audit-entry::before { content:''; position:absolute; left:-1.125rem; top:0.375rem; width:0.5rem; height:0.5rem; border-radius:50%; border:0.125rem solid var(--border); background:var(--surface-canvas); z-index:1; }
+    .audit-entry.create::before { border-color:var(--green); background:var(--green); }
+    .audit-entry.amend::before { border-color:var(--amber); background:var(--amber); }
+    .audit-entry.cancel::before { border-color:var(--red); background:var(--red); }
+    .audit-entry.approve::before { border-color:var(--accent); background:var(--accent); }
+
+    .audit-card { background:var(--card-bg); border:0.0625rem solid var(--border); border-radius:0.375rem; padding:0.5rem 0.625rem; }
+    .audit-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.25rem; }
+    .audit-title { font-size:0.6875rem; font-weight:600; color:var(--text-primary); font-family:'Inter',sans-serif; }
+    .audit-meta { font-size:0.5625rem; color:var(--text-muted); }
+    .audit-user { font-size:0.625rem; color:var(--accent); font-weight:500; }
+
+    /* Diff display */
+    .audit-diff { margin-top:0.375rem; border:0.0625rem solid var(--border); border-radius:0.25rem; overflow:hidden; font-size:0.625rem; }
+    .diff-row { display:flex; padding:0.1875rem 0.375rem; font-family:'JetBrains Mono',monospace; }
+    .diff-row.header { background:var(--surface-elevated); font-weight:600; color:var(--text-tertiary); font-family:'Inter',sans-serif; text-transform:uppercase; font-size:0.5625rem; letter-spacing:0.05em; }
+    .diff-field { width:7rem; flex-shrink:0; color:var(--text-tertiary); }
+    .diff-old { flex:1; color:var(--red); }
+    .diff-old::before { content:'\u2212 '; }
+    .diff-new { flex:1; color:var(--green); }
+    .diff-new::before { content:'+ '; }
+    .diff-row:not(.header) { border-top:0.0625rem solid var(--border); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:flex; gap:0.25rem;">
+        <div class="hz-skeleton" style="width:4rem; height:1.5rem; border-radius:1rem;"></div>
+        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
+        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
+        <div style="flex:1;"></div>
+        <div class="hz-skeleton" style="width:10rem; height:1.5rem;"></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div class="hz-card">
+          <div class="hz-skeleton" style="width:100%; height:20rem;"></div>
+        </div>
+        <div class="hz-card">
+          <div class="hz-skeleton" style="width:100%; height:20rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="audit-content" style="display:none;">
+    <!-- Toolbar -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+      <div style="display:flex; gap:0.25rem;">
+        <button class="hz-pill active" data-type="all" onclick="filterAudit('all',this)">All</button>
+        <button class="hz-pill" data-type="create" onclick="filterAudit('create',this)">Created</button>
+        <button class="hz-pill" data-type="amend" onclick="filterAudit('amend',this)">Amended</button>
+        <button class="hz-pill" data-type="cancel" onclick="filterAudit('cancel',this)">Cancelled</button>
+        <button class="hz-pill" data-type="approve" onclick="filterAudit('approve',this)">Approved</button>
+      </div>
+      <div style="margin-left:auto; position:relative; max-width:14rem;">
+        <input id="audit-search" type="text" class="hz-input" style="width:100%; padding-left:1.75rem;" placeholder="Search audit entries..." oninput="searchAudit(this.value)" />
+        <svg style="position:absolute; left:0.5rem; top:50%; transform:translateY(-50%); color:var(--text-muted);" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+      <!-- Table view -->
+      <div class="hz-card fade-in">
+        <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Audit Table</div>
+        <div style="overflow-x:auto; max-height:calc(100vh - 12rem); overflow-y:auto;">
+          <table class="hz-table" id="audit-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Entity</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Timeline view -->
+      <div class="hz-card fade-in-d1">
+        <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Audit Timeline</div>
+        <div class="audit-timeline" id="audit-timeline"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('audit-log', 'Audit Log');
+
+const auditEntries = [
+  {
+    id: 1, timestamp: '2026-04-11 09:42:15', entity: 'T-1024', entityType: 'Trade',
+    action: 'create', user: 'Jon Cobley', role: 'Senior Trader',
+    summary: 'Created trade T-1024: Buy 65,000 MMBtu JKM @ $12.45 from Shell',
+    diff: null
+  },
+  {
+    id: 2, timestamp: '2026-04-11 09:45:32', entity: 'T-1024', entityType: 'Trade',
+    action: 'amend', user: 'Jon Cobley', role: 'Senior Trader',
+    summary: 'Amended trade T-1024: Price and volume adjusted',
+    diff: [
+      { field: 'Price', old: '$12.40', new: '$12.45' },
+      { field: 'Volume', old: '60,000', new: '65,000' },
+    ]
+  },
+  {
+    id: 3, timestamp: '2026-04-11 10:12:08', entity: 'T-1024', entityType: 'Trade',
+    action: 'approve', user: 'Sarah Mitchell', role: 'Trade Manager',
+    summary: 'Approved trade T-1024 (credit check passed)',
+    diff: [
+      { field: 'Status', old: 'Pending', new: 'Confirmed' },
+    ]
+  },
+  {
+    id: 4, timestamp: '2026-04-11 09:38:44', entity: 'T-1023', entityType: 'Trade',
+    action: 'create', user: 'Jon Cobley', role: 'Senior Trader',
+    summary: 'Created trade T-1023: Sell 70,000 MMBtu JKM @ $12.52 to JERA',
+    diff: null
+  },
+  {
+    id: 5, timestamp: '2026-04-10 16:30:11', entity: 'T-1013', entityType: 'Trade',
+    action: 'cancel', user: 'Adam Kumar', role: 'Trader',
+    summary: 'Cancelled trade T-1013: Glencore TTF deal withdrawn',
+    diff: [
+      { field: 'Status', old: 'Confirmed', new: 'Cancelled' },
+      { field: 'Cancel Reason', old: '\u2014', new: 'Counterparty withdrawal' },
+    ]
+  },
+  {
+    id: 6, timestamp: '2026-04-10 14:22:00', entity: 'INV-4518', entityType: 'Invoice',
+    action: 'amend', user: 'Sarah Mitchell', role: 'Trade Manager',
+    summary: 'Amended invoice INV-4518: Amount corrected after reconciliation',
+    diff: [
+      { field: 'Amount', old: '$1,120,000', new: '$1,150,000' },
+      { field: 'Type', old: 'Provisional', new: 'Final' },
+    ]
+  },
+  {
+    id: 7, timestamp: '2026-04-10 11:35:50', entity: 'NOM-2026-041', entityType: 'Nomination',
+    action: 'create', user: 'Ryan Park', role: 'Operations',
+    summary: 'Created nomination NOM-2026-041 for cargo C-2406 on LNG Sokoto',
+    diff: null
+  },
+  {
+    id: 8, timestamp: '2026-04-09 16:55:22', entity: 'T-1006', entityType: 'Trade',
+    action: 'approve', user: 'Sarah Mitchell', role: 'Trade Manager',
+    summary: 'Approved trade T-1006 (Vitol HH deal)',
+    diff: [
+      { field: 'Status', old: 'Pending', new: 'Confirmed' },
+    ]
+  },
+];
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function renderAudit() {
+  const filtered = auditEntries.filter(e => {
+    if (currentFilter !== 'all' && e.action !== currentFilter) return false;
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      return e.entity.toLowerCase().includes(q) || e.summary.toLowerCase().includes(q) || e.user.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  // Table
+  const tbody = document.getElementById('audit-tbody');
+  tbody.innerHTML = '';
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted); font-family:Inter,sans-serif;">No audit entries found</td></tr>';
+  } else {
+    filtered.forEach(e => {
+      const actionStyle = {
+        create: 'background:var(--green-dim);color:var(--green)',
+        amend: 'background:var(--amber-dim);color:var(--amber)',
+        cancel: 'background:var(--red-dim);color:var(--red)',
+        approve: 'background:var(--accent-bg);color:var(--accent)',
+      }[e.action] || '';
+      tbody.innerHTML += '<tr>' +
+        '<td style="white-space:nowrap;">' + e.timestamp + '</td>' +
+        '<td style="color:var(--accent);">' + e.entity + '</td>' +
+        '<td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;' + actionStyle + '">' + e.action + '</span></td>' +
+        '<td>' + e.user + '</td>' +
+        '<td style="max-width:16rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + e.summary + '</td>' +
+        '</tr>';
+    });
+  }
+
+  // Timeline
+  const timeline = document.getElementById('audit-timeline');
+  timeline.innerHTML = '';
+  if (filtered.length === 0) {
+    timeline.innerHTML = '<div style="text-align:center; padding:1.5rem; color:var(--text-muted); font-family:Inter,sans-serif;">No entries match your filter</div>';
+  } else {
+    filtered.forEach(e => {
+      let diffHtml = '';
+      if (e.diff && e.diff.length > 0) {
+        diffHtml = '<div class="audit-diff">' +
+          '<div class="diff-row header"><span class="diff-field">Field</span><span class="diff-old">Previous</span><span class="diff-new">Updated</span></div>';
+        e.diff.forEach(d => {
+          diffHtml += '<div class="diff-row"><span class="diff-field">' + d.field + '</span><span class="diff-old">' + d.old + '</span><span class="diff-new">' + d.new + '</span></div>';
+        });
+        diffHtml += '</div>';
+      }
+
+      timeline.innerHTML += '<div class="audit-entry ' + e.action + '">' +
+        '<div class="audit-card">' +
+        '<div class="audit-header">' +
+        '<span class="audit-title">' + e.entity + ' &mdash; ' + e.action.charAt(0).toUpperCase() + e.action.slice(1) + '</span>' +
+        '<span class="audit-meta">' + e.timestamp + '</span>' +
+        '</div>' +
+        '<div style="font-size:0.625rem; color:var(--text-secondary); margin-bottom:0.25rem;">' + e.summary + '</div>' +
+        '<span class="audit-user">' + e.user + '</span><span style="font-size:0.5625rem; color:var(--text-muted);"> &middot; ' + e.role + '</span>' +
+        diffHtml +
+        '</div></div>';
+    });
+  }
+}
+
+function filterAudit(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.hz-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAudit();
+}
+
+function searchAudit(q) {
+  currentSearch = q;
+  renderAudit();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderAudit();
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('audit-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

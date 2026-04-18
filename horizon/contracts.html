@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contracts — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    /* Wizard steps */
+    .wiz-steps { display:flex; align-items:center; gap:0; margin-bottom:1rem; }
+    .wiz-step { display:flex; align-items:center; gap:0.375rem; padding:0.375rem 0.75rem; font-size:0.625rem; font-weight:600; color:var(--text-muted); position:relative; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.15s; }
+    .wiz-step .num { display:flex; align-items:center; justify-content:center; width:1.25rem; height:1.25rem; border-radius:50%; border:0.0625rem solid var(--border); font-size:0.5625rem; transition:all 0.15s; }
+    .wiz-step.active { color:var(--accent); }
+    .wiz-step.active .num { background:var(--accent); border-color:var(--accent); color:#000; }
+    .wiz-step.done { color:var(--green); }
+    .wiz-step.done .num { background:var(--green); border-color:var(--green); color:#000; }
+    .wiz-connector { width:2rem; height:0.0625rem; background:var(--border); }
+    .wiz-connector.done { background:var(--green); }
+
+    /* Wizard panels */
+    .wiz-panel { display:none; }
+    .wiz-panel.active { display:block; animation: fadeIn 0.2s ease; }
+    .wiz-form-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(12rem,1fr)); gap:0.5rem; margin-bottom:0.5rem; }
+    .wiz-group { display:flex; flex-direction:column; gap:0.1875rem; }
+    .wiz-label { font-size:0.625rem; font-weight:500; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif; }
+    .wiz-error { font-size:0.5625rem; color:var(--red); font-family:'Inter',sans-serif; min-height:0.75rem; }
+    .wiz-nav { display:flex; justify-content:space-between; margin-top:0.75rem; padding-top:0.5rem; border-top:0.0625rem solid var(--border); }
+
+    /* Review summary */
+    .review-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+    @media (max-width:48rem) { .review-grid { grid-template-columns:1fr; } }
+    .review-section { margin-bottom:0.5rem; }
+    .review-section-title { font-size:0.625rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem; font-family:'Inter',sans-serif; }
+    .review-row { display:flex; justify-content:space-between; padding:0.1875rem 0; font-size:0.6875rem; border-bottom:0.0625rem solid var(--border); }
+    .review-row:last-child { border-bottom:none; }
+    .review-label { color:var(--text-tertiary); font-family:'Inter',sans-serif; }
+    .review-val { font-weight:500; color:var(--text-primary); }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem;">
+      <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
+        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
+      </div>
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:100%; height:16rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="wiz-content" style="display:none;">
+    <!-- Steps -->
+    <div class="wiz-steps fade-in">
+      <div class="wiz-step active" data-step="0" onclick="goToStep(0)"><span class="num">1</span>Counterparty</div>
+      <div class="wiz-connector"></div>
+      <div class="wiz-step" data-step="1" onclick="goToStep(1)"><span class="num">2</span>Terms</div>
+      <div class="wiz-connector"></div>
+      <div class="wiz-step" data-step="2" onclick="goToStep(2)"><span class="num">3</span>Pricing</div>
+      <div class="wiz-connector"></div>
+      <div class="wiz-step" data-step="3" onclick="goToStep(3)"><span class="num">4</span>Review</div>
+    </div>
+
+    <!-- Step 1: Counterparty -->
+    <div class="wiz-panel active hz-card fade-in-d1" data-panel="0">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 1: Counterparty Details</div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Contract Type</label>
+          <select id="wiz-type" class="hz-input" style="width:100%;">
+            <option value="SPA">SPA (Sale & Purchase Agreement)</option>
+            <option value="Spot">Spot Deal</option>
+            <option value="Tender">Tender</option>
+          </select>
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Counterparty</label>
+          <select id="wiz-cpty" class="hz-input" style="width:100%;">
+            <option value="">Select...</option>
+            <option value="Shell">Shell</option>
+            <option value="JERA">JERA</option>
+            <option value="TotalEnergies">TotalEnergies</option>
+            <option value="BP">BP</option>
+            <option value="Chevron">Chevron</option>
+            <option value="QatarEnergy">QatarEnergy</option>
+            <option value="Petronas">Petronas</option>
+          </select>
+          <div class="wiz-error" id="wiz-cpty-err"></div>
+        </div>
+      </div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Contract Reference</label>
+          <input id="wiz-ref" type="text" class="hz-input" style="width:100%;" placeholder="SPA-2026-XXX" />
+          <div class="wiz-error" id="wiz-ref-err"></div>
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Effective Date</label>
+          <input id="wiz-eff" type="date" class="hz-input" style="width:100%;" />
+        </div>
+      </div>
+      <div class="wiz-nav">
+        <div></div>
+        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Terms -->
+    <div class="wiz-panel hz-card" data-panel="1">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 2: Contract Terms</div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Duration (months)</label>
+          <input id="wiz-duration" type="number" class="hz-input" style="width:100%;" value="12" min="1" max="240" />
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Annual Contract Quantity (MMBtu)</label>
+          <input id="wiz-acq" type="number" class="hz-input" style="width:100%;" placeholder="2000000" />
+          <div class="wiz-error" id="wiz-acq-err"></div>
+        </div>
+      </div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Delivery Basis</label>
+          <select id="wiz-incoterm" class="hz-input" style="width:100%;">
+            <option value="FOB">FOB</option>
+            <option value="DES">DES</option>
+            <option value="CIF">CIF</option>
+          </select>
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Delivery Point</label>
+          <select id="wiz-delpoint" class="hz-input" style="width:100%;">
+            <option value="">Select...</option>
+            <option value="Ras Laffan">Ras Laffan, Qatar</option>
+            <option value="Sabine Pass">Sabine Pass, USA</option>
+            <option value="Bonny Island">Bonny Island, Nigeria</option>
+            <option value="Darwin">Darwin, Australia</option>
+            <option value="Bintulu">Bintulu, Malaysia</option>
+          </select>
+        </div>
+      </div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Tolerance (%)</label>
+          <input id="wiz-tolerance" type="number" class="hz-input" style="width:100%;" value="5" step="0.5" />
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Governing Law</label>
+          <select id="wiz-law" class="hz-input" style="width:100%;">
+            <option value="English">English Law</option>
+            <option value="Singapore">Singapore Law</option>
+            <option value="New York">New York Law</option>
+          </select>
+        </div>
+      </div>
+      <div class="wiz-nav">
+        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
+        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Pricing -->
+    <div class="wiz-panel hz-card" data-panel="2">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 3: Pricing Structure</div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Pricing Model</label>
+          <select id="wiz-pricing" class="hz-input" style="width:100%;">
+            <option value="hub-indexed">Hub-Indexed</option>
+            <option value="oil-indexed">Oil-Indexed</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="fixed">Fixed Price</option>
+          </select>
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Benchmark</label>
+          <select id="wiz-bench" class="hz-input" style="width:100%;">
+            <option value="JKM">JKM</option>
+            <option value="TTF">TTF</option>
+            <option value="HH">Henry Hub</option>
+            <option value="Brent">Brent</option>
+          </select>
+        </div>
+      </div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Base Price / Slope</label>
+          <input id="wiz-base" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="12.50" />
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Premium / Discount</label>
+          <input id="wiz-premium" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="+0.15" />
+        </div>
+      </div>
+      <div class="wiz-form-row">
+        <div class="wiz-group">
+          <label class="wiz-label">Payment Terms (days)</label>
+          <input id="wiz-payment" type="number" class="hz-input" style="width:100%;" value="30" />
+        </div>
+        <div class="wiz-group">
+          <label class="wiz-label">Currency</label>
+          <select id="wiz-currency" class="hz-input" style="width:100%;">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+      </div>
+      <div class="wiz-nav">
+        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
+        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Review -->
+    <div class="wiz-panel hz-card" data-panel="3">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 4: Review & Submit</div>
+      <div class="review-grid" id="review-content"></div>
+      <div class="wiz-nav">
+        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
+        <button class="hz-btn primary" onclick="submitContract()">Create Contract</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('contracts', 'Contracts');
+
+let currentStep = 0;
+
+function updateSteps() {
+  document.querySelectorAll('.wiz-step').forEach((el, i) => {
+    el.classList.remove('active','done');
+    if (i < currentStep) el.classList.add('done');
+    else if (i === currentStep) el.classList.add('active');
+  });
+  document.querySelectorAll('.wiz-connector').forEach((el, i) => {
+    el.classList.toggle('done', i < currentStep);
+  });
+  document.querySelectorAll('.wiz-panel').forEach((el, i) => {
+    el.classList.toggle('active', i === currentStep);
+  });
+}
+
+function validateStep(step) {
+  if (step === 0) {
+    let valid = true;
+    if (!document.getElementById('wiz-cpty').value) {
+      document.getElementById('wiz-cpty-err').textContent = 'Counterparty required';
+      valid = false;
+    } else { document.getElementById('wiz-cpty-err').textContent = ''; }
+    if (!document.getElementById('wiz-ref').value.trim()) {
+      document.getElementById('wiz-ref-err').textContent = 'Reference required';
+      valid = false;
+    } else { document.getElementById('wiz-ref-err').textContent = ''; }
+    return valid;
+  }
+  if (step === 1) {
+    const acq = parseInt(document.getElementById('wiz-acq').value);
+    if (isNaN(acq) || acq < 1000) {
+      document.getElementById('wiz-acq-err').textContent = 'Min ACQ: 1,000 MMBtu';
+      return false;
+    }
+    document.getElementById('wiz-acq-err').textContent = '';
+    return true;
+  }
+  return true;
+}
+
+function nextStep() {
+  if (!validateStep(currentStep)) { showToast('Please fix validation errors', 'error'); return; }
+  if (currentStep < 3) {
+    currentStep++;
+    if (currentStep === 3) buildReview();
+    updateSteps();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; updateSteps(); }
+}
+
+function goToStep(step) {
+  // Only allow going to completed or current steps
+  if (step <= currentStep) {
+    currentStep = step;
+    updateSteps();
+  }
+}
+
+function buildReview() {
+  const el = document.getElementById('review-content');
+  const gv = id => document.getElementById(id).value || '--';
+  const gs = id => { const s = document.getElementById(id); return s.options && s.selectedIndex >= 0 ? s.options[s.selectedIndex].text : s.value || '--'; };
+
+  el.innerHTML = '<div class="review-section"><div class="review-section-title">Counterparty</div>' +
+    '<div class="review-row"><span class="review-label">Type</span><span class="review-val">' + gs('wiz-type') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Counterparty</span><span class="review-val">' + gv('wiz-cpty') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Reference</span><span class="review-val">' + gv('wiz-ref') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Effective</span><span class="review-val">' + gv('wiz-eff') + '</span></div>' +
+    '</div>' +
+    '<div class="review-section"><div class="review-section-title">Terms</div>' +
+    '<div class="review-row"><span class="review-label">Duration</span><span class="review-val">' + gv('wiz-duration') + ' months</span></div>' +
+    '<div class="review-row"><span class="review-label">ACQ</span><span class="review-val">' + parseInt(gv('wiz-acq') || 0).toLocaleString() + ' MMBtu</span></div>' +
+    '<div class="review-row"><span class="review-label">Delivery</span><span class="review-val">' + gv('wiz-incoterm') + ' / ' + gv('wiz-delpoint') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Law</span><span class="review-val">' + gs('wiz-law') + '</span></div>' +
+    '</div>' +
+    '<div class="review-section"><div class="review-section-title">Pricing</div>' +
+    '<div class="review-row"><span class="review-label">Model</span><span class="review-val">' + gs('wiz-pricing') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Benchmark</span><span class="review-val">' + gv('wiz-bench') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Base Price</span><span class="review-val">$' + (parseFloat(gv('wiz-base')) || 0).toFixed(2) + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Premium</span><span class="review-val">' + gv('wiz-premium') + '</span></div>' +
+    '<div class="review-row"><span class="review-label">Payment</span><span class="review-val">' + gv('wiz-payment') + ' days / ' + gv('wiz-currency') + '</span></div>' +
+    '</div>';
+}
+
+function submitContract() {
+  const ref = document.getElementById('wiz-ref').value || 'NEW';
+  showToast('Contract ' + ref + ' created successfully', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('wiz-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nominations — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    .nom-form { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    @media (max-width:48rem) { .nom-form { grid-template-columns:1fr; } }
+    .nom-group { display:flex; flex-direction:column; gap:0.1875rem; }
+    .nom-label { font-size:0.625rem; font-weight:500; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif; }
+    .nom-cascade { display:flex; align-items:center; gap:0.375rem; margin:0.5rem 0; }
+    .nom-cascade-step { display:flex; align-items:center; gap:0.25rem; font-size:0.625rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .nom-cascade-step.active { color:var(--accent); font-weight:600; }
+    .nom-cascade-step .dot { width:0.5rem; height:0.5rem; border-radius:50%; background:var(--border); }
+    .nom-cascade-step.active .dot { background:var(--accent); }
+    .nom-cascade-step.done .dot { background:var(--green); }
+    .nom-cascade-arrow { color:var(--border); font-size:0.75rem; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:10rem; height:0.875rem; margin-bottom:0.75rem;"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+          <div class="hz-skeleton" style="height:1.75rem;"></div>
+        </div>
+      </div>
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:100%; height:10rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="nom-content" style="display:none;">
+    <!-- Cascade progress -->
+    <div class="nom-cascade fade-in">
+      <div class="nom-cascade-step done"><span class="dot"></span>Contract</div>
+      <span class="nom-cascade-arrow">&rarr;</span>
+      <div class="nom-cascade-step active"><span class="dot"></span>Cargo</div>
+      <span class="nom-cascade-arrow">&rarr;</span>
+      <div class="nom-cascade-step"><span class="dot"></span>Vessel</div>
+      <span class="nom-cascade-arrow">&rarr;</span>
+      <div class="nom-cascade-step"><span class="dot"></span>ETA</div>
+    </div>
+
+    <!-- Nomination Form -->
+    <div class="hz-card fade-in-d1">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">New Nomination</div>
+      <div class="nom-form">
+        <div class="nom-group">
+          <label class="nom-label">Contract</label>
+          <select id="nom-contract" class="hz-input" style="width:100%;" onchange="onContractChange()">
+            <option value="">Select contract...</option>
+            <option value="SPA-2024-001">SPA-2024-001 (Shell, JKM)</option>
+            <option value="SPA-2024-002">SPA-2024-002 (JERA, JKM)</option>
+            <option value="SPA-2024-003">SPA-2024-003 (BP, TTF)</option>
+            <option value="SPOT-2026-015">SPOT-2026-015 (Vitol, JKM)</option>
+          </select>
+        </div>
+        <div class="nom-group">
+          <label class="nom-label">Cargo</label>
+          <select id="nom-cargo" class="hz-input" style="width:100%;" disabled onchange="onCargoChange()">
+            <option value="">Select cargo...</option>
+          </select>
+        </div>
+        <div class="nom-group">
+          <label class="nom-label">Vessel</label>
+          <select id="nom-vessel" class="hz-input" style="width:100%;" disabled onchange="onVesselChange()">
+            <option value="">Select vessel...</option>
+          </select>
+        </div>
+        <div class="nom-group">
+          <label class="nom-label">ETA</label>
+          <input id="nom-eta" type="date" class="hz-input" style="width:100%;" disabled />
+        </div>
+        <div class="nom-group">
+          <label class="nom-label">Volume (MMBtu)</label>
+          <input id="nom-volume" type="number" class="hz-input" style="width:100%;" placeholder="65000" />
+        </div>
+        <div class="nom-group">
+          <label class="nom-label">Load Port</label>
+          <select id="nom-port" class="hz-input" style="width:100%;">
+            <option value="">Select port...</option>
+            <option value="ras-laffan">Ras Laffan, Qatar</option>
+            <option value="sabine-pass">Sabine Pass, USA</option>
+            <option value="bonny">Bonny Island, Nigeria</option>
+            <option value="darwin">Darwin, Australia</option>
+            <option value="bintulu">Bintulu, Malaysia</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.75rem; padding-top:0.5rem; border-top:0.0625rem solid var(--border);">
+        <button class="hz-btn" onclick="resetNom()">Reset</button>
+        <button class="hz-btn primary" onclick="submitNom()">Submit Nomination</button>
+      </div>
+    </div>
+
+    <!-- Schedule Table -->
+    <div class="hz-card fade-in-d2" style="margin-top:0.75rem;">
+      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Nomination Schedule</div>
+      <div style="overflow-x:auto;">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Nomination</th>
+              <th>Contract</th>
+              <th>Cargo</th>
+              <th>Vessel</th>
+              <th style="text-align:right;">Volume</th>
+              <th>Port</th>
+              <th>ETA</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--accent);">NOM-2026-041</td>
+              <td>SPA-2024-001</td>
+              <td>C-2406</td>
+              <td>LNG Sokoto</td>
+              <td style="text-align:right;">65,000</td>
+              <td>Ras Laffan</td>
+              <td>2026-04-18</td>
+              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--green-dim);color:var(--green);">Confirmed</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--accent);">NOM-2026-040</td>
+              <td>SPA-2024-002</td>
+              <td>C-2405</td>
+              <td>Dapeng Sun</td>
+              <td style="text-align:right;">70,000</td>
+              <td>Sabine Pass</td>
+              <td>2026-04-22</td>
+              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--amber-dim);color:var(--amber);">Pending</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--accent);">NOM-2026-039</td>
+              <td>SPA-2024-003</td>
+              <td>C-2404</td>
+              <td>Al Dafna</td>
+              <td style="text-align:right;">55,000</td>
+              <td>Bonny Island</td>
+              <td>2026-04-28</td>
+              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--amber-dim);color:var(--amber);">Pending</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--accent);">NOM-2026-038</td>
+              <td>SPOT-2026-015</td>
+              <td>C-2403</td>
+              <td>Gallina</td>
+              <td style="text-align:right;">80,000</td>
+              <td>Darwin</td>
+              <td>2026-05-02</td>
+              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--green-dim);color:var(--green);">Confirmed</span></td>
+            </tr>
+            <tr>
+              <td style="color:var(--accent);">NOM-2026-037</td>
+              <td>SPA-2024-001</td>
+              <td>C-2402</td>
+              <td>Arctic Lady</td>
+              <td style="text-align:right;">72,000</td>
+              <td>Ras Laffan</td>
+              <td>2026-05-08</td>
+              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--surface-elevated);color:var(--text-muted);">Draft</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('nominations', 'Nominations');
+
+/* Cascading data */
+const contractCargos = {
+  'SPA-2024-001': ['C-2406','C-2410','C-2415'],
+  'SPA-2024-002': ['C-2405','C-2411'],
+  'SPA-2024-003': ['C-2404','C-2412','C-2416'],
+  'SPOT-2026-015': ['C-2403'],
+};
+
+const cargoVessels = {
+  'C-2406': ['LNG Sokoto','Al Dafna','Arctic Lady'],
+  'C-2405': ['Dapeng Sun','Gallina'],
+  'C-2404': ['Al Dafna','LNG Sokoto'],
+  'C-2403': ['Gallina','Arctic Lady','Dapeng Sun'],
+  'C-2410': ['LNG Sokoto'],
+  'C-2411': ['Dapeng Sun','Al Dafna'],
+  'C-2412': ['Arctic Lady'],
+  'C-2415': ['Gallina','LNG Sokoto'],
+  'C-2416': ['Al Dafna'],
+};
+
+function updateCascade(step) {
+  const steps = document.querySelectorAll('.nom-cascade-step');
+  const stepNames = ['Contract','Cargo','Vessel','ETA'];
+  steps.forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i < step) s.classList.add('done');
+    else if (i === step) s.classList.add('active');
+  });
+}
+
+function onContractChange() {
+  const contract = document.getElementById('nom-contract').value;
+  const cargoSel = document.getElementById('nom-cargo');
+  const vesselSel = document.getElementById('nom-vessel');
+  const etaInput = document.getElementById('nom-eta');
+
+  cargoSel.innerHTML = '<option value="">Select cargo...</option>';
+  vesselSel.innerHTML = '<option value="">Select vessel...</option>';
+  vesselSel.disabled = true;
+  etaInput.disabled = true;
+  etaInput.value = '';
+
+  if (contract && contractCargos[contract]) {
+    contractCargos[contract].forEach(c => {
+      cargoSel.innerHTML += '<option value="' + c + '">' + c + '</option>';
+    });
+    cargoSel.disabled = false;
+    updateCascade(1);
+  } else {
+    cargoSel.disabled = true;
+    updateCascade(0);
+  }
+}
+
+function onCargoChange() {
+  const cargo = document.getElementById('nom-cargo').value;
+  const vesselSel = document.getElementById('nom-vessel');
+  const etaInput = document.getElementById('nom-eta');
+
+  vesselSel.innerHTML = '<option value="">Select vessel...</option>';
+  etaInput.disabled = true;
+  etaInput.value = '';
+
+  if (cargo && cargoVessels[cargo]) {
+    cargoVessels[cargo].forEach(v => {
+      vesselSel.innerHTML += '<option value="' + v + '">' + v + '</option>';
+    });
+    vesselSel.disabled = false;
+    updateCascade(2);
+  } else {
+    vesselSel.disabled = true;
+    updateCascade(1);
+  }
+}
+
+function onVesselChange() {
+  const vessel = document.getElementById('nom-vessel').value;
+  const etaInput = document.getElementById('nom-eta');
+  if (vessel) {
+    etaInput.disabled = false;
+    updateCascade(3);
+  } else {
+    etaInput.disabled = true;
+    updateCascade(2);
+  }
+}
+
+function resetNom() {
+  document.getElementById('nom-contract').value = '';
+  document.getElementById('nom-cargo').innerHTML = '<option value="">Select cargo...</option>';
+  document.getElementById('nom-cargo').disabled = true;
+  document.getElementById('nom-vessel').innerHTML = '<option value="">Select vessel...</option>';
+  document.getElementById('nom-vessel').disabled = true;
+  document.getElementById('nom-eta').disabled = true;
+  document.getElementById('nom-eta').value = '';
+  document.getElementById('nom-volume').value = '';
+  document.getElementById('nom-port').value = '';
+  updateCascade(0);
+}
+
+function submitNom() {
+  const contract = document.getElementById('nom-contract').value;
+  const cargo = document.getElementById('nom-cargo').value;
+  const vessel = document.getElementById('nom-vessel').value;
+  if (!contract || !cargo || !vessel) {
+    showToast('Please complete all cascade fields', 'error');
+    return;
+  }
+  showToast('Nomination submitted: ' + cargo + ' on ' + vessel, 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('nom-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>

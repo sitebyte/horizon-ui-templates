@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Horizon ETRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
+    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+    #skeleton-wrapper { transition: opacity 0.3s ease; }
+
+    .settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    @media (max-width:48rem) { .settings-grid { grid-template-columns:1fr; } }
+
+    .setting-section { margin-bottom:0.75rem; }
+    .setting-title { font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif; }
+    .setting-desc { font-size:0.5625rem; color:var(--text-muted); margin-bottom:0.5rem; font-family:'Inter',sans-serif; }
+
+    .setting-row { display:flex; align-items:center; justify-content:space-between; padding:0.375rem 0; border-bottom:0.0625rem solid var(--border); }
+    .setting-row:last-child { border-bottom:none; }
+    .setting-label { font-size:0.6875rem; color:var(--text-secondary); font-family:'Inter',sans-serif; }
+    .setting-sublabel { font-size:0.5625rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+
+    /* Toggle switch */
+    .hz-toggle { position:relative; width:2.25rem; height:1.25rem; }
+    .hz-toggle input { opacity:0; width:0; height:0; }
+    .hz-toggle-slider { position:absolute; cursor:pointer; inset:0; background:var(--surface-overlay); border-radius:0.625rem; transition:0.2s; }
+    .hz-toggle-slider::before { content:''; position:absolute; height:0.875rem; width:0.875rem; left:0.1875rem; bottom:0.1875rem; background:var(--text-primary); border-radius:50%; transition:0.2s; }
+    .hz-toggle input:checked + .hz-toggle-slider { background:var(--accent); }
+    .hz-toggle input:checked + .hz-toggle-slider::before { transform:translateX(1rem); }
+
+    /* Theme selector */
+    .theme-options { display:flex; gap:0.375rem; }
+    .theme-opt { width:2.5rem; height:2rem; border-radius:0.25rem; border:0.125rem solid var(--border); cursor:pointer; transition:border-color 0.15s; display:flex; flex-direction:column; overflow:hidden; }
+    .theme-opt.active { border-color:var(--accent); }
+    .theme-opt .top { flex:1; }
+    .theme-opt .bot { flex:1; }
+    .theme-opt.dark .top { background:#1a1a1a; }
+    .theme-opt.dark .bot { background:#0a0a0a; }
+    .theme-opt.light .top { background:#f1f5f9; }
+    .theme-opt.light .bot { background:#ffffff; }
+
+    /* Density */
+    .density-options { display:flex; gap:0.375rem; }
+    .density-opt { padding:0.25rem 0.625rem; border:0.0625rem solid var(--border); border-radius:0.375rem; font-size:0.625rem; cursor:pointer; transition:all 0.15s; color:var(--text-tertiary); font-family:'Inter',sans-serif; }
+    .density-opt:hover { border-color:var(--text-muted); }
+    .density-opt.active { background:var(--accent); border-color:var(--accent); color:#000; }
+
+    /* Shortcuts table */
+    .shortcut-table { width:100%; border-collapse:collapse; }
+    .shortcut-table td { padding:0.25rem 0.5rem; font-size:0.6875rem; border-bottom:0.0625rem solid var(--border); }
+    .shortcut-table td:first-child { color:var(--text-tertiary); font-family:'Inter',sans-serif; width:60%; }
+    .shortcut-table td:last-child { text-align:right; }
+    .shortcut-table tr:last-child td { border-bottom:none; }
+    .shortcut-key { display:inline-flex; align-items:center; gap:0.125rem; }
+    .shortcut-key kbd { display:inline-flex; align-items:center; justify-content:center; min-width:1.25rem; height:1.125rem; padding:0 0.25rem; background:var(--surface-elevated); border:0.0625rem solid var(--border); border-radius:0.1875rem; font-size:0.5625rem; font-weight:600; color:var(--text-tertiary); font-family:'JetBrains Mono',monospace; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Skeleton -->
+  <div id="skeleton-wrapper">
+    <div style="padding:0.75rem; display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:8rem; height:0.875rem; margin-bottom:0.75rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:1.75rem; margin-bottom:0.5rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:1.75rem; margin-bottom:0.5rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:1.75rem; margin-bottom:0.5rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:1.75rem;"></div>
+      </div>
+      <div class="hz-card">
+        <div class="hz-skeleton" style="width:8rem; height:0.875rem; margin-bottom:0.75rem;"></div>
+        <div class="hz-skeleton" style="width:100%; height:12rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real content -->
+  <div id="settings-content" style="display:none;">
+    <div class="settings-grid">
+      <!-- Left column -->
+      <div>
+        <!-- Profile -->
+        <div class="hz-card fade-in" style="margin-bottom:0.75rem;">
+          <div class="setting-section">
+            <div class="setting-title">Profile</div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Role</div>
+                <div class="setting-sublabel">Determines visible modules and permissions</div>
+              </div>
+              <select id="set-role" class="hz-input" onchange="onRoleChange()">
+                <option value="trader">Trader</option>
+                <option value="operations">Operations</option>
+                <option value="manager">Manager</option>
+                <option value="risk">Risk Analyst</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Default Portfolio</div>
+              </div>
+              <select id="set-portfolio" class="hz-input">
+                <option value="all">All Portfolios</option>
+                <option value="pacific">Pacific</option>
+                <option value="atlantic">Atlantic</option>
+                <option value="americas">Americas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="hz-card fade-in-d1" style="margin-bottom:0.75rem;">
+          <div class="setting-section">
+            <div class="setting-title">Appearance</div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Theme</div>
+              </div>
+              <div class="theme-options">
+                <div class="theme-opt dark" id="theme-dark" onclick="setThemeSetting('dark')" title="Dark"><div class="top"></div><div class="bot"></div></div>
+                <div class="theme-opt light" id="theme-light" onclick="setThemeSetting('light')" title="Light"><div class="top"></div><div class="bot"></div></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Density</div>
+                <div class="setting-sublabel">Row height and padding</div>
+              </div>
+              <div class="density-options">
+                <button class="density-opt" onclick="setDensity('compact',this)">Compact</button>
+                <button class="density-opt active" onclick="setDensity('default',this)">Default</button>
+                <button class="density-opt" onclick="setDensity('relaxed',this)">Relaxed</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="hz-card fade-in-d2">
+          <div class="setting-section">
+            <div class="setting-title">Preferences</div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Ticker Bar</div>
+                <div class="setting-sublabel">Show live price ticker in header</div>
+              </div>
+              <label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Sound Alerts</div>
+                <div class="setting-sublabel">Play sound on trade confirmation</div>
+              </div>
+              <label class="hz-toggle"><input type="checkbox" /><span class="hz-toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Auto-refresh Positions</div>
+                <div class="setting-sublabel">Update position ladder every 30s</div>
+              </div>
+              <label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Confirm on Cancel</div>
+                <div class="setting-sublabel">Require confirmation before cancelling trades</div>
+              </div>
+              <label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Number Format</div>
+              </div>
+              <select class="hz-input">
+                <option value="us">1,234.56 (US)</option>
+                <option value="eu">1.234,56 (EU)</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Date Format</div>
+              </div>
+              <select class="hz-input">
+                <option value="iso">YYYY-MM-DD</option>
+                <option value="us">MM/DD/YYYY</option>
+                <option value="eu">DD/MM/YYYY</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Shortcuts -->
+      <div>
+        <div class="hz-card fade-in-d3">
+          <div class="setting-title">Keyboard Shortcuts</div>
+          <div class="setting-desc">Navigate faster with these shortcuts. All shortcuts work globally.</div>
+          <table class="shortcut-table">
+            <tr>
+              <td>Open command palette</td>
+              <td><span class="shortcut-key"><kbd>&#8984;</kbd><kbd>K</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Toggle sidebar</td>
+              <td><span class="shortcut-key"><kbd>&#8984;</kbd><kbd>B</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Go to Dashboard</td>
+              <td><span class="shortcut-key"><kbd>G</kbd> <kbd>D</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Go to Quick Entry</td>
+              <td><span class="shortcut-key"><kbd>G</kbd> <kbd>Q</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Go to Blotter</td>
+              <td><span class="shortcut-key"><kbd>G</kbd> <kbd>B</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Go to Positions</td>
+              <td><span class="shortcut-key"><kbd>G</kbd> <kbd>P</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Go to Settings</td>
+              <td><span class="shortcut-key"><kbd>G</kbd> <kbd>S</kbd></span></td>
+            </tr>
+            <tr>
+              <td>New trade</td>
+              <td><span class="shortcut-key"><kbd>N</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Toggle theme</td>
+              <td><span class="shortcut-key"><kbd>T</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Show shortcuts</td>
+              <td><span class="shortcut-key"><kbd>?</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Close overlay / panel</td>
+              <td><span class="shortcut-key"><kbd>Esc</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Navigate position ladder</td>
+              <td><span class="shortcut-key"><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Drill into position cell</td>
+              <td><span class="shortcut-key"><kbd>Enter</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Search / filter in grids</td>
+              <td><span class="shortcut-key"><kbd>&#8984;</kbd><kbd>F</kbd></span></td>
+            </tr>
+            <tr>
+              <td>Export to CSV</td>
+              <td><span class="shortcut-key"><kbd>&#8984;</kbd><kbd>E</kbd></span></td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Data Sources -->
+        <div class="hz-card fade-in-d4" style="margin-top:0.75rem;">
+          <div class="setting-title">Data Sources</div>
+          <div class="setting-desc">Status of connected data feeds.</div>
+          <div class="setting-row">
+            <div style="display:flex; align-items:center; gap:0.375rem;">
+              <span class="hz-dot green"></span>
+              <span class="setting-label">EIA API</span>
+            </div>
+            <span style="font-size:0.5625rem; color:var(--green);">Connected</span>
+          </div>
+          <div class="setting-row">
+            <div style="display:flex; align-items:center; gap:0.375rem;">
+              <span class="hz-dot green"></span>
+              <span class="setting-label">CME/ICE (yfinance)</span>
+            </div>
+            <span style="font-size:0.5625rem; color:var(--green);">Connected</span>
+          </div>
+          <div class="setting-row">
+            <div style="display:flex; align-items:center; gap:0.375rem;">
+              <span class="hz-dot amber"></span>
+              <span class="setting-label">AIS Stream</span>
+            </div>
+            <span style="font-size:0.5625rem; color:var(--amber);">Degraded (15s latency)</span>
+          </div>
+          <div class="setting-row">
+            <div style="display:flex; align-items:center; gap:0.375rem;">
+              <span class="hz-dot green"></span>
+              <span class="setting-label">RSS News Feeds</span>
+            </div>
+            <span style="font-size:0.5625rem; color:var(--green);">Connected</span>
+          </div>
+          <div class="setting-row">
+            <div style="display:flex; align-items:center; gap:0.375rem;">
+              <span class="hz-dot red"></span>
+              <span class="setting-label">FRED API</span>
+            </div>
+            <span style="font-size:0.5625rem; color:var(--red);">Offline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('settings', 'Settings');
+
+function setThemeSetting(theme) {
+  applyTheme(theme);
+  updateThemeSelector();
+}
+
+function updateThemeSelector() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('theme-dark').classList.toggle('active', isDark);
+  document.getElementById('theme-light').classList.toggle('active', !isDark);
+}
+
+function setDensity(density, btn) {
+  document.querySelectorAll('.density-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const sizes = { compact: '0.625rem', default: '0.75rem', relaxed: '0.875rem' };
+  document.documentElement.style.fontSize = sizes[density] || '0.75rem';
+  showToast('Density set to ' + density, 'success');
+}
+
+function onRoleChange() {
+  const role = document.getElementById('set-role').value;
+  showToast('Role changed to ' + role, 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateThemeSelector();
+  // Watch for theme changes
+  const observer = new MutationObserver(updateThemeSelector);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  setTimeout(() => {
+    document.getElementById('skeleton-wrapper').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('skeleton-wrapper').style.display = 'none';
+      document.getElementById('settings-content').style.display = 'block';
+    }, 300);
+  }, 500);
+});
+</script>
+</body>
+</html>
