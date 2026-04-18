@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trader Speed — Horizon ETRM</title>
+  <link href="../horizon/shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+  <style>
+    /* Ultra-dense monospace override for the speed variant */
+    .speed-strip {
+      font-family: var(--font-mono);
+      background: var(--surface-base);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-3) var(--sp-4);
+    }
+    .speed-strip:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.1875rem var(--accent-bg);
+    }
+
+    .speed-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+    .speed-field label {
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+    }
+    .speed-field input,
+    .speed-field select {
+      background: var(--input-bg);
+      border: 0.0625rem solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-1) var(--sp-2);
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+      font-family: var(--font-mono);
+      height: 1.75rem;
+      width: 100%;
+      transition: border-color var(--transition-fast);
+    }
+    .speed-field input:focus,
+    .speed-field select:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 0.125rem var(--accent-bg);
+    }
+    .speed-field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.375rem center;
+      padding-right: 1.25rem;
+      cursor: pointer;
+    }
+
+    /* Direction toggle with keyboard hint */
+    .speed-dir-group {
+      display: flex;
+      gap: 0.125rem;
+      height: 1.75rem;
+    }
+    .speed-dir-btn {
+      flex: 1;
+      border: 0.0625rem solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      background: var(--input-bg);
+      color: var(--text-muted);
+    }
+    .speed-dir-btn.active-buy {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .speed-dir-btn.active-sell {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+    .speed-dir-btn .dir-key {
+      font-size: 0.5rem;
+      opacity: 0.7;
+      padding: 0 0.1875rem;
+      border-radius: 0.125rem;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Keystroke counter */
+    .keystroke-counter {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--accent-bg);
+      border: 0.0625rem solid rgba(79, 70, 229, 0.2);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-light);
+    }
+    .keystroke-counter .ks-num {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--accent-light);
+      min-width: 1.5rem;
+      text-align: center;
+    }
+    .keystroke-counter .ks-label {
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+    }
+    .keystroke-counter .ks-time {
+      margin-left: auto;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Inline confirmation */
+    .speed-confirm {
+      display: none;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--green-dim);
+      border: 0.0625rem solid rgba(34, 197, 94, 0.3);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--green);
+      margin-top: var(--sp-2);
+    }
+    .speed-confirm.visible { display: flex; }
+    .speed-confirm .confirm-summary {
+      flex: 1;
+      color: var(--text-primary);
+    }
+    .speed-confirm .confirm-actions {
+      display: flex;
+      gap: var(--sp-2);
+      align-items: center;
+    }
+
+    /* Compact blotter table */
+    .speed-blotter {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+    }
+    .speed-blotter th {
+      text-align: left;
+      padding: var(--sp-1) var(--sp-2);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.5625rem;
+      letter-spacing: 0.06em;
+      border-bottom: 0.0625rem solid var(--border);
+      background: var(--surface-base);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .speed-blotter td {
+      padding: var(--sp-1) var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      color: var(--text-secondary);
+      height: 1.75rem;
+      white-space: nowrap;
+    }
+    .speed-blotter tr:hover td { background: var(--hover); }
+    .speed-blotter tr.new-trade td {
+      animation: newRow 0.4s ease;
+    }
+    @keyframes newRow {
+      from { background: var(--accent-bg); }
+      to { background: transparent; }
+    }
+
+    /* Speed-specific combobox (narrower dropdown) */
+    .speed-combo {
+      position: relative;
+    }
+    .speed-combo-input {
+      background: var(--input-bg);
+      border: 0.0625rem solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-1) var(--sp-2);
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+      font-family: var(--font-mono);
+      height: 1.75rem;
+      width: 100%;
+      transition: border-color var(--transition-fast);
+    }
+    .speed-combo-input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 0.125rem var(--accent-bg);
+    }
+    .speed-combo-input::placeholder { color: var(--text-muted); font-family: var(--font-mono); }
+    .speed-combo-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 0.125rem;
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-sm);
+      max-height: 10rem;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+    .speed-combo-dropdown.open { display: block; }
+    .speed-combo-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: var(--sp-1) var(--sp-2);
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: background 0.08s;
+    }
+    .speed-combo-option.highlighted {
+      background: var(--accent-bg);
+      color: var(--accent-light);
+    }
+
+    /* Keystroke visualizer */
+    .ks-log {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      min-height: 1.5rem;
+      align-items: center;
+    }
+    .ks-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.25rem;
+      height: 1.25rem;
+      padding: 0 0.25rem;
+      background: var(--surface-overlay);
+      border: 0.0625rem solid var(--border);
+      border-radius: 0.1875rem;
+      font-size: 0.5625rem;
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      font-weight: 600;
+      animation: keyPop 0.15s ease;
+    }
+    @keyframes keyPop {
+      0% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Keystroke Counter Header -->
+  <div class="flex items-center justify-between mb-3 fade-in">
+    <div>
+      <h2 class="text-sm font-semibold" style="color:var(--text-primary);">Speed Entry Mode</h2>
+      <p class="text-xs" style="color:var(--text-muted);">Minimum keystrokes to capture. B/S toggles instantly. Tab to advance. Enter to commit.</p>
+    </div>
+    <div class="keystroke-counter" id="ks-counter">
+      <span class="ks-num" id="ks-count">0</span>
+      <span class="ks-label">keystrokes</span>
+      <span class="ks-time" id="ks-time">--</span>
+    </div>
+  </div>
+
+  <!-- Keystroke Visualizer -->
+  <div class="mb-3 fade-in-d1">
+    <div class="flex items-center gap-2 mb-1">
+      <span class="text-xs font-medium" style="color:var(--text-muted);font-family:var(--font-ui);">KEYSTROKE LOG</span>
+      <button class="text-xs" style="color:var(--accent-light);font-family:var(--font-ui);" onclick="resetKeystrokeLog()">Clear</button>
+    </div>
+    <div class="ks-log" id="ks-log">
+      <span class="text-xs" style="color:var(--text-muted);font-style:italic;">Start typing to see keystrokes...</span>
+    </div>
+  </div>
+
+  <!-- Speed Entry Strip -->
+  <div class="speed-strip mb-3 fade-in-d2" id="speed-strip">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-2 items-end">
+      <!-- Direction (B/S) -->
+      <div class="speed-field">
+        <label>B/S <span style="opacity:0.5;">[B or S key]</span></label>
+        <div class="speed-dir-group">
+          <button class="speed-dir-btn active-buy" id="sp-buy" onclick="spDir('BUY')">
+            BUY <span class="dir-key">B</span>
+          </button>
+          <button class="speed-dir-btn" id="sp-sell" onclick="spDir('SELL')">
+            SELL <span class="dir-key">S</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Counterparty (2 chars + Tab) -->
+      <div class="speed-field" style="grid-column: span 2;">
+        <label>Counterparty <span style="opacity:0.5;">[2 chars + Tab]</span></label>
+        <div class="speed-combo" id="sp-cpty-combo">
+          <input class="speed-combo-input" id="sp-cpty" placeholder="sh..." autocomplete="off" />
+          <div class="speed-combo-dropdown" id="sp-cpty-dropdown"></div>
+        </div>
+      </div>
+
+      <!-- Volume (pre-filled) -->
+      <div class="speed-field">
+        <label>Volume <span style="opacity:0.5;">[pre-filled]</span></label>
+        <input type="text" id="sp-vol" value="3,200,000" />
+      </div>
+
+      <!-- Benchmark (auto-selected) -->
+      <div class="speed-field">
+        <label>Benchmark <span style="opacity:0.5;">[auto]</span></label>
+        <select id="sp-bench">
+          <option>JKM</option>
+          <option>TTF</option>
+          <option>HH</option>
+          <option>Brent</option>
+        </select>
+      </div>
+
+      <!-- Premium -->
+      <div class="speed-field">
+        <label>Premium</label>
+        <input type="text" id="sp-prem" placeholder="+0.50" />
+      </div>
+
+      <!-- Delivery -->
+      <div class="speed-field">
+        <label>Delivery</label>
+        <select id="sp-delivery">
+          <option>Jun-26</option>
+          <option>Jul-26</option>
+          <option>Aug-26</option>
+          <option>Sep-26</option>
+          <option>Q3-26</option>
+          <option>Q4-26</option>
+        </select>
+      </div>
+
+      <!-- Terms -->
+      <div class="speed-field">
+        <label>Terms</label>
+        <select id="sp-terms">
+          <option>DES</option>
+          <option>FOB</option>
+          <option>CIF</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <div class="speed-field">
+        <label>&nbsp;</label>
+        <button class="hz-btn primary w-full" style="height:1.75rem;font-size:var(--text-xs);font-family:var(--font-mono);" id="sp-submit" onclick="spSubmit()">
+          ENTER &crarr;
+        </button>
+      </div>
+    </div>
+
+    <!-- Inline Confirmation -->
+    <div class="speed-confirm" id="sp-confirm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span class="confirm-summary" id="sp-confirm-text"></span>
+      <div class="confirm-actions">
+        <span class="hz-key-hint" style="background:rgba(34,197,94,0.2);border-color:rgba(34,197,94,0.3);color:var(--green);">Enter</span>
+        <span class="text-xs" style="color:var(--green);font-family:var(--font-ui);">Confirm</span>
+        <span class="hz-key-hint">Esc</span>
+        <span class="text-xs" style="color:var(--text-muted);font-family:var(--font-ui);">Cancel</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Target annotation -->
+  <div class="flex items-center gap-3 mb-3 fade-in-d3">
+    <div class="flex items-center gap-1 text-xs" style="color:var(--text-muted);font-family:var(--font-ui);">
+      <span class="font-semibold" style="color:var(--accent-light);">TARGET:</span>
+      5 keystrokes + 2 Tabs + 2 Enters = trade in
+      <span class="font-mono font-bold" style="color:var(--green);">8 seconds</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <span class="hz-key-hint">B</span>
+      <span class="hz-key-hint">s</span>
+      <span class="hz-key-hint">h</span>
+      <span class="hz-key-hint">Tab</span>
+      <span class="hz-key-hint">Tab</span>
+      <span class="hz-key-hint">+</span>
+      <span class="hz-key-hint">.</span>
+      <span class="hz-key-hint">5</span>
+      <span class="hz-key-hint">&crarr;</span>
+      <span class="hz-key-hint">&crarr;</span>
+    </div>
+  </div>
+
+  <!-- Compact Blotter -->
+  <div class="hz-card fade-in-d4" style="padding:var(--sp-2) var(--sp-3);">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold" style="color:var(--text-primary);font-family:var(--font-ui);">Blotter</span>
+        <span class="hz-badge neutral" id="blotter-count">3 trades</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-mono" style="color:var(--text-muted);">P&L:</span>
+        <span class="text-xs font-mono font-bold text-green" id="blotter-pnl">+$2,166K</span>
+      </div>
+    </div>
+    <div style="max-height:18rem;overflow-y:auto;">
+      <table class="speed-blotter" id="blotter-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>B/S</th>
+            <th>Counterparty</th>
+            <th style="text-align:right;">Volume</th>
+            <th>Idx</th>
+            <th style="text-align:right;">Prem</th>
+            <th>Del</th>
+            <th>Terms</th>
+            <th style="text-align:right;">Price</th>
+            <th style="text-align:right;">P&L</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="blotter-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="../horizon/shell.js"></script>
+<script>
+  initShell('quick-entry', 'Speed Entry');
+
+  // ---- State ----
+  var spDirection = 'BUY';
+  var spPending = null;
+  var spStartTime = null;
+  var keystrokeCount = 0;
+  var keystrokeLog = [];
+  var spIdCounter = 4;
+
+  var COUNTERPARTIES = [
+    { short: 'sh', label: 'Shell Trading', bench: 'JKM', context: 'UK | Credit: $22M' },
+    { short: 'to', label: 'TotalEnergies', bench: 'TTF', context: 'FR | Credit: $18M' },
+    { short: 'bp', label: 'BP Gas Marketing', bench: 'JKM', context: 'UK | Credit: $31M' },
+    { short: 'ch', label: 'Chevron', bench: 'HH', context: 'US | Credit: $45M' },
+    { short: 'eq', label: 'Equinor', bench: 'TTF', context: 'NO | Credit: $28M' },
+    { short: 'gu', label: 'Gunvor', bench: 'JKM', context: 'CH | Credit: $15M' },
+    { short: 'vi', label: 'Vitol', bench: 'JKM', context: 'CH | Credit: $20M' },
+    { short: 'tr', label: 'Trafigura', bench: 'JKM', context: 'SG | Credit: $12M' },
+    { short: 'wo', label: 'Woodside Energy', bench: 'JKM', context: 'AU | Credit: $35M' },
+  ];
+
+  var BLOTTER = [
+    { time: '11:30', dir: 'BUY', cpty: 'BP Gas Marketing', vol: 4800000, idx: 'TTF', prem: -0.10, del: 'Sep-26', terms: 'DES', price: 12.70, pnl: 1600000, status: 'Pending' },
+    { time: '10:15', dir: 'SELL', cpty: 'TotalEnergies', vol: 1600000, idx: 'JKM', prem: 0.25, del: 'Jul-26', terms: 'FOB', price: 14.10, pnl: -42000, status: 'Confirmed' },
+    { time: '09:42', dir: 'BUY', cpty: 'Shell Trading', vol: 3200000, idx: 'JKM', prem: 0.50, del: 'Jun-26', terms: 'DES', price: 14.75, pnl: 608000, status: 'Confirmed' },
+  ];
+
+  // ---- Keystroke Tracking ----
+  function trackKeystroke(key) {
+    if (!spStartTime) spStartTime = Date.now();
+    keystrokeCount++;
+    keystrokeLog.push(key);
+    document.getElementById('ks-count').textContent = keystrokeCount;
+
+    var elapsed = ((Date.now() - spStartTime) / 1000).toFixed(1);
+    document.getElementById('ks-time').textContent = elapsed + 's';
+
+    // Update log display
+    var logEl = document.getElementById('ks-log');
+    var keyEl = document.createElement('span');
+    keyEl.className = 'ks-key';
+    keyEl.textContent = key;
+    if (logEl.querySelector('span[style]')) logEl.innerHTML = '';
+    logEl.appendChild(keyEl);
+  }
+
+  function resetKeystrokeLog() {
+    keystrokeCount = 0;
+    keystrokeLog = [];
+    spStartTime = null;
+    document.getElementById('ks-count').textContent = '0';
+    document.getElementById('ks-time').textContent = '--';
+    document.getElementById('ks-log').innerHTML = '<span class="text-xs" style="color:var(--text-muted);font-style:italic;">Start typing to see keystrokes...</span>';
+  }
+
+  // ---- Direction Toggle ----
+  function spDir(dir) {
+    spDirection = dir;
+    var buyBtn = document.getElementById('sp-buy');
+    var sellBtn = document.getElementById('sp-sell');
+    if (dir === 'BUY') {
+      buyBtn.className = 'speed-dir-btn active-buy';
+      sellBtn.className = 'speed-dir-btn';
+    } else {
+      sellBtn.className = 'speed-dir-btn active-sell';
+      buyBtn.className = 'speed-dir-btn';
+    }
+  }
+
+  // Global B/S shortcut - works everywhere except inside inputs
+  document.addEventListener('keydown', function(e) {
+    var tag = e.target.tagName;
+    var inInput = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA';
+
+    // B/S direction toggle even from outside inputs
+    if (!inInput && !spPending) {
+      if (e.key === 'b' || e.key === 'B') {
+        spDir('BUY');
+        trackKeystroke('B');
+        document.getElementById('sp-cpty').focus();
+        return;
+      }
+      if (e.key === 's' || e.key === 'S') {
+        spDir('SELL');
+        trackKeystroke('S');
+        document.getElementById('sp-cpty').focus();
+        return;
+      }
+    }
+
+    // Enter to submit or confirm
+    if (e.key === 'Enter') {
+      if (spPending) {
+        e.preventDefault();
+        trackKeystroke('\u21B5');
+        spConfirm();
+        return;
+      }
+      // If in the entry strip, submit
+      if (inInput && document.getElementById('speed-strip').contains(e.target)) {
+        e.preventDefault();
+        trackKeystroke('\u21B5');
+        spSubmit();
+        return;
+      }
+    }
+
+    // Escape to cancel
+    if (e.key === 'Escape' && spPending) {
+      e.preventDefault();
+      spCancel();
+      return;
+    }
+
+    // Track keystrokes within the strip
+    if (inInput && document.getElementById('speed-strip').contains(e.target)) {
+      if (e.key === 'Tab') {
+        trackKeystroke('Tab');
+      } else if (e.key.length === 1) {
+        trackKeystroke(e.key);
+      }
+    }
+  });
+
+  // ---- Counterparty Combobox (2-char auto-select) ----
+  var cptyInput = document.getElementById('sp-cpty');
+  var cptyDropdown = document.getElementById('sp-cpty-dropdown');
+  var cptyHighlight = 0;
+  var cptyFiltered = [];
+  var cptySelected = null;
+
+  function renderCptyDropdown() {
+    var q = cptyInput.value.toLowerCase();
+    cptyFiltered = COUNTERPARTIES.filter(function(c) {
+      return c.label.toLowerCase().indexOf(q) >= 0 || c.short.indexOf(q) >= 0;
+    });
+    if (cptyFiltered.length === 0) {
+      cptyDropdown.innerHTML = '<div style="padding:0.375rem 0.5rem;color:var(--text-muted);font-size:0.6875rem;">No match</div>';
+      return;
+    }
+    if (cptyHighlight >= cptyFiltered.length) cptyHighlight = 0;
+    var html = '';
+    cptyFiltered.forEach(function(c, i) {
+      html += '<button class="speed-combo-option' + (i === cptyHighlight ? ' highlighted' : '') + '" data-idx="' + i + '">';
+      html += c.label + ' <span style="color:var(--text-muted);font-size:0.5625rem;">' + c.context + '</span>';
+      html += '</button>';
+    });
+    cptyDropdown.innerHTML = html;
+
+    cptyDropdown.querySelectorAll('.speed-combo-option').forEach(function(btn) {
+      btn.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selectCpty(parseInt(btn.dataset.idx));
+      });
+      btn.addEventListener('mouseenter', function() {
+        cptyHighlight = parseInt(btn.dataset.idx);
+        renderCptyDropdown();
+      });
+    });
+  }
+
+  function selectCpty(idx) {
+    if (idx < 0 || idx >= cptyFiltered.length) return;
+    var c = cptyFiltered[idx];
+    cptySelected = c;
+    cptyInput.value = c.label;
+    cptyDropdown.classList.remove('open');
+
+    // Auto-select benchmark from counterparty's usual
+    document.getElementById('sp-bench').value = c.bench;
+
+    // Move to next field (volume - but it's pre-filled, so move past to premium)
+    document.getElementById('sp-prem').focus();
+    document.getElementById('sp-prem').select();
+  }
+
+  cptyInput.addEventListener('focus', function() {
+    cptyHighlight = 0;
+    cptyDropdown.classList.add('open');
+    renderCptyDropdown();
+  });
+
+  cptyInput.addEventListener('input', function() {
+    cptyHighlight = 0;
+    if (!cptyDropdown.classList.contains('open')) cptyDropdown.classList.add('open');
+    renderCptyDropdown();
+  });
+
+  cptyInput.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cptyHighlight = Math.min(cptyHighlight + 1, cptyFiltered.length - 1);
+      renderCptyDropdown();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cptyHighlight = Math.max(cptyHighlight - 1, 0);
+      renderCptyDropdown();
+    } else if (e.key === 'Tab' || e.key === 'Enter') {
+      if (cptyDropdown.classList.contains('open') && cptyFiltered.length > 0) {
+        if (e.key === 'Tab') {
+          // Don't preventDefault on Tab - let it auto-select top match AND move focus
+          selectCpty(cptyHighlight);
+        } else {
+          e.preventDefault();
+          selectCpty(cptyHighlight);
+        }
+      }
+    } else if (e.key === 'Escape') {
+      cptyDropdown.classList.remove('open');
+    }
+  });
+
+  cptyInput.addEventListener('blur', function() {
+    setTimeout(function() { cptyDropdown.classList.remove('open'); }, 120);
+  });
+
+  // ---- Submit / Confirm ----
+  function spSubmit() {
+    var vol = document.getElementById('sp-vol').value;
+    var bench = document.getElementById('sp-bench').value;
+    var prem = document.getElementById('sp-prem').value || '0';
+    var del = document.getElementById('sp-delivery').value;
+    var terms = document.getElementById('sp-terms').value;
+    var cpty = cptySelected ? cptySelected.label : cptyInput.value || 'Unknown';
+
+    spPending = { dir: spDirection, cpty: cpty, vol: vol, bench: bench, prem: prem, del: del, terms: terms };
+
+    // Show inline confirmation
+    var confirmEl = document.getElementById('sp-confirm');
+    var premSign = parseFloat(prem) >= 0 ? '+' : '';
+    document.getElementById('sp-confirm-text').textContent =
+      spDirection + ' ' + vol + ' MMBtu ' + bench + premSign + prem + ' ' + terms + ' ' + del + ' from ' + cpty;
+    confirmEl.classList.add('visible');
+
+    // Grey out the form
+    document.getElementById('speed-strip').style.opacity = '0.6';
+    document.querySelectorAll('#speed-strip input, #speed-strip select, #speed-strip button:not(#sp-submit)')
+      .forEach(function(el) { el.disabled = true; });
+  }
+
+  function spConfirm() {
+    if (!spPending) return;
+
+    var now = new Date();
+    var timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    var volNum = parseInt(spPending.vol.replace(/,/g, '')) || 0;
+    var premNum = parseFloat(spPending.prem) || 0;
+    var basePrice = spPending.bench === 'JKM' ? 14.25 : spPending.bench === 'TTF' ? 12.80 : 3.42;
+    var price = basePrice + premNum;
+    var pnl = Math.round((Math.random() - 0.2) * 400000);
+
+    var newTrade = {
+      time: timeStr,
+      dir: spPending.dir,
+      cpty: spPending.cpty,
+      vol: volNum,
+      idx: spPending.bench,
+      prem: premNum,
+      del: spPending.del,
+      terms: spPending.terms,
+      price: price,
+      pnl: pnl,
+      status: 'Confirmed'
+    };
+
+    BLOTTER.unshift(newTrade);
+    renderBlotter();
+
+    // Show toast with elapsed time
+    var elapsed = spStartTime ? ((Date.now() - spStartTime) / 1000).toFixed(1) : '--';
+    showToast('Trade committed in ' + keystrokeCount + ' keystrokes / ' + elapsed + 's', 'success');
+
+    spCancel();
+  }
+
+  function spCancel() {
+    spPending = null;
+    document.getElementById('sp-confirm').classList.remove('visible');
+    document.getElementById('speed-strip').style.opacity = '';
+    document.querySelectorAll('#speed-strip input, #speed-strip select, #speed-strip button')
+      .forEach(function(el) { el.disabled = false; });
+  }
+
+  // ---- Blotter Rendering ----
+  function renderBlotter() {
+    var body = document.getElementById('blotter-body');
+    var html = '';
+    var totalPnl = 0;
+
+    BLOTTER.forEach(function(t, i) {
+      totalPnl += t.pnl;
+      var dirClass = t.dir === 'BUY' ? 'text-green' : 'text-red';
+      var pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+      var pnlStr = (t.pnl >= 0 ? '+$' : '-$') + Math.abs(t.pnl).toLocaleString('en-US');
+      var premStr = (t.prem >= 0 ? '+' : '') + t.prem.toFixed(2);
+      var statusCls = t.status === 'Confirmed' ? 'green' : 'amber';
+
+      html += '<tr' + (i === 0 ? ' class="new-trade"' : '') + '>';
+      html += '<td>' + t.time + '</td>';
+      html += '<td class="' + dirClass + '" style="font-weight:700;">' + t.dir + '</td>';
+      html += '<td>' + t.cpty + '</td>';
+      html += '<td style="text-align:right;">' + t.vol.toLocaleString('en-US') + '</td>';
+      html += '<td>' + t.idx + '</td>';
+      html += '<td style="text-align:right;">' + premStr + '</td>';
+      html += '<td>' + t.del + '</td>';
+      html += '<td>' + t.terms + '</td>';
+      html += '<td style="text-align:right;">$' + t.price.toFixed(2) + '</td>';
+      html += '<td style="text-align:right;" class="' + pnlClass + '">' + pnlStr + '</td>';
+      html += '<td><span class="hz-badge ' + statusCls + '">' + t.status + '</span></td>';
+      html += '</tr>';
+    });
+    body.innerHTML = html;
+
+    document.getElementById('blotter-count').textContent = BLOTTER.length + ' trades';
+    var totalStr = (totalPnl >= 0 ? '+$' : '-$') + Math.abs(Math.round(totalPnl / 1000)).toLocaleString('en-US') + 'K';
+    document.getElementById('blotter-pnl').textContent = totalStr;
+    document.getElementById('blotter-pnl').className = 'text-xs font-mono font-bold ' + (totalPnl >= 0 ? 'text-green' : 'text-red');
+  }
+
+  // Initial render
+  setTimeout(function() { renderBlotter(); }, 520);
+</script>
+
+<!-- Back to Index -->
+<a href="../index.html"
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
+</body>
+</html>
