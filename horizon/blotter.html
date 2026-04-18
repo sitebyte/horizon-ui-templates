@@ -193,6 +193,30 @@ function toggleCol(field, visible) { gridApi.setColumnsVisible([field], visible)
 
 /* --- Context menu --- */
 let selectedRow = null;
+let ctxMenuEl = null;
+
+function showContextMenu(event, items) {
+  closeContextMenu();
+  ctxMenuEl = document.createElement('div');
+  ctxMenuEl.style.cssText = 'position:fixed;z-index:9999;min-width:10rem;padding:0.25rem;border-radius:0.5rem;border:1px solid var(--border,#27272a);background:var(--surface-elevated,#27272a);box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3);';
+  ctxMenuEl.innerHTML = items.map(function(item) {
+    return '<button onclick="' + item.action + '" style="display:block;width:100%;text-align:left;padding:0.375rem 0.75rem;font-size:0.8125rem;color:var(--text-primary,#fafafa);background:none;border:none;border-radius:0.375rem;cursor:pointer;" onmouseover="this.style.background=\'var(--surface-raised,#3f3f46)\'" onmouseout="this.style.background=\'none\'">' + item.label + '</button>';
+  }).join('');
+  var x = event.clientX, y = event.clientY;
+  document.body.appendChild(ctxMenuEl);
+  if (x + ctxMenuEl.offsetWidth > window.innerWidth) x = window.innerWidth - ctxMenuEl.offsetWidth - 8;
+  if (y + ctxMenuEl.offsetHeight > window.innerHeight) y = window.innerHeight - ctxMenuEl.offsetHeight - 8;
+  ctxMenuEl.style.left = x + 'px';
+  ctxMenuEl.style.top = y + 'px';
+}
+
+function closeContextMenu() {
+  if (ctxMenuEl && ctxMenuEl.parentNode) { ctxMenuEl.parentNode.removeChild(ctxMenuEl); ctxMenuEl = null; }
+}
+
+document.addEventListener('click', closeContextMenu);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeContextMenu(); });
+
 function ctxAction(action) {
   closeContextMenu();
   if (!selectedRow) return;
