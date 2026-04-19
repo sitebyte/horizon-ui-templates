@@ -77,9 +77,9 @@ const MENU = [
       { label: 'Blotter', icon: 'list', href: 'blotter.html', key: 'blotter' },
       { label: 'Positions', icon: 'bar-chart-2', href: 'positions.html', key: 'positions' },
       {
-        label: 'Curves', icon: 'trending-up', key: 'curves', children: [
-          { label: 'Forward Curves', href: 'curves.html' },
-          { label: 'Spread Monitor', href: 'curves.html' },
+        label: 'Curves', icon: 'trending-up', key: 'curves', href: 'curves.html', children: [
+          { label: 'Forward Curves', href: 'curves.html', key: 'forward-curves' },
+          { label: 'Spread Monitor', href: 'curves.html', key: 'spread-monitor' },
         ]
       },
       { label: 'Hedge Book', icon: 'shield', href: 'hedges.html', key: 'hedges' },
@@ -90,22 +90,40 @@ const MENU = [
       { label: 'Cargo Board', icon: 'truck', href: 'cargo-board.html', key: 'cargo-board' },
       {
         label: 'Nominations', icon: 'file-text', key: 'nominations', href: 'nominations.html', badge: { count: 2, color: 'amber' }, children: [
-          { label: 'ADP Schedule', href: 'nominations.html' },
-          { label: 'Cargo Nominations', href: 'nominations.html' },
-          { label: 'Vessel Nominations', href: 'nominations.html' },
+          { label: 'ADP Schedule', href: 'nominations.html', key: 'adp-schedule' },
+          { label: 'Cargo Nominations', href: 'nominations.html', key: 'cargo-nominations' },
+          { label: 'Vessel Nominations', href: 'nominations.html', key: 'vessel-nominations' },
         ]
       },
     ]
   },
   {
     group: 'SETTLEMENT', defaultOpen: false, items: [
-      { label: 'Invoice Queue', icon: 'dollar', href: 'invoices.html', key: 'invoices', badge: { count: 3, color: 'red' } },
+      {
+        label: 'Invoice Queue', icon: 'dollar', href: 'invoices.html', key: 'invoices', badge: { count: 3, color: 'red' }, children: [
+          { label: 'Provisional', href: 'invoices.html', key: 'invoices-provisional' },
+          { label: 'Final', href: 'invoices.html', key: 'invoices-final' },
+          { label: 'Disputed', href: 'invoices.html', key: 'invoices-disputed' },
+        ]
+      },
       { label: 'Reconciliation', icon: 'refresh-cw', href: 'reconciliation.html', key: 'reconciliation' },
     ]
   },
   {
     group: 'ADMIN', defaultOpen: false, items: [
-      { label: 'Contracts', icon: 'clipboard', href: 'contracts.html', key: 'contracts' },
+      {
+        label: 'Contracts', icon: 'clipboard', href: 'contracts.html', key: 'contracts', children: [
+          { label: 'Active Contracts', href: 'contracts.html', key: 'active-contracts' },
+          { label: 'New Contract', href: 'contracts.html', key: 'new-contract' },
+          {
+            label: 'Reference Data', key: 'reference-data', children: [
+              { label: 'Counterparties', href: 'settings.html', key: 'ref-counterparties' },
+              { label: 'Ports & Terminals', href: 'settings.html', key: 'ref-ports' },
+              { label: 'Vessels', href: 'settings.html', key: 'ref-vessels' },
+            ]
+          },
+        ]
+      },
       { label: 'Audit Log', icon: 'clock', href: 'audit-log.html', key: 'audit-log' },
       { label: 'Settings', icon: 'settings', href: 'settings.html', key: 'settings' },
     ]
@@ -113,6 +131,122 @@ const MENU = [
 ];
 
 /* ========== BUILD SIDEBAR ========== */
+
+/* Check if any descendant of an item matches the activePage key */
+function hasActiveDescendant(item, activePage) {
+  if (!item.children) return false;
+  for (var i = 0; i < item.children.length; i++) {
+    if (item.children[i].key === activePage) return true;
+    if (hasActiveDescendant(item.children[i], activePage)) return true;
+  }
+  return false;
+}
+
+/*
+ * Render a single menu item recursively.
+ * depth 0: icon + label + badge + arrow
+ * depth 1: indented label (no icon) + arrow (if children)
+ * depth 2+: double+ indented label
+ * If item has children AND href: label click navigates, arrow click toggles
+ * If item has children but NO href: label click toggles
+ */
+function renderMenuItem(item, depth, activePage, subState) {
+  var html = '';
+  var isActive = item.key === activePage;
+  var childActive = hasActiveDescendant(item, activePage);
+  var hasKids = item.children && item.children.length > 0;
+
+  if (hasKids) {
+    // Determine open state: auto-expand if a child is active, otherwise use stored state
+    var sOpen = childActive || isActive || (subState[item.key] || false);
+    var subKey = item.key || item.label.toLowerCase().replace(/\s+/g, '-');
+
+    html += '<div class="hz-menu-sub" data-sub="' + subKey + '">';
+
+    if (depth === 0) {
+      // Top-level parent with children
+      if (item.href) {
+        // Has href: label navigates, arrow toggles
+        html += '<div class="hz-menu-item hz-menu-parent ' + (isActive || childActive ? 'active' : '') + '" data-tooltip="' + item.label + '">';
+        html += '  <a class="hz-menu-parent-link" href="' + item.href + '">';
+        html += '    <span class="hz-menu-icon">' + svg(item.icon, 16) + '</span>';
+        html += '    <span class="hz-menu-label">' + item.label + '</span>';
+        html += '  </a>';
+        if (item.badge) {
+          html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
+        }
+        html += '  <button class="hz-menu-sub-toggle" onclick="toggleSubMenu(\'' + subKey + '\')" title="Expand ' + item.label + '">';
+        html += '    <span class="hz-menu-sub-arrow ' + (sOpen ? 'open' : '') + '">' + svg('chevron-right', 12) + '</span>';
+        html += '  </button>';
+        html += '</div>';
+      } else {
+        // No href: whole row toggles
+        html += '<button class="hz-menu-item ' + (isActive || childActive ? 'active' : '') + '" onclick="toggleSubMenu(\'' + subKey + '\')" data-tooltip="' + item.label + '">';
+        html += '  <span class="hz-menu-icon">' + svg(item.icon, 16) + '</span>';
+        html += '  <span class="hz-menu-label">' + item.label + '</span>';
+        if (item.badge) {
+          html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
+        }
+        html += '  <span class="hz-menu-sub-arrow ' + (sOpen ? 'open' : '') + '">' + svg('chevron-right', 12) + '</span>';
+        html += '</button>';
+      }
+    } else {
+      // Nested parent (depth 1+)
+      var depthClass = depth === 1 ? 'sub' : 'sub-deep';
+      if (item.href) {
+        html += '<div class="hz-menu-item hz-menu-parent ' + depthClass + ' ' + (isActive || childActive ? 'active' : '') + '" data-tooltip="' + item.label + '">';
+        html += '  <a class="hz-menu-parent-link" href="' + item.href + '">';
+        html += '    <span class="hz-menu-icon"></span>';
+        html += '    <span class="hz-menu-label">' + item.label + '</span>';
+        html += '  </a>';
+        if (item.badge) {
+          html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
+        }
+        html += '  <button class="hz-menu-sub-toggle" onclick="toggleSubMenu(\'' + subKey + '\')" title="Expand ' + item.label + '">';
+        html += '    <span class="hz-menu-sub-arrow ' + (sOpen ? 'open' : '') + '">' + svg('chevron-right', 12) + '</span>';
+        html += '  </button>';
+        html += '</div>';
+      } else {
+        html += '<button class="hz-menu-item ' + depthClass + ' ' + (isActive || childActive ? 'active' : '') + '" onclick="toggleSubMenu(\'' + subKey + '\')" data-tooltip="' + item.label + '">';
+        html += '  <span class="hz-menu-icon"></span>';
+        html += '  <span class="hz-menu-label">' + item.label + '</span>';
+        if (item.badge) {
+          html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
+        }
+        html += '  <span class="hz-menu-sub-arrow ' + (sOpen ? 'open' : '') + '">' + svg('chevron-right', 12) + '</span>';
+        html += '</button>';
+      }
+    }
+
+    // Render children
+    html += '<div class="hz-menu-sub-items ' + (sOpen ? 'open' : '') + '">';
+    item.children.forEach(function(child) {
+      html += renderMenuItem(child, depth + 1, activePage, subState);
+    });
+    html += '</div>';
+    html += '</div>';
+  } else {
+    // Leaf item (no children)
+    if (depth === 0) {
+      html += '<a class="hz-menu-item ' + (isActive ? 'active' : '') + '" href="' + item.href + '" data-tooltip="' + item.label + '">';
+      html += '  <span class="hz-menu-icon">' + svg(item.icon, 16) + '</span>';
+      html += '  <span class="hz-menu-label">' + item.label + '</span>';
+      if (item.badge) {
+        html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
+      }
+      html += '</a>';
+    } else {
+      var leafClass = depth === 1 ? 'sub' : 'sub-deep';
+      html += '<a class="hz-menu-item ' + leafClass + ' ' + (isActive ? 'active' : '') + '" href="' + item.href + '" data-tooltip="' + item.label + '">';
+      html += '  <span class="hz-menu-icon"></span>';
+      html += '  <span class="hz-menu-label">' + item.label + '</span>';
+      html += '</a>';
+    }
+  }
+
+  return html;
+}
+
 function buildSidebar(activePage) {
   const sidebarState = JSON.parse(localStorage.getItem('hz-sidebar-groups') || '{}');
   const subState = JSON.parse(localStorage.getItem('hz-sidebar-subs') || '{}');
@@ -146,6 +280,13 @@ function buildSidebar(activePage) {
   MENU.forEach(function(group) {
     var gKey = group.group;
     var gOpen = sidebarState[gKey] !== undefined ? sidebarState[gKey] : group.defaultOpen;
+
+    // Auto-expand group if it contains the active page
+    var groupHasActive = group.items.some(function(item) {
+      return item.key === activePage || hasActiveDescendant(item, activePage);
+    });
+    if (groupHasActive) gOpen = true;
+
     html += '<div class="hz-menu-group" data-group="' + gKey + '">';
     html += '  <button class="hz-menu-group-btn" onclick="toggleMenuGroup(\'' + gKey + '\')">';
     html += '    <span class="hz-menu-group-arrow ' + (gOpen ? 'open' : '') + '">' + svg('chevron-right', 10) + '</span>';
@@ -154,35 +295,7 @@ function buildSidebar(activePage) {
     html += '  <div class="hz-menu-group-items ' + (gOpen ? 'open' : '') + '">';
 
     group.items.forEach(function(item) {
-      var isActive = item.key === activePage;
-      if (item.children) {
-        var sOpen = subState[item.key] || false;
-        html += '<div class="hz-menu-sub" data-sub="' + item.key + '">';
-        html += '  <button class="hz-menu-item ' + (isActive ? 'active' : '') + '" onclick="toggleSubMenu(\'' + item.key + '\')" data-tooltip="' + item.label + '">';
-        html += '    <span class="hz-menu-icon">' + svg(item.icon, 16) + '</span>';
-        html += '    <span class="hz-menu-label">' + item.label + '</span>';
-        if (item.badge) {
-          html += '    <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
-        }
-        html += '    <span class="hz-menu-sub-arrow ' + (sOpen ? 'open' : '') + '">' + svg('chevron-right', 12) + '</span>';
-        html += '  </button>';
-        html += '  <div class="hz-menu-sub-items ' + (sOpen ? 'open' : '') + '">';
-        item.children.forEach(function(child) {
-          html += '<a class="hz-menu-item sub" href="' + child.href + '" data-tooltip="' + child.label + '">';
-          html += '  <span class="hz-menu-icon"></span>';
-          html += '  <span class="hz-menu-label">' + child.label + '</span>';
-          html += '</a>';
-        });
-        html += '  </div></div>';
-      } else {
-        html += '<a class="hz-menu-item ' + (isActive ? 'active' : '') + '" href="' + item.href + '" data-tooltip="' + item.label + '">';
-        html += '  <span class="hz-menu-icon">' + svg(item.icon, 16) + '</span>';
-        html += '  <span class="hz-menu-label">' + item.label + '</span>';
-        if (item.badge) {
-          html += '  <span class="hz-menu-badge ' + item.badge.color + '">' + item.badge.count + '</span>';
-        }
-        html += '</a>';
-      }
+      html += renderMenuItem(item, 0, activePage, subState);
     });
     html += '  </div></div>';
   });

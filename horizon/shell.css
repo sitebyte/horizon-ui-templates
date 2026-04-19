@@ -451,6 +451,54 @@ input, select, textarea {
   padding-left: 2.75rem;
   font-size: var(--text-xs);
 }
+.hz-menu-item.sub-deep {
+  padding-left: 3.75rem;
+  font-size: var(--text-xs);
+}
+
+/* Parent item with both href and children: split into link + toggle */
+.hz-menu-item.hz-menu-parent {
+  padding: 0;
+  cursor: default;
+}
+.hz-menu-parent-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-3);
+  color: inherit;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.hz-menu-item.hz-menu-parent.sub .hz-menu-parent-link {
+  padding-left: 2.75rem;
+}
+.hz-menu-item.hz-menu-parent.sub-deep .hz-menu-parent-link {
+  padding-left: 3.75rem;
+}
+.hz-menu-parent-link:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+.hz-menu-sub-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-2);
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.hz-menu-sub-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.hz-sidebar:not(.expanded) .hz-menu-sub-toggle {
+  display: none;
+}
 
 /* Tooltip on collapsed sidebar */
 .hz-sidebar:not(.expanded) .hz-menu-item[data-tooltip]:hover::after {
