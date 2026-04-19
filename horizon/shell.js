@@ -275,6 +275,68 @@ function buildHeader(pageTitle) {
 }
 
 /* ========== COMMAND PALETTE ========== */
+/* ========== MOCK ENTITY DATABASE (for command-line lookup) ========== */
+var MOCK_ENTITIES = {
+  trades: [
+    { id: 'T-1001', ref: 'BUY-2026-0411-A3F', cp: 'Shell Trading', bm: 'JKM', vol: '3,200,000', status: 'Confirmed' },
+    { id: 'T-1002', ref: 'SELL-2026-0410-B7K', cp: 'JERA Co.', bm: 'TTF', vol: '2,800,000', status: 'Confirmed' },
+    { id: 'T-1003', ref: 'BUY-2026-0409-C2P', cp: 'QatarEnergy', bm: 'JKM', vol: '3,200,000', status: 'Pending' },
+    { id: 'T-1004', ref: 'SELL-2026-0408-D9M', cp: 'TotalEnergies', bm: 'HH', vol: '2,500,000', status: 'Confirmed' },
+    { id: 'T-1005', ref: 'BUY-2026-0407-E1L', cp: 'Cheniere', bm: 'HH', vol: '5,000,000', status: 'Confirmed' },
+    { id: 'T-1006', ref: 'BUY-2026-0405-F4R', cp: 'Woodside', bm: 'JKM', vol: '3,200,000', status: 'Draft' },
+    { id: 'T-1007', ref: 'SELL-2026-0404-G8T', cp: 'KOGAS', bm: 'TTF', vol: '2,800,000', status: 'Confirmed' },
+  ],
+  invoices: [
+    { id: 'INV-2026-0042', cp: 'Shell Trading', amount: '$45.6M', status: 'Pending' },
+    { id: 'INV-2026-0041', cp: 'JERA Co.', amount: '$33.2M', status: 'Approved' },
+    { id: 'INV-2026-0040', cp: 'QatarEnergy', amount: '$42.1M', status: 'Paid' },
+    { id: 'INV-2026-0039', cp: 'TotalEnergies', amount: '$8.5M', status: 'Draft' },
+  ],
+  cargoes: [
+    { id: 'CARGO-Q2-01', vessel: 'Al Dafna', route: 'Ras Laffan → Sodegaura', status: 'In Transit' },
+    { id: 'CARGO-Q2-02', vessel: 'Seri Begawan', route: 'Ras Laffan → Incheon', status: 'Loading' },
+    { id: 'CARGO-Q2-03', vessel: 'Arctic Spirit', route: 'Sabine Pass → Gate Rotterdam', status: 'Nominated' },
+    { id: 'CARGO-Q3-01', vessel: 'TBN', route: 'Bonny Island → Dahej', status: 'Planning' },
+  ],
+  contracts: [
+    { id: 'SPA-QATAR-2026', cp: 'QatarEnergy', type: 'SPA', acq: '12.8M MMBtu' },
+    { id: 'SPA-SHELL-2026', cp: 'Shell Trading', type: 'SPA', acq: '9.6M MMBtu' },
+    { id: 'MSA-JERA-2025', cp: 'JERA Co.', type: 'MSA', acq: '6.4M MMBtu' },
+    { id: 'SPOT-TOTAL-Q2', cp: 'TotalEnergies', type: 'Spot', acq: '3.2M MMBtu' },
+  ],
+  nominations: [
+    { id: 'NOM-2026-Q2-001', contract: 'SPA-QATAR-2026', vessel: 'Al Dafna', status: 'Confirmed' },
+    { id: 'NOM-2026-Q2-002', contract: 'SPA-SHELL-2026', vessel: 'Seri Begawan', status: 'Submitted' },
+    { id: 'NOM-2026-Q2-003', contract: 'SPOT-TOTAL-Q2', vessel: 'TBN', status: 'Draft' },
+  ],
+};
+
+/* Parse command-line style input: "trade 1003" or "invoice INV-2026-0042" or "cargo Q2-01" */
+function parseEntityCommand(q) {
+  q = q.trim();
+  var patterns = [
+    { regex: /^trade\s+(.+)/i, type: 'trades', page: 'lifecycle.html', label: 'Trade' },
+    { regex: /^inv(?:oice)?\s+(.+)/i, type: 'invoices', page: 'invoices.html', label: 'Invoice' },
+    { regex: /^cargo\s+(.+)/i, type: 'cargoes', page: 'cargo-board.html', label: 'Cargo' },
+    { regex: /^contract\s+(.+)/i, type: 'contracts', page: 'contracts.html', label: 'Contract' },
+    { regex: /^nom(?:ination)?\s+(.+)/i, type: 'nominations', page: 'nominations.html', label: 'Nomination' },
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var m = q.match(patterns[i].regex);
+    if (m) {
+      var search = m[1].toUpperCase();
+      var entities = MOCK_ENTITIES[patterns[i].type];
+      var results = entities.filter(function(e) {
+        return e.id.toUpperCase().indexOf(search) >= 0 ||
+               (e.ref && e.ref.toUpperCase().indexOf(search) >= 0) ||
+               (e.cp && e.cp.toUpperCase().indexOf(search) >= 0);
+      });
+      return { type: patterns[i].type, label: patterns[i].label, page: patterns[i].page, search: m[1], results: results };
+    }
+  }
+  return null;
+}
+
 var CMD_ACTIONS = [
   { label: 'Go to Dashboard', keys: 'G D', group: 'Navigate', action: function() { location.href = 'index.html'; } },
   { label: 'Go to Quick Entry', keys: 'G Q', group: 'Navigate', action: function() { location.href = 'quick-entry.html'; } },
@@ -292,7 +354,7 @@ var CMD_ACTIONS = [
   { label: 'Go to Cargo Board', keys: 'G G', group: 'Navigate', action: function() { location.href = 'cargo-board.html'; } },
   { label: 'Go to Settings', keys: 'G S', group: 'Navigate', action: function() { location.href = 'settings.html'; } },
   { label: 'Toggle Theme', keys: 'T', group: 'Actions', action: function() { toggleTheme(); } },
-  { label: 'Toggle Sidebar', keys: '&#8984;B', group: 'Actions', action: function() { toggleSidebar(); } },
+  { label: 'Toggle Sidebar', keys: '\u2318B', group: 'Actions', action: function() { toggleSidebar(); } },
   { label: 'New Trade', keys: 'N', group: 'Actions', action: function() { location.href = 'quick-entry.html'; } },
   { label: 'Show Shortcuts', keys: '?', group: 'Help', action: function() { location.href = 'settings.html'; } },
 ];
@@ -334,17 +396,86 @@ function closeCmdK() {
 
 function renderCmdKList(q) {
   var list = document.getElementById('hz-cmdk-list');
+
+  /* --- Check for entity command (e.g., "trade 1003", "invoice INV-2026-0042") --- */
+  var entityResult = parseEntityCommand(q);
+  if (entityResult) {
+    cmdkFiltered = [];
+    var html = '<div class="hz-cmdk-group-label">' + entityResult.label + ' Lookup: "' + entityResult.search.replace(/</g, '&lt;') + '"</div>';
+    if (entityResult.results.length === 0) {
+      html += '<div class="hz-cmdk-empty">No ' + entityResult.label.toLowerCase() + ' matching "' + entityResult.search.replace(/</g, '&lt;') + '"</div>';
+      html += '<button class="hz-cmdk-item" onmouseenter="cmdkHover(0)" onclick="closeCmdK();location.href=\'' + entityResult.page + '\'"><span>Go to ' + entityResult.label + ' list instead</span><kbd>\u21B5</kbd></button>';
+      cmdkFiltered.push({ label: 'Go to list', action: function() { location.href = entityResult.page; } });
+    } else {
+      entityResult.results.forEach(function(e, i) {
+        var detail = e.ref ? e.ref : e.id;
+        var sub = [];
+        if (e.cp) sub.push(e.cp);
+        if (e.bm) sub.push(e.bm);
+        if (e.vol) sub.push(e.vol + ' MMBtu');
+        if (e.amount) sub.push(e.amount);
+        if (e.vessel) sub.push(e.vessel);
+        if (e.route) sub.push(e.route);
+        if (e.type) sub.push(e.type);
+        if (e.acq) sub.push(e.acq);
+        var statusCls = '';
+        if (e.status === 'Confirmed' || e.status === 'Approved' || e.status === 'Paid') statusCls = 'color:var(--green)';
+        else if (e.status === 'Pending' || e.status === 'Submitted' || e.status === 'In Transit' || e.status === 'Loading') statusCls = 'color:var(--accent)';
+        else if (e.status === 'Draft' || e.status === 'Planning') statusCls = 'color:var(--text-muted)';
+
+        var page = entityResult.page;
+        /* Route to lifecycle for trades, specific pages for others */
+        if (entityResult.type === 'trades') page = 'lifecycle.html';
+
+        cmdkFiltered.push({ label: detail, action: (function(p) { return function() { location.href = p; }; })(page) });
+
+        html += '<button class="hz-cmdk-item ' + (i === cmdkIdx ? 'active' : '') + '" onmouseenter="cmdkHover(' + i + ')" onclick="cmdkExec(' + i + ')">';
+        html += '<div style="display:flex;flex-direction:column;gap:0.125rem;flex:1;min-width:0">';
+        html += '<div style="display:flex;align-items:center;gap:0.5rem">';
+        html += '<span style="font-family:var(--font-mono);font-weight:600">' + e.id + '</span>';
+        if (e.status) html += '<span style="font-size:0.6875rem;' + statusCls + '">' + e.status + '</span>';
+        html += '</div>';
+        html += '<span style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sub.join(' \u00B7 ') + '</span>';
+        html += '</div>';
+        html += '<kbd>\u21B5</kbd>';
+        html += '</button>';
+      });
+    }
+    /* Also show "View all" link */
+    var allIdx = cmdkFiltered.length;
+    cmdkFiltered.push({ label: 'View all', action: function() { location.href = entityResult.page; } });
+    html += '<button class="hz-cmdk-item ' + (allIdx === cmdkIdx ? 'active' : '') + '" onmouseenter="cmdkHover(' + allIdx + ')" onclick="cmdkExec(' + allIdx + ')"><span>View all ' + entityResult.label.toLowerCase() + 's</span><kbd>' + entityResult.label[0].toUpperCase() + '</kbd></button>';
+
+    if (cmdkIdx >= cmdkFiltered.length) cmdkIdx = 0;
+    list.innerHTML = html;
+    return;
+  }
+
+  /* --- Standard command search --- */
   cmdkFiltered = CMD_ACTIONS.filter(function(a) {
     return a.label.toLowerCase().indexOf(q.toLowerCase()) >= 0;
   });
   if (cmdkIdx >= cmdkFiltered.length) cmdkIdx = Math.max(0, cmdkFiltered.length - 1);
+
+  /* --- Show command hints when empty --- */
+  var hintsHtml = '';
+  if (q === '') {
+    hintsHtml = '<div class="hz-cmdk-group-label" style="padding-bottom:0.25rem">Entity Lookup</div>';
+    hintsHtml += '<div style="padding:0.25rem 0.875rem 0.625rem;font-size:0.75rem;color:var(--text-muted);line-height:1.6">';
+    hintsHtml += 'Type <kbd style="font-family:var(--font-mono);padding:0.125rem 0.375rem;border-radius:0.25rem;background:var(--surface-raised);font-size:0.6875rem">trade 1003</kbd> ';
+    hintsHtml += '<kbd style="font-family:var(--font-mono);padding:0.125rem 0.375rem;border-radius:0.25rem;background:var(--surface-raised);font-size:0.6875rem">invoice 0042</kbd> ';
+    hintsHtml += '<kbd style="font-family:var(--font-mono);padding:0.125rem 0.375rem;border-radius:0.25rem;background:var(--surface-raised);font-size:0.6875rem">cargo Q2</kbd> ';
+    hintsHtml += '<kbd style="font-family:var(--font-mono);padding:0.125rem 0.375rem;border-radius:0.25rem;background:var(--surface-raised);font-size:0.6875rem">contract QATAR</kbd> ';
+    hintsHtml += '<kbd style="font-family:var(--font-mono);padding:0.125rem 0.375rem;border-radius:0.25rem;background:var(--surface-raised);font-size:0.6875rem">nom Q2</kbd>';
+    hintsHtml += '</div>';
+  }
 
   if (cmdkFiltered.length === 0) {
     list.innerHTML = '<div class="hz-cmdk-empty">No results for "' + q.replace(/</g, '&lt;') + '"</div>';
     return;
   }
 
-  var html = '';
+  var html = hintsHtml;
   var lastGroup = '';
   cmdkFiltered.forEach(function(a, i) {
     if (a.group && a.group !== lastGroup) {
