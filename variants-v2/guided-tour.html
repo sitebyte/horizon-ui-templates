@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guided Tour — Horizon ETRM</title>
+  <link href="../horizon/shell.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+      }}
+    };
+  </script>
+  <style>
+    /* ================================================
+       GUIDED TOUR — Overlay, Spotlight, Tooltip System
+       ================================================ */
+
+    /* --- Tour Overlay --- */
+    .tour-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .tour-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* The dark backdrop — a pseudo-element so spotlight can punch through */
+    .tour-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 9001;
+      transition: opacity 0.3s ease;
+    }
+    [data-theme="light"] .tour-backdrop {
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    /* --- Spotlight Cutout (applied to highlighted element) --- */
+    .tour-spotlight {
+      position: relative;
+      z-index: 9002;
+      border-radius: var(--radius-lg);
+      transition: box-shadow 0.4s ease;
+    }
+    .tour-spotlight-glow {
+      box-shadow:
+        0 0 0 0.25rem rgba(99, 102, 241, 0.4),
+        0 0 1.5rem rgba(99, 102, 241, 0.2);
+      animation: tour-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes tour-pulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 0.25rem rgba(99, 102, 241, 0.4),
+          0 0 1.5rem rgba(99, 102, 241, 0.2);
+      }
+      50% {
+        box-shadow:
+          0 0 0 0.375rem rgba(99, 102, 241, 0.5),
+          0 0 2rem rgba(99, 102, 241, 0.3);
+      }
+    }
+
+    /* --- Tour Tooltip --- */
+    .tour-tooltip {
+      position: fixed;
+      z-index: 9003;
+      width: 22rem;
+      max-width: calc(100vw - 2rem);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      box-shadow:
+        0 1.5rem 3rem rgba(0, 0, 0, 0.3),
+        0 0 0 0.0625rem rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transform: translateY(0.5rem);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: auto;
+    }
+    .tour-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    [data-theme="light"] .tour-tooltip {
+      box-shadow:
+        0 1.5rem 3rem rgba(0, 0, 0, 0.12),
+        0 0 0 0.0625rem rgba(0, 0, 0, 0.06);
+    }
+
+    .tour-tooltip-title {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.375rem;
+    }
+    .tour-tooltip-body {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .tour-tooltip-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .tour-tooltip-steps {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .tour-tooltip-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    /* Tour buttons */
+    .tour-btn {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-md);
+      transition: all 0.15s ease;
+      font-family: var(--font-ui);
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+    .tour-btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+    }
+    .tour-btn-ghost:hover {
+      color: var(--text-secondary);
+      background: var(--hover);
+    }
+    .tour-btn-secondary {
+      background: var(--surface-raised);
+      color: var(--text-secondary);
+      border: 0.0625rem solid var(--border);
+    }
+    .tour-btn-secondary:hover {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+    }
+    .tour-btn-primary {
+      background: var(--gradient);
+      color: #ffffff;
+    }
+    .tour-btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    /* --- Welcome / Completion Card (centered modal style) --- */
+    .tour-card {
+      position: fixed;
+      z-index: 9003;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      width: 26rem;
+      max-width: calc(100vw - 2rem);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      text-align: center;
+      box-shadow:
+        0 2rem 4rem rgba(0, 0, 0, 0.3),
+        0 0 0 0.0625rem rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: auto;
+    }
+    .tour-card.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    [data-theme="light"] .tour-card {
+      box-shadow:
+        0 2rem 4rem rgba(0, 0, 0, 0.12),
+        0 0 0 0.0625rem rgba(0, 0, 0, 0.06);
+    }
+    .tour-card-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-lg);
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .tour-card-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    .tour-card-body {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .tour-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    .tour-card-actions .tour-btn {
+      padding: 0.5rem 1.25rem;
+      font-size: var(--text-sm);
+    }
+
+    /* Completion checkbox */
+    .tour-checkbox-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .tour-checkbox-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 0.875rem;
+      height: 0.875rem;
+      cursor: pointer;
+    }
+    .tour-checkbox-row label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    /* --- Step Progress Dots --- */
+    .tour-dots {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.75rem;
+      justify-content: center;
+    }
+    .tour-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+      background: var(--surface-elevated);
+      transition: all 0.2s ease;
+    }
+    .tour-dot.active {
+      background: var(--accent);
+      width: 1rem;
+      border-radius: var(--radius-full);
+    }
+    .tour-dot.done {
+      background: var(--accent-light);
+    }
+
+    /* --- Contextual Help Icons --- */
+    .ctx-help {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 0.9375rem;
+      height: 0.9375rem;
+      border-radius: 50%;
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.5625rem;
+      font-weight: 700;
+      cursor: help;
+      position: relative;
+      vertical-align: middle;
+      margin-left: 0.25rem;
+      flex-shrink: 0;
+      font-family: var(--font-ui);
+      line-height: 1;
+      transition: all 0.15s ease;
+    }
+    .ctx-help:hover {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+    .ctx-help::after {
+      content: attr(data-help);
+      position: absolute;
+      bottom: calc(100% + 0.5rem);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14rem;
+      padding: 0.5rem 0.625rem;
+      font-size: var(--text-xs);
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      transform: translateX(-50%) translateY(0.25rem);
+      z-index: 500;
+      white-space: normal;
+      text-align: left;
+    }
+    [data-theme="light"] .ctx-help::after {
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    }
+    .ctx-help:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    /* Arrow for tooltip */
+    .ctx-help::before {
+      content: '';
+      position: absolute;
+      bottom: calc(100% + 0.25rem);
+      left: 50%;
+      transform: translateX(-50%);
+      border: 0.3125rem solid transparent;
+      border-top-color: var(--surface-elevated);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 501;
+    }
+    .ctx-help:hover::before {
+      opacity: 1;
+    }
+
+    /* --- Header Tour Button --- */
+    .tour-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      font-size: var(--text-xs);
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-ui);
+      white-space: nowrap;
+    }
+    .tour-trigger-btn:hover {
+      color: var(--accent-light);
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    /* --- Quick Action Buttons --- */
+    .quick-action {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-ui);
+    }
+    .quick-action:hover {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+    .quick-action-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: var(--radius-md);
+      background: var(--gradient-subtle);
+      color: var(--accent-light);
+      flex-shrink: 0;
+    }
+    .quick-action kbd {
+      margin-left: auto;
+      font-size: 0.5625rem;
+      font-family: var(--font-mono);
+      padding: 0.125rem 0.3125rem;
+      border-radius: 0.1875rem;
+      background: var(--surface-elevated);
+      border: 0.0625rem solid var(--border);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- ===== HEADER ACTIONS (injected after shell builds) ===== -->
+
+  <!-- ===== KPI CARDS ===== -->
+  <div id="tour-kpis" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    <div class="hz-kpi fade-in-d1">
+      <span class="hz-kpi-label">
+        Net Position
+        <span class="ctx-help" data-help="Sum of all long minus short positions across all benchmarks. Positive = net long exposure.">?</span>
+      </span>
+      <span class="hz-kpi-value font-mono">6.4M</span>
+      <span class="hz-kpi-delta positive">+3.2M vs yesterday</span>
+    </div>
+    <div class="hz-kpi fade-in-d2">
+      <span class="hz-kpi-label">Unrealized P&amp;L</span>
+      <span class="hz-kpi-value font-mono text-green">+$2.1M</span>
+      <span class="hz-kpi-delta positive">+$340K today</span>
+    </div>
+    <div class="hz-kpi fade-in-d3">
+      <span class="hz-kpi-label">
+        Hedge Ratio
+        <span class="ctx-help" data-help="Percentage of physical exposure covered by paper hedges. Target: 90%+. Below 80% triggers a risk alert.">?</span>
+      </span>
+      <span class="hz-kpi-value font-mono">78%</span>
+      <span class="hz-kpi-delta negative">-4% from target</span>
+    </div>
+    <div class="hz-kpi fade-in-d4">
+      <span class="hz-kpi-label">Active Trades</span>
+      <span class="hz-kpi-value font-mono">47</span>
+      <span class="hz-kpi-delta" style="color:var(--text-muted);">12 pending approval</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+    <!-- ===== POSITION LADDER ===== -->
+    <div id="tour-ladder" class="lg:col-span-2 hz-card fade-in-d3">
+      <div class="hz-card-header">
+        <div>
+          <div class="hz-card-title">
+            Position Ladder
+            <span class="ctx-help" data-help="Benchmark x Month matrix. Values in MMBtu. WACOG = Weighted Average Cost of Gas. Click any cell to see underlying trades.">?</span>
+          </div>
+          <div class="hz-card-subtitle">Net position by benchmark and delivery month</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="hz-btn sm active">JKM</button>
+          <button class="hz-btn sm">TTF</button>
+          <button class="hz-btn sm">HH</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th style="text-align:right;">Long</th>
+              <th style="text-align:right;">Short</th>
+              <th style="text-align:right;">Net</th>
+              <th style="text-align:right;">WACOG</th>
+              <th style="text-align:right;">MTM P&amp;L</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Jun-26</td>
+              <td style="text-align:right;" class="font-mono text-green">3.2M</td>
+              <td style="text-align:right;" class="font-mono text-red">-1.6M</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono">1.6M</td>
+              <td style="text-align:right;" class="font-mono">$14.12</td>
+              <td style="text-align:right;" class="font-mono text-green">+$208K</td>
+            </tr>
+            <tr>
+              <td>Jul-26</td>
+              <td style="text-align:right;" class="font-mono text-green">4.8M</td>
+              <td style="text-align:right;" class="font-mono text-red">-3.2M</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono">1.6M</td>
+              <td style="text-align:right;" class="font-mono">$13.85</td>
+              <td style="text-align:right;" class="font-mono text-green">+$412K</td>
+            </tr>
+            <tr>
+              <td>Aug-26</td>
+              <td style="text-align:right;" class="font-mono text-green">3.2M</td>
+              <td style="text-align:right;" class="font-mono text-red">-4.8M</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono text-red">-1.6M</td>
+              <td style="text-align:right;" class="font-mono">$14.50</td>
+              <td style="text-align:right;" class="font-mono text-red">-$128K</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr style="border-top:0.125rem solid var(--border-strong);">
+              <td style="font-weight:600;color:var(--text-primary);">Total</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono text-green">11.2M</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono text-red">-9.6M</td>
+              <td style="text-align:right;font-weight:700;color:var(--text-primary);" class="font-mono">1.6M</td>
+              <td style="text-align:right;" class="font-mono">$14.16</td>
+              <td style="text-align:right;font-weight:600;" class="font-mono text-green">+$492K</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== ALERTS PANEL ===== -->
+    <div id="tour-alerts" class="hz-card fade-in-d4">
+      <div class="hz-card-header">
+        <div class="hz-card-title">Alerts</div>
+        <span class="hz-badge amber">3 active</span>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="p-3 rounded-lg" style="background:var(--red-dim);border:0.0625rem solid rgba(239,68,68,0.2);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="hz-dot red"></span>
+            <span class="text-sm font-medium" style="color:var(--red);">Position Limit Breach</span>
+          </div>
+          <p class="text-xs" style="color:var(--text-tertiary);">Sep-26 net position at 92% of $4M limit. Action required.</p>
+          <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">11 Apr 09:15</p>
+        </div>
+        <div class="p-3 rounded-lg" style="background:var(--amber-dim);border:0.0625rem solid rgba(245,158,11,0.2);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="hz-dot amber"></span>
+            <span class="text-sm font-medium" style="color:var(--amber);">JKM Spread Alert</span>
+          </div>
+          <p class="text-xs" style="color:var(--text-tertiary);">Jun/Jul spread widened to $0.30 — above $0.25 threshold</p>
+          <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">11 Apr 08:42</p>
+        </div>
+        <div class="p-3 rounded-lg" style="background:var(--blue-dim);border:0.0625rem solid rgba(59,130,246,0.2);">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="hz-dot blue"></span>
+            <span class="text-sm font-medium" style="color:var(--blue);">Cargo Update</span>
+          </div>
+          <p class="text-xs" style="color:var(--text-tertiary);">Al Dafna ETA revised to 18 Jun (+1 day). No commercial impact.</p>
+          <p class="text-xs font-mono mt-1" style="color:var(--text-muted);">10 Apr 16:30</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== QUICK ACTIONS ===== -->
+  <div id="tour-actions" class="grid grid-cols-1 sm:grid-cols-3 gap-3 fade-in-d4">
+    <button class="quick-action" onclick="showToast('Opening Quick Entry...', 'info')">
+      <span class="quick-action-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+      New Trade
+      <kbd>N</kbd>
+    </button>
+    <button class="quick-action" onclick="showToast('Opening AI Assistant...', 'info')">
+      <span class="quick-action-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </span>
+      Ask AI
+      <kbd>A</kbd>
+    </button>
+    <button class="quick-action" onclick="showToast('Generating morning report...', 'success')">
+      <span class="quick-action-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </span>
+      Generate Report
+      <kbd>R</kbd>
+    </button>
+  </div>
+
+</div>
+
+<!-- ===== TOUR OVERLAY CONTAINER (injected by JS) ===== -->
+<div id="tour-overlay" class="tour-overlay"></div>
+
+<script src="../horizon/shell.js"></script>
+<script>
+  initShell('dashboard', 'Dashboard');
+
+  /* ============================================================
+     GUIDED TOUR SYSTEM — Vanilla JS, zero dependencies
+     Demonstrates tooltip-spotlight pattern for evaluation
+     ============================================================ */
+
+  (function() {
+    'use strict';
+
+    // --- Tour Configuration ---
+    var TOUR_STEPS = [
+      {
+        type: 'card',
+        title: 'Welcome to Horizon',
+        body: 'Let\'s walk through the key features of your trading dashboard. This takes about 60 seconds.',
+        icon: 'bolt',
+        primaryLabel: 'Start Tour',
+        secondaryLabel: 'Skip'
+      },
+      {
+        type: 'spotlight',
+        target: '#tour-kpis',
+        title: 'Key Performance Indicators',
+        body: 'These cards show your key metrics at a glance. Net Position, P&L, Hedge Ratio, and Active Trades update in real-time as market data flows in.',
+        position: 'bottom'
+      },
+      {
+        type: 'spotlight',
+        target: '#tour-ladder',
+        title: 'Position Ladder',
+        body: 'The Position Ladder shows your exposure by benchmark and month. Green = long, red = short. Click any cell to drill into the underlying trades.',
+        position: 'bottom'
+      },
+      {
+        type: 'spotlight',
+        target: '#tour-alerts',
+        title: 'Alerts Panel',
+        body: 'Alerts are sorted by urgency. Red = action needed now. Amber = attention soon. Blue = informational. Click any alert to navigate to the relevant trade or position.',
+        position: 'left'
+      },
+      {
+        type: 'spotlight',
+        target: '#hz-sidebar',
+        title: 'Navigation Sidebar',
+        body: 'Navigate between views here. The menu groups features by workflow: Trading, Physical, Settlement. Use Cmd+K to jump to any page instantly.',
+        position: 'right'
+      },
+      {
+        type: 'spotlight',
+        target: '#tour-actions',
+        title: 'Quick Actions',
+        body: 'Quick Actions give you one-click access to common tasks. Press N to create a new trade, A to ask the AI assistant, or R to generate a report from anywhere.',
+        position: 'top'
+      },
+      {
+        type: 'card',
+        title: 'You\'re all set!',
+        body: 'Explore the dashboard or try entering your first trade. You can restart this tour anytime from the header.',
+        icon: 'check',
+        primaryLabel: 'Explore Dashboard',
+        secondaryLabel: 'Quick Entry',
+        showCheckbox: true
+      }
+    ];
+
+    var currentStep = -1;
+    var overlayEl = document.getElementById('tour-overlay');
+    var backdropEl = null;
+    var tooltipEl = null;
+    var cardEl = null;
+    var previousSpotlight = null;
+
+    // --- Create DOM elements ---
+    function createTourElements() {
+      // Backdrop
+      backdropEl = document.createElement('div');
+      backdropEl.className = 'tour-backdrop';
+      backdropEl.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+      overlayEl.appendChild(backdropEl);
+
+      // Tooltip (for spotlight steps)
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tour-tooltip';
+      overlayEl.appendChild(tooltipEl);
+
+      // Card (for welcome/completion steps)
+      cardEl = document.createElement('div');
+      cardEl.className = 'tour-card';
+      overlayEl.appendChild(cardEl);
+    }
+
+    // --- Position tooltip relative to target ---
+    function positionTooltip(targetEl, position) {
+      var rect = targetEl.getBoundingClientRect();
+      var ttWidth = tooltipEl.offsetWidth || 352;
+      var ttHeight = tooltipEl.offsetHeight || 120;
+      var gap = 12;
+      var top, left;
+
+      switch (position) {
+        case 'bottom':
+          top = rect.bottom + gap;
+          left = rect.left + (rect.width / 2) - (ttWidth / 2);
+          break;
+        case 'top':
+          top = rect.top - ttHeight - gap;
+          left = rect.left + (rect.width / 2) - (ttWidth / 2);
+          break;
+        case 'left':
+          top = rect.top + (rect.height / 2) - (ttHeight / 2);
+          left = rect.left - ttWidth - gap;
+          break;
+        case 'right':
+          top = rect.top + (rect.height / 2) - (ttHeight / 2);
+          left = rect.right + gap;
+          break;
+        default:
+          top = rect.bottom + gap;
+          left = rect.left;
+      }
+
+      // Clamp within viewport
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      if (left < 8) left = 8;
+      if (left + ttWidth > vw - 8) left = vw - ttWidth - 8;
+      if (top < 8) top = 8;
+      if (top + ttHeight > vh - 8) top = vh - ttHeight - 8;
+
+      tooltipEl.style.top = top + 'px';
+      tooltipEl.style.left = left + 'px';
+    }
+
+    // --- Build progress dots ---
+    function buildDots(step, total) {
+      var html = '<div class="tour-dots">';
+      for (var i = 0; i < total; i++) {
+        var cls = 'tour-dot';
+        if (i === step) cls += ' active';
+        else if (i < step) cls += ' done';
+        html += '<span class="' + cls + '"></span>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    // --- Clear previous spotlight ---
+    function clearSpotlight() {
+      if (previousSpotlight) {
+        previousSpotlight.classList.remove('tour-spotlight', 'tour-spotlight-glow');
+        previousSpotlight.style.position = '';
+        previousSpotlight.style.zIndex = '';
+        previousSpotlight = null;
+      }
+    }
+
+    // --- Show a step ---
+    function showStep(idx) {
+      currentStep = idx;
+      var step = TOUR_STEPS[idx];
+
+      // Hide both containers first
+      tooltipEl.classList.remove('visible');
+      cardEl.classList.remove('visible');
+      clearSpotlight();
+
+      if (step.type === 'card') {
+        showCardStep(step, idx);
+      } else {
+        showSpotlightStep(step, idx);
+      }
+    }
+
+    // --- Card step (welcome / completion) ---
+    function showCardStep(step, idx) {
+      var iconSvg = '';
+      if (step.icon === 'bolt') {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>';
+      } else if (step.icon === 'check') {
+        iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      }
+
+      var html = '';
+      html += '<div class="tour-card-icon">' + iconSvg + '</div>';
+      html += '<div class="tour-card-title">' + step.title + '</div>';
+      html += '<div class="tour-card-body">' + step.body + '</div>';
+      html += '<div class="tour-card-actions">';
+      if (step.secondaryLabel) {
+        if (idx === 0) {
+          html += '<button class="tour-btn tour-btn-secondary" onclick="window._tour.skip()">' + step.secondaryLabel + '</button>';
+        } else {
+          html += '<button class="tour-btn tour-btn-secondary" onclick="window._tour.skip()">' + step.secondaryLabel + '</button>';
+        }
+      }
+      html += '<button class="tour-btn tour-btn-primary" onclick="' + (idx === TOUR_STEPS.length - 1 ? 'window._tour.finish()' : 'window._tour.next()') + '">' + step.primaryLabel + '</button>';
+      html += '</div>';
+
+      if (step.showCheckbox) {
+        html += '<div class="tour-checkbox-row">';
+        html += '<input type="checkbox" id="tour-dont-show" checked />';
+        html += '<label for="tour-dont-show">Don\'t show this again</label>';
+        html += '</div>';
+      }
+
+      html += buildDots(idx, TOUR_STEPS.length);
+      cardEl.innerHTML = html;
+
+      requestAnimationFrame(function() {
+        cardEl.classList.add('visible');
+      });
+    }
+
+    // --- Spotlight step ---
+    function showSpotlightStep(step, idx) {
+      var targetEl = document.querySelector(step.target);
+      if (!targetEl) { next(); return; }
+
+      // Scroll target into view
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // Apply spotlight
+      setTimeout(function() {
+        targetEl.classList.add('tour-spotlight', 'tour-spotlight-glow');
+        previousSpotlight = targetEl;
+
+        // Build tooltip content
+        var html = '';
+        html += '<div class="tour-tooltip-title">' + step.title + '</div>';
+        html += '<div class="tour-tooltip-body">' + step.body + '</div>';
+        html += '<div class="tour-tooltip-footer">';
+        html += '  <span class="tour-tooltip-steps">' + (idx + 1) + ' of ' + TOUR_STEPS.length + '</span>';
+        html += '  <div class="tour-tooltip-actions">';
+        html += '    <button class="tour-btn tour-btn-ghost" onclick="window._tour.skip()">Skip</button>';
+        if (idx > 0) {
+          html += '  <button class="tour-btn tour-btn-secondary" onclick="window._tour.prev()">Previous</button>';
+        }
+        html += '    <button class="tour-btn tour-btn-primary" onclick="window._tour.next()">Next</button>';
+        html += '  </div>';
+        html += '</div>';
+        html += buildDots(idx, TOUR_STEPS.length);
+        tooltipEl.innerHTML = html;
+
+        // Position and show
+        positionTooltip(targetEl, step.position);
+        requestAnimationFrame(function() {
+          tooltipEl.classList.add('visible');
+        });
+      }, 100);
+    }
+
+    // --- Tour controls ---
+    function startTour() {
+      if (!backdropEl) createTourElements();
+      overlayEl.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      showStep(0);
+    }
+
+    function next() {
+      if (currentStep < TOUR_STEPS.length - 1) {
+        tooltipEl.classList.remove('visible');
+        cardEl.classList.remove('visible');
+        setTimeout(function() {
+          showStep(currentStep + 1);
+        }, 150);
+      } else {
+        finish();
+      }
+    }
+
+    function prev() {
+      if (currentStep > 0) {
+        tooltipEl.classList.remove('visible');
+        cardEl.classList.remove('visible');
+        setTimeout(function() {
+          showStep(currentStep - 1);
+        }, 150);
+      }
+    }
+
+    function skip() {
+      endTour(true);
+    }
+
+    function finish() {
+      var checkbox = document.getElementById('tour-dont-show');
+      if (checkbox && checkbox.checked) {
+        localStorage.setItem('horizon-tour-complete', 'true');
+      }
+      endTour(false);
+    }
+
+    function endTour(wasSkipped) {
+      clearSpotlight();
+      tooltipEl.classList.remove('visible');
+      cardEl.classList.remove('visible');
+
+      setTimeout(function() {
+        overlayEl.classList.remove('active');
+        document.body.style.overflow = '';
+        currentStep = -1;
+
+        if (wasSkipped) {
+          showToast('Tour skipped. Click "Take a Tour" in the header anytime.', 'info');
+        } else {
+          showToast('Tour complete! Explore at your pace.', 'success');
+        }
+      }, 200);
+    }
+
+    // --- Keyboard navigation ---
+    document.addEventListener('keydown', function(e) {
+      if (currentStep < 0) return;
+      // Don't intercept if CmdK is open
+      var cmdkOverlay = document.getElementById('hz-cmdk-overlay');
+      if (cmdkOverlay && cmdkOverlay.style.display !== 'none') return;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        e.stopPropagation();
+        next();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        e.stopPropagation();
+        prev();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        skip();
+      }
+    }, true);
+
+    // --- Handle window resize: reposition tooltip ---
+    window.addEventListener('resize', function() {
+      if (currentStep >= 0 && TOUR_STEPS[currentStep].type === 'spotlight') {
+        var targetEl = document.querySelector(TOUR_STEPS[currentStep].target);
+        if (targetEl) positionTooltip(targetEl, TOUR_STEPS[currentStep].position);
+      }
+    });
+
+    // --- Public API ---
+    window._tour = {
+      start: startTour,
+      next: next,
+      prev: prev,
+      skip: skip,
+      finish: finish
+    };
+
+    // --- Inject "Take a Tour" button into header ---
+    function injectTourButton() {
+      var headerRight = document.querySelector('.hz-header-right');
+      if (!headerRight) return;
+
+      var btn = document.createElement('button');
+      btn.className = 'tour-trigger-btn';
+      btn.onclick = startTour;
+      btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Take a Tour';
+
+      // Also add a small "?" restart icon
+      var helpBtn = document.createElement('button');
+      helpBtn.className = 'tour-trigger-btn';
+      helpBtn.title = 'Restart guided tour';
+      helpBtn.onclick = function() {
+        localStorage.removeItem('horizon-tour-complete');
+        startTour();
+      };
+      helpBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      helpBtn.style.padding = '0.25rem';
+
+      // Insert before existing header buttons
+      var firstChild = headerRight.firstChild;
+      headerRight.insertBefore(btn, firstChild);
+      headerRight.insertBefore(helpBtn, btn.nextSibling);
+    }
+
+    // --- Auto-show on first visit ---
+    function checkFirstVisit() {
+      var tourDone = localStorage.getItem('horizon-tour-complete');
+      if (!tourDone) {
+        setTimeout(startTour, 800);
+      }
+    }
+
+    // Wait for shell to finish building
+    setTimeout(function() {
+      injectTourButton();
+      checkFirstVisit();
+    }, 600);
+
+  })();
+</script>
+
+<!-- Back to Index -->
+<a href="../index.html"
+   style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
+   onmouseover="this.style.background='rgba(79,70,229,1)'"
+   onmouseout="this.style.background='rgba(99,102,241,0.9)'"
+>&#8592; All Themes</a>
+
+</body>
+</html>
