@@ -78,8 +78,8 @@ const MENU = [
       { label: 'Positions', icon: 'bar-chart-2', href: 'positions.html', key: 'positions' },
       {
         label: 'Curves', icon: 'trending-up', key: 'curves', href: 'curves.html', children: [
-          { label: 'Forward Curves', href: 'curves.html', key: 'forward-curves' },
-          { label: 'Spread Monitor', href: 'curves.html', key: 'spread-monitor' },
+          { label: 'Forward Curves', href: 'curves.html#forward-curves', key: 'forward-curves' },
+          { label: 'Spread Monitor', href: 'curves.html#spread-monitor', key: 'spread-monitor' },
         ]
       },
       { label: 'Hedge Book', icon: 'shield', href: 'hedges.html', key: 'hedges' },
@@ -90,9 +90,9 @@ const MENU = [
       { label: 'Cargo Board', icon: 'truck', href: 'cargo-board.html', key: 'cargo-board' },
       {
         label: 'Nominations', icon: 'file-text', key: 'nominations', href: 'nominations.html', badge: { count: 2, color: 'amber' }, children: [
-          { label: 'ADP Schedule', href: 'nominations.html', key: 'adp-schedule' },
-          { label: 'Cargo Nominations', href: 'nominations.html', key: 'cargo-nominations' },
-          { label: 'Vessel Nominations', href: 'nominations.html', key: 'vessel-nominations' },
+          { label: 'ADP Schedule', href: 'nominations.html#adp-schedule', key: 'adp-schedule' },
+          { label: 'Cargo Nominations', href: 'nominations.html#cargo-nominations', key: 'cargo-nominations' },
+          { label: 'Vessel Nominations', href: 'nominations.html#vessel-nominations', key: 'vessel-nominations' },
         ]
       },
     ]
@@ -101,9 +101,9 @@ const MENU = [
     group: 'SETTLEMENT', defaultOpen: false, items: [
       {
         label: 'Invoice Queue', icon: 'dollar', href: 'invoices.html', key: 'invoices', badge: { count: 3, color: 'red' }, children: [
-          { label: 'Provisional', href: 'invoices.html', key: 'invoices-provisional' },
-          { label: 'Final', href: 'invoices.html', key: 'invoices-final' },
-          { label: 'Disputed', href: 'invoices.html', key: 'invoices-disputed' },
+          { label: 'Provisional', href: 'invoices.html#provisional', key: 'invoices-provisional' },
+          { label: 'Final', href: 'invoices.html#final', key: 'invoices-final' },
+          { label: 'Disputed', href: 'invoices.html#disputed', key: 'invoices-disputed' },
         ]
       },
       { label: 'Reconciliation', icon: 'refresh-cw', href: 'reconciliation.html', key: 'reconciliation' },
@@ -113,8 +113,8 @@ const MENU = [
     group: 'ADMIN', defaultOpen: false, items: [
       {
         label: 'Contracts', icon: 'clipboard', href: 'contracts.html', key: 'contracts', children: [
-          { label: 'Active Contracts', href: 'contracts.html', key: 'active-contracts' },
-          { label: 'New Contract', href: 'contracts.html', key: 'new-contract' },
+          { label: 'Active Contracts', href: 'contracts.html#active', key: 'active-contracts' },
+          { label: 'New Contract', href: 'contracts.html#new', key: 'new-contract' },
           {
             label: 'Reference Data', key: 'reference-data', children: [
               { label: 'Counterparties', href: 'settings.html', key: 'ref-counterparties' },
@@ -135,15 +135,20 @@ const MENU = [
 /* Check if an item matches the active page — by key OR by href matching current URL */
 function isItemActive(item, activePage) {
   if (item.key === activePage) return true;
-  // Also match by href against current page filename
+  // Also match by href against current page filename + hash
   if (item.href) {
     var currentFile = location.pathname.split('/').pop() || 'index.html';
     var currentHash = location.hash || '';
-    var itemHref = item.href.split('#')[0];
+    var itemFile = item.href.split('#')[0];
     var itemHash = item.href.includes('#') ? '#' + item.href.split('#')[1] : '';
-    // Match filename, and if item has a hash, match that too
-    if (itemHref === currentFile) {
-      if (!itemHash || itemHash === currentHash) return true;
+    if (itemFile === currentFile) {
+      // If the menu item has a hash anchor, only match if current hash matches
+      if (itemHash) return itemHash === currentHash;
+      // If the menu item has NO hash, match only if current URL also has no hash
+      // (or match anyway for parent items — parents without hash match the page)
+      if (!currentHash) return true;
+      // Parent item (no hash) on a page with a hash — still active as the parent
+      return true;
     }
   }
   return false;

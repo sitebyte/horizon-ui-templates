@@ -135,25 +135,29 @@ async function screenshot(pg, name) {
   // ─── TEST 2b: Sub-menu active highlighting ───
   console.log('\n── Sub-Menu Active Highlighting ──');
   {
-    // Test that sub-items highlight when on their parent's page
-    const { pg, ctx, jsErrors } = await newPage('horizon/curves.html');
-    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
-    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on curves page (' + activeSubs + ' active)');
+    // Without hash: parent is active, children are NOT (correct — no hash means no specific sub-section)
+    const { pg, ctx } = await newPage('horizon/curves.html');
+    const parentActive = await pg.locator('.hz-menu-item.active:not(.sub)').count();
+    const childActive = await pg.locator('.hz-menu-item.sub.active').count();
+    log(parentActive > 0 ? 'PASS' : 'FAIL', 'Curves parent highlighted on curves.html');
+    log(childActive === 0 ? 'PASS' : 'FAIL', 'No sub-item highlighted without hash (correct)');
     await ctx.close();
   }
   {
-    const { pg, ctx, jsErrors } = await newPage('horizon/invoices.html');
-    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
-    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on invoices page (' + activeSubs + ' active)');
-    // Also verify the parent group auto-expanded
+    // WITH hash: specific child highlights
+    const { pg, ctx } = await newPage('horizon/curves.html#spread-monitor');
+    const childActive = await pg.locator('.hz-menu-item.sub.active').evaluateAll(els => els.map(e => e.textContent.trim()));
+    log(childActive.includes('Spread Monitor') ? 'PASS' : 'FAIL', 'Spread Monitor highlights with #spread-monitor hash (' + childActive.join(',') + ')');
+    await ctx.close();
+  }
+  {
+    const { pg, ctx } = await newPage('horizon/invoices.html');
     const settlementOpen = await pg.locator('.hz-menu-group[data-group="SETTLEMENT"] .hz-menu-group-items.open').count();
     log(settlementOpen > 0 ? 'PASS' : 'FAIL', 'SETTLEMENT group auto-expanded for invoices');
     await ctx.close();
   }
   {
-    const { pg, ctx, jsErrors } = await newPage('horizon/contracts.html');
-    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
-    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on contracts page (' + activeSubs + ' active)');
+    const { pg, ctx } = await newPage('horizon/contracts.html');
     const adminOpen = await pg.locator('.hz-menu-group[data-group="ADMIN"] .hz-menu-group-items.open').count();
     log(adminOpen > 0 ? 'PASS' : 'FAIL', 'ADMIN group auto-expanded for contracts');
     await ctx.close();
