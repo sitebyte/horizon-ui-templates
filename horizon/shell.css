@@ -450,11 +450,40 @@ input, select, textarea {
 .hz-menu-item.sub {
   padding-left: 2.75rem;
   font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  border-left: 0.125rem solid transparent;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
 }
+.hz-menu-item.sub:hover {
+  color: var(--text-primary);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+.hz-menu-item.sub.active {
+  color: var(--accent-light);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+}
+.hz-menu-item.sub.active::before { display: none; } /* hide the default left bar */
 .hz-menu-item.sub-deep {
-  padding-left: 3.75rem;
+  padding-left: 1rem;
+  margin-left: 2.5rem;
   font-size: var(--text-xs);
+  color: var(--text-muted);
+  border-left: 0.125rem solid transparent;
 }
+.hz-menu-item.sub-deep:hover {
+  color: var(--text-secondary);
+  border-left-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+.hz-menu-item.sub-deep.active {
+  color: var(--accent-light);
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+}
+.hz-menu-item.sub-deep.active::before { display: none; }
 
 /* Parent item with both href and children: split into link + toggle */
 .hz-menu-item.hz-menu-parent {

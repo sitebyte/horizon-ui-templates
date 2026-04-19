@@ -132,6 +132,33 @@ async function screenshot(pg, name) {
     await ctx.close();
   }
 
+  // ─── TEST 2b: Sub-menu active highlighting ───
+  console.log('\n── Sub-Menu Active Highlighting ──');
+  {
+    // Test that sub-items highlight when on their parent's page
+    const { pg, ctx, jsErrors } = await newPage('horizon/curves.html');
+    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
+    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on curves page (' + activeSubs + ' active)');
+    await ctx.close();
+  }
+  {
+    const { pg, ctx, jsErrors } = await newPage('horizon/invoices.html');
+    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
+    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on invoices page (' + activeSubs + ' active)');
+    // Also verify the parent group auto-expanded
+    const settlementOpen = await pg.locator('.hz-menu-group[data-group="SETTLEMENT"] .hz-menu-group-items.open').count();
+    log(settlementOpen > 0 ? 'PASS' : 'FAIL', 'SETTLEMENT group auto-expanded for invoices');
+    await ctx.close();
+  }
+  {
+    const { pg, ctx, jsErrors } = await newPage('horizon/contracts.html');
+    const activeSubs = await pg.locator('.hz-menu-item.sub.active').count();
+    log(activeSubs > 0 ? 'PASS' : 'FAIL', 'Sub-items highlight on contracts page (' + activeSubs + ' active)');
+    const adminOpen = await pg.locator('.hz-menu-group[data-group="ADMIN"] .hz-menu-group-items.open').count();
+    log(adminOpen > 0 ? 'PASS' : 'FAIL', 'ADMIN group auto-expanded for contracts');
+    await ctx.close();
+  }
+
   // ─── TEST 3: Command palette ───
   console.log('\n── Command Palette ──');
   {

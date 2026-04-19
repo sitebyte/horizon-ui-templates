@@ -132,11 +132,28 @@ const MENU = [
 
 /* ========== BUILD SIDEBAR ========== */
 
+/* Check if an item matches the active page — by key OR by href matching current URL */
+function isItemActive(item, activePage) {
+  if (item.key === activePage) return true;
+  // Also match by href against current page filename
+  if (item.href) {
+    var currentFile = location.pathname.split('/').pop() || 'index.html';
+    var currentHash = location.hash || '';
+    var itemHref = item.href.split('#')[0];
+    var itemHash = item.href.includes('#') ? '#' + item.href.split('#')[1] : '';
+    // Match filename, and if item has a hash, match that too
+    if (itemHref === currentFile) {
+      if (!itemHash || itemHash === currentHash) return true;
+    }
+  }
+  return false;
+}
+
 /* Check if any descendant of an item matches the activePage key */
 function hasActiveDescendant(item, activePage) {
   if (!item.children) return false;
   for (var i = 0; i < item.children.length; i++) {
-    if (item.children[i].key === activePage) return true;
+    if (isItemActive(item.children[i], activePage)) return true;
     if (hasActiveDescendant(item.children[i], activePage)) return true;
   }
   return false;
@@ -152,7 +169,7 @@ function hasActiveDescendant(item, activePage) {
  */
 function renderMenuItem(item, depth, activePage, subState) {
   var html = '';
-  var isActive = item.key === activePage;
+  var isActive = isItemActive(item, activePage);
   var childActive = hasActiveDescendant(item, activePage);
   var hasKids = item.children && item.children.length > 0;
 
