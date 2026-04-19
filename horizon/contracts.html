@@ -9,347 +9,958 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
+    /* ===== Step Indicator ===== */
+    .wiz-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: var(--sp-5) var(--sp-4);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--sp-4);
+    }
+    .wiz-step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-2);
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      min-width: 5rem;
+    }
+    .wiz-step-circle {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--text-sm);
+      font-family: var(--font-mono);
+      border: 0.125rem solid var(--border-strong);
+      background: var(--surface-raised);
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+    }
+    .wiz-step-item.active .wiz-step-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 0 0.25rem var(--accent-bg);
+    }
+    .wiz-step-item.done .wiz-step-circle {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .wiz-step-label {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.2s;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .wiz-step-item.active .wiz-step-label { color: var(--accent-light); }
+    .wiz-step-item.done .wiz-step-label { color: var(--green); }
+    .wiz-step-line {
+      flex: 1;
+      height: 0.125rem;
+      min-width: 3rem;
+      max-width: 8rem;
+      background: var(--border);
+      margin-bottom: 1.75rem; /* align to circle center */
+      transition: background 0.25s;
+    }
+    .wiz-step-line.done { background: var(--green); }
+    .wiz-step-line.active { background: var(--accent); }
 
-    /* Wizard steps */
-    .wiz-steps { display:flex; align-items:center; gap:0; margin-bottom:1rem; }
-    .wiz-step { display:flex; align-items:center; gap:0.375rem; padding:0.375rem 0.75rem; font-size:0.625rem; font-weight:600; color:var(--text-muted); position:relative; font-family:'Inter',sans-serif; cursor:pointer; transition:color 0.15s; }
-    .wiz-step .num { display:flex; align-items:center; justify-content:center; width:1.25rem; height:1.25rem; border-radius:50%; border:0.0625rem solid var(--border); font-size:0.5625rem; transition:all 0.15s; }
-    .wiz-step.active { color:var(--accent); }
-    .wiz-step.active .num { background:var(--accent); border-color:var(--accent); color:#000; }
-    .wiz-step.done { color:var(--green); }
-    .wiz-step.done .num { background:var(--green); border-color:var(--green); color:#000; }
-    .wiz-connector { width:2rem; height:0.0625rem; background:var(--border); }
-    .wiz-connector.done { background:var(--green); }
+    /* ===== Wizard Panels ===== */
+    .wiz-panel {
+      display: none;
+      animation: fadeInUp 0.25s ease;
+    }
+    .wiz-panel.active { display: block; }
 
-    /* Wizard panels */
-    .wiz-panel { display:none; }
-    .wiz-panel.active { display:block; animation: fadeIn 0.2s ease; }
-    .wiz-form-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(12rem,1fr)); gap:0.5rem; margin-bottom:0.5rem; }
-    .wiz-group { display:flex; flex-direction:column; gap:0.1875rem; }
-    .wiz-label { font-size:0.625rem; font-weight:500; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif; }
-    .wiz-error { font-size:0.5625rem; color:var(--red); font-family:'Inter',sans-serif; min-height:0.75rem; }
-    .wiz-nav { display:flex; justify-content:space-between; margin-top:0.75rem; padding-top:0.5rem; border-top:0.0625rem solid var(--border); }
+    /* ===== Radio Cards ===== */
+    .radio-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-3);
+    }
+    @media (max-width: 48rem) { .radio-cards { grid-template-columns: repeat(2, 1fr); } }
+    .radio-card {
+      cursor: pointer;
+      background: var(--surface-raised);
+      border: 0.125rem solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4);
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .radio-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-elevated);
+    }
+    .radio-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      box-shadow: 0 0 0 0.1875rem var(--accent-bg);
+    }
+    .radio-card-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--sp-2);
+    }
+    .radio-card-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.125rem;
+    }
+    .radio-card-desc {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
 
-    /* Review summary */
-    .review-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
-    @media (max-width:48rem) { .review-grid { grid-template-columns:1fr; } }
-    .review-section { margin-bottom:0.5rem; }
-    .review-section-title { font-size:0.625rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem; font-family:'Inter',sans-serif; }
-    .review-row { display:flex; justify-content:space-between; padding:0.1875rem 0; font-size:0.6875rem; border-bottom:0.0625rem solid var(--border); }
-    .review-row:last-child { border-bottom:none; }
-    .review-label { color:var(--text-tertiary); font-family:'Inter',sans-serif; }
-    .review-val { font-weight:500; color:var(--text-primary); }
+    /* ===== Pricing Basis Toggle ===== */
+    .pricing-toggle {
+      display: inline-flex;
+      border-radius: var(--radius-md);
+      border: 0.0625rem solid var(--border);
+      overflow: hidden;
+      background: var(--surface-raised);
+    }
+    .pricing-toggle-btn {
+      padding: var(--sp-2) var(--sp-3);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: var(--font-ui);
+      white-space: nowrap;
+    }
+    .pricing-toggle-btn:hover { color: var(--text-secondary); background: var(--hover); }
+    .pricing-toggle-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    .pricing-toggle-btn + .pricing-toggle-btn {
+      border-left: 0.0625rem solid var(--border);
+    }
+
+    /* ===== Pricing conditional sections ===== */
+    .pricing-section {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .pricing-section.visible { display: grid; }
+
+    /* ===== Formula preview ===== */
+    .formula-preview {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-light);
+      margin-top: var(--sp-2);
+    }
+    .formula-preview .formula-label {
+      font-family: var(--font-ui);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* ===== Form layout helpers ===== */
+    .wiz-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-4);
+    }
+    @media (max-width: 36rem) { .wiz-form-grid { grid-template-columns: 1fr; } }
+    .wiz-form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 48rem) { .wiz-form-grid.cols-3 { grid-template-columns: 1fr 1fr; } }
+    .wiz-group { display: flex; flex-direction: column; gap: var(--sp-1); }
+    .wiz-group.full { grid-column: 1 / -1; }
+
+    .wiz-error-msg {
+      font-size: var(--text-xs);
+      color: var(--red);
+      min-height: 1rem;
+      font-family: var(--font-ui);
+    }
+    .wiz-input-error {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 0 0.125rem var(--red-dim) !important;
+    }
+
+    /* ===== Section title ===== */
+    .wiz-section-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-1);
+    }
+    .wiz-section-sub {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-5);
+    }
+
+    /* ===== Nav buttons ===== */
+    .wiz-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--sp-6);
+      padding-top: var(--sp-4);
+      border-top: 0.0625rem solid var(--border);
+    }
+    .wiz-nav-right { display: flex; gap: var(--sp-3); }
+
+    /* ===== Review ===== */
+    .review-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-4);
+    }
+    @media (max-width: 48rem) { .review-sections { grid-template-columns: 1fr; } }
+    .review-block {
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .review-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 0.0625rem solid var(--border);
+      background: var(--surface-base);
+    }
+    .review-block-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .review-block-edit {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--accent-light);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .review-block-edit:hover { color: var(--accent); }
+    .review-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: var(--sp-2) var(--sp-4);
+      font-size: var(--text-sm);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-row-label { color: var(--text-tertiary); }
+    .review-row-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: right;
+    }
+    .review-row-value.mono { font-family: var(--font-mono); }
   </style>
 </head>
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem;">
-      <div style="display:flex; gap:1rem; margin-bottom:1rem;">
-        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
-        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
-        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
-        <div class="hz-skeleton" style="width:6rem; height:1.25rem;"></div>
+  <!-- ===== Step Indicator ===== -->
+  <div class="wiz-stepper" id="wiz-stepper">
+    <div class="wiz-step-item active" data-step="0" onclick="wizGoTo(0)">
+      <div class="wiz-step-circle">1</div>
+      <div class="wiz-step-label">Type & Parties</div>
+    </div>
+    <div class="wiz-step-line"></div>
+    <div class="wiz-step-item" data-step="1" onclick="wizGoTo(1)">
+      <div class="wiz-step-circle">2</div>
+      <div class="wiz-step-label">Volume & Delivery</div>
+    </div>
+    <div class="wiz-step-line"></div>
+    <div class="wiz-step-item" data-step="2" onclick="wizGoTo(2)">
+      <div class="wiz-step-circle">3</div>
+      <div class="wiz-step-label">Pricing</div>
+    </div>
+    <div class="wiz-step-line"></div>
+    <div class="wiz-step-item" data-step="3" onclick="wizGoTo(3)">
+      <div class="wiz-step-circle">4</div>
+      <div class="wiz-step-label">Review</div>
+    </div>
+  </div>
+
+  <!-- ========== STEP 1: Contract Type & Parties ========== -->
+  <div class="wiz-panel active hz-card " data-panel="0">
+    <div class="wiz-section-title">Contract Type & Parties</div>
+    <div class="wiz-section-sub">Select the contract type and identify the counterparties.</div>
+
+    <!-- Contract Type Radio Cards -->
+    <label class="hz-label" style="margin-bottom:var(--sp-2);">Contract Type</label>
+    <div class="radio-cards" id="contract-type-cards">
+      <div class="radio-card selected" data-type="SPA" onclick="selectType(this)">
+        <div class="radio-card-icon" style="background:var(--blue-dim); color:var(--blue);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="radio-card-title">SPA</div>
+        <div class="radio-card-desc">Sale & Purchase Agreement</div>
       </div>
-      <div class="hz-card">
-        <div class="hz-skeleton" style="width:100%; height:16rem;"></div>
+      <div class="radio-card" data-type="MSA" onclick="selectType(this)">
+        <div class="radio-card-icon" style="background:rgba(124,58,237,0.15); color:var(--accent-violet);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="radio-card-title">MSA</div>
+        <div class="radio-card-desc">Master Service Agreement</div>
+      </div>
+      <div class="radio-card" data-type="Spot" onclick="selectType(this)">
+        <div class="radio-card-icon" style="background:var(--green-dim); color:var(--green);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        </div>
+        <div class="radio-card-title">Spot Deal</div>
+        <div class="radio-card-desc">Single Cargo Transaction</div>
+      </div>
+      <div class="radio-card" data-type="Tender" onclick="selectType(this)">
+        <div class="radio-card-icon" style="background:var(--amber-dim); color:var(--amber);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 14l2 2 4-4"/></svg>
+        </div>
+        <div class="radio-card-title">Tender</div>
+        <div class="radio-card-desc">Competitive Bid Process</div>
+      </div>
+    </div>
+    <div class="wiz-error-msg" id="err-type"></div>
+
+    <!-- Seller & Buyer -->
+    <div class="wiz-form-grid" style="margin-top:var(--sp-5);">
+      <div class="wiz-group">
+        <label class="hz-label">Seller</label>
+        <div class="hz-combobox" id="combo-seller">
+          <input class="hz-combobox-input" placeholder="Search seller..." autocomplete="off" />
+          <div class="hz-combobox-dropdown"></div>
+        </div>
+        <div class="wiz-error-msg" id="err-seller"></div>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Buyer</label>
+        <div class="hz-combobox" id="combo-buyer">
+          <input class="hz-combobox-input" placeholder="Search buyer..." autocomplete="off" />
+          <div class="hz-combobox-dropdown"></div>
+        </div>
+        <div class="wiz-error-msg" id="err-buyer"></div>
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="wiz-form-grid" style="margin-top:var(--sp-3);">
+      <div class="wiz-group">
+        <label class="hz-label">Start Date</label>
+        <input type="date" id="wiz-start" class="hz-input" value="2026-04-01" />
+        <div class="wiz-error-msg" id="err-start"></div>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">End Date</label>
+        <input type="date" id="wiz-end" class="hz-input" value="2046-03-31" />
+        <div class="wiz-error-msg" id="err-end"></div>
+      </div>
+    </div>
+
+    <div class="wiz-nav">
+      <div></div>
+      <button class="hz-btn primary lg" onclick="wizNext()">Next <span style="margin-left:var(--sp-1);">&rarr;</span></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 2: Volume & Delivery ========== -->
+  <div class="wiz-panel hz-card" data-panel="1">
+    <div class="wiz-section-title">Volume & Delivery</div>
+    <div class="wiz-section-sub">Define contract quantities, tolerances, and delivery logistics.</div>
+
+    <div class="wiz-form-grid cols-3">
+      <div class="wiz-group">
+        <label class="hz-label">ACQ (MMBtu/year)</label>
+        <input type="text" id="wiz-acq" class="hz-input font-mono" placeholder="13,600,000" value="13600000" oninput="formatACQ(this)" />
+        <div class="wiz-error-msg" id="err-acq"></div>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Minimum Take (%)</label>
+        <input type="number" id="wiz-min-take" class="hz-input font-mono" value="80" min="0" max="100" step="1" />
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Maximum Take (%)</label>
+        <input type="number" id="wiz-max-take" class="hz-input font-mono" value="110" min="100" max="200" step="1" />
+      </div>
+    </div>
+
+    <div class="wiz-form-grid" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Delivery Terms</label>
+        <select id="wiz-delivery-terms" class="hz-input">
+          <option value="FOB">FOB (Free on Board)</option>
+          <option value="DES">DES (Delivered Ex Ship)</option>
+          <option value="DAP">DAP (Delivered at Place)</option>
+        </select>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Delivery Schedule</label>
+        <select id="wiz-schedule" class="hz-input">
+          <option value="Monthly">Monthly</option>
+          <option value="Quarterly">Quarterly</option>
+          <option value="Annual">Annual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="wiz-form-grid" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Load Port</label>
+        <div class="hz-combobox" id="combo-load">
+          <input class="hz-combobox-input" placeholder="Search load port..." autocomplete="off" />
+          <div class="hz-combobox-dropdown"></div>
+        </div>
+        <div class="wiz-error-msg" id="err-load"></div>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Discharge Port</label>
+        <div class="hz-combobox" id="combo-discharge">
+          <input class="hz-combobox-input" placeholder="Search discharge port..." autocomplete="off" />
+          <div class="hz-combobox-dropdown"></div>
+        </div>
+        <div class="wiz-error-msg" id="err-discharge"></div>
+      </div>
+    </div>
+
+    <div class="wiz-nav">
+      <button class="hz-btn lg" onclick="wizPrev()"><span style="margin-right:var(--sp-1);">&larr;</span> Back</button>
+      <button class="hz-btn primary lg" onclick="wizNext()">Next <span style="margin-left:var(--sp-1);">&rarr;</span></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 3: Pricing ========== -->
+  <div class="wiz-panel hz-card" data-panel="2">
+    <div class="wiz-section-title">Pricing Structure</div>
+    <div class="wiz-section-sub">Choose a pricing basis and configure the formula parameters.</div>
+
+    <label class="hz-label" style="margin-bottom:var(--sp-2);">Pricing Basis</label>
+    <div class="pricing-toggle" id="pricing-toggle">
+      <button class="pricing-toggle-btn active" data-pricing="hub-indexed" onclick="setPricing('hub-indexed',this)">Hub Indexed</button>
+      <button class="pricing-toggle-btn" data-pricing="oil-indexed" onclick="setPricing('oil-indexed',this)">Oil Indexed</button>
+      <button class="pricing-toggle-btn" data-pricing="fixed" onclick="setPricing('fixed',this)">Fixed Price</button>
+      <button class="pricing-toggle-btn" data-pricing="hybrid" onclick="setPricing('hybrid',this)">Hybrid</button>
+    </div>
+
+    <!-- Hub Indexed Fields -->
+    <div class="pricing-section visible wiz-form-grid cols-3" id="pricing-hub" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Benchmark</label>
+        <select id="wiz-benchmark" class="hz-input" onchange="updateFormula()">
+          <option value="JKM">JKM (Platts)</option>
+          <option value="TTF">TTF (ICE)</option>
+          <option value="HH">Henry Hub (NYMEX)</option>
+        </select>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Premium ($/MMBtu)</label>
+        <input type="number" id="wiz-premium" class="hz-input font-mono" step="0.01" value="0.50" placeholder="+0.50" onchange="updateFormula()" />
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Averaging Period</label>
+        <select id="wiz-avg-period" class="hz-input" onchange="updateFormula()">
+          <option value="M-1">Month Ahead (M-1)</option>
+          <option value="Delivery">Delivery Month</option>
+          <option value="3M">3-Month Average</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Oil Indexed Fields -->
+    <div class="pricing-section wiz-form-grid cols-3" id="pricing-oil" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Oil Benchmark</label>
+        <select id="wiz-oil-bench" class="hz-input" onchange="updateFormula()">
+          <option value="Brent">Brent (ICE)</option>
+          <option value="WTI">WTI (NYMEX)</option>
+          <option value="JCC">JCC (Japan)</option>
+        </select>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Slope (%)</label>
+        <input type="number" id="wiz-slope" class="hz-input font-mono" step="0.01" value="14.85" onchange="updateFormula()" />
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Constant ($/MMBtu)</label>
+        <input type="number" id="wiz-constant" class="hz-input font-mono" step="0.01" value="0.50" onchange="updateFormula()" />
+      </div>
+    </div>
+
+    <!-- Fixed Fields -->
+    <div class="pricing-section wiz-form-grid" id="pricing-fixed" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Fixed Price ($/MMBtu)</label>
+        <input type="number" id="wiz-fixed-price" class="hz-input font-mono" step="0.01" value="12.50" onchange="updateFormula()" />
+      </div>
+    </div>
+
+    <!-- Hybrid Fields -->
+    <div class="pricing-section wiz-form-grid cols-3" id="pricing-hybrid" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Hub Component</label>
+        <select id="wiz-hybrid-bench" class="hz-input" onchange="updateFormula()">
+          <option value="JKM">JKM (Platts)</option>
+          <option value="TTF">TTF (ICE)</option>
+        </select>
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Hub Weight (%)</label>
+        <input type="number" id="wiz-hybrid-weight" class="hz-input font-mono" value="50" min="0" max="100" step="5" onchange="updateFormula()" />
+      </div>
+      <div class="wiz-group">
+        <label class="hz-label">Oil Slope (%)</label>
+        <input type="number" id="wiz-hybrid-slope" class="hz-input font-mono" step="0.01" value="14.85" onchange="updateFormula()" />
+      </div>
+    </div>
+
+    <!-- Formula Preview -->
+    <div class="formula-preview" id="formula-preview">
+      <span class="formula-label">Formula:</span>
+      <span id="formula-text">Avg(JKM, M-1) + $0.50</span>
+    </div>
+
+    <!-- Currency -->
+    <div class="wiz-form-grid" style="margin-top:var(--sp-4);">
+      <div class="wiz-group">
+        <label class="hz-label">Currency</label>
+        <select id="wiz-currency" class="hz-input">
+          <option value="USD">USD — US Dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="GBP">GBP — British Pound</option>
+          <option value="JPY">JPY — Japanese Yen</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="wiz-nav">
+      <button class="hz-btn lg" onclick="wizPrev()"><span style="margin-right:var(--sp-1);">&larr;</span> Back</button>
+      <button class="hz-btn primary lg" onclick="wizNext()">Next <span style="margin-left:var(--sp-1);">&rarr;</span></button>
+    </div>
+  </div>
+
+  <!-- ========== STEP 4: Review & Submit ========== -->
+  <div class="wiz-panel hz-card" data-panel="3">
+    <div class="wiz-section-title">Review & Submit</div>
+    <div class="wiz-section-sub">Verify all contract details before submission.</div>
+
+    <div class="review-sections" id="review-content"></div>
+
+    <div class="wiz-nav">
+      <button class="hz-btn lg" onclick="wizPrev()"><span style="margin-right:var(--sp-1);">&larr;</span> Back</button>
+      <div class="wiz-nav-right">
+        <button class="hz-btn lg" onclick="saveDraft()">Save as Draft</button>
+        <button class="hz-btn primary lg" onclick="submitContract()">Submit Contract</button>
       </div>
     </div>
   </div>
 
-  <!-- Real content -->
-  <div id="wiz-content" style="display:none;">
-    <!-- Steps -->
-    <div class="wiz-steps fade-in">
-      <div class="wiz-step active" data-step="0" onclick="goToStep(0)"><span class="num">1</span>Counterparty</div>
-      <div class="wiz-connector"></div>
-      <div class="wiz-step" data-step="1" onclick="goToStep(1)"><span class="num">2</span>Terms</div>
-      <div class="wiz-connector"></div>
-      <div class="wiz-step" data-step="2" onclick="goToStep(2)"><span class="num">3</span>Pricing</div>
-      <div class="wiz-connector"></div>
-      <div class="wiz-step" data-step="3" onclick="goToStep(3)"><span class="num">4</span>Review</div>
-    </div>
-
-    <!-- Step 1: Counterparty -->
-    <div class="wiz-panel active hz-card fade-in-d1" data-panel="0">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 1: Counterparty Details</div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Contract Type</label>
-          <select id="wiz-type" class="hz-input" style="width:100%;">
-            <option value="SPA">SPA (Sale & Purchase Agreement)</option>
-            <option value="Spot">Spot Deal</option>
-            <option value="Tender">Tender</option>
-          </select>
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Counterparty</label>
-          <select id="wiz-cpty" class="hz-input" style="width:100%;">
-            <option value="">Select...</option>
-            <option value="Shell">Shell</option>
-            <option value="JERA">JERA</option>
-            <option value="TotalEnergies">TotalEnergies</option>
-            <option value="BP">BP</option>
-            <option value="Chevron">Chevron</option>
-            <option value="QatarEnergy">QatarEnergy</option>
-            <option value="Petronas">Petronas</option>
-          </select>
-          <div class="wiz-error" id="wiz-cpty-err"></div>
-        </div>
-      </div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Contract Reference</label>
-          <input id="wiz-ref" type="text" class="hz-input" style="width:100%;" placeholder="SPA-2026-XXX" />
-          <div class="wiz-error" id="wiz-ref-err"></div>
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Effective Date</label>
-          <input id="wiz-eff" type="date" class="hz-input" style="width:100%;" />
-        </div>
-      </div>
-      <div class="wiz-nav">
-        <div></div>
-        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
-      </div>
-    </div>
-
-    <!-- Step 2: Terms -->
-    <div class="wiz-panel hz-card" data-panel="1">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 2: Contract Terms</div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Duration (months)</label>
-          <input id="wiz-duration" type="number" class="hz-input" style="width:100%;" value="12" min="1" max="240" />
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Annual Contract Quantity (MMBtu)</label>
-          <input id="wiz-acq" type="number" class="hz-input" style="width:100%;" placeholder="2000000" />
-          <div class="wiz-error" id="wiz-acq-err"></div>
-        </div>
-      </div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Delivery Basis</label>
-          <select id="wiz-incoterm" class="hz-input" style="width:100%;">
-            <option value="FOB">FOB</option>
-            <option value="DES">DES</option>
-            <option value="CIF">CIF</option>
-          </select>
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Delivery Point</label>
-          <select id="wiz-delpoint" class="hz-input" style="width:100%;">
-            <option value="">Select...</option>
-            <option value="Ras Laffan">Ras Laffan, Qatar</option>
-            <option value="Sabine Pass">Sabine Pass, USA</option>
-            <option value="Bonny Island">Bonny Island, Nigeria</option>
-            <option value="Darwin">Darwin, Australia</option>
-            <option value="Bintulu">Bintulu, Malaysia</option>
-          </select>
-        </div>
-      </div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Tolerance (%)</label>
-          <input id="wiz-tolerance" type="number" class="hz-input" style="width:100%;" value="5" step="0.5" />
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Governing Law</label>
-          <select id="wiz-law" class="hz-input" style="width:100%;">
-            <option value="English">English Law</option>
-            <option value="Singapore">Singapore Law</option>
-            <option value="New York">New York Law</option>
-          </select>
-        </div>
-      </div>
-      <div class="wiz-nav">
-        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
-        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
-      </div>
-    </div>
-
-    <!-- Step 3: Pricing -->
-    <div class="wiz-panel hz-card" data-panel="2">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 3: Pricing Structure</div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Pricing Model</label>
-          <select id="wiz-pricing" class="hz-input" style="width:100%;">
-            <option value="hub-indexed">Hub-Indexed</option>
-            <option value="oil-indexed">Oil-Indexed</option>
-            <option value="hybrid">Hybrid</option>
-            <option value="fixed">Fixed Price</option>
-          </select>
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Benchmark</label>
-          <select id="wiz-bench" class="hz-input" style="width:100%;">
-            <option value="JKM">JKM</option>
-            <option value="TTF">TTF</option>
-            <option value="HH">Henry Hub</option>
-            <option value="Brent">Brent</option>
-          </select>
-        </div>
-      </div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Base Price / Slope</label>
-          <input id="wiz-base" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="12.50" />
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Premium / Discount</label>
-          <input id="wiz-premium" type="number" class="hz-input" style="width:100%;" step="0.01" placeholder="+0.15" />
-        </div>
-      </div>
-      <div class="wiz-form-row">
-        <div class="wiz-group">
-          <label class="wiz-label">Payment Terms (days)</label>
-          <input id="wiz-payment" type="number" class="hz-input" style="width:100%;" value="30" />
-        </div>
-        <div class="wiz-group">
-          <label class="wiz-label">Currency</label>
-          <select id="wiz-currency" class="hz-input" style="width:100%;">
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-        </div>
-      </div>
-      <div class="wiz-nav">
-        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
-        <button class="hz-btn primary" onclick="nextStep()">Next &rarr;</button>
-      </div>
-    </div>
-
-    <!-- Step 4: Review -->
-    <div class="wiz-panel hz-card" data-panel="3">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">Step 4: Review & Submit</div>
-      <div class="review-grid" id="review-content"></div>
-      <div class="wiz-nav">
-        <button class="hz-btn" onclick="prevStep()">&larr; Back</button>
-        <button class="hz-btn primary" onclick="submitContract()">Create Contract</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="shell.js"></script>
 <script>
 initShell('contracts', 'Contracts');
 
-let currentStep = 0;
+/* ========== STATE ========== */
+var wizStep = 0;
+var wizMaxReached = 0;
+var selectedContractType = 'SPA';
+var selectedPricing = 'hub-indexed';
 
-function updateSteps() {
-  document.querySelectorAll('.wiz-step').forEach((el, i) => {
-    el.classList.remove('active','done');
-    if (i < currentStep) el.classList.add('done');
-    else if (i === currentStep) el.classList.add('active');
-  });
-  document.querySelectorAll('.wiz-connector').forEach((el, i) => {
-    el.classList.toggle('done', i < currentStep);
-  });
-  document.querySelectorAll('.wiz-panel').forEach((el, i) => {
-    el.classList.toggle('active', i === currentStep);
-  });
+/* ========== COMBOBOX INIT ========== */
+var counterparties = [
+  { label: 'QatarEnergy', value: 'QatarEnergy' },
+  { label: 'Shell Western LNG', value: 'Shell' },
+  { label: 'TotalEnergies Gas & Power', value: 'TotalEnergies' },
+  { label: 'JERA Co., Inc.', value: 'JERA' },
+  { label: 'BP Gas Marketing Ltd', value: 'BP' },
+  { label: 'Chevron LNG', value: 'Chevron' },
+  { label: 'Petronas LNG', value: 'Petronas' },
+  { label: 'Woodside Energy', value: 'Woodside' },
+  { label: 'Naturgy (Gas Natural)', value: 'Naturgy' },
+  { label: 'Kogas (Korea Gas)', value: 'Kogas' },
+  { label: 'ENN Natural Gas', value: 'ENN' },
+  { label: 'Gunvor Group', value: 'Gunvor' },
+];
+
+var loadPorts = [
+  { label: 'Ras Laffan, Qatar', value: 'Ras Laffan' },
+  { label: 'Sabine Pass, USA', value: 'Sabine Pass' },
+  { label: 'Bonny Island, Nigeria', value: 'Bonny Island' },
+  { label: 'Darwin LNG, Australia', value: 'Darwin' },
+  { label: 'Bintulu, Malaysia', value: 'Bintulu' },
+  { label: 'Hammerfest, Norway', value: 'Hammerfest' },
+  { label: 'Tangguh, Indonesia', value: 'Tangguh' },
+  { label: 'Cameron LNG, USA', value: 'Cameron' },
+  { label: 'Gorgon, Australia', value: 'Gorgon' },
+];
+
+var dischargePorts = [
+  { label: 'Incheon, South Korea', value: 'Incheon' },
+  { label: 'Sodegaura, Japan', value: 'Sodegaura' },
+  { label: 'Dahej, India', value: 'Dahej' },
+  { label: 'Gate Terminal, Netherlands', value: 'Gate' },
+  { label: 'Huelva, Spain', value: 'Huelva' },
+  { label: 'Tianjin, China', value: 'Tianjin' },
+  { label: 'Isle of Grain, UK', value: 'Isle of Grain' },
+  { label: 'Montoir, France', value: 'Montoir' },
+  { label: 'Aliaga, Turkey', value: 'Aliaga' },
+];
+
+/* Defer combobox + wizard init until shell skeleton resolves */
+setTimeout(function() {
+  wizUpdateUI();
+  var sellerEl = document.getElementById('combo-seller');
+  var buyerEl = document.getElementById('combo-buyer');
+  var loadEl = document.getElementById('combo-load');
+  var dischargeEl = document.getElementById('combo-discharge');
+  if (sellerEl) initCombobox(sellerEl, counterparties);
+  if (buyerEl) initCombobox(buyerEl, counterparties);
+  if (loadEl) initCombobox(loadEl, loadPorts);
+  if (dischargeEl) initCombobox(dischargeEl, dischargePorts);
+}, 600);
+
+/* ========== CONTRACT TYPE ========== */
+function selectType(el) {
+  selectedContractType = el.dataset.type;
+  var cards = document.querySelectorAll('#contract-type-cards .radio-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].classList.remove('selected');
+  }
+  el.classList.add('selected');
+  clearErr('err-type');
 }
+
+/* ========== PRICING ========== */
+function setPricing(type, btn) {
+  selectedPricing = type;
+  var btns = document.querySelectorAll('#pricing-toggle .pricing-toggle-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+
+  var sections = ['pricing-hub', 'pricing-oil', 'pricing-fixed', 'pricing-hybrid'];
+  for (var j = 0; j < sections.length; j++) {
+    document.getElementById(sections[j]).classList.remove('visible');
+  }
+  var sectionMap = {
+    'hub-indexed': 'pricing-hub',
+    'oil-indexed': 'pricing-oil',
+    'fixed': 'pricing-fixed',
+    'hybrid': 'pricing-hybrid'
+  };
+  document.getElementById(sectionMap[type]).classList.add('visible');
+  updateFormula();
+}
+
+function updateFormula() {
+  var text = '';
+  if (selectedPricing === 'hub-indexed') {
+    var bench = document.getElementById('wiz-benchmark').value;
+    var prem = parseFloat(document.getElementById('wiz-premium').value) || 0;
+    var avgPd = document.getElementById('wiz-avg-period').value;
+    var sign = prem >= 0 ? '+ $' + prem.toFixed(2) : '- $' + Math.abs(prem).toFixed(2);
+    text = 'Avg(' + bench + ', ' + avgPd + ') ' + sign;
+  } else if (selectedPricing === 'oil-indexed') {
+    var oilBench = document.getElementById('wiz-oil-bench').value;
+    var slope = document.getElementById('wiz-slope').value;
+    var constant = parseFloat(document.getElementById('wiz-constant').value) || 0;
+    var cSign = constant >= 0 ? '+ $' + constant.toFixed(2) : '- $' + Math.abs(constant).toFixed(2);
+    text = slope + '% x ' + oilBench + ' ' + cSign;
+  } else if (selectedPricing === 'fixed') {
+    var fp = parseFloat(document.getElementById('wiz-fixed-price').value) || 0;
+    text = '$' + fp.toFixed(2) + '/MMBtu (Fixed)';
+  } else if (selectedPricing === 'hybrid') {
+    var hBench = document.getElementById('wiz-hybrid-bench').value;
+    var hWeight = document.getElementById('wiz-hybrid-weight').value;
+    var hSlope = document.getElementById('wiz-hybrid-slope').value;
+    text = hWeight + '% Avg(' + hBench + ') + ' + (100 - hWeight) + '% (' + hSlope + '% x Brent)';
+  }
+  document.getElementById('formula-text').textContent = text;
+}
+
+/* ========== ACQ FORMATTING ========== */
+function formatACQ(el) {
+  var raw = el.value.replace(/[^0-9]/g, '');
+  if (raw) {
+    el.value = parseInt(raw).toLocaleString('en-US');
+  }
+}
+
+function getACQValue() {
+  var el = document.getElementById('wiz-acq');
+  return parseInt(el.value.replace(/[^0-9]/g, '')) || 0;
+}
+
+/* ========== VALIDATION ========== */
+function clearErr(id) { document.getElementById(id).textContent = ''; }
+function setErr(id, msg) { document.getElementById(id).textContent = msg; }
 
 function validateStep(step) {
+  var valid = true;
+
   if (step === 0) {
-    let valid = true;
-    if (!document.getElementById('wiz-cpty').value) {
-      document.getElementById('wiz-cpty-err').textContent = 'Counterparty required';
+    // Type is always selected (default SPA)
+    clearErr('err-type');
+    clearErr('err-seller'); clearErr('err-buyer');
+    clearErr('err-start'); clearErr('err-end');
+
+    var sellerEl = document.getElementById('combo-seller');
+    var buyerEl = document.getElementById('combo-buyer');
+    if (!sellerEl.combobox || !sellerEl.combobox.getValue()) {
+      setErr('err-seller', 'Seller is required');
       valid = false;
-    } else { document.getElementById('wiz-cpty-err').textContent = ''; }
-    if (!document.getElementById('wiz-ref').value.trim()) {
-      document.getElementById('wiz-ref-err').textContent = 'Reference required';
-      valid = false;
-    } else { document.getElementById('wiz-ref-err').textContent = ''; }
-    return valid;
-  }
-  if (step === 1) {
-    const acq = parseInt(document.getElementById('wiz-acq').value);
-    if (isNaN(acq) || acq < 1000) {
-      document.getElementById('wiz-acq-err').textContent = 'Min ACQ: 1,000 MMBtu';
-      return false;
     }
-    document.getElementById('wiz-acq-err').textContent = '';
-    return true;
+    if (!buyerEl.combobox || !buyerEl.combobox.getValue()) {
+      setErr('err-buyer', 'Buyer is required');
+      valid = false;
+    }
+    if (!document.getElementById('wiz-start').value) {
+      setErr('err-start', 'Start date is required');
+      valid = false;
+    }
+    if (!document.getElementById('wiz-end').value) {
+      setErr('err-end', 'End date is required');
+      valid = false;
+    }
+    // Validate start < end
+    var sd = document.getElementById('wiz-start').value;
+    var ed = document.getElementById('wiz-end').value;
+    if (sd && ed && sd >= ed) {
+      setErr('err-end', 'End date must be after start date');
+      valid = false;
+    }
   }
-  return true;
+
+  if (step === 1) {
+    clearErr('err-acq'); clearErr('err-load'); clearErr('err-discharge');
+    var acq = getACQValue();
+    if (!acq || acq < 100000) {
+      setErr('err-acq', 'ACQ must be at least 100,000 MMBtu');
+      valid = false;
+    }
+    var loadEl = document.getElementById('combo-load');
+    if (!loadEl.combobox || !loadEl.combobox.getValue()) {
+      setErr('err-load', 'Load port is required');
+      valid = false;
+    }
+    var dischEl = document.getElementById('combo-discharge');
+    if (!dischEl.combobox || !dischEl.combobox.getValue()) {
+      setErr('err-discharge', 'Discharge port is required');
+      valid = false;
+    }
+  }
+
+  // Step 2 (pricing) has sensible defaults, always valid
+  return valid;
 }
 
-function nextStep() {
-  if (!validateStep(currentStep)) { showToast('Please fix validation errors', 'error'); return; }
-  if (currentStep < 3) {
-    currentStep++;
-    if (currentStep === 3) buildReview();
-    updateSteps();
+/* ========== STEP NAVIGATION ========== */
+function wizUpdateUI() {
+  var steps = document.querySelectorAll('.wiz-step-item');
+  var lines = document.querySelectorAll('.wiz-step-line');
+  var panels = document.querySelectorAll('.wiz-panel');
+
+  for (var i = 0; i < steps.length; i++) {
+    steps[i].classList.remove('active', 'done');
+    if (i < wizStep) steps[i].classList.add('done');
+    else if (i === wizStep) steps[i].classList.add('active');
+  }
+  for (var j = 0; j < lines.length; j++) {
+    lines[j].classList.remove('done', 'active');
+    if (j < wizStep) lines[j].classList.add('done');
+    else if (j === wizStep) lines[j].classList.add('active');
+  }
+  for (var k = 0; k < panels.length; k++) {
+    panels[k].classList.remove('active');
+  }
+  panels[wizStep].classList.add('active');
+
+  // Scroll to top of content area
+  var content = document.querySelector('.hz-content');
+  if (content) content.scrollTop = 0;
+}
+
+function wizNext() {
+  if (!validateStep(wizStep)) {
+    showToast('Please fix the highlighted fields', 'error');
+    return;
+  }
+  if (wizStep < 3) {
+    wizStep++;
+    if (wizStep > wizMaxReached) wizMaxReached = wizStep;
+    if (wizStep === 3) buildReview();
+    wizUpdateUI();
   }
 }
 
-function prevStep() {
-  if (currentStep > 0) { currentStep--; updateSteps(); }
+function wizPrev() {
+  if (wizStep > 0) {
+    wizStep--;
+    wizUpdateUI();
+  }
 }
 
-function goToStep(step) {
-  // Only allow going to completed or current steps
-  if (step <= currentStep) {
-    currentStep = step;
-    updateSteps();
+function wizGoTo(step) {
+  // Allow jumping to completed steps or the current frontier
+  if (step <= wizMaxReached) {
+    if (step === 3) buildReview();
+    wizStep = step;
+    wizUpdateUI();
   }
+}
+
+/* ========== REVIEW BUILDER ========== */
+function gv(id) { return document.getElementById(id).value || '--'; }
+function gcv(comboId) {
+  var el = document.getElementById(comboId);
+  if (el && el.combobox && el.combobox.getValue()) {
+    return el.querySelector('.hz-combobox-input').value;
+  }
+  return '--';
 }
 
 function buildReview() {
-  const el = document.getElementById('review-content');
-  const gv = id => document.getElementById(id).value || '--';
-  const gs = id => { const s = document.getElementById(id); return s.options && s.selectedIndex >= 0 ? s.options[s.selectedIndex].text : s.value || '--'; };
+  var acqRaw = getACQValue();
+  var acqFmt = acqRaw ? acqRaw.toLocaleString('en-US') + ' MMBtu/year' : '--';
 
-  el.innerHTML = '<div class="review-section"><div class="review-section-title">Counterparty</div>' +
-    '<div class="review-row"><span class="review-label">Type</span><span class="review-val">' + gs('wiz-type') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Counterparty</span><span class="review-val">' + gv('wiz-cpty') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Reference</span><span class="review-val">' + gv('wiz-ref') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Effective</span><span class="review-val">' + gv('wiz-eff') + '</span></div>' +
-    '</div>' +
-    '<div class="review-section"><div class="review-section-title">Terms</div>' +
-    '<div class="review-row"><span class="review-label">Duration</span><span class="review-val">' + gv('wiz-duration') + ' months</span></div>' +
-    '<div class="review-row"><span class="review-label">ACQ</span><span class="review-val">' + parseInt(gv('wiz-acq') || 0).toLocaleString() + ' MMBtu</span></div>' +
-    '<div class="review-row"><span class="review-label">Delivery</span><span class="review-val">' + gv('wiz-incoterm') + ' / ' + gv('wiz-delpoint') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Law</span><span class="review-val">' + gs('wiz-law') + '</span></div>' +
-    '</div>' +
-    '<div class="review-section"><div class="review-section-title">Pricing</div>' +
-    '<div class="review-row"><span class="review-label">Model</span><span class="review-val">' + gs('wiz-pricing') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Benchmark</span><span class="review-val">' + gv('wiz-bench') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Base Price</span><span class="review-val">$' + (parseFloat(gv('wiz-base')) || 0).toFixed(2) + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Premium</span><span class="review-val">' + gv('wiz-premium') + '</span></div>' +
-    '<div class="review-row"><span class="review-label">Payment</span><span class="review-val">' + gv('wiz-payment') + ' days / ' + gv('wiz-currency') + '</span></div>' +
-    '</div>';
+  // Pricing summary
+  var pricingLabel = '';
+  var pricingDetails = [];
+  if (selectedPricing === 'hub-indexed') {
+    pricingLabel = 'Hub Indexed';
+    pricingDetails = [
+      ['Benchmark', gv('wiz-benchmark')],
+      ['Premium', '$' + (parseFloat(gv('wiz-premium')) || 0).toFixed(2) + '/MMBtu'],
+      ['Averaging', gv('wiz-avg-period')],
+    ];
+  } else if (selectedPricing === 'oil-indexed') {
+    pricingLabel = 'Oil Indexed';
+    pricingDetails = [
+      ['Oil Benchmark', gv('wiz-oil-bench')],
+      ['Slope', gv('wiz-slope') + '%'],
+      ['Constant', '$' + (parseFloat(gv('wiz-constant')) || 0).toFixed(2)],
+    ];
+  } else if (selectedPricing === 'fixed') {
+    pricingLabel = 'Fixed Price';
+    pricingDetails = [
+      ['Price', '$' + (parseFloat(gv('wiz-fixed-price')) || 0).toFixed(2) + '/MMBtu'],
+    ];
+  } else if (selectedPricing === 'hybrid') {
+    pricingLabel = 'Hybrid';
+    pricingDetails = [
+      ['Hub Component', gv('wiz-hybrid-bench') + ' (' + gv('wiz-hybrid-weight') + '%)'],
+      ['Oil Slope', gv('wiz-hybrid-slope') + '%'],
+    ];
+  }
+
+  var formulaText = document.getElementById('formula-text').textContent;
+
+  var sections = [
+    {
+      title: 'Contract Type & Parties',
+      editStep: 0,
+      rows: [
+        ['Contract Type', selectedContractType],
+        ['Seller', gcv('combo-seller')],
+        ['Buyer', gcv('combo-buyer')],
+        ['Start Date', gv('wiz-start')],
+        ['End Date', gv('wiz-end')],
+      ]
+    },
+    {
+      title: 'Volume & Delivery',
+      editStep: 1,
+      rows: [
+        ['ACQ', acqFmt, true],
+        ['Minimum Take', gv('wiz-min-take') + '%', true],
+        ['Maximum Take', gv('wiz-max-take') + '%', true],
+        ['Delivery Terms', gv('wiz-delivery-terms')],
+        ['Schedule', gv('wiz-schedule')],
+        ['Load Port', gcv('combo-load')],
+        ['Discharge Port', gcv('combo-discharge')],
+      ]
+    },
+    {
+      title: 'Pricing',
+      editStep: 2,
+      rows: (function() {
+        var r = [['Pricing Basis', pricingLabel]];
+        for (var i = 0; i < pricingDetails.length; i++) {
+          r.push([pricingDetails[i][0], pricingDetails[i][1], true]);
+        }
+        r.push(['Formula', formulaText, true]);
+        r.push(['Currency', gv('wiz-currency')]);
+        return r;
+      })()
+    }
+  ];
+
+  var html = '';
+  for (var s = 0; s < sections.length; s++) {
+    var sec = sections[s];
+    html += '<div class="review-block">';
+    html += '<div class="review-block-header">';
+    html += '<span class="review-block-title">' + sec.title + '</span>';
+    html += '<span class="review-block-edit" onclick="wizGoTo(' + sec.editStep + ')">Edit</span>';
+    html += '</div>';
+    for (var r = 0; r < sec.rows.length; r++) {
+      var row = sec.rows[r];
+      var monoClass = row[2] ? ' mono' : '';
+      html += '<div class="review-row">';
+      html += '<span class="review-row-label">' + row[0] + '</span>';
+      html += '<span class="review-row-value' + monoClass + '">' + row[1] + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('review-content').innerHTML = html;
 }
 
+/* ========== SUBMIT / DRAFT ========== */
 function submitContract() {
-  const ref = document.getElementById('wiz-ref').value || 'NEW';
-  showToast('Contract ' + ref + ' created successfully', 'success');
+  showToast('Contract ' + selectedContractType + '-' + new Date().getFullYear() + ' submitted successfully', 'success');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('wiz-content').style.display = 'block';
-    }, 300);
-  }, 500);
-});
+function saveDraft() {
+  showToast('Draft saved', 'success');
+}
 </script>
 
 <!-- Back to Index -->
-<a href="../index.html" 
+<a href="../index.html"
    style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
    onmouseover="this.style.background='rgba(79,70,229,1)'"
    onmouseout="this.style.background='rgba(99,102,241,0.9)'"

@@ -9,181 +9,408 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
+    /* ---- Pipeline stepper ---- */
+    .nom-pipeline { display:flex; align-items:center; gap:0; padding:0 0.25rem; }
+    .nom-pipe-step {
+      display:flex; align-items:center; gap:0.5rem;
+      padding:0.5rem 1rem;
+      font-size:0.6875rem; font-weight:600; font-family:var(--font-ui);
+      color:var(--text-muted);
+      position:relative;
+      transition:all 0.3s ease;
+      cursor:default;
+      user-select:none;
+    }
+    .nom-pipe-step .pipe-num {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:1.5rem; height:1.5rem;
+      border-radius:50%;
+      font-size:0.625rem; font-weight:700;
+      font-family:var(--font-mono);
+      border:0.125rem solid var(--border-strong);
+      background:var(--surface-raised);
+      color:var(--text-muted);
+      transition:all 0.3s ease;
+      flex-shrink:0;
+    }
+    .nom-pipe-step .pipe-label { white-space:nowrap; }
+    .nom-pipe-connector {
+      width:2.5rem; height:0.125rem;
+      background:var(--border);
+      flex-shrink:0;
+      transition:background 0.4s ease;
+      position:relative;
+    }
+    .nom-pipe-connector.done { background:var(--green); }
+    .nom-pipe-connector.done::after {
+      content:''; position:absolute; inset:0;
+      background:var(--green);
+      animation:connectorPulse 0.4s ease forwards;
+    }
+    @keyframes connectorPulse {
+      0% { transform:scaleX(0); transform-origin:left; }
+      100% { transform:scaleX(1); transform-origin:left; }
+    }
 
-    .nom-form { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
-    @media (max-width:48rem) { .nom-form { grid-template-columns:1fr; } }
-    .nom-group { display:flex; flex-direction:column; gap:0.1875rem; }
-    .nom-label { font-size:0.625rem; font-weight:500; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.05em; font-family:'Inter',sans-serif; }
-    .nom-cascade { display:flex; align-items:center; gap:0.375rem; margin:0.5rem 0; }
-    .nom-cascade-step { display:flex; align-items:center; gap:0.25rem; font-size:0.625rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
-    .nom-cascade-step.active { color:var(--accent); font-weight:600; }
-    .nom-cascade-step .dot { width:0.5rem; height:0.5rem; border-radius:50%; background:var(--border); }
-    .nom-cascade-step.active .dot { background:var(--accent); }
-    .nom-cascade-step.done .dot { background:var(--green); }
-    .nom-cascade-arrow { color:var(--border); font-size:0.75rem; }
+    /* Step states */
+    .nom-pipe-step.done { color:var(--green); }
+    .nom-pipe-step.done .pipe-num {
+      background:var(--green); border-color:var(--green); color:#fff;
+      box-shadow:0 0 0 0.25rem var(--green-dim);
+    }
+    .nom-pipe-step.active { color:var(--accent-light); }
+    .nom-pipe-step.active .pipe-num {
+      background:var(--accent); border-color:var(--accent); color:#fff;
+      box-shadow:0 0 0 0.25rem var(--accent-bg);
+      animation:activePulse 2s ease infinite;
+    }
+    @keyframes activePulse {
+      0%,100% { box-shadow:0 0 0 0.25rem var(--accent-bg); }
+      50% { box-shadow:0 0 0 0.5rem rgba(79,70,229,0.08); }
+    }
+    .nom-pipe-step.disabled { opacity:0.4; }
+    .nom-pipe-step.disabled .pipe-num {
+      background:var(--surface-elevated); border-color:var(--border); color:var(--text-muted);
+    }
+
+    /* ---- Step panels ---- */
+    .nom-step-panel {
+      overflow:hidden;
+      max-height:0;
+      opacity:0;
+      transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.3s ease;
+      margin-top:0;
+    }
+    .nom-step-panel.open {
+      max-height:30rem;
+      opacity:1;
+      margin-top:0.75rem;
+    }
+    .nom-step-panel.collapsed {
+      max-height:2.5rem;
+      opacity:1;
+      margin-top:0.5rem;
+    }
+
+    /* Step completed summary inline */
+    .nom-step-summary {
+      display:flex; align-items:center; gap:0.75rem;
+      padding:0.375rem 0.75rem;
+      background:var(--green-dim);
+      border-radius:var(--radius-md);
+      font-size:var(--text-xs);
+      color:var(--green);
+      font-weight:500;
+      cursor:pointer;
+      transition:background 0.15s;
+    }
+    .nom-step-summary:hover { background:rgba(34,197,94,0.2); }
+    .nom-step-summary .summary-check {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:1rem; height:1rem; border-radius:50%;
+      background:var(--green); flex-shrink:0;
+    }
+    .nom-step-summary .summary-check svg { width:0.625rem; height:0.625rem; color:#fff; }
+
+    /* ---- Combobox enhancements ---- */
+    .nom-combobox-rich .hz-combobox-option {
+      padding:0.5rem 0.75rem;
+      display:flex; flex-direction:column; gap:0.125rem;
+    }
+    .nom-combobox-rich .opt-main {
+      display:flex; align-items:center; gap:0.5rem;
+      font-size:var(--text-sm); font-weight:500; color:var(--text-primary);
+    }
+    .nom-combobox-rich .opt-badge {
+      display:inline-flex; padding:0.0625rem 0.375rem;
+      border-radius:var(--radius-full);
+      font-size:0.5625rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.04em;
+    }
+    .nom-combobox-rich .opt-badge.spa { background:var(--blue-dim); color:var(--blue); }
+    .nom-combobox-rich .opt-badge.msa { background:var(--amber-dim); color:var(--amber); }
+    .nom-combobox-rich .opt-badge.spot { background:var(--green-dim); color:var(--green); }
+    .nom-combobox-rich .opt-sub {
+      font-size:0.625rem; color:var(--text-muted); font-family:var(--font-ui);
+    }
+
+    /* ---- Vessel info card ---- */
+    .vessel-info-card {
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem;
+      padding:0.75rem;
+      background:var(--surface-base);
+      border:0.0625rem solid var(--border-subtle);
+      border-radius:var(--radius-md);
+      margin-top:0.5rem;
+      animation:fadeSlideIn 0.3s ease forwards;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity:0; transform:translateY(0.5rem); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .vessel-info-item {
+      display:flex; flex-direction:column; gap:0.125rem;
+    }
+    .vessel-info-item .vi-label {
+      font-size:0.5625rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.06em; color:var(--text-muted); font-family:var(--font-ui);
+    }
+    .vessel-info-item .vi-value {
+      font-size:var(--text-sm); font-weight:500; color:var(--text-primary);
+    }
+    .vessel-info-item .vi-value.good { color:var(--green); }
+    .vessel-info-item .vi-value.mono { font-family:var(--font-mono); }
+
+    /* ---- Review card ---- */
+    .nom-review-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem 1.5rem;
+      padding:0.75rem;
+      background:var(--surface-base);
+      border:0.0625rem solid var(--border-subtle);
+      border-radius:var(--radius-md);
+    }
+    .nom-review-item { display:flex; flex-direction:column; gap:0.125rem; }
+    .nom-review-item .rv-label {
+      font-size:0.5625rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.06em; color:var(--text-muted);
+    }
+    .nom-review-item .rv-value {
+      font-size:var(--text-sm); font-weight:500; color:var(--text-primary);
+    }
+    .nom-review-item .rv-value.mono {
+      font-family:var(--font-mono);
+    }
+
+    /* ---- Field row ---- */
+    .nom-field-row {
+      display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;
+    }
+    .nom-field-row.triple { grid-template-columns:1fr 1fr 1fr; }
+    @media(max-width:48rem) {
+      .nom-field-row, .nom-field-row.triple { grid-template-columns:1fr; }
+      .nom-pipeline { flex-wrap:wrap; gap:0.25rem; }
+      .nom-pipe-connector { width:1rem; }
+      .vessel-info-card { grid-template-columns:1fr; }
+      .nom-review-grid { grid-template-columns:1fr 1fr; }
+    }
+
+    .nom-field-group { display:flex; flex-direction:column; gap:0.25rem; }
+    .nom-field-group .nom-label {
+      font-size:0.625rem; font-weight:600; color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font-ui);
+    }
+
+    /* ---- Step section label ---- */
+    .nom-section-title {
+      font-size:var(--text-sm); font-weight:600; color:var(--text-primary);
+      font-family:var(--font-ui);
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .nom-section-title .section-badge {
+      font-size:0.5625rem; font-weight:700;
+      padding:0.125rem 0.375rem; border-radius:var(--radius-full);
+      background:var(--accent-bg); color:var(--accent-light);
+      font-family:var(--font-mono);
+    }
+
+    /* ---- Confirm button row ---- */
+    .nom-step-actions {
+      display:flex; align-items:center; justify-content:flex-end;
+      gap:0.5rem; margin-top:0.75rem;
+      padding-top:0.5rem;
+      border-top:0.0625rem solid var(--border-subtle);
+    }
+
+    /* ---- Deadline urgency ---- */
+    .deadline-urgent { color:var(--red); font-weight:600; }
+    .deadline-warning { color:var(--amber); font-weight:600; }
+    .deadline-ok { color:var(--green); font-weight:500; }
+
+    /* ---- NOM ref highlight ---- */
+    .nom-ref { color:var(--accent-light); font-family:var(--font-mono); font-size:var(--text-xs); font-weight:600; }
   </style>
 </head>
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
-      <div class="hz-card">
-        <div class="hz-skeleton" style="width:10rem; height:0.875rem; margin-bottom:0.75rem;"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-          <div class="hz-skeleton" style="height:1.75rem;"></div>
-          <div class="hz-skeleton" style="height:1.75rem;"></div>
-          <div class="hz-skeleton" style="height:1.75rem;"></div>
-          <div class="hz-skeleton" style="height:1.75rem;"></div>
+  <!-- ============ Cascading Nomination Form ============ -->
+  <div class="hz-card fade-in">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+      <div>
+        <div style="font-size:0.9375rem;font-weight:700;color:var(--text-primary);font-family:var(--font-ui);">New Nomination</div>
+        <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Guided workflow — complete each step to proceed</div>
+      </div>
+      <span id="nom-ref-badge" style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-muted);background:var(--surface-elevated);padding:0.25rem 0.625rem;border-radius:var(--radius-full);font-weight:600;">NOM-2026-Q2-001</span>
+    </div>
+
+    <!-- Pipeline Stepper -->
+    <div class="nom-pipeline" id="nom-pipeline">
+      <div class="nom-pipe-step active" data-step="0">
+        <span class="pipe-num">1</span>
+        <span class="pipe-label">Contract</span>
+      </div>
+      <div class="nom-pipe-connector" data-conn="0"></div>
+      <div class="nom-pipe-step disabled" data-step="1">
+        <span class="pipe-num">2</span>
+        <span class="pipe-label">Cargo</span>
+      </div>
+      <div class="nom-pipe-connector" data-conn="1"></div>
+      <div class="nom-pipe-step disabled" data-step="2">
+        <span class="pipe-num">3</span>
+        <span class="pipe-label">Volume & Dates</span>
+      </div>
+      <div class="nom-pipe-connector" data-conn="2"></div>
+      <div class="nom-pipe-step disabled" data-step="3">
+        <span class="pipe-num">4</span>
+        <span class="pipe-label">Vessel</span>
+      </div>
+      <div class="nom-pipe-connector" data-conn="3"></div>
+      <div class="nom-pipe-step disabled" data-step="4">
+        <span class="pipe-num">5</span>
+        <span class="pipe-label">Submit</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Contract -->
+    <div class="nom-step-panel open" id="step-panel-0">
+      <div class="nom-section-title">
+        Select Contract
+        <span class="section-badge">Step 1</span>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <div class="nom-field-group">
+          <label class="nom-label">Contract Reference</label>
+          <div class="hz-combobox nom-combobox-rich" id="combo-contract">
+            <input class="hz-combobox-input" placeholder="Search contracts..." />
+            <div class="hz-combobox-dropdown"></div>
+          </div>
         </div>
       </div>
-      <div class="hz-card">
-        <div class="hz-skeleton" style="width:100%; height:10rem;"></div>
+    </div>
+
+    <!-- Step 1 summary (shown when done) -->
+    <div class="nom-step-panel" id="step-summary-0"></div>
+
+    <!-- Step 2: Cargo -->
+    <div class="nom-step-panel" id="step-panel-1">
+      <div class="nom-section-title">
+        Select Cargo Window
+        <span class="section-badge">Step 2</span>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <div class="nom-field-group">
+          <label class="nom-label">Cargo Window</label>
+          <div class="hz-combobox nom-combobox-rich" id="combo-cargo">
+            <input class="hz-combobox-input" placeholder="Search cargo windows..." />
+            <div class="hz-combobox-dropdown"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nom-step-panel" id="step-summary-1"></div>
+
+    <!-- Step 3: Volume & Dates -->
+    <div class="nom-step-panel" id="step-panel-2">
+      <div class="nom-section-title">
+        Volume & Dates
+        <span class="section-badge">Step 3</span>
+      </div>
+      <div style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.75rem;">
+        <div class="nom-field-row triple">
+          <div class="nom-field-group">
+            <label class="nom-label">Volume (MMBtu)</label>
+            <input class="hz-input font-mono" id="nom-volume" type="text" style="font-family:var(--font-mono);" />
+          </div>
+          <div class="nom-field-group">
+            <label class="nom-label">Laycan Start</label>
+            <input class="hz-input" id="nom-laycan-start" type="date" />
+          </div>
+          <div class="nom-field-group">
+            <label class="nom-label">Laycan End</label>
+            <input class="hz-input" id="nom-laycan-end" type="date" />
+          </div>
+        </div>
+        <div class="nom-field-row">
+          <div class="nom-field-group">
+            <label class="nom-label">Load Port</label>
+            <div class="hz-combobox" id="combo-load-port">
+              <input class="hz-combobox-input" placeholder="Search load ports..." />
+              <div class="hz-combobox-dropdown"></div>
+            </div>
+          </div>
+          <div class="nom-field-group">
+            <label class="nom-label">Discharge Port</label>
+            <div class="hz-combobox" id="combo-disch-port">
+              <input class="hz-combobox-input" placeholder="Search discharge ports..." />
+              <div class="hz-combobox-dropdown"></div>
+            </div>
+          </div>
+        </div>
+        <div class="nom-step-actions">
+          <button class="hz-btn sm" onclick="confirmStep2()">Confirm Volume & Dates</button>
+        </div>
+      </div>
+    </div>
+    <div class="nom-step-panel" id="step-summary-2"></div>
+
+    <!-- Step 4: Vessel -->
+    <div class="nom-step-panel" id="step-panel-3">
+      <div class="nom-section-title">
+        Select Vessel
+        <span class="section-badge">Step 4</span>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <div class="nom-field-group">
+          <label class="nom-label">Vessel</label>
+          <div class="hz-combobox nom-combobox-rich" id="combo-vessel">
+            <input class="hz-combobox-input" placeholder="Search vessels..." />
+            <div class="hz-combobox-dropdown"></div>
+          </div>
+        </div>
+        <div id="vessel-info-container"></div>
+      </div>
+    </div>
+    <div class="nom-step-panel" id="step-summary-3"></div>
+
+    <!-- Step 5: Review & Submit -->
+    <div class="nom-step-panel" id="step-panel-4">
+      <div class="nom-section-title">
+        Review & Submit
+        <span class="section-badge">Step 5</span>
+      </div>
+      <div style="margin-top:0.5rem;">
+        <div id="review-summary" class="nom-review-grid"></div>
+        <div style="display:flex;align-items:center;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
+          <button class="hz-btn sm" onclick="saveDraft()">Save Draft</button>
+          <button class="hz-btn primary" onclick="submitNom()">Submit Nomination</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Real content -->
-  <div id="nom-content" style="display:none;">
-    <!-- Cascade progress -->
-    <div class="nom-cascade fade-in">
-      <div class="nom-cascade-step done"><span class="dot"></span>Contract</div>
-      <span class="nom-cascade-arrow">&rarr;</span>
-      <div class="nom-cascade-step active"><span class="dot"></span>Cargo</div>
-      <span class="nom-cascade-arrow">&rarr;</span>
-      <div class="nom-cascade-step"><span class="dot"></span>Vessel</div>
-      <span class="nom-cascade-arrow">&rarr;</span>
-      <div class="nom-cascade-step"><span class="dot"></span>ETA</div>
+  <!-- ============ Nomination Schedule Table ============ -->
+  <div class="hz-card fade-in-d2" style="margin-top:0.75rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.625rem;">
+      <div style="font-size:0.875rem;font-weight:600;color:var(--text-primary);font-family:var(--font-ui);">Nomination Schedule</div>
+      <span style="font-size:var(--text-xs);color:var(--text-muted);">Sorted by deadline urgency</span>
     </div>
-
-    <!-- Nomination Form -->
-    <div class="hz-card fade-in-d1">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.625rem; font-family:'Inter',sans-serif;">New Nomination</div>
-      <div class="nom-form">
-        <div class="nom-group">
-          <label class="nom-label">Contract</label>
-          <select id="nom-contract" class="hz-input" style="width:100%;" onchange="onContractChange()">
-            <option value="">Select contract...</option>
-            <option value="SPA-2024-001">SPA-2024-001 (Shell, JKM)</option>
-            <option value="SPA-2024-002">SPA-2024-002 (JERA, JKM)</option>
-            <option value="SPA-2024-003">SPA-2024-003 (BP, TTF)</option>
-            <option value="SPOT-2026-015">SPOT-2026-015 (Vitol, JKM)</option>
-          </select>
-        </div>
-        <div class="nom-group">
-          <label class="nom-label">Cargo</label>
-          <select id="nom-cargo" class="hz-input" style="width:100%;" disabled onchange="onCargoChange()">
-            <option value="">Select cargo...</option>
-          </select>
-        </div>
-        <div class="nom-group">
-          <label class="nom-label">Vessel</label>
-          <select id="nom-vessel" class="hz-input" style="width:100%;" disabled onchange="onVesselChange()">
-            <option value="">Select vessel...</option>
-          </select>
-        </div>
-        <div class="nom-group">
-          <label class="nom-label">ETA</label>
-          <input id="nom-eta" type="date" class="hz-input" style="width:100%;" disabled />
-        </div>
-        <div class="nom-group">
-          <label class="nom-label">Volume (MMBtu)</label>
-          <input id="nom-volume" type="number" class="hz-input" style="width:100%;" placeholder="65000" />
-        </div>
-        <div class="nom-group">
-          <label class="nom-label">Load Port</label>
-          <select id="nom-port" class="hz-input" style="width:100%;">
-            <option value="">Select port...</option>
-            <option value="ras-laffan">Ras Laffan, Qatar</option>
-            <option value="sabine-pass">Sabine Pass, USA</option>
-            <option value="bonny">Bonny Island, Nigeria</option>
-            <option value="darwin">Darwin, Australia</option>
-            <option value="bintulu">Bintulu, Malaysia</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.75rem; padding-top:0.5rem; border-top:0.0625rem solid var(--border);">
-        <button class="hz-btn" onclick="resetNom()">Reset</button>
-        <button class="hz-btn primary" onclick="submitNom()">Submit Nomination</button>
-      </div>
-    </div>
-
-    <!-- Schedule Table -->
-    <div class="hz-card fade-in-d2" style="margin-top:0.75rem;">
-      <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif;">Nomination Schedule</div>
-      <div style="overflow-x:auto;">
-        <table class="hz-table">
-          <thead>
-            <tr>
-              <th>Nomination</th>
-              <th>Contract</th>
-              <th>Cargo</th>
-              <th>Vessel</th>
-              <th style="text-align:right;">Volume</th>
-              <th>Port</th>
-              <th>ETA</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="color:var(--accent);">NOM-2026-041</td>
-              <td>SPA-2024-001</td>
-              <td>C-2406</td>
-              <td>LNG Sokoto</td>
-              <td style="text-align:right;">65,000</td>
-              <td>Ras Laffan</td>
-              <td>2026-04-18</td>
-              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--green-dim);color:var(--green);">Confirmed</span></td>
-            </tr>
-            <tr>
-              <td style="color:var(--accent);">NOM-2026-040</td>
-              <td>SPA-2024-002</td>
-              <td>C-2405</td>
-              <td>Dapeng Sun</td>
-              <td style="text-align:right;">70,000</td>
-              <td>Sabine Pass</td>
-              <td>2026-04-22</td>
-              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--amber-dim);color:var(--amber);">Pending</span></td>
-            </tr>
-            <tr>
-              <td style="color:var(--accent);">NOM-2026-039</td>
-              <td>SPA-2024-003</td>
-              <td>C-2404</td>
-              <td>Al Dafna</td>
-              <td style="text-align:right;">55,000</td>
-              <td>Bonny Island</td>
-              <td>2026-04-28</td>
-              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--amber-dim);color:var(--amber);">Pending</span></td>
-            </tr>
-            <tr>
-              <td style="color:var(--accent);">NOM-2026-038</td>
-              <td>SPOT-2026-015</td>
-              <td>C-2403</td>
-              <td>Gallina</td>
-              <td style="text-align:right;">80,000</td>
-              <td>Darwin</td>
-              <td>2026-05-02</td>
-              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--green-dim);color:var(--green);">Confirmed</span></td>
-            </tr>
-            <tr>
-              <td style="color:var(--accent);">NOM-2026-037</td>
-              <td>SPA-2024-001</td>
-              <td>C-2402</td>
-              <td>Arctic Lady</td>
-              <td style="text-align:right;">72,000</td>
-              <td>Ras Laffan</td>
-              <td>2026-05-08</td>
-              <td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;background:var(--surface-elevated);color:var(--text-muted);">Draft</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div style="overflow-x:auto;">
+      <table class="hz-table" id="nom-schedule-table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Contract</th>
+            <th>Cargo</th>
+            <th>Delivery Month</th>
+            <th style="text-align:right;">Volume</th>
+            <th>Vessel</th>
+            <th>Status</th>
+            <th>Deadline</th>
+            <th style="text-align:right;">Days Left</th>
+          </tr>
+        </thead>
+        <tbody id="nom-schedule-body"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -192,130 +419,626 @@
 <script>
 initShell('nominations', 'Nominations');
 
-/* Cascading data */
-const contractCargos = {
-  'SPA-2024-001': ['C-2406','C-2410','C-2415'],
-  'SPA-2024-002': ['C-2405','C-2411'],
-  'SPA-2024-003': ['C-2404','C-2412','C-2416'],
-  'SPOT-2026-015': ['C-2403'],
+/* ============================================================
+   DATA
+   ============================================================ */
+
+var CONTRACTS = [
+  { value:'SPA-QATAR-2026', label:'SPA-QATAR-2026', counterparty:'QatarEnergy', type:'SPA', acq:'18,200,000 MMBtu remaining' },
+  { value:'SPA-SHELL-2026', label:'SPA-SHELL-2026', counterparty:'Shell International', type:'SPA', acq:'12,400,000 MMBtu remaining' },
+  { value:'MSA-JERA-2025',  label:'MSA-JERA-2025',  counterparty:'JERA Co.',           type:'MSA', acq:'8,600,000 MMBtu remaining' },
+  { value:'SPOT-TOTAL-Q2',  label:'SPOT-TOTAL-Q2',  counterparty:'TotalEnergies',       type:'Spot', acq:'3,200,000 MMBtu (single)' },
+  { value:'SPOT-BP-Q3',     label:'SPOT-BP-Q3',     counterparty:'BP Gas Marketing',    type:'Spot', acq:'2,950,000 MMBtu (single)' },
+];
+
+var CONTRACT_CARGOS = {
+  'SPA-QATAR-2026': [
+    { value:'CARGO-Q2-01', label:'CARGO-Q2-01', month:'Jun 2026', volume:'3,200,000', laycanStart:'2026-06-10', laycanEnd:'2026-06-14', loadPort:'Ras Laffan, Qatar', dischPort:'Incheon, South Korea' },
+    { value:'CARGO-Q2-02', label:'CARGO-Q2-02', month:'Jul 2026', volume:'3,400,000', laycanStart:'2026-07-05', laycanEnd:'2026-07-09', loadPort:'Ras Laffan, Qatar', dischPort:'Sodegaura, Japan' },
+    { value:'CARGO-Q3-01', label:'CARGO-Q3-01', month:'Aug 2026', volume:'3,200,000', laycanStart:'2026-08-12', laycanEnd:'2026-08-16', loadPort:'Ras Laffan, Qatar', dischPort:'Dahej, India' },
+  ],
+  'SPA-SHELL-2026': [
+    { value:'CARGO-H2-01', label:'CARGO-H2-01', month:'Jul 2026', volume:'2,800,000', laycanStart:'2026-07-18', laycanEnd:'2026-07-22', loadPort:'Sabine Pass, USA', dischPort:'Isle of Grain, UK' },
+    { value:'CARGO-H2-02', label:'CARGO-H2-02', month:'Sep 2026', volume:'2,800,000', laycanStart:'2026-09-01', laycanEnd:'2026-09-05', loadPort:'Cameron LNG, USA', dischPort:'Zeebrugge, Belgium' },
+  ],
+  'MSA-JERA-2025': [
+    { value:'CARGO-MSA-04', label:'CARGO-MSA-04', month:'May 2026', volume:'2,950,000', laycanStart:'2026-05-20', laycanEnd:'2026-05-24', loadPort:'Gladstone, Australia', dischPort:'Sodegaura, Japan' },
+    { value:'CARGO-MSA-05', label:'CARGO-MSA-05', month:'Jul 2026', volume:'2,950,000', laycanStart:'2026-07-10', laycanEnd:'2026-07-14', loadPort:'Darwin, Australia', dischPort:'Futtsu, Japan' },
+  ],
+  'SPOT-TOTAL-Q2': [
+    { value:'CARGO-SPOT-T1', label:'CARGO-SPOT-T1', month:'Jun 2026', volume:'3,200,000', laycanStart:'2026-06-22', laycanEnd:'2026-06-26', loadPort:'Bonny Island, Nigeria', dischPort:'Montoir, France' },
+  ],
+  'SPOT-BP-Q3': [
+    { value:'CARGO-SPOT-B1', label:'CARGO-SPOT-B1', month:'Aug 2026', volume:'2,950,000', laycanStart:'2026-08-05', laycanEnd:'2026-08-09', loadPort:'Bintulu, Malaysia', dischPort:'Dapeng, China' },
+  ],
 };
 
-const cargoVessels = {
-  'C-2406': ['LNG Sokoto','Al Dafna','Arctic Lady'],
-  'C-2405': ['Dapeng Sun','Gallina'],
-  'C-2404': ['Al Dafna','LNG Sokoto'],
-  'C-2403': ['Gallina','Arctic Lady','Dapeng Sun'],
-  'C-2410': ['LNG Sokoto'],
-  'C-2411': ['Dapeng Sun','Al Dafna'],
-  'C-2412': ['Arctic Lady'],
-  'C-2415': ['Gallina','LNG Sokoto'],
-  'C-2416': ['Al Dafna'],
-};
+var VESSELS = [
+  { value:'Al Dafna',        label:'Al Dafna',        capacity:170000, position:'Singapore Strait', lastSeen:'11 Apr' },
+  { value:'Seri Begawan',    label:'Seri Begawan',    capacity:155000, position:'Malacca Strait', lastSeen:'10 Apr' },
+  { value:'Shahamah',        label:'Shahamah',        capacity:137000, position:'Suez Canal', lastSeen:'09 Apr' },
+  { value:'Methane Princess', label:'Methane Princess', capacity:145000, position:'Persian Gulf', lastSeen:'11 Apr' },
+  { value:'Gallina',         label:'Gallina',         capacity:162000, position:'Atlantic, off Gibraltar', lastSeen:'08 Apr' },
+  { value:'Arctic Spirit',   label:'Arctic Spirit',   capacity:174000, position:'North Sea', lastSeen:'10 Apr' },
+];
 
-function updateCascade(step) {
-  const steps = document.querySelectorAll('.nom-cascade-step');
-  const stepNames = ['Contract','Cargo','Vessel','ETA'];
-  steps.forEach((s, i) => {
-    s.classList.remove('active','done');
-    if (i < step) s.classList.add('done');
-    else if (i === step) s.classList.add('active');
+var PORTS = [
+  'Ras Laffan, Qatar',
+  'Sabine Pass, USA',
+  'Cameron LNG, USA',
+  'Bonny Island, Nigeria',
+  'Gladstone, Australia',
+  'Darwin, Australia',
+  'Bintulu, Malaysia',
+  'Incheon, South Korea',
+  'Sodegaura, Japan',
+  'Futtsu, Japan',
+  'Isle of Grain, UK',
+  'Zeebrugge, Belgium',
+  'Dahej, India',
+  'Montoir, France',
+  'Dapeng, China',
+  'Barcelona, Spain',
+];
+
+var SCHEDULE = [
+  { ref:'NOM-2026-Q1-008', contract:'SPA-QATAR-2026', cargo:'CARGO-Q1-04', month:'Apr 2026', volume:'3,200,000', vessel:'Methane Princess', status:'Submitted', deadline:'2026-04-13' },
+  { ref:'NOM-2026-Q1-007', contract:'MSA-JERA-2025',  cargo:'CARGO-MSA-03', month:'Apr 2026', volume:'2,950,000', vessel:'Al Dafna',     status:'Draft',     deadline:'2026-04-14' },
+  { ref:'NOM-2026-Q2-002', contract:'SPOT-TOTAL-Q2',  cargo:'CARGO-SPOT-T1', month:'Jun 2026', volume:'3,200,000', vessel:'Gallina',       status:'Draft',     deadline:'2026-04-18' },
+  { ref:'NOM-2026-Q2-003', contract:'SPA-SHELL-2026', cargo:'CARGO-H2-01', month:'Jul 2026', volume:'2,800,000', vessel:'Arctic Spirit',  status:'Submitted', deadline:'2026-04-25' },
+  { ref:'NOM-2026-Q2-004', contract:'SPA-QATAR-2026', cargo:'CARGO-Q2-01', month:'Jun 2026', volume:'3,200,000', vessel:'Seri Begawan',  status:'Confirmed', deadline:'2026-04-28' },
+  { ref:'NOM-2026-Q2-005', contract:'MSA-JERA-2025',  cargo:'CARGO-MSA-04', month:'May 2026', volume:'2,950,000', vessel:'Shahamah',      status:'Confirmed', deadline:'2026-05-02' },
+  { ref:'NOM-2026-Q2-006', contract:'SPA-QATAR-2026', cargo:'CARGO-Q2-02', month:'Jul 2026', volume:'3,400,000', vessel:'Al Dafna',      status:'Rejected',  deadline:'2026-05-10' },
+  { ref:'NOM-2026-Q3-001', contract:'SPOT-BP-Q3',     cargo:'CARGO-SPOT-B1', month:'Aug 2026', volume:'2,950,000', vessel:'Methane Princess', status:'Draft', deadline:'2026-05-20' },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var currentStep = 0;
+var completedSteps = [];
+var selectedContract = null;
+var selectedCargo = null;
+var selectedVessel = null;
+var volumeDatesConfirmed = false;
+
+/* ============================================================
+   PIPELINE STEPPER
+   ============================================================ */
+function updatePipeline() {
+  var steps = document.querySelectorAll('.nom-pipe-step');
+  var connectors = document.querySelectorAll('.nom-pipe-connector');
+
+  steps.forEach(function(el, i) {
+    el.classList.remove('done', 'active', 'disabled');
+    if (completedSteps.indexOf(i) >= 0) {
+      el.classList.add('done');
+      // Replace number with check
+      el.querySelector('.pipe-num').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if (i === currentStep) {
+      el.classList.add('active');
+      el.querySelector('.pipe-num').textContent = String(i + 1);
+    } else {
+      el.classList.add('disabled');
+      el.querySelector('.pipe-num').textContent = String(i + 1);
+    }
+  });
+
+  connectors.forEach(function(el, i) {
+    el.classList.toggle('done', completedSteps.indexOf(i) >= 0);
   });
 }
 
-function onContractChange() {
-  const contract = document.getElementById('nom-contract').value;
-  const cargoSel = document.getElementById('nom-cargo');
-  const vesselSel = document.getElementById('nom-vessel');
-  const etaInput = document.getElementById('nom-eta');
-
-  cargoSel.innerHTML = '<option value="">Select cargo...</option>';
-  vesselSel.innerHTML = '<option value="">Select vessel...</option>';
-  vesselSel.disabled = true;
-  etaInput.disabled = true;
-  etaInput.value = '';
-
-  if (contract && contractCargos[contract]) {
-    contractCargos[contract].forEach(c => {
-      cargoSel.innerHTML += '<option value="' + c + '">' + c + '</option>';
-    });
-    cargoSel.disabled = false;
-    updateCascade(1);
-  } else {
-    cargoSel.disabled = true;
-    updateCascade(0);
+function showStepPanel(step) {
+  // Close all panels
+  for (var i = 0; i < 5; i++) {
+    var panel = document.getElementById('step-panel-' + i);
+    var summary = document.getElementById('step-summary-' + i);
+    if (panel) panel.classList.remove('open');
+    if (summary) summary.classList.remove('open');
   }
+
+  // Show summaries for completed steps
+  completedSteps.forEach(function(s) {
+    var summary = document.getElementById('step-summary-' + s);
+    if (summary && summary.innerHTML) summary.classList.add('open');
+  });
+
+  // Open the active panel
+  var activePanel = document.getElementById('step-panel-' + step);
+  if (activePanel) activePanel.classList.add('open');
 }
 
-function onCargoChange() {
-  const cargo = document.getElementById('nom-cargo').value;
-  const vesselSel = document.getElementById('nom-vessel');
-  const etaInput = document.getElementById('nom-eta');
-
-  vesselSel.innerHTML = '<option value="">Select vessel...</option>';
-  etaInput.disabled = true;
-  etaInput.value = '';
-
-  if (cargo && cargoVessels[cargo]) {
-    cargoVessels[cargo].forEach(v => {
-      vesselSel.innerHTML += '<option value="' + v + '">' + v + '</option>';
-    });
-    vesselSel.disabled = false;
-    updateCascade(2);
-  } else {
-    vesselSel.disabled = true;
-    updateCascade(1);
-  }
+function advanceToStep(step) {
+  currentStep = step;
+  updatePipeline();
+  showStepPanel(step);
 }
 
-function onVesselChange() {
-  const vessel = document.getElementById('nom-vessel').value;
-  const etaInput = document.getElementById('nom-eta');
-  if (vessel) {
-    etaInput.disabled = false;
-    updateCascade(3);
-  } else {
-    etaInput.disabled = true;
-    updateCascade(2);
-  }
+function completeStep(step) {
+  if (completedSteps.indexOf(step) < 0) completedSteps.push(step);
+  renderStepSummary(step);
 }
 
-function resetNom() {
-  document.getElementById('nom-contract').value = '';
-  document.getElementById('nom-cargo').innerHTML = '<option value="">Select cargo...</option>';
-  document.getElementById('nom-cargo').disabled = true;
-  document.getElementById('nom-vessel').innerHTML = '<option value="">Select vessel...</option>';
-  document.getElementById('nom-vessel').disabled = true;
-  document.getElementById('nom-eta').disabled = true;
-  document.getElementById('nom-eta').value = '';
-  document.getElementById('nom-volume').value = '';
-  document.getElementById('nom-port').value = '';
-  updateCascade(0);
+function renderStepSummary(step) {
+  var summary = document.getElementById('step-summary-' + step);
+  if (!summary) return;
+
+  var checkSvg = '<span class="summary-check"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  var text = '';
+
+  if (step === 0 && selectedContract) {
+    var c = CONTRACTS.find(function(x){ return x.value === selectedContract; });
+    text = c ? c.label + ' — ' + c.counterparty : selectedContract;
+  } else if (step === 1 && selectedCargo) {
+    text = selectedCargo.label + ' — ' + selectedCargo.month + ' — ' + formatNum(selectedCargo.volume) + ' MMBtu';
+  } else if (step === 2) {
+    var vol = document.getElementById('nom-volume').value;
+    var lp = document.getElementById('combo-load-port');
+    var dp = document.getElementById('combo-disch-port');
+    var lpVal = lp && lp.combobox ? lp.combobox.getValue() : '';
+    var dpVal = dp && dp.combobox ? dp.combobox.getValue() : '';
+    text = formatNum(vol) + ' MMBtu | ' + lpVal + ' \u2192 ' + dpVal;
+  } else if (step === 3 && selectedVessel) {
+    var v = VESSELS.find(function(x){ return x.value === selectedVessel; });
+    text = v ? v.label + ' (' + formatNum(String(v.capacity)) + ' m\u00b3)' : selectedVessel;
+  }
+
+  summary.innerHTML = '<div class="nom-step-summary" onclick="reopenStep(' + step + ')">' + checkSvg + '<span>' + text + '</span><span style="margin-left:auto;font-size:0.5625rem;color:var(--text-muted);">click to edit</span></div>';
+}
+
+function reopenStep(step) {
+  // Remove this step and all after from completed
+  completedSteps = completedSteps.filter(function(s){ return s < step; });
+  // Clear subsequent selections
+  if (step <= 0) { selectedContract = null; selectedCargo = null; selectedVessel = null; volumeDatesConfirmed = false; clearCombo('combo-contract'); clearCombo('combo-cargo'); clearCombo('combo-vessel'); clearCargoDropdown(); }
+  if (step <= 1) { selectedCargo = null; selectedVessel = null; volumeDatesConfirmed = false; clearCombo('combo-cargo'); clearCombo('combo-vessel'); }
+  if (step <= 2) { selectedVessel = null; volumeDatesConfirmed = false; clearCombo('combo-vessel'); }
+  if (step <= 3) { selectedVessel = null; clearCombo('combo-vessel'); }
+
+  // Clear summaries for step and after
+  for (var i = step; i < 5; i++) {
+    var s = document.getElementById('step-summary-' + i);
+    if (s) { s.innerHTML = ''; s.classList.remove('open'); }
+    var vi = document.getElementById('vessel-info-container');
+    if (vi) vi.innerHTML = '';
+  }
+
+  advanceToStep(step);
+}
+
+function clearCombo(id) {
+  var el = document.getElementById(id);
+  if (el && el.combobox) el.combobox.clear();
+}
+
+function formatNum(s) {
+  if (!s) return '';
+  // If already has commas, return as is
+  if (String(s).indexOf(',') >= 0) return s;
+  return String(s).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/* ============================================================
+   STEP 1: CONTRACT COMBOBOX
+   ============================================================ */
+function initContractCombo() {
+  var el = document.getElementById('combo-contract');
+  var options = CONTRACTS.map(function(c) {
+    var badgeClass = c.type === 'SPA' ? 'spa' : c.type === 'MSA' ? 'msa' : 'spot';
+    return {
+      value: c.value,
+      label: c.label,
+      html: '<span class="opt-main"><span>' + c.label + '</span><span class="opt-badge ' + badgeClass + '">' + c.type + '</span></span><span class="opt-sub">' + c.counterparty + ' \u2014 ' + c.acq + '</span>',
+      searchText: c.label + ' ' + c.counterparty + ' ' + c.type
+    };
+  });
+
+  initRichCombobox(el, options, function(val) {
+    selectedContract = val;
+    selectedCargo = null;
+    selectedVessel = null;
+    volumeDatesConfirmed = false;
+    clearCombo('combo-cargo');
+    clearCombo('combo-vessel');
+    loadCargoDropdown(val);
+    completeStep(0);
+    advanceToStep(1);
+  });
+}
+
+/* ============================================================
+   STEP 2: CARGO COMBOBOX
+   ============================================================ */
+function loadCargoDropdown(contractVal) {
+  var el = document.getElementById('combo-cargo');
+  var cargos = CONTRACT_CARGOS[contractVal] || [];
+
+  var options = cargos.map(function(c) {
+    return {
+      value: c.value,
+      label: c.label,
+      data: c,
+      html: '<span class="opt-main"><span>' + c.label + '</span></span><span class="opt-sub">' + c.month + ' \u2014 ' + formatNum(c.volume) + ' MMBtu</span>',
+      searchText: c.label + ' ' + c.month + ' ' + c.volume
+    };
+  });
+
+  initRichCombobox(el, options, function(val, opt) {
+    selectedCargo = opt.data;
+    selectedVessel = null;
+    clearCombo('combo-vessel');
+    prefillVolumeDates(opt.data);
+    completeStep(1);
+    advanceToStep(2);
+  });
+}
+
+function clearCargoDropdown() {
+  var el = document.getElementById('combo-cargo');
+  if (el) initRichCombobox(el, [], function(){});
+}
+
+function prefillVolumeDates(cargo) {
+  document.getElementById('nom-volume').value = cargo.volume;
+  document.getElementById('nom-laycan-start').value = cargo.laycanStart;
+  document.getElementById('nom-laycan-end').value = cargo.laycanEnd;
+
+  var lp = document.getElementById('combo-load-port');
+  var dp = document.getElementById('combo-disch-port');
+  if (lp && lp.combobox) lp.combobox.setValue(cargo.loadPort);
+  if (dp && dp.combobox) dp.combobox.setValue(cargo.dischPort);
+}
+
+/* ============================================================
+   STEP 3: CONFIRM VOLUME & DATES
+   ============================================================ */
+function confirmStep2() {
+  var vol = document.getElementById('nom-volume').value;
+  var ls = document.getElementById('nom-laycan-start').value;
+  var le = document.getElementById('nom-laycan-end').value;
+  var lp = document.getElementById('combo-load-port');
+  var dp = document.getElementById('combo-disch-port');
+  var lpVal = lp && lp.combobox ? lp.combobox.getValue() : null;
+  var dpVal = dp && dp.combobox ? dp.combobox.getValue() : null;
+
+  if (!vol || !ls || !le || !lpVal || !dpVal) {
+    showToast('Please fill in all volume and date fields', 'error');
+    return;
+  }
+
+  volumeDatesConfirmed = true;
+  completeStep(2);
+  initVesselCombo();
+  advanceToStep(3);
+}
+
+/* ============================================================
+   STEP 4: VESSEL COMBOBOX
+   ============================================================ */
+function initVesselCombo() {
+  var el = document.getElementById('combo-vessel');
+  var options = VESSELS.map(function(v) {
+    return {
+      value: v.value,
+      label: v.label,
+      data: v,
+      html: '<span class="opt-main"><span>' + v.label + '</span></span><span class="opt-sub">' + formatNum(String(v.capacity)) + ' m\u00b3 \u2014 Last: ' + v.position + '</span>',
+      searchText: v.label + ' ' + v.capacity + ' ' + v.position
+    };
+  });
+
+  initRichCombobox(el, options, function(val, opt) {
+    selectedVessel = val;
+    showVesselInfo(opt.data);
+    completeStep(3);
+    advanceToStep(4);
+    buildReviewSummary();
+  });
+}
+
+function showVesselInfo(vessel) {
+  var container = document.getElementById('vessel-info-container');
+  var volumeStr = document.getElementById('nom-volume').value || '0';
+  var volumeClean = volumeStr.replace(/,/g, '');
+  var volumeNum = parseInt(volumeClean, 10);
+
+  // Rough compatibility check (1 m3 LNG ~ 24 MMBtu)
+  var capacityMmbtu = vessel.capacity * 24;
+  var compatible = capacityMmbtu >= volumeNum;
+  var compatText = compatible
+    ? '\u2713 Compatible (' + formatNum(String(vessel.capacity)) + ' m\u00b3 vs ' + formatNum(volumeStr) + ' MMBtu)'
+    : '\u2717 Undersized (' + formatNum(String(vessel.capacity)) + ' m\u00b3 vs ' + formatNum(volumeStr) + ' MMBtu)';
+
+  // ETA calculation from laycan start
+  var lsVal = document.getElementById('nom-laycan-start').value;
+  var etaLoad = 'TBD';
+  var etaDisch = 'TBD';
+  var transit = 13;
+  if (lsVal) {
+    var loadDate = new Date(lsVal);
+    var dischDate = new Date(loadDate);
+    dischDate.setDate(dischDate.getDate() + transit);
+    etaLoad = formatDate(loadDate);
+    etaDisch = formatDate(dischDate);
+  }
+
+  container.innerHTML = '<div class="vessel-info-card">' +
+    '<div class="vessel-info-item"><span class="vi-label">Capacity Check</span><span class="vi-value ' + (compatible ? 'good' : '') + '">' + compatText + '</span></div>' +
+    '<div class="vessel-info-item"><span class="vi-label">ETA Schedule</span><span class="vi-value mono">Load: ' + etaLoad + ' | Disch: ' + etaDisch + ' | Transit: ' + transit + 'd</span></div>' +
+    '<div class="vessel-info-item"><span class="vi-label">Current Position</span><span class="vi-value">Last seen: ' + vessel.position + ', ' + vessel.lastSeen + '</span></div>' +
+  '</div>';
+}
+
+function formatDate(d) {
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+/* ============================================================
+   STEP 5: REVIEW & SUBMIT
+   ============================================================ */
+function buildReviewSummary() {
+  var review = document.getElementById('review-summary');
+  var c = CONTRACTS.find(function(x){ return x.value === selectedContract; });
+  var v = VESSELS.find(function(x){ return x.value === selectedVessel; });
+  var vol = document.getElementById('nom-volume').value;
+  var lp = document.getElementById('combo-load-port');
+  var dp = document.getElementById('combo-disch-port');
+  var lpVal = lp && lp.combobox ? lp.combobox.getValue() : '';
+  var dpVal = dp && dp.combobox ? dp.combobox.getValue() : '';
+  var ls = document.getElementById('nom-laycan-start').value;
+  var le = document.getElementById('nom-laycan-end').value;
+
+  review.innerHTML =
+    '<div class="nom-review-item"><span class="rv-label">Nomination Ref</span><span class="rv-value mono">NOM-2026-Q2-001</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Contract</span><span class="rv-value">' + (c ? c.label : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Counterparty</span><span class="rv-value">' + (c ? c.counterparty : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Cargo</span><span class="rv-value">' + (selectedCargo ? selectedCargo.label : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Volume</span><span class="rv-value mono">' + formatNum(vol) + ' MMBtu</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Delivery</span><span class="rv-value">' + (selectedCargo ? selectedCargo.month : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Load Port</span><span class="rv-value">' + lpVal + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Discharge Port</span><span class="rv-value">' + dpVal + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Laycan</span><span class="rv-value mono">' + ls + ' \u2014 ' + le + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Vessel</span><span class="rv-value">' + (v ? v.label : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Capacity</span><span class="rv-value mono">' + (v ? formatNum(String(v.capacity)) + ' m\u00b3' : '') + '</span></div>' +
+    '<div class="nom-review-item"><span class="rv-label">Status</span><span class="rv-value" style="color:var(--amber);">Ready to Submit</span></div>';
 }
 
 function submitNom() {
-  const contract = document.getElementById('nom-contract').value;
-  const cargo = document.getElementById('nom-cargo').value;
-  const vessel = document.getElementById('nom-vessel').value;
-  if (!contract || !cargo || !vessel) {
-    showToast('Please complete all cascade fields', 'error');
+  if (!selectedContract || !selectedCargo || !selectedVessel || !volumeDatesConfirmed) {
+    showToast('Please complete all steps before submitting', 'error');
     return;
   }
-  showToast('Nomination submitted: ' + cargo + ' on ' + vessel, 'success');
+  showToast('Nomination NOM-2026-Q2-001 submitted successfully', 'success');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('nom-content').style.display = 'block';
-    }, 300);
-  }, 500);
+function saveDraft() {
+  showToast('Nomination saved as draft', 'success');
+}
+
+/* ============================================================
+   RICH COMBOBOX (with HTML rendering)
+   ============================================================ */
+function initRichCombobox(el, options, onSelect) {
+  var input = el.querySelector('.hz-combobox-input');
+  var dropdown = el.querySelector('.hz-combobox-dropdown');
+  var highlightIdx = -1;
+  var filteredOptions = options.slice();
+  var selectedValue = null;
+  var previousValue = null;
+  var isOpen = false;
+
+  // Remove old listeners by replacing input node
+  var newInput = input.cloneNode(true);
+  input.parentNode.replaceChild(newInput, input);
+  input = newInput;
+
+  function renderDropdown() {
+    var q = input.value.toLowerCase();
+    filteredOptions = options.filter(function(opt) {
+      var searchIn = opt.searchText || opt.label;
+      return searchIn.toLowerCase().indexOf(q) >= 0;
+    });
+
+    if (filteredOptions.length === 0) {
+      dropdown.innerHTML = '<div class="hz-combobox-empty">No matches</div>';
+      highlightIdx = -1;
+      return;
+    }
+
+    if (highlightIdx >= filteredOptions.length) highlightIdx = filteredOptions.length - 1;
+    if (highlightIdx < 0) highlightIdx = 0;
+
+    var html = '';
+    filteredOptions.forEach(function(opt, i) {
+      var cls = 'hz-combobox-option' + (i === highlightIdx ? ' highlighted' : '') + (selectedValue === opt.value ? ' selected' : '');
+      html += '<button class="' + cls + '" data-index="' + i + '">' + (opt.html || opt.label) + '</button>';
+    });
+    dropdown.innerHTML = html;
+
+    dropdown.querySelectorAll('.hz-combobox-option').forEach(function(btn) {
+      btn.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selectOption(parseInt(btn.dataset.index));
+      });
+      btn.addEventListener('mouseenter', function() {
+        highlightIdx = parseInt(btn.dataset.index);
+        renderDropdown();
+      });
+    });
+
+    var highlighted = dropdown.querySelector('.highlighted');
+    if (highlighted) highlighted.scrollIntoView({ block: 'nearest' });
+  }
+
+  function openDropdown() {
+    if (isOpen) return;
+    isOpen = true;
+    dropdown.classList.add('open');
+    previousValue = selectedValue;
+    highlightIdx = 0;
+    renderDropdown();
+  }
+
+  function closeDropdown() {
+    isOpen = false;
+    dropdown.classList.remove('open');
+  }
+
+  function selectOption(idx) {
+    if (idx < 0 || idx >= filteredOptions.length) return;
+    var opt = filteredOptions[idx];
+    selectedValue = opt.value;
+    input.value = opt.label;
+    closeDropdown();
+    if (onSelect) onSelect(opt.value, opt);
+  }
+
+  input.addEventListener('focus', function() { openDropdown(); });
+  input.addEventListener('input', function() {
+    if (!isOpen) openDropdown();
+    highlightIdx = 0;
+    renderDropdown();
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!isOpen) { openDropdown(); return; }
+      highlightIdx = Math.min(highlightIdx + 1, filteredOptions.length - 1);
+      renderDropdown();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      highlightIdx = Math.max(highlightIdx - 1, 0);
+      renderDropdown();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isOpen && highlightIdx >= 0) selectOption(highlightIdx);
+    } else if (e.key === 'Tab') {
+      if (isOpen && highlightIdx >= 0) selectOption(highlightIdx);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      if (previousValue !== null) {
+        var prevOpt = options.find(function(o){ return o.value === previousValue; });
+        if (prevOpt) input.value = prevOpt.label;
+      } else { input.value = ''; }
+      closeDropdown();
+    }
+  });
+
+  input.addEventListener('blur', function() {
+    setTimeout(function() {
+      if (isOpen) {
+        if (previousValue !== null) {
+          var prevOpt = options.find(function(o){ return o.value === previousValue; });
+          if (prevOpt) input.value = prevOpt.label;
+        } else if (!selectedValue) { input.value = ''; }
+        closeDropdown();
+      }
+    }, 150);
+  });
+
+  // Programmatic API
+  el.combobox = {
+    getValue: function() { return selectedValue; },
+    setValue: function(val) {
+      var opt = options.find(function(o){ return o.value === val; });
+      if (opt) { selectedValue = val; input.value = opt.label; }
+    },
+    clear: function() {
+      selectedValue = null; previousValue = null;
+      input.value = '';
+    }
+  };
+}
+
+/* ============================================================
+   PORT COMBOBOXES
+   ============================================================ */
+function initPortCombos() {
+  var portOptions = PORTS.map(function(p) {
+    return { value: p, label: p };
+  });
+
+  initRichCombobox(document.getElementById('combo-load-port'), portOptions, function(){});
+  initRichCombobox(document.getElementById('combo-disch-port'), portOptions, function(){});
+}
+
+/* ============================================================
+   SCHEDULE TABLE
+   ============================================================ */
+function renderSchedule() {
+  var tbody = document.getElementById('nom-schedule-body');
+  var today = new Date(2026, 3, 11); // 11 Apr 2026
+
+  // Sort by deadline urgency (closest first)
+  var sorted = SCHEDULE.slice().sort(function(a, b) {
+    return new Date(a.deadline) - new Date(b.deadline);
+  });
+
+  var html = '';
+  sorted.forEach(function(n) {
+    var deadlineDate = new Date(n.deadline);
+    var diffMs = deadlineDate - today;
+    var daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    // Status badge
+    var statusColors = {
+      Draft:     'background:var(--surface-elevated);color:var(--text-muted);',
+      Submitted: 'background:var(--blue-dim);color:var(--blue);',
+      Confirmed: 'background:var(--green-dim);color:var(--green);',
+      Rejected:  'background:var(--red-dim);color:var(--red);',
+    };
+    var statusStyle = statusColors[n.status] || '';
+
+    // Deadline styling
+    var deadlineClass = '';
+    var daysText = '';
+    if (daysLeft < 0) {
+      deadlineClass = 'deadline-ok';
+      daysText = 'Passed';
+    } else if (daysLeft < 3) {
+      deadlineClass = 'deadline-urgent';
+      daysText = daysLeft + 'd';
+    } else if (daysLeft < 7) {
+      deadlineClass = 'deadline-warning';
+      daysText = daysLeft + 'd';
+    } else {
+      deadlineClass = 'deadline-ok';
+      daysText = daysLeft + 'd';
+    }
+
+    html += '<tr>' +
+      '<td><span class="nom-ref">' + n.ref + '</span></td>' +
+      '<td>' + n.contract + '</td>' +
+      '<td style="font-family:var(--font-mono);font-size:var(--text-xs);">' + n.cargo + '</td>' +
+      '<td>' + n.month + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);">' + n.volume + '</td>' +
+      '<td>' + n.vessel + '</td>' +
+      '<td><span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:var(--radius-full);font-size:0.5625rem;font-weight:600;' + statusStyle + '">' + n.status + '</span></td>' +
+      '<td style="font-family:var(--font-mono);font-size:var(--text-xs);">' + n.deadline + '</td>' +
+      '<td style="text-align:right;"><span class="' + deadlineClass + '">' + daysText + '</span></td>' +
+    '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  initContractCombo();
+  initPortCombos();
+  renderSchedule();
+  updatePipeline();
+  showStepPanel(0);
 });
 </script>
 
 <!-- Back to Index -->
-<a href="../index.html" 
+<a href="../index.html"
    style="position:fixed;bottom:1rem;right:1rem;z-index:9999;display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 0.875rem;font-size:0.75rem;font-family:Inter,system-ui,sans-serif;border-radius:0.5rem;text-decoration:none;transition:all 0.15s;background:rgba(99,102,241,0.9);color:white;box-shadow:0 0.25rem 0.75rem rgba(0,0,0,0.2);backdrop-filter:blur(0.5rem);"
    onmouseover="this.style.background='rgba(79,70,229,1)'"
    onmouseout="this.style.background='rgba(99,102,241,0.9)'"
