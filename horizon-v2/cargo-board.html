@@ -6,12 +6,6 @@
   <title>Cargo Board — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    /* Skeleton */
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
-
     /* Phase strip */
     .phase-strip { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-bottom: var(--sp-6); }
     .phase-pill { display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-full); font-size: var(--text-xs); color: var(--text-secondary); font-weight: 500; }
@@ -83,31 +77,8 @@
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:flex; gap:0.5rem;">
-        <div class="hz-skeleton" style="height:2rem; width:6rem; border-radius:624.9375rem;"></div>
-        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
-        <div class="hz-skeleton" style="height:2rem; width:5rem; border-radius:624.9375rem;"></div>
-        <div class="hz-skeleton" style="height:2rem; width:6rem; border-radius:624.9375rem;"></div>
-        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
-        <div class="hz-skeleton" style="height:2rem; width:7rem; border-radius:624.9375rem;"></div>
-      </div>
-      <div class="hz-skeleton" style="height:2.5rem; border-radius:0.5rem;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-      <div class="hz-skeleton" style="height:3.5rem; border-radius:0;"></div>
-    </div>
-  </div>
-
   <!-- Real content -->
-  <div id="cargo-content" style="display:none;">
+  <div id="cargo-content">
 
     <!-- Phase summary strip -->
     <div class="phase-strip fade-in" id="phase-strip"></div>
@@ -351,13 +322,6 @@ function toggleDetail(idx) {
 document.addEventListener('DOMContentLoaded', function() {
   renderPhaseStrip();
   renderGantt();
-  setTimeout(function() {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(function() {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('cargo-content').style.display = 'block';
-    }, 300);
-  }, 500);
 });
 </script>
 

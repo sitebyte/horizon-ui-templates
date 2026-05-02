@@ -6,11 +6,6 @@
   <title>Reconciliation — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
-
     .recon-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
     @media (max-width:48rem) { .recon-grid { grid-template-columns:1fr; } }
 
@@ -45,23 +40,8 @@
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:flex; gap:0.25rem;">
-        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
-        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
-        <div class="hz-skeleton" style="width:6rem; height:1.5rem;"></div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-        <div class="hz-card"><div class="hz-skeleton" style="width:100%; height:12rem;"></div></div>
-        <div class="hz-card"><div class="hz-skeleton" style="width:100%; height:12rem;"></div></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Real content -->
-  <div id="recon-content" style="display:none;">
+  <div id="recon-content">
     <!-- Cargo selector -->
     <div class="recon-selector fade-in">
       <button class="recon-sel-btn active" onclick="loadRecon(0, this)">C-2406 (Shell)</button>
@@ -184,13 +164,6 @@ function flagRecon() {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadRecon(0, null);
-  setTimeout(() => {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('recon-content').style.display = 'block';
-    }, 300);
-  }, 500);
 });
 </script>
 

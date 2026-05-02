@@ -9,10 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
     .hz-pill { padding:0.1875rem 0.5rem; border-radius:1rem; font-size:0.625rem; font-weight:500; border:0.0625rem solid var(--border); color:var(--text-tertiary); background:transparent; transition:all 0.15s; cursor:pointer; }
     .hz-pill:hover { border-color:var(--text-muted); color:var(--text-secondary); }
     .hz-pill.active { background:var(--accent); border-color:var(--accent); color:#000; }
@@ -22,25 +18,8 @@
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
-      <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
-        <div class="hz-skeleton" style="width:4rem; height:1.5rem; border-radius:1rem;"></div>
-        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
-        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
-        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
-        <div style="flex:1;"></div>
-        <div class="hz-skeleton" style="width:8rem; height:1.5rem;"></div>
-      </div>
-      <div class="hz-card" style="padding:0; height:24rem;">
-        <div class="hz-skeleton" style="width:100%; height:100%; border-radius:0.375rem;"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Real content -->
-  <div id="inv-content" style="display:none;">
+  <div id="inv-content">
     <!-- Toolbar -->
     <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
       <div style="display:flex; gap:0.25rem;">
@@ -58,7 +37,7 @@
       </div>
     </div>
     <!-- AG Grid -->
-    <div id="inv-grid" class="ag-theme-quartz-dark hz-grid-fill" style="width:100%;"></div>
+    <div id="inv-grid" class="ag-theme-quartz-dark" style="width:100%;height:calc(100vh - 10rem);"></div>
   </div>
 
 </div>
@@ -106,7 +85,7 @@ function bulkApprove() {
 
 function exportInvCsv() { gridApi.exportDataAsCsv({ fileName: 'invoices-export.csv' }); }
 
-document.addEventListener('DOMContentLoaded', () => {
+setTimeout(function() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const gridEl = document.getElementById('inv-grid');
   gridEl.classList.toggle('ag-theme-quartz-dark', isDark);
@@ -151,14 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   gridApi = agGrid.createGrid(gridEl, gridOptions);
 
-  setTimeout(() => {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('inv-content').style.display = 'block';
-    }, 300);
-  }, 500);
-});
+}, 100);
 </script>
 
 </body>

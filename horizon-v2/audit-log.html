@@ -6,11 +6,6 @@
   <title>Audit Log — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
-
     .hz-pill { padding:0.1875rem 0.5rem; border-radius:1rem; font-size:0.625rem; font-weight:500; border:0.0625rem solid var(--border); color:var(--text-tertiary); background:transparent; transition:all 0.15s; cursor:pointer; }
     .hz-pill:hover { border-color:var(--text-muted); color:var(--text-secondary); }
     .hz-pill.active { background:var(--accent); border-color:var(--accent); color:#000; }
@@ -46,29 +41,8 @@
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:flex; gap:0.25rem;">
-        <div class="hz-skeleton" style="width:4rem; height:1.5rem; border-radius:1rem;"></div>
-        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
-        <div class="hz-skeleton" style="width:5rem; height:1.5rem; border-radius:1rem;"></div>
-        <div style="flex:1;"></div>
-        <div class="hz-skeleton" style="width:10rem; height:1.5rem;"></div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-        <div class="hz-card">
-          <div class="hz-skeleton" style="width:100%; height:20rem;"></div>
-        </div>
-        <div class="hz-card">
-          <div class="hz-skeleton" style="width:100%; height:20rem;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Real content -->
-  <div id="audit-content" style="display:none;">
+  <div id="audit-content">
     <!-- Toolbar -->
     <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
       <div style="display:flex; gap:0.25rem;">
@@ -263,13 +237,6 @@ function searchAudit(q) {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderAudit();
-  setTimeout(() => {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('audit-content').style.display = 'block';
-    }, 300);
-  }, 500);
 });
 </script>
 

@@ -6,12 +6,6 @@
   <title>Hedge Book — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    /* Skeleton */
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    #skeleton-wrapper { transition: opacity 0.3s ease; }
-
     /* KPI cards */
     .hedge-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-4); margin-bottom: var(--sp-6); }
 
@@ -70,22 +64,8 @@
 <body>
 <div id="hz-app">
 
-  <!-- Skeleton -->
-  <div id="skeleton-wrapper">
-    <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem;">
-        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
-        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
-        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
-        <div class="hz-skeleton" style="height:6rem; border-radius:0.5rem;"></div>
-      </div>
-      <div class="hz-skeleton" style="height:8rem; border-radius:0.5rem;"></div>
-      <div class="hz-skeleton" style="height:16rem; border-radius:0.5rem;"></div>
-    </div>
-  </div>
-
   <!-- Real content -->
-  <div id="hedges-content" style="display:none;">
+  <div id="hedges-content">
 
     <!-- KPI Summary -->
     <div class="hedge-kpis" id="hedge-kpis"></div>
@@ -290,13 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
   renderRatios();
   renderPaperTrades();
   renderComparison();
-  setTimeout(function() {
-    document.getElementById('skeleton-wrapper').style.opacity = '0';
-    setTimeout(function() {
-      document.getElementById('skeleton-wrapper').style.display = 'none';
-      document.getElementById('hedges-content').style.display = 'block';
-    }, 300);
-  }, 500);
 });
 </script>
 
