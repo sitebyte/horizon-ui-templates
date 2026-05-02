@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cargo Board — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     /* Skeleton */
@@ -126,6 +123,308 @@
       <div class="legend-item"><div class="legend-swatch transit"></div> In Transit</div>
       <div class="legend-item"><div class="legend-swatch discharge"></div> Discharge</div>
       <div class="legend-item"><div class="legend-swatch settlement"></div> Settlement</div>
+    </div>
+
+    <!-- ============================================================
+         UI Component Showcase
+         ============================================================ -->
+    <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+      <h2 style="font-size:var(--text-lg);font-weight:700;color:var(--text-primary);margin-bottom:var(--sp-6);">Component Showcase</h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- 1. Vessel Schedule Card -->
+        <div class="hz-card" style="grid-column:1/-1;">
+          <div class="hz-card-header">
+            <div>
+              <div class="hz-card-title">Vessel Schedule</div>
+              <div class="hz-card-subtitle">Active LNG carrier fleet &mdash; current voyage assignments</div>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="hz-table">
+              <thead>
+                <tr>
+                  <th>Vessel Name</th>
+                  <th>IMO Number</th>
+                  <th>DWT</th>
+                  <th>Flag</th>
+                  <th>Current Position</th>
+                  <th>ETA</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:600;">LNG Sokoto</td>
+                  <td class="font-mono">9784321</td>
+                  <td class="font-mono">87,132</td>
+                  <td>Nigeria</td>
+                  <td>Bonny Island Anch.</td>
+                  <td class="font-mono">2026-07-08</td>
+                  <td><span class="hz-badge amber">Awaiting Berth</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Al Hamra</td>
+                  <td class="font-mono">9812456</td>
+                  <td class="font-mono">93,416</td>
+                  <td>Marshall Islands</td>
+                  <td>Ras Laffan Terminal</td>
+                  <td class="font-mono">2026-08-02</td>
+                  <td><span class="hz-badge blue">Nominated</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Pacific Breeze</td>
+                  <td class="font-mono">9756789</td>
+                  <td class="font-mono">84,762</td>
+                  <td>Bahamas</td>
+                  <td>Sabine Pass Berth 3</td>
+                  <td class="font-mono">2026-08-18</td>
+                  <td><span class="hz-badge green">Loading</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">LNG Benue</td>
+                  <td class="font-mono">9823456</td>
+                  <td class="font-mono">89,250</td>
+                  <td>Bermuda</td>
+                  <td><span class="font-mono">04&#176;12&#8242;N 108&#176;45&#8242;E</span></td>
+                  <td class="font-mono">2026-07-12</td>
+                  <td><span class="hz-badge green">In Transit</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Gaslog Salem</td>
+                  <td class="font-mono">9867890</td>
+                  <td class="font-mono">91,834</td>
+                  <td>Greece</td>
+                  <td><span class="font-mono">14&#176;38&#8242;N 54&#176;22&#8242;E</span></td>
+                  <td class="font-mono">2026-08-14</td>
+                  <td><span class="hz-badge green">In Transit</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Dapeng Star</td>
+                  <td class="font-mono">9745678</td>
+                  <td class="font-mono">96,120</td>
+                  <td>Hong Kong</td>
+                  <td><span class="font-mono">12&#176;05&#8242;N 43&#176;18&#8242;E</span></td>
+                  <td class="font-mono">2026-08-30</td>
+                  <td><span class="hz-badge green">In Transit</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Maran Gas Coronis</td>
+                  <td class="font-mono">9834567</td>
+                  <td class="font-mono">88,945</td>
+                  <td>Greece</td>
+                  <td>Huelva LNG Terminal</td>
+                  <td class="font-mono">2026-07-01</td>
+                  <td><span class="hz-badge amber">Discharging</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Flex Endeavour</td>
+                  <td class="font-mono">9878901</td>
+                  <td class="font-mono">90,578</td>
+                  <td>Norway</td>
+                  <td>Zeebrugge Terminal</td>
+                  <td class="font-mono">&mdash;</td>
+                  <td><span class="hz-badge neutral">Completed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Cargo Assignment Card -->
+        <div class="hz-card" style="grid-column:1/-1;">
+          <div class="hz-card-header">
+            <div>
+              <div class="hz-card-title">Cargo Assignment</div>
+              <div class="hz-card-subtitle">Assign LNG cargo parcels to nominated vessels</div>
+            </div>
+          </div>
+          <div style="padding:var(--sp-4);">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+              <!-- Cargo Select -->
+              <div>
+                <label class="hz-label">Cargo</label>
+                <select class="hz-input" style="width:100%;">
+                  <option value="">Select cargo&hellip;</option>
+                  <option>CRG-2041 &mdash; Bonny Light LNG (65,000 MT)</option>
+                  <option>CRG-2039 &mdash; Qatargas LNG (72,000 MT)</option>
+                  <option>CRG-2037 &mdash; Sabine Pass LNG (68,500 MT)</option>
+                  <option>CRG-2035 &mdash; MLNG Tiga (66,200 MT)</option>
+                  <option>CRG-2033 &mdash; Tangguh LNG (70,100 MT)</option>
+                  <option>CRG-2031 &mdash; Qatargas LNG (74,500 MT)</option>
+                </select>
+              </div>
+              <!-- Vessel Select -->
+              <div>
+                <label class="hz-label">Vessel</label>
+                <select class="hz-input" style="width:100%;">
+                  <option value="">Select vessel&hellip;</option>
+                  <option>LNG Sokoto (IMO 9784321)</option>
+                  <option>Al Hamra (IMO 9812456)</option>
+                  <option>Pacific Breeze (IMO 9756789)</option>
+                  <option>LNG Benue (IMO 9823456)</option>
+                  <option>Gaslog Salem (IMO 9867890)</option>
+                  <option>Dapeng Star (IMO 9745678)</option>
+                  <option>Maran Gas Coronis (IMO 9834567)</option>
+                  <option>Flex Endeavour (IMO 9878901)</option>
+                </select>
+              </div>
+              <!-- Loading Port -->
+              <div>
+                <label class="hz-label">Loading Port</label>
+                <select class="hz-input" style="width:100%;">
+                  <option value="">Select loading port&hellip;</option>
+                  <option>Bonny Island, Nigeria</option>
+                  <option>Ras Laffan, Qatar</option>
+                  <option>Sabine Pass, USA</option>
+                  <option>Bintulu, Malaysia</option>
+                  <option>Tangguh, Indonesia</option>
+                  <option>Cameron, USA</option>
+                  <option>Hammerfest, Norway</option>
+                  <option>Idku, Egypt</option>
+                </select>
+              </div>
+              <!-- Discharge Port -->
+              <div>
+                <label class="hz-label">Discharge Port</label>
+                <select class="hz-input" style="width:100%;">
+                  <option value="">Select discharge port&hellip;</option>
+                  <option>Montoir, France</option>
+                  <option>Sodegaura, Japan</option>
+                  <option>Dahej, India</option>
+                  <option>Incheon, South Korea</option>
+                  <option>Futtsu, Japan</option>
+                  <option>Rudong, China</option>
+                  <option>Huelva, Spain</option>
+                  <option>Zeebrugge, Belgium</option>
+                </select>
+              </div>
+              <!-- Laycan From -->
+              <div>
+                <label class="hz-label">Laycan From</label>
+                <input type="date" class="hz-input" style="width:100%;" value="2026-07-10" />
+              </div>
+              <!-- Laycan To -->
+              <div>
+                <label class="hz-label">Laycan To</label>
+                <input type="date" class="hz-input" style="width:100%;" value="2026-07-15" />
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="hz-btn primary">Assign Cargo</button>
+              <button class="hz-btn ghost">Clear</button>
+              <button class="hz-btn">View History</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Port Activity Card -->
+        <div class="hz-card" style="grid-column:1/-1;">
+          <div class="hz-card-header">
+            <div>
+              <div class="hz-card-title">Port Activity</div>
+              <div class="hz-card-subtitle">Recent terminal events &mdash; last 24 hours</div>
+            </div>
+          </div>
+          <div style="padding:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-3);">
+
+            <!-- Event 1 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot green pulse" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">Pacific Breeze</span>
+                  <span class="hz-badge green" style="font-size:0.5625rem;">Loading commenced</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Sabine Pass &mdash; Berth 3 &bull; Cargo CRG-2037</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">14:32 UTC</span>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot green" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">LNG Sokoto</span>
+                  <span class="hz-badge green" style="font-size:0.5625rem;">All fast</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Bonny Island &mdash; SBM #2 &bull; Cargo CRG-2041</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">13:07 UTC</span>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot amber" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">Maran Gas Coronis</span>
+                  <span class="hz-badge amber" style="font-size:0.5625rem;">Berthed</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Huelva LNG Terminal &mdash; Jetty 1 &bull; Cargo CRG-2028</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">11:45 UTC</span>
+            </div>
+
+            <!-- Event 4 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot green" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">Flex Endeavour</span>
+                  <span class="hz-badge green" style="font-size:0.5625rem;">Sailed</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Zeebrugge Terminal &mdash; Berth 601 &bull; Cargo CRG-2025</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">09:18 UTC</span>
+            </div>
+
+            <!-- Event 5 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot red" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">Al Hamra</span>
+                  <span class="hz-badge amber" style="font-size:0.5625rem;">Vessel delayed</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Ras Laffan &mdash; Expected berth window pushed 6h &bull; Cargo CRG-2039</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">07:54 UTC</span>
+            </div>
+
+            <!-- Event 6 -->
+            <div class="flex items-center gap-3" style="padding-bottom:var(--sp-3);border-bottom:0.0625rem solid var(--border-subtle);">
+              <span class="hz-dot green" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">LNG Benue</span>
+                  <span class="hz-badge green" style="font-size:0.5625rem;">Loading commenced</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Bintulu MLNG &mdash; Jetty B &bull; Cargo CRG-2035</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">05:22 UTC</span>
+            </div>
+
+            <!-- Event 7 -->
+            <div class="flex items-center gap-3">
+              <span class="hz-dot amber" style="flex-shrink:0;"></span>
+              <div style="flex:1;min-width:0;">
+                <div class="flex items-center gap-2">
+                  <span style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">Dapeng Star</span>
+                  <span class="hz-badge amber" style="font-size:0.5625rem;">NOR tendered</span>
+                </div>
+                <div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.125rem;">Ras Laffan &mdash; Outer anchorage &bull; Cargo CRG-2031</div>
+              </div>
+              <span class="font-mono" style="font-size:var(--text-xs);color:var(--text-tertiary);white-space:nowrap;">02:10 UTC</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
 
   </div>

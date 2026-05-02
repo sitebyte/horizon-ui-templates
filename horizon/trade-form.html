@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trade Entry — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     /* ========== Page Layout ========== */
@@ -915,6 +912,100 @@
 
       <div style="font-size: var(--text-xs); color: var(--text-muted); padding: 0 var(--sp-2); line-height: 1.5;">
         Estimates based on current spot prices and existing portfolio. Actual P&L and positions may differ after settlement.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== UI Component Showcase ===== -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold" style="color:var(--text-primary);">Form Patterns</h2>
+        <p class="text-xs" style="color:var(--text-muted);">Validation states, field types &amp; interaction patterns</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <!-- Validation States -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Input Validation</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div>
+            <label class="hz-label">Default Input</label>
+            <input type="text" class="tf-input" placeholder="Enter value..." />
+          </div>
+          <div>
+            <label class="hz-label">Filled Input</label>
+            <input type="text" class="tf-input font-mono" value="3,200,000 MMBtu" />
+          </div>
+          <div>
+            <label class="hz-label">Error State</label>
+            <input type="text" class="tf-input error" value="0" />
+            <span class="text-xs text-red" style="margin-top:var(--sp-1);display:block;">Volume must be greater than 100,000 MMBtu</span>
+          </div>
+          <div>
+            <label class="hz-label">Read-only Field</label>
+            <input type="text" class="tf-input readonly" value="Auto-calculated: $47.2M" readonly />
+          </div>
+          <div>
+            <label class="hz-label">With Unit Suffix</label>
+            <div class="flex gap-2 items-center">
+              <input type="text" class="tf-input font-mono" value="+0.50" style="flex:1;" />
+              <span class="text-xs font-mono" style="color:var(--text-muted);white-space:nowrap;">$/MMBtu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Formulas -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Pricing Formulas</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div style="padding:var(--sp-3);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);border-radius:var(--radius-md);">
+            <div class="text-xs" style="color:var(--text-muted);margin-bottom:var(--sp-1);">HUB-INDEXED</div>
+            <div class="font-mono text-sm" style="color:var(--text-primary);">JKM<sub>spot</sub> + $0.50/MMBtu</div>
+            <div class="text-xs font-mono mt-1" style="color:var(--text-tertiary);">Current: $14.25 + $0.50 = <strong style="color:var(--text-primary);">$14.75</strong></div>
+          </div>
+          <div style="padding:var(--sp-3);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);border-radius:var(--radius-md);">
+            <div class="text-xs" style="color:var(--text-muted);margin-bottom:var(--sp-1);">FIXED PRICE</div>
+            <div class="font-mono text-sm" style="color:var(--text-primary);">$14.62/MMBtu (fixed)</div>
+            <div class="text-xs font-mono mt-1" style="color:var(--text-tertiary);">vs. Spot: <span class="text-green">+$0.13 premium</span></div>
+          </div>
+          <div style="padding:var(--sp-3);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);border-radius:var(--radius-md);">
+            <div class="text-xs" style="color:var(--text-muted);margin-bottom:var(--sp-1);">S-CURVE / OIL LINKED</div>
+            <div class="font-mono text-sm" style="color:var(--text-primary);">0.1485 &times; JCC<sub>3m</sub> + $0.50</div>
+            <div class="text-xs font-mono mt-1" style="color:var(--text-tertiary);">JCC: $75.30 &rarr; Est: <strong style="color:var(--text-primary);">$11.68</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trade Templates -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Quick Templates</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <button class="hz-btn w-full" style="justify-content:flex-start;text-align:left;">
+            <span style="color:var(--green);font-weight:700;width:1.5rem;">B</span>
+            <div class="flex-1"><div class="text-sm">Spot Buy — JKM DES</div><div class="text-xs" style="color:var(--text-muted);">Standard DES Japan delivery</div></div>
+          </button>
+          <button class="hz-btn w-full" style="justify-content:flex-start;text-align:left;">
+            <span style="color:var(--red);font-weight:700;width:1.5rem;">S</span>
+            <div class="flex-1"><div class="text-sm">Spot Sell — JKM FOB</div><div class="text-xs" style="color:var(--text-muted);">Standard FOB export cargo</div></div>
+          </button>
+          <button class="hz-btn w-full" style="justify-content:flex-start;text-align:left;">
+            <span style="color:var(--green);font-weight:700;width:1.5rem;">B</span>
+            <div class="flex-1"><div class="text-sm">Term Buy — TTF</div><div class="text-xs" style="color:var(--text-muted);">Calendar strip, pipe delivery</div></div>
+          </button>
+          <button class="hz-btn w-full" style="justify-content:flex-start;text-align:left;">
+            <span style="color:var(--blue);font-weight:700;width:1.5rem;">H</span>
+            <div class="flex-1"><div class="text-sm">Hedge — JKM Swap</div><div class="text-xs" style="color:var(--text-muted);">Paper trade, ICE cleared</div></div>
+          </button>
+        </div>
       </div>
     </div>
   </div>

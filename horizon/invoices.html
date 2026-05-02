@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Invoice Queue — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
@@ -61,7 +58,139 @@
       </div>
     </div>
     <!-- AG Grid -->
-    <div id="inv-grid" class="ag-theme-quartz-dark" style="height:calc(100vh - 8.5rem); width:100%;"></div>
+    <div id="inv-grid" class="ag-theme-quartz-dark" style="height:28rem; width:100%;"></div>
+  </div>
+
+  <!-- ===== UI Component Showcase ===== -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold" style="color:var(--text-primary);">Invoice Management</h2>
+        <p class="text-xs" style="color:var(--text-muted);">Settlement workflow patterns &amp; approval controls</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Pending Approval</span>
+        <span class="hz-kpi-value text-amber" style="font-size:var(--text-xl);">5</span>
+        <span class="hz-kpi-delta negative">$42.8M total</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Approved (MTD)</span>
+        <span class="hz-kpi-value text-green" style="font-size:var(--text-xl);">18</span>
+        <span class="hz-kpi-delta positive">$156.2M settled</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Overdue</span>
+        <span class="hz-kpi-value text-red" style="font-size:var(--text-xl);">2</span>
+        <span class="hz-kpi-delta negative">$8.5M at risk</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Disputed</span>
+        <span class="hz-kpi-value" style="font-size:var(--text-xl);">1</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">Under review</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <!-- Invoice Detail -->
+      <div class="hz-card lg:col-span-2">
+        <div class="hz-card-header">
+          <div>
+            <div class="hz-card-title">Invoice Line Items</div>
+            <div class="hz-card-subtitle">INV-2026-0042 — Shell Trading — Jun 2026 Delivery</div>
+          </div>
+          <span class="hz-badge amber">Pending</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="hz-table">
+            <thead>
+              <tr><th>Line</th><th>Description</th><th>Cargo Ref</th><th style="text-align:right;">Qty (MMBtu)</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Amount</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">1</td>
+                <td>LNG Cargo — JKM + $0.50</td>
+                <td class="font-mono" style="color:var(--accent-light);">CARGO-Q2-01</td>
+                <td style="text-align:right;" class="font-mono">3,200,000</td>
+                <td style="text-align:right;" class="font-mono">$14.75</td>
+                <td style="text-align:right;" class="font-mono font-semibold">$47,200,000</td>
+              </tr>
+              <tr>
+                <td class="font-mono">2</td>
+                <td>Shipping Surcharge (DES)</td>
+                <td class="font-mono" style="color:var(--text-muted);">—</td>
+                <td style="text-align:right;" class="font-mono">3,200,000</td>
+                <td style="text-align:right;" class="font-mono">$0.12</td>
+                <td style="text-align:right;" class="font-mono">$384,000</td>
+              </tr>
+              <tr>
+                <td class="font-mono">3</td>
+                <td>Quality Adjustment</td>
+                <td class="font-mono" style="color:var(--text-muted);">—</td>
+                <td style="text-align:right;" class="font-mono">3,200,000</td>
+                <td style="text-align:right;" class="font-mono">-$0.03</td>
+                <td style="text-align:right;" class="font-mono text-red">-$96,000</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:0.125rem solid var(--border-strong);">
+                <td colspan="5" style="text-align:right;font-weight:600;color:var(--text-primary);">Invoice Total</td>
+                <td style="text-align:right;" class="font-mono font-bold" style="color:var(--text-primary);">$47,488,000</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="flex items-center gap-2" style="padding-top:var(--sp-3);border-top:0.0625rem solid var(--border-subtle);margin-top:var(--sp-3);">
+          <button class="hz-btn primary sm">Approve Invoice</button>
+          <button class="hz-btn sm">Request Amendment</button>
+          <button class="hz-btn destructive sm">Dispute</button>
+          <button class="hz-btn ghost sm" style="margin-left:auto;">Print PDF</button>
+        </div>
+      </div>
+
+      <!-- Approval Workflow -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Approval Workflow</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div class="flex items-center gap-3">
+            <span class="hz-dot green"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Operations Review</div>
+              <div class="text-xs" style="color:var(--text-muted);">S. Kumar — 10 Apr 14:22</div>
+            </div>
+            <span class="hz-badge green">Done</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="hz-dot green"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Volume Reconciliation</div>
+              <div class="text-xs" style="color:var(--text-muted);">System — 10 Apr 14:22</div>
+            </div>
+            <span class="hz-badge green">Matched</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="hz-dot amber"></span>
+            <div class="flex-1">
+              <div class="text-sm font-medium" style="color:var(--text-primary);">Finance Approval</div>
+              <div class="text-xs" style="color:var(--text-muted);">Awaiting R. Mehta</div>
+            </div>
+            <span class="hz-badge amber">Pending</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="hz-dot" style="background:var(--border-strong);"></span>
+            <div class="flex-1">
+              <div class="text-sm" style="color:var(--text-muted);">Payment Instruction</div>
+              <div class="text-xs" style="color:var(--text-muted);">Blocked</div>
+            </div>
+            <span class="hz-badge neutral">Queued</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

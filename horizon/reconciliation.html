@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reconciliation — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
@@ -97,6 +94,199 @@
     </div>
   </div>
 </div>
+
+<!-- ===== Component Showcase ===== -->
+<div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+  <!-- Reconciliation Detail -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Reconciliation Detail</h3>
+      <span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Under Review</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="hz-table">
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Provisional Value</th>
+            <th>Final Value</th>
+            <th>Variance</th>
+            <th>Tolerance</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Volume (MMBtu)</td>
+            <td class="font-mono">64,800</td>
+            <td class="font-mono">65,120</td>
+            <td class="font-mono text-red">+320 (0.49%)</td>
+            <td class="font-mono">0.50%</td>
+            <td><span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Near Limit</span></td>
+          </tr>
+          <tr>
+            <td>Price ($/MMBtu)</td>
+            <td class="font-mono">$12.45</td>
+            <td class="font-mono">$12.45</td>
+            <td class="font-mono text-green">0.00%</td>
+            <td class="font-mono">0.10%</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Match</span></td>
+          </tr>
+          <tr>
+            <td>Total Amount (USD)</td>
+            <td class="font-mono">$806,760.00</td>
+            <td class="font-mono">$810,744.00</td>
+            <td class="font-mono text-red">+$3,984.00 (0.49%)</td>
+            <td class="font-mono">1.00%</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Within</span></td>
+          </tr>
+          <tr>
+            <td>Quality (BTU/SCF)</td>
+            <td class="font-mono">1,042</td>
+            <td class="font-mono">1,038</td>
+            <td class="font-mono text-red">-4 (0.38%)</td>
+            <td class="font-mono">0.50%</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Within</span></td>
+          </tr>
+          <tr>
+            <td>Heating Value (BTU/lb)</td>
+            <td class="font-mono">22,450</td>
+            <td class="font-mono">22,480</td>
+            <td class="font-mono text-green">+30 (0.13%)</td>
+            <td class="font-mono">0.25%</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Within</span></td>
+          </tr>
+          <tr>
+            <td>Cargo Weight (MT)</td>
+            <td class="font-mono">68,200</td>
+            <td class="font-mono">69,540</td>
+            <td class="font-mono text-red">+1,340 (1.96%)</td>
+            <td class="font-mono">1.00%</td>
+            <td><span class="hz-badge" style="background:var(--red-dim);color:var(--red);">Breach</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Adjustment Form -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Adjustment Form</h3>
+    </div>
+    <form onsubmit="return false;" style="display:flex;flex-direction:column;gap:var(--sp-4);">
+      <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:var(--sp-4);">
+        <div>
+          <label class="hz-label">Adjustment Type</label>
+          <select class="hz-input" style="width:100%;">
+            <option value="">Select type...</option>
+            <option value="volume">Volume Correction</option>
+            <option value="price">Price Adjustment</option>
+            <option value="quality">Quality Premium/Discount</option>
+            <option value="demurrage">Demurrage Claim</option>
+            <option value="boil-off">Boil-off Allowance</option>
+            <option value="heel">Heel Retention Credit</option>
+          </select>
+        </div>
+        <div>
+          <label class="hz-label">Amount (USD)</label>
+          <input type="text" class="hz-input font-mono" placeholder="$0.00" value="$3,984.00" style="width:100%;" />
+        </div>
+        <div>
+          <label class="hz-label">Approver</label>
+          <select class="hz-input" style="width:100%;">
+            <option value="">Select approver...</option>
+            <option value="sarah">Sarah Mitchell (Trade Manager)</option>
+            <option value="david">David Chen (VP Trading)</option>
+            <option value="lisa">Lisa Park (Head of Operations)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="hz-label">Reason / Justification</label>
+        <textarea class="hz-input" rows="3" style="width:100%;resize:vertical;" placeholder="Describe the reason for this adjustment...">Volume variance of 320 MMBtu on cargo C-2406 (Shell) due to measurement discrepancy between loading and discharge port tank gauging. Final survey report reference: SGS-2026-04182.</textarea>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="hz-btn primary">Submit Adjustment</button>
+        <button class="hz-btn">Save Draft</button>
+        <span class="text-muted" style="font-size:var(--text-xs);margin-left:auto;">Requires dual approval for amounts &gt; $5,000</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tolerance Rules -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Tolerance Rules</h3>
+      <span class="text-muted" style="font-size:var(--text-xs);">Contract SPA-2024-0087 (Shell)</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+      <!-- Volume -->
+      <div>
+        <div class="flex items-center" style="justify-content:space-between;margin-bottom:0.25rem;">
+          <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Volume (MMBtu)</span>
+          <span class="font-mono" style="font-size:var(--text-xs);color:var(--amber);">0.49% / 0.50%</span>
+        </div>
+        <div class="tol-bar"><div class="tol-track"><div class="tol-fill warn" style="width:98%;"></div></div></div>
+        <div class="flex items-center gap-2" style="font-size:var(--text-xs);color:var(--text-muted);">
+          <span>Threshold: &plusmn;0.50%</span>
+          <span style="margin-left:auto;">Escalation: Trade Manager</span>
+        </div>
+      </div>
+      <!-- Price -->
+      <div>
+        <div class="flex items-center" style="justify-content:space-between;margin-bottom:0.25rem;">
+          <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Price ($/MMBtu)</span>
+          <span class="font-mono" style="font-size:var(--text-xs);color:var(--green);">0.00% / 0.10%</span>
+        </div>
+        <div class="tol-bar"><div class="tol-track"><div class="tol-fill ok" style="width:0%;"></div></div></div>
+        <div class="flex items-center gap-2" style="font-size:var(--text-xs);color:var(--text-muted);">
+          <span>Threshold: &plusmn;0.10%</span>
+          <span style="margin-left:auto;">Escalation: Senior Trader</span>
+        </div>
+      </div>
+      <!-- Total Amount -->
+      <div>
+        <div class="flex items-center" style="justify-content:space-between;margin-bottom:0.25rem;">
+          <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Total Amount (USD)</span>
+          <span class="font-mono" style="font-size:var(--text-xs);color:var(--green);">0.49% / 1.00%</span>
+        </div>
+        <div class="tol-bar"><div class="tol-track"><div class="tol-fill ok" style="width:49%;"></div></div></div>
+        <div class="flex items-center gap-2" style="font-size:var(--text-xs);color:var(--text-muted);">
+          <span>Threshold: &plusmn;1.00%</span>
+          <span style="margin-left:auto;">Escalation: VP Trading</span>
+        </div>
+      </div>
+      <!-- Quality -->
+      <div>
+        <div class="flex items-center" style="justify-content:space-between;margin-bottom:0.25rem;">
+          <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Quality (BTU/SCF)</span>
+          <span class="font-mono" style="font-size:var(--text-xs);color:var(--green);">0.38% / 0.50%</span>
+        </div>
+        <div class="tol-bar"><div class="tol-track"><div class="tol-fill ok" style="width:76%;"></div></div></div>
+        <div class="flex items-center gap-2" style="font-size:var(--text-xs);color:var(--text-muted);">
+          <span>Threshold: &plusmn;0.50%</span>
+          <span style="margin-left:auto;">Escalation: Operations Manager</span>
+        </div>
+      </div>
+      <!-- Cargo Weight -->
+      <div>
+        <div class="flex items-center" style="justify-content:space-between;margin-bottom:0.25rem;">
+          <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Cargo Weight (MT)</span>
+          <span class="font-mono" style="font-size:var(--text-xs);color:var(--red);">1.96% / 1.00%</span>
+        </div>
+        <div class="tol-bar"><div class="tol-track"><div class="tol-fill fail" style="width:100%;"></div></div></div>
+        <div class="flex items-center gap-2" style="font-size:var(--text-xs);color:var(--text-muted);">
+          <span>Threshold: &plusmn;1.00%</span>
+          <span style="margin-left:auto;color:var(--red);font-weight:600;">BREACH - Auto-escalated to VP Trading</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- ===== End Component Showcase ===== -->
 
 <script src="shell.js"></script>
 <script>

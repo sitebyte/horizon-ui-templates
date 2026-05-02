@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hedge Book — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     /* Skeleton */
@@ -124,6 +121,211 @@
 
     <!-- Physical vs Paper Comparison -->
     <div class="comparison-grid" id="comparison-grid"></div>
+
+    <!-- ===== UI COMPONENT SHOWCASE ===== -->
+    <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-lg font-bold" style="color:var(--text-primary);">UI Components</h2>
+          <p class="text-xs" style="color:var(--text-muted);">Hedge book workflow patterns &amp; component reference</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- 1. Hedge Effectiveness Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <span class="hz-card-title">Hedge Effectiveness</span>
+            <span class="hz-badge green" style="margin-left:auto;">Q2 2026</span>
+          </div>
+          <table class="hz-table">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th style="text-align:right;">Phys Vol</th>
+                <th style="text-align:right;">Hedged Vol</th>
+                <th style="text-align:right;">Ratio</th>
+                <th style="text-align:right;">Target</th>
+                <th style="text-align:right;">Var</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">Apr 26</td>
+                <td class="font-mono" style="text-align:right;">840k</td>
+                <td class="font-mono" style="text-align:right;">798k</td>
+                <td class="font-mono text-green" style="text-align:right; font-weight:600;">95%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono text-green" style="text-align:right;">+10%</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">May 26</td>
+                <td class="font-mono" style="text-align:right;">920k</td>
+                <td class="font-mono" style="text-align:right;">782k</td>
+                <td class="font-mono text-green" style="text-align:right; font-weight:600;">85%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono" style="text-align:right; color:var(--text-muted);">0%</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">Jun 26</td>
+                <td class="font-mono" style="text-align:right;">1.1M</td>
+                <td class="font-mono" style="text-align:right;">748k</td>
+                <td class="font-mono text-red" style="text-align:right; font-weight:600;">68%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono text-red" style="text-align:right;">-17%</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">Jul 26</td>
+                <td class="font-mono" style="text-align:right;">980k</td>
+                <td class="font-mono" style="text-align:right;">853k</td>
+                <td class="font-mono text-green" style="text-align:right; font-weight:600;">87%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono text-green" style="text-align:right;">+2%</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">Aug 26</td>
+                <td class="font-mono" style="text-align:right;">870k</td>
+                <td class="font-mono" style="text-align:right;">548k</td>
+                <td class="font-mono text-red" style="text-align:right; font-weight:600;">63%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono text-red" style="text-align:right;">-22%</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; color:var(--text-primary);">Sep 26</td>
+                <td class="font-mono" style="text-align:right;">760k</td>
+                <td class="font-mono" style="text-align:right;">692k</td>
+                <td class="font-mono text-green" style="text-align:right; font-weight:600;">91%</td>
+                <td class="font-mono text-muted" style="text-align:right;">85%</td>
+                <td class="font-mono text-green" style="text-align:right;">+6%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 2. Paper Trade Entry Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <span class="hz-card-title">Paper Trade Entry</span>
+            <span class="hz-badge blue" style="margin-left:auto;">New</span>
+          </div>
+
+          <!-- Direction toggle -->
+          <div style="margin-bottom:var(--sp-3);">
+            <label class="hz-label">Direction</label>
+            <div class="flex gap-2" style="margin-top:var(--sp-1);">
+              <button class="hz-btn sm active" style="flex:1;">Buy</button>
+              <button class="hz-btn sm ghost" style="flex:1;">Sell</button>
+            </div>
+          </div>
+
+          <!-- Instrument select -->
+          <div style="margin-bottom:var(--sp-3);">
+            <label class="hz-label">Instrument</label>
+            <select class="hz-input" style="width:100%; margin-top:var(--sp-1);">
+              <option>JKM Swap</option>
+              <option>TTF Swap</option>
+              <option>HH Futures</option>
+              <option>Brent Futures</option>
+            </select>
+          </div>
+
+          <!-- Volume & Strike in a row -->
+          <div class="flex gap-3" style="margin-bottom:var(--sp-3);">
+            <div style="flex:1;">
+              <label class="hz-label">Volume (lots)</label>
+              <input type="number" class="hz-input" placeholder="0" value="100" style="width:100%; margin-top:var(--sp-1);" />
+            </div>
+            <div style="flex:1;">
+              <label class="hz-label">Strike Price</label>
+              <input type="text" class="hz-input font-mono" placeholder="0.00" value="14.25" style="width:100%; margin-top:var(--sp-1);" />
+            </div>
+          </div>
+
+          <!-- Expiry -->
+          <div style="margin-bottom:var(--sp-4);">
+            <label class="hz-label">Expiry</label>
+            <select class="hz-input" style="width:100%; margin-top:var(--sp-1);">
+              <option>Jun 2026</option>
+              <option>Jul 2026</option>
+              <option>Aug 2026</option>
+              <option>Sep 2026</option>
+              <option>Oct 2026</option>
+              <option>Q4 2026</option>
+              <option>Q1 2027</option>
+            </select>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-2">
+            <button class="hz-btn primary sm" style="flex:1;">Submit Trade</button>
+            <button class="hz-btn ghost sm" style="flex:1;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- 3. Hedge P&L Attribution Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <span class="hz-card-title">Hedge P&amp;L Attribution</span>
+            <span class="hz-badge amber" style="margin-left:auto;">MTM</span>
+          </div>
+          <div style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--sp-3);">Mark-to-market as of 02 May 2026</div>
+
+          <!-- JKM Swaps -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-2) 0; border-bottom:0.0625rem solid var(--border-subtle);">
+            <div>
+              <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary);">JKM Swaps</div>
+              <div class="text-xs text-muted">370 lots &middot; 4 trades</div>
+            </div>
+            <span class="font-mono text-green" style="font-weight:700; font-size:var(--text-sm);">+$1,247,300</span>
+          </div>
+
+          <!-- TTF Swaps -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-2) 0; border-bottom:0.0625rem solid var(--border-subtle);">
+            <div>
+              <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary);">TTF Swaps</div>
+              <div class="text-xs text-muted">175 lots &middot; 2 trades</div>
+            </div>
+            <span class="font-mono text-red" style="font-weight:700; font-size:var(--text-sm);">-$389,650</span>
+          </div>
+
+          <!-- HH Futures -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-2) 0; border-bottom:0.0625rem solid var(--border-subtle);">
+            <div>
+              <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary);">HH Futures</div>
+              <div class="text-xs text-muted">260 lots &middot; 3 trades</div>
+            </div>
+            <span class="font-mono text-green" style="font-weight:700; font-size:var(--text-sm);">+$82,140</span>
+          </div>
+
+          <!-- Brent Futures -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-2) 0; border-bottom:0.0625rem solid var(--border-subtle);">
+            <div>
+              <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary);">Brent Futures</div>
+              <div class="text-xs text-muted">90 lots &middot; 1 trade</div>
+            </div>
+            <span class="font-mono text-red" style="font-weight:700; font-size:var(--text-sm);">-$56,800</span>
+          </div>
+
+          <!-- Options -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-2) 0; border-bottom:0.0625rem solid var(--border-subtle);">
+            <div>
+              <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary);">Options (JKM/TTF)</div>
+              <div class="text-xs text-muted">110 lots &middot; 2 trades</div>
+            </div>
+            <span class="font-mono text-green" style="font-weight:700; font-size:var(--text-sm);">+$34,500</span>
+          </div>
+
+          <!-- Total row -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:var(--sp-3) 0; border-top:0.125rem solid var(--border); margin-top:var(--sp-2);">
+            <div style="font-size:var(--text-sm); font-weight:700; color:var(--text-primary);">Total Hedge P&amp;L</div>
+            <span class="font-mono text-green" style="font-weight:700; font-size:var(--text-base);">+$917,490</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- ===== END UI COMPONENT SHOWCASE ===== -->
 
   </div>
 </div>

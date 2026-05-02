@@ -884,10 +884,10 @@ function initShell(activePage, pageTitle) {
   var wrapper = document.getElementById('hz-app');
   var pageContent = wrapper.innerHTML;
 
-  // Build the shell with skeleton
-  wrapper.innerHTML = buildSidebar(activePage) +
+  // Build the shell with skeleton — header is full-width above sidebar
+  wrapper.innerHTML = buildHeader(pageTitle) +
+    buildSidebar(activePage) +
     '<div class="hz-main">' +
-      buildHeader(pageTitle) +
       '<main class="hz-content">' +
         '<div id="hz-page-content" style="display:none;">' + pageContent + '</div>' +
         showPageSkeleton() +

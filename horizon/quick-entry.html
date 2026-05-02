@@ -5,16 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick Entry — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.3/dist/ag-grid-community.min.js"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: { extend: {
-        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-      }}
-    };
-  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
 </head>
 <body>
 <div id="hz-app">
@@ -153,6 +146,140 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Trade
       </button>
+    </div>
+  </div>
+
+  <!-- ===== UI Component Showcase ===== -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold" style="color:var(--text-primary);">Trade Entry Patterns</h2>
+        <p class="text-xs" style="color:var(--text-muted);">Speed-optimized input components for high-frequency trading workflows</p>
+      </div>
+      <div class="flex gap-2">
+        <span class="hz-badge green">8 keystrokes</span>
+        <span class="hz-badge neutral">Keyboard-first</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <!-- Market Context Panel -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Market Context</div>
+          <span class="hz-dot green pulse"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div class="flex items-center justify-between">
+            <span class="text-sm" style="color:var(--text-secondary);">JKM Front Month</span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-semibold" style="color:var(--text-primary);">$14.25</span>
+              <span class="font-mono text-xs text-green">+0.35 (+2.5%)</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm" style="color:var(--text-secondary);">TTF Front Month</span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-semibold" style="color:var(--text-primary);">$12.80</span>
+              <span class="font-mono text-xs text-red">-0.15 (-1.2%)</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm" style="color:var(--text-secondary);">HH Front Month</span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-semibold" style="color:var(--text-primary);">$3.42</span>
+              <span class="font-mono text-xs text-green">+0.02 (+0.6%)</span>
+            </div>
+          </div>
+          <div style="border-top:0.0625rem solid var(--border-subtle);padding-top:var(--sp-2);margin-top:var(--sp-1);">
+            <div class="flex items-center justify-between">
+              <span class="text-xs" style="color:var(--text-muted);">JKM-TTF Spread</span>
+              <span class="font-mono text-sm text-green">+$1.45</span>
+            </div>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-xs" style="color:var(--text-muted);">30d Avg Spread</span>
+              <span class="font-mono text-sm" style="color:var(--text-tertiary);">+$1.22</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Position Impact Preview -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Position Impact</div>
+          <span class="text-xs" style="color:var(--text-muted);">Pre-trade analysis</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Current Net (JKM)</span>
+              <span class="font-mono text-sm text-green">+6.4M Long</span>
+            </div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">After this trade</span>
+              <span class="font-mono text-sm font-semibold text-green">+9.6M Long</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:96%;background:var(--green);"></div>
+            </div>
+            <div class="text-xs font-mono mt-1" style="color:var(--text-muted);">Limit: 10M | Usage: 96%</div>
+          </div>
+          <div style="border-top:0.0625rem solid var(--border-subtle);padding-top:var(--sp-2);">
+            <div class="flex items-center justify-between">
+              <span class="text-xs" style="color:var(--text-muted);">Hedge Ratio Impact</span>
+              <span class="font-mono text-sm text-amber">74% &rarr; 68%</span>
+            </div>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-xs" style="color:var(--text-muted);">Credit Impact</span>
+              <span class="font-mono text-sm" style="color:var(--text-secondary);">-$4.2M headroom</span>
+            </div>
+          </div>
+          <div class="hz-error-banner" style="padding:var(--sp-2);font-size:var(--text-xs);">
+            <span class="hz-error-icon" style="display:flex;font-size:0.75rem;">&#9888;</span>
+            <div>
+              <div class="hz-error-title" style="font-size:var(--text-xs);">Near Position Limit</div>
+              <div class="hz-error-desc" style="font-size:0.625rem;">Trade will bring JKM to 96% of 10M limit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Trade Summary -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Session Summary</div>
+          <span class="text-xs font-mono" style="color:var(--text-muted);">11 Apr 2026</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div class="grid grid-cols-2 gap-3">
+            <div style="padding:var(--sp-3);background:var(--green-dim);border-radius:var(--radius-md);text-align:center;">
+              <div class="font-mono font-bold text-lg text-green">3</div>
+              <div class="text-xs" style="color:var(--text-muted);">Buys</div>
+            </div>
+            <div style="padding:var(--sp-3);background:var(--red-dim);border-radius:var(--radius-md);text-align:center;">
+              <div class="font-mono font-bold text-lg text-red">1</div>
+              <div class="text-xs" style="color:var(--text-muted);">Sells</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs" style="color:var(--text-muted);">Net Volume Today</span>
+            <span class="font-mono text-sm text-green">+6.4M MMBtu</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs" style="color:var(--text-muted);">Unrealized P&amp;L</span>
+            <span class="font-mono text-sm text-green">+$775K</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs" style="color:var(--text-muted);">Avg Fill vs Mid</span>
+            <span class="font-mono text-sm text-green">+$0.08</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs" style="color:var(--text-muted);">Keystroke Efficiency</span>
+            <span class="font-mono text-sm" style="color:var(--text-primary);">8.2 avg</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

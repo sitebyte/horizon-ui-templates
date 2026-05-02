@@ -5,7 +5,7 @@
    0.25rem spacing base, all multiples
    ============================================================ */
 
-/* ---------- Google Fonts ---------- */
+/* ---------- Google Fonts (loaded via @import — consider preconnect <link> in HTML for faster paint) ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ---------- CSS Custom Properties ---------- */
@@ -183,17 +183,17 @@ input, select, textarea {
 
 /* ---------- Layout ---------- */
 #hz-app {
-  display: flex;
   min-height: 100vh;
   width: 100%;
 }
 .hz-main {
-  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   transition: margin-left var(--transition-panel);
   margin-left: var(--sidebar-collapsed);
+  margin-top: var(--sp-12);
+  min-height: calc(100vh - var(--sp-12));
 }
 .hz-sidebar.expanded ~ .hz-main {
   margin-left: var(--sidebar-expanded);
@@ -207,7 +207,6 @@ input, select, textarea {
 /* ---------- Sidebar ---------- */
 .hz-sidebar {
   width: var(--sidebar-collapsed);
-  min-height: 100vh;
   background: var(--sidebar-bg);
   border-right: 0.0625rem solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -216,7 +215,7 @@ input, select, textarea {
   overflow: hidden;
   position: fixed;
   left: 0;
-  top: 0;
+  top: var(--sp-12);
   bottom: 0;
   z-index: 100;
 }
@@ -550,6 +549,10 @@ input, select, textarea {
 
 /* ---------- Header ---------- */
 .hz-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   height: var(--sp-12);
   min-height: var(--sp-12);
   display: flex;
@@ -560,6 +563,7 @@ input, select, textarea {
   border-bottom: 0.0625rem solid var(--border);
   gap: var(--sp-3);
   flex-shrink: 0;
+  z-index: 150;
 }
 .hz-header-left {
   display: flex;
@@ -1319,6 +1323,79 @@ select.hz-input {
 }
 
 /* ---------- Utility Classes ---------- */
+
+/* Display */
+.flex { display: flex; }
+.grid { display: grid; }
+.hidden { display: none; }
+.inline-flex { display: inline-flex; }
+
+/* Flex */
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1 1 0%; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.shrink-0 { flex-shrink: 0; }
+.flex-wrap { flex-wrap: wrap; }
+
+/* Grid */
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.col-span-2 { grid-column: span 2 / span 2; }
+.col-span-3 { grid-column: span 3 / span 3; }
+
+/* Gap */
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-5 { gap: 1.25rem; }
+.gap-6 { gap: 1.5rem; }
+
+/* Spacing: margin */
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-5 { margin-bottom: 1.25rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+
+/* Spacing: padding */
+.p-2 { padding: 0.5rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+/* Sizing */
+.w-full { width: 100%; }
+.w-8 { width: 2rem; }
+.h-2 { height: 0.5rem; }
+.h-8 { height: 2rem; }
+
+/* Typography */
+.text-xs { font-size: 0.6875rem; }
+.text-sm { font-size: 0.8125rem; }
+.text-base { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.5rem; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Colors */
 .text-accent { color: var(--accent); }
 .text-green { color: var(--green); }
 .text-red { color: var(--red); }
@@ -1334,8 +1411,34 @@ select.hz-input {
 .bg-amber-dim { background: var(--amber-dim); }
 .bg-blue-dim { background: var(--blue-dim); }
 
+/* Borders */
 .border-b { border-bottom: 0.0625rem solid var(--border); }
 .border-t { border-top: 0.0625rem solid var(--border); }
+.rounded { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Overflow */
+.overflow-x-auto { overflow-x: auto; }
+.overflow-hidden { overflow: hidden; }
+
+/* Transitions */
+.transition-colors { transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast); }
+
+/* Responsive: sm (≥40rem / 640px) */
+@media (min-width: 40rem) {
+  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+/* Responsive: lg (≥64rem / 1024px) */
+@media (min-width: 64rem) {
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .lg\:grid-cols-8 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .lg\:col-span-2 { grid-column: span 2 / span 2; }
+}
 
 /* Keyboard hint */
 .hz-key-hint {
@@ -1377,6 +1480,7 @@ select.hz-input {
     transform: translateX(-100%);
     position: fixed;
     z-index: 200;
+    top: var(--sp-12);
   }
   .hz-sidebar.expanded { transform: translateX(0); width: var(--sidebar-expanded); }
   .hz-main { margin-left: 0 !important; }

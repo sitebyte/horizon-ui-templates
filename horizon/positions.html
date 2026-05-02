@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Positions — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
@@ -153,6 +150,240 @@
         <tbody id="drill-tbody"></tbody>
       </table>
     </div>
+
+    <!-- UI Component Showcase -->
+    <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+      <div style="margin-bottom:var(--sp-5);">
+        <h2 style="font-size:1rem;font-weight:700;color:var(--text-primary);margin:0 0 0.25rem 0;">Component Showcase</h2>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">Position management UI patterns for LNG ETRM workflows</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-4);">
+
+        <!-- 1. Position Filters Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <h3 class="hz-card-title">Position Filters</h3>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+            <!-- Benchmark multi-select -->
+            <div>
+              <label class="hz-label">Benchmark</label>
+              <div class="flex items-center gap-2" style="flex-wrap:wrap;margin-top:0.25rem;">
+                <label class="flex items-center gap-1" style="font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                  <input type="checkbox" checked style="accent-color:var(--accent);" /> JKM
+                </label>
+                <label class="flex items-center gap-1" style="font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                  <input type="checkbox" checked style="accent-color:var(--accent);" /> TTF
+                </label>
+                <label class="flex items-center gap-1" style="font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                  <input type="checkbox" style="accent-color:var(--accent);" /> HH
+                </label>
+                <label class="flex items-center gap-1" style="font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                  <input type="checkbox" style="accent-color:var(--accent);" /> Brent
+                </label>
+                <label class="flex items-center gap-1" style="font-size:0.75rem;color:var(--text-secondary);cursor:pointer;">
+                  <input type="checkbox" style="accent-color:var(--accent);" /> NBP
+                </label>
+              </div>
+            </div>
+
+            <!-- Delivery period date range -->
+            <div>
+              <label class="hz-label">Delivery Period</label>
+              <div class="flex items-center gap-2" style="margin-top:0.25rem;">
+                <input type="date" class="hz-input" value="2026-06-01" style="flex:1;" />
+                <span class="text-muted" style="font-size:0.75rem;">to</span>
+                <input type="date" class="hz-input" value="2026-11-30" style="flex:1;" />
+              </div>
+            </div>
+
+            <!-- Direction toggle -->
+            <div>
+              <label class="hz-label">Direction</label>
+              <div class="flex items-center gap-2" style="margin-top:0.25rem;">
+                <button class="hz-btn sm">Long</button>
+                <button class="hz-btn sm">Short</button>
+                <button class="hz-btn sm active">All</button>
+              </div>
+            </div>
+
+            <!-- Counterparty search -->
+            <div>
+              <label class="hz-label">Counterparty</label>
+              <input type="text" class="hz-input w-full" placeholder="Search counterparties..." style="margin-top:0.25rem;" />
+            </div>
+
+            <div class="flex items-center gap-2" style="margin-top:var(--sp-1);">
+              <button class="hz-btn primary sm">Apply Filters</button>
+              <button class="hz-btn ghost sm">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. P&L Breakdown Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <h3 class="hz-card-title">P&amp;L Breakdown</h3>
+          </div>
+
+          <table class="hz-table w-full" style="font-size:0.75rem;">
+            <thead>
+              <tr>
+                <th>Benchmark</th>
+                <th style="text-align:right;">Net Position</th>
+                <th style="text-align:right;">WACOG</th>
+                <th style="text-align:right;">Spot Price</th>
+                <th style="text-align:right;">Unreal. P&amp;L</th>
+                <th style="text-align:right;">% of Portf.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="hz-badge blue" style="font-size:0.625rem;">JKM</span></td>
+                <td class="font-mono" style="text-align:right;">+840k</td>
+                <td class="font-mono" style="text-align:right;">$12.49</td>
+                <td class="font-mono" style="text-align:right;">$13.12</td>
+                <td class="font-mono text-green" style="text-align:right;">+$542k</td>
+                <td class="font-mono" style="text-align:right;">44.2%</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge green" style="font-size:0.625rem;">TTF</span></td>
+                <td class="font-mono" style="text-align:right;">+130k</td>
+                <td class="font-mono" style="text-align:right;">$11.88</td>
+                <td class="font-mono" style="text-align:right;">$12.21</td>
+                <td class="font-mono text-green" style="text-align:right;">+$93k</td>
+                <td class="font-mono" style="text-align:right;">31.8%</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge amber" style="font-size:0.625rem;">HH</span></td>
+                <td class="font-mono" style="text-align:right;">+535k</td>
+                <td class="font-mono" style="text-align:right;">$2.37</td>
+                <td class="font-mono" style="text-align:right;">$2.54</td>
+                <td class="font-mono text-green" style="text-align:right;">+$157k</td>
+                <td class="font-mono" style="text-align:right;">24.0%</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:0.125rem solid var(--border);font-weight:700;">
+                <td>Total</td>
+                <td class="font-mono" style="text-align:right;">+1.505M</td>
+                <td class="font-mono text-muted" style="text-align:right;">--</td>
+                <td class="font-mono text-muted" style="text-align:right;">--</td>
+                <td class="font-mono text-green" style="text-align:right;font-weight:700;">+$792k</td>
+                <td class="font-mono" style="text-align:right;">100%</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:0.0625rem solid var(--border);">
+            <div class="flex items-center justify-between" style="font-size:0.6875rem;">
+              <span class="text-muted">Realized P&amp;L (MTD)</span>
+              <span class="font-mono text-green" style="font-weight:600;">+$1.24M</span>
+            </div>
+            <div class="flex items-center justify-between" style="font-size:0.6875rem;margin-top:0.25rem;">
+              <span class="text-muted">Unrealized P&amp;L</span>
+              <span class="font-mono text-green" style="font-weight:600;">+$792k</span>
+            </div>
+            <div class="flex items-center justify-between" style="font-size:0.6875rem;margin-top:0.25rem;">
+              <span class="text-muted">Mark-to-Market Delta</span>
+              <span class="font-mono text-red" style="font-weight:600;">-$68k</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Position Limits Card -->
+        <div class="hz-card">
+          <div class="hz-card-header">
+            <h3 class="hz-card-title">Position Limits</h3>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:var(--sp-4);">
+            <!-- JKM Limit -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="hz-badge blue" style="font-size:0.625rem;">JKM</span>
+                  <span style="font-size:0.75rem;color:var(--text-secondary);">Net Exposure</span>
+                </div>
+                <span class="font-mono" style="font-size:0.75rem;color:var(--text-primary);font-weight:600;">6.4M / 10M</span>
+              </div>
+              <div style="width:100%;height:0.5rem;border-radius:var(--radius-full);background:var(--surface-elevated);overflow:hidden;">
+                <div style="width:64%;height:100%;border-radius:var(--radius-full);background:var(--green);transition:width 0.5s ease;"></div>
+              </div>
+              <div class="flex items-center justify-between" style="margin-top:0.25rem;">
+                <span class="text-muted" style="font-size:0.625rem;">64% utilized</span>
+                <span class="text-muted" style="font-size:0.625rem;">3.6M remaining</span>
+              </div>
+            </div>
+
+            <!-- TTF Limit -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="hz-badge green" style="font-size:0.625rem;">TTF</span>
+                  <span style="font-size:0.75rem;color:var(--text-secondary);">Net Exposure</span>
+                </div>
+                <span class="font-mono" style="font-size:0.75rem;color:var(--text-primary);font-weight:600;">2.8M / 5M</span>
+              </div>
+              <div style="width:100%;height:0.5rem;border-radius:var(--radius-full);background:var(--surface-elevated);overflow:hidden;">
+                <div style="width:56%;height:100%;border-radius:var(--radius-full);background:var(--accent);transition:width 0.5s ease;"></div>
+              </div>
+              <div class="flex items-center justify-between" style="margin-top:0.25rem;">
+                <span class="text-muted" style="font-size:0.625rem;">56% utilized</span>
+                <span class="text-muted" style="font-size:0.625rem;">2.2M remaining</span>
+              </div>
+            </div>
+
+            <!-- HH Limit -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="hz-badge amber" style="font-size:0.625rem;">HH</span>
+                  <span style="font-size:0.75rem;color:var(--text-secondary);">Net Exposure</span>
+                </div>
+                <span class="font-mono" style="font-size:0.75rem;color:var(--text-primary);font-weight:600;">1.2M / 3M</span>
+              </div>
+              <div style="width:100%;height:0.5rem;border-radius:var(--radius-full);background:var(--surface-elevated);overflow:hidden;">
+                <div style="width:40%;height:100%;border-radius:var(--radius-full);background:var(--blue);transition:width 0.5s ease;"></div>
+              </div>
+              <div class="flex items-center justify-between" style="margin-top:0.25rem;">
+                <span class="text-muted" style="font-size:0.625rem;">40% utilized</span>
+                <span class="text-muted" style="font-size:0.625rem;">1.8M remaining</span>
+              </div>
+            </div>
+
+            <!-- Brent Limit (near threshold) -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="hz-badge red" style="font-size:0.625rem;">Brent</span>
+                  <span style="font-size:0.75rem;color:var(--text-secondary);">Net Exposure</span>
+                </div>
+                <span class="font-mono" style="font-size:0.75rem;color:var(--red);font-weight:600;">4.3M / 5M</span>
+              </div>
+              <div style="width:100%;height:0.5rem;border-radius:var(--radius-full);background:var(--surface-elevated);overflow:hidden;">
+                <div style="width:86%;height:100%;border-radius:var(--radius-full);background:var(--red);transition:width 0.5s ease;"></div>
+              </div>
+              <div class="flex items-center justify-between" style="margin-top:0.25rem;">
+                <span class="text-red" style="font-size:0.625rem;font-weight:600;">86% utilized -- near limit</span>
+                <span class="text-muted" style="font-size:0.625rem;">700k remaining</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:0.0625rem solid var(--border);">
+            <div class="flex items-center gap-2">
+              <span class="hz-badge amber" style="font-size:0.625rem;">Warning</span>
+              <span style="font-size:0.6875rem;color:var(--text-secondary);">Brent exposure at 86% of limit -- approval required above 90%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 

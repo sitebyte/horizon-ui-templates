@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blotter — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
@@ -96,7 +93,135 @@
       <span id="total-pnl" style="font-size:0.625rem; font-weight:600; color:var(--green);">Total Unrealized P&L: --</span>
     </div>
     <!-- AG Grid -->
-    <div id="blotter-grid" class="ag-theme-quartz-dark" style="height:calc(100vh - 8.5rem); width:100%;"></div>
+    <div id="blotter-grid" class="ag-theme-quartz-dark" style="height:28rem; width:100%;"></div>
+  </div>
+
+  <!-- ===== UI Component Showcase ===== -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold" style="color:var(--text-primary);">Blotter Analytics</h2>
+        <p class="text-xs" style="color:var(--text-muted);">Summary statistics &amp; grid configuration patterns</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Total Trades</span>
+        <span class="hz-kpi-value" style="font-size:var(--text-xl);">24</span>
+        <span class="hz-kpi-delta positive">+3 today</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Net Volume</span>
+        <span class="hz-kpi-value text-green" style="font-size:var(--text-xl);">+8.4M</span>
+        <span class="hz-kpi-delta" style="color:var(--text-muted);">MMBtu long</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Unrealized P&amp;L</span>
+        <span class="hz-kpi-value text-green" style="font-size:var(--text-xl);">+$2.1M</span>
+        <span class="hz-kpi-delta positive">+$340K today</span>
+      </div>
+      <div class="hz-kpi">
+        <span class="hz-kpi-label">Pending Confirms</span>
+        <span class="hz-kpi-value text-amber" style="font-size:var(--text-xl);">5</span>
+        <span class="hz-kpi-delta negative">2 overdue</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <!-- P&L by Benchmark -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">P&amp;L by Benchmark</div>
+        </div>
+        <table class="hz-table">
+          <thead><tr><th>Benchmark</th><th style="text-align:right;">Trades</th><th style="text-align:right;">Volume</th><th style="text-align:right;">P&amp;L</th></tr></thead>
+          <tbody>
+            <tr><td>JKM</td><td style="text-align:right;" class="font-mono">12</td><td style="text-align:right;" class="font-mono">19.2M</td><td style="text-align:right;" class="font-mono text-green">+$1.42M</td></tr>
+            <tr><td>TTF</td><td style="text-align:right;" class="font-mono">7</td><td style="text-align:right;" class="font-mono">11.2M</td><td style="text-align:right;" class="font-mono text-green">+$580K</td></tr>
+            <tr><td>HH</td><td style="text-align:right;" class="font-mono">5</td><td style="text-align:right;" class="font-mono">8.0M</td><td style="text-align:right;" class="font-mono text-green">+$112K</td></tr>
+          </tbody>
+          <tfoot>
+            <tr style="border-top:0.125rem solid var(--border-strong);">
+              <td style="font-weight:600;color:var(--text-primary);">Total</td>
+              <td style="text-align:right;" class="font-mono font-semibold">24</td>
+              <td style="text-align:right;" class="font-mono font-semibold">38.4M</td>
+              <td style="text-align:right;" class="font-mono font-semibold text-green">+$2.11M</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Counterparty Exposure -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Counterparty Exposure</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-secondary);">Shell Trading</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$18.4M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);"><div class="h-2 rounded-full" style="width:72%;background:var(--accent);"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-secondary);">JERA Co.</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$12.6M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);"><div class="h-2 rounded-full" style="width:50%;background:var(--accent);"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-secondary);">QatarEnergy</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$9.8M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);"><div class="h-2 rounded-full" style="width:38%;background:var(--green);"></div></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-secondary);">TotalEnergies</span>
+              <span class="text-xs font-mono" style="color:var(--text-primary);">$5.2M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);"><div class="h-2 rounded-full" style="width:20%;background:var(--green);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Feature Reference -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Grid Features</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">Column sorting (click headers)</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">Text &amp; status filtering</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">Column visibility toggle</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">CSV export</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">P&amp;L cell color coding</span>
+          </div>
+          <div class="flex items-center gap-2 p-2 rounded" style="background:var(--hover);">
+            <span class="hz-badge green" style="min-width:1.25rem;text-align:center;">&#10004;</span>
+            <span class="text-sm" style="color:var(--text-secondary);">Status badge cell renderers</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

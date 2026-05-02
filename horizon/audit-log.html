@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Audit Log — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
@@ -114,6 +111,207 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== Component Showcase ===== -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+  <!-- Audit Filters -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Audit Filters</h3>
+    </div>
+    <form onsubmit="return false;" style="display:flex;flex-direction:column;gap:var(--sp-4);">
+      <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:var(--sp-4);">
+        <div>
+          <label class="hz-label">Entity Type</label>
+          <select class="hz-input" style="width:100%;">
+            <option value="all">All Entity Types</option>
+            <option value="trade">Trade</option>
+            <option value="invoice">Invoice</option>
+            <option value="nomination">Nomination</option>
+            <option value="contract">Contract</option>
+            <option value="vessel">Vessel Schedule</option>
+            <option value="credit">Credit Limit</option>
+          </select>
+        </div>
+        <div>
+          <label class="hz-label">Date Range (From)</label>
+          <input type="date" class="hz-input" value="2026-04-01" style="width:100%;" />
+        </div>
+        <div>
+          <label class="hz-label">Date Range (To)</label>
+          <input type="date" class="hz-input" value="2026-04-30" style="width:100%;" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:var(--sp-4);">
+        <div>
+          <label class="hz-label">User</label>
+          <select class="hz-input" style="width:100%;">
+            <option value="all">All Users</option>
+            <option value="jon">Jon Cobley</option>
+            <option value="sarah">Sarah Mitchell</option>
+            <option value="adam">Adam Kumar</option>
+            <option value="ryan">Ryan Park</option>
+            <option value="lisa">Lisa Chen</option>
+          </select>
+        </div>
+        <div>
+          <label class="hz-label">Action Type</label>
+          <div class="flex items-center gap-3" style="flex-wrap:wrap;padding-top:0.375rem;">
+            <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);" /> Create
+            </label>
+            <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);" /> Amend
+            </label>
+            <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);" /> Cancel
+            </label>
+            <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);" /> Approve
+            </label>
+          </div>
+        </div>
+        <div class="flex items-center" style="padding-top:var(--sp-5);">
+          <button class="hz-btn primary" style="width:100%;">Search Audit Log</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Change Detail -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Change Detail</h3>
+      <div class="flex items-center gap-2">
+        <span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Amendment</span>
+        <span class="text-muted" style="font-size:var(--text-xs);">T-1024 &mdash; 2026-04-11 09:45:32</span>
+      </div>
+    </div>
+    <div style="margin-bottom:var(--sp-3);">
+      <div class="flex items-center gap-2" style="font-size:var(--text-sm);margin-bottom:var(--sp-1);">
+        <span style="color:var(--text-secondary);font-weight:600;">Jon Cobley</span>
+        <span class="text-muted">amended trade</span>
+        <span style="color:var(--accent);font-weight:600;">T-1024</span>
+      </div>
+      <span class="text-muted" style="font-size:var(--text-xs);">Price and volume adjusted after counterparty confirmation call with Shell Western LNG</span>
+    </div>
+    <div style="border:0.0625rem solid var(--border);border-radius:var(--radius-md);overflow:hidden;font-size:var(--text-sm);">
+      <!-- Diff header -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);background:var(--surface-elevated);font-weight:700;color:var(--text-muted);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.05em;">
+        <span style="width:8rem;flex-shrink:0;">Field</span>
+        <span style="flex:1;">Previous Value</span>
+        <span style="flex:1;">Updated Value</span>
+      </div>
+      <!-- Price row -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);border-top:0.0625rem solid var(--border);">
+        <span style="width:8rem;flex-shrink:0;color:var(--text-tertiary);">Price</span>
+        <span class="font-mono text-red" style="flex:1;">- $12.40/MMBtu</span>
+        <span class="font-mono text-green" style="flex:1;">+ $12.45/MMBtu</span>
+      </div>
+      <!-- Volume row -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);border-top:0.0625rem solid var(--border);">
+        <span style="width:8rem;flex-shrink:0;color:var(--text-tertiary);">Volume</span>
+        <span class="font-mono text-red" style="flex:1;">- 60,000 MMBtu</span>
+        <span class="font-mono text-green" style="flex:1;">+ 65,000 MMBtu</span>
+      </div>
+      <!-- Total Amount row -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);border-top:0.0625rem solid var(--border);">
+        <span style="width:8rem;flex-shrink:0;color:var(--text-tertiary);">Total Amount</span>
+        <span class="font-mono text-red" style="flex:1;">- $744,000.00</span>
+        <span class="font-mono text-green" style="flex:1;">+ $809,250.00</span>
+      </div>
+      <!-- Counterparty Ref row -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);border-top:0.0625rem solid var(--border);">
+        <span style="width:8rem;flex-shrink:0;color:var(--text-tertiary);">CP Ref</span>
+        <span class="font-mono text-red" style="flex:1;">- SH-LNG-04401</span>
+        <span class="font-mono text-green" style="flex:1;">+ SH-LNG-04401-R1</span>
+      </div>
+      <!-- Status row -->
+      <div style="display:flex;padding:var(--sp-2) var(--sp-3);border-top:0.0625rem solid var(--border);">
+        <span style="width:8rem;flex-shrink:0;color:var(--text-tertiary);">Status</span>
+        <span class="font-mono text-red" style="flex:1;">- Confirmed</span>
+        <span class="font-mono text-green" style="flex:1;">+ Pending Re-approval</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Summary -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Audit Summary</h3>
+      <span class="text-muted" style="font-size:var(--text-xs);">April 2026</span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:var(--sp-5);">
+      <!-- Total Changes -->
+      <div style="text-align:center;padding:var(--sp-4);background:var(--surface-raised);border-radius:var(--radius-md);border:0.0625rem solid var(--border);">
+        <div class="font-mono" style="font-size:var(--text-2xl);font-weight:800;color:var(--text-primary);">247</div>
+        <div class="text-muted" style="font-size:var(--text-xs);margin-top:var(--sp-1);">Total Changes</div>
+        <div style="font-size:var(--text-xs);margin-top:var(--sp-2);display:flex;justify-content:center;gap:var(--sp-3);">
+          <span><span style="color:var(--green);font-weight:600;">98</span> Create</span>
+          <span><span style="color:var(--amber);font-weight:600;">112</span> Amend</span>
+          <span><span style="color:var(--red);font-weight:600;">14</span> Cancel</span>
+          <span><span style="color:var(--accent);font-weight:600;">23</span> Approve</span>
+        </div>
+      </div>
+      <!-- By User -->
+      <div style="padding:var(--sp-3);background:var(--surface-raised);border-radius:var(--radius-md);border:0.0625rem solid var(--border);">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-2);">By User</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Jon Cobley</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">87</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Sarah Mitchell</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">62</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Adam Kumar</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">48</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Ryan Park</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">31</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Lisa Chen</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">19</span>
+          </div>
+        </div>
+      </div>
+      <!-- By Entity Type -->
+      <div style="padding:var(--sp-3);background:var(--surface-raised);border-radius:var(--radius-md);border:0.0625rem solid var(--border);">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-2);">By Entity Type</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Trade</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">124</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Invoice</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">48</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Nomination</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">35</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Contract</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">22</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-secondary);">Vessel Schedule</span>
+            <span class="font-mono" style="font-weight:600;color:var(--text-primary);">18</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+  <!-- ===== End Component Showcase ===== -->
+
 </div>
 
 <script src="shell.js"></script>

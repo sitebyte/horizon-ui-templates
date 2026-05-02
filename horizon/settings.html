@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Settings — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
@@ -312,6 +309,221 @@
     </div>
   </div>
 </div>
+
+<!-- ===== Component Showcase ===== -->
+<div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+  <!-- Notification Rules -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Notification Rules</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="hz-table">
+        <thead>
+          <tr>
+            <th>Notification Type</th>
+            <th>Description</th>
+            <th>Channel</th>
+            <th>Enabled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Trade Confirmation</td>
+            <td class="text-muted">Alert when a trade is confirmed or rejected</td>
+            <td><span class="hz-badge" style="background:var(--accent-bg);color:var(--accent);">Email + Push</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Position Limit Breach</td>
+            <td class="text-muted">Alert when portfolio exposure exceeds threshold</td>
+            <td><span class="hz-badge" style="background:var(--red-dim);color:var(--red);">SMS + Email</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Cargo Schedule Change</td>
+            <td class="text-muted">Vessel ETA/ETD updates for tracked cargoes</td>
+            <td><span class="hz-badge" style="background:var(--accent-bg);color:var(--accent);">Push</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Invoice Due Reminder</td>
+            <td class="text-muted">Notify 7 days before invoice payment deadline</td>
+            <td><span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Email</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Credit Limit Warning</td>
+            <td class="text-muted">Alert when counterparty credit usage exceeds 80%</td>
+            <td><span class="hz-badge" style="background:var(--red-dim);color:var(--red);">SMS + Email</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Market Price Alert</td>
+            <td class="text-muted">JKM/TTF/HH price moves beyond set threshold</td>
+            <td><span class="hz-badge" style="background:var(--accent-bg);color:var(--accent);">Push</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Reconciliation Breach</td>
+            <td class="text-muted">Tolerance breach on provisional vs final invoice</td>
+            <td><span class="hz-badge" style="background:var(--red-dim);color:var(--red);">SMS + Email + Push</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" checked /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary);">Daily P&L Summary</td>
+            <td class="text-muted">End-of-day portfolio P&L digest</td>
+            <td><span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Email</span></td>
+            <td><label class="hz-toggle"><input type="checkbox" /><span class="hz-toggle-slider"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- API Keys -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">API Keys</h3>
+      <button class="hz-btn primary" style="font-size:var(--text-xs);">+ Generate New Key</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-3);">
+      <!-- Key 1 -->
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);">
+        <div style="flex:1;min-width:0;">
+          <div class="flex items-center gap-2" style="margin-bottom:0.25rem;">
+            <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Production - Trading API</span>
+            <span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span>
+          </div>
+          <div class="font-mono" style="font-size:var(--text-sm);color:var(--text-tertiary);letter-spacing:0.05em;">hzn_live_sk_••••••••••••••••••••a4f8</div>
+          <div class="text-muted" style="font-size:var(--text-xs);margin-top:0.25rem;">Created 2025-11-14 &middot; Last used 2 hours ago &middot; Scope: trades, positions, market-data</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="hz-btn" style="font-size:var(--text-xs);">Copy</button>
+          <button class="hz-btn" style="font-size:var(--text-xs);color:var(--red);">Regenerate</button>
+        </div>
+      </div>
+      <!-- Key 2 -->
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);">
+        <div style="flex:1;min-width:0;">
+          <div class="flex items-center gap-2" style="margin-bottom:0.25rem;">
+            <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Staging - Risk Engine</span>
+            <span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Staging</span>
+          </div>
+          <div class="font-mono" style="font-size:var(--text-sm);color:var(--text-tertiary);letter-spacing:0.05em;">hzn_test_sk_••••••••••••••••••••7b2e</div>
+          <div class="text-muted" style="font-size:var(--text-xs);margin-top:0.25rem;">Created 2026-01-20 &middot; Last used 14 days ago &middot; Scope: risk, positions, read-only</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="hz-btn" style="font-size:var(--text-xs);">Copy</button>
+          <button class="hz-btn" style="font-size:var(--text-xs);color:var(--red);">Regenerate</button>
+        </div>
+      </div>
+      <!-- Key 3 -->
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);">
+        <div style="flex:1;min-width:0;">
+          <div class="flex items-center gap-2" style="margin-bottom:0.25rem;">
+            <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Reporting - BI Dashboard</span>
+            <span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span>
+          </div>
+          <div class="font-mono" style="font-size:var(--text-sm);color:var(--text-tertiary);letter-spacing:0.05em;">hzn_live_sk_••••••••••••••••••••d91c</div>
+          <div class="text-muted" style="font-size:var(--text-xs);margin-top:0.25rem;">Created 2026-02-08 &middot; Last used 5 minutes ago &middot; Scope: analytics, reports, read-only</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="hz-btn" style="font-size:var(--text-xs);">Copy</button>
+          <button class="hz-btn" style="font-size:var(--text-xs);color:var(--red);">Regenerate</button>
+        </div>
+      </div>
+      <!-- Key 4 (revoked) -->
+      <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);opacity:0.5;">
+        <div style="flex:1;min-width:0;">
+          <div class="flex items-center gap-2" style="margin-bottom:0.25rem;">
+            <span style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);">Legacy - EIA Integration</span>
+            <span class="hz-badge" style="background:var(--red-dim);color:var(--red);">Revoked</span>
+          </div>
+          <div class="font-mono" style="font-size:var(--text-sm);color:var(--text-tertiary);letter-spacing:0.05em;">hzn_live_sk_••••••••••••••••••••e3a1</div>
+          <div class="text-muted" style="font-size:var(--text-xs);margin-top:0.25rem;">Created 2024-06-01 &middot; Revoked 2025-12-15 &middot; Scope: market-data</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="hz-btn" style="font-size:var(--text-xs);" disabled>Copy</button>
+          <button class="hz-btn" style="font-size:var(--text-xs);" disabled>Revoked</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Export -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Data Export</h3>
+    </div>
+    <form onsubmit="return false;" style="display:flex;flex-direction:column;gap:var(--sp-4);">
+      <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:var(--sp-4);">
+        <div>
+          <label class="hz-label">Export Format</label>
+          <select class="hz-input" style="width:100%;">
+            <option value="csv">CSV (.csv)</option>
+            <option value="json">JSON (.json)</option>
+            <option value="excel">Excel (.xlsx)</option>
+          </select>
+        </div>
+        <div>
+          <label class="hz-label">Date Range (From)</label>
+          <input type="date" class="hz-input" value="2026-01-01" style="width:100%;" />
+        </div>
+        <div>
+          <label class="hz-label">Date Range (To)</label>
+          <input type="date" class="hz-input" value="2026-04-30" style="width:100%;" />
+        </div>
+      </div>
+      <div>
+        <label class="hz-label">Entity Types to Export</label>
+        <div class="flex items-center gap-3" style="flex-wrap:wrap;padding-top:var(--sp-2);">
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" checked style="accent-color:var(--accent);" /> Trades
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" checked style="accent-color:var(--accent);" /> Positions
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--accent);" /> Invoices
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--accent);" /> Nominations
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" checked style="accent-color:var(--accent);" /> Contracts
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--accent);" /> Audit Log
+          </label>
+          <label class="flex items-center gap-2" style="font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;">
+            <input type="checkbox" style="accent-color:var(--accent);" /> Market Data
+          </label>
+        </div>
+      </div>
+      <div style="padding:var(--sp-3) var(--sp-4);background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);">
+        <div class="flex items-center gap-3" style="font-size:var(--text-sm);">
+          <span style="color:var(--text-muted);">Estimated export size:</span>
+          <span class="font-mono" style="font-weight:600;color:var(--text-primary);">~2.4 MB</span>
+          <span class="text-muted">&middot;</span>
+          <span style="color:var(--text-muted);">Records:</span>
+          <span class="font-mono" style="font-weight:600;color:var(--text-primary);">14,832</span>
+          <span class="text-muted">&middot;</span>
+          <span style="color:var(--text-muted);">Last export:</span>
+          <span style="color:var(--text-secondary);">2026-04-28 16:42 UTC</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="hz-btn primary">Export Data</button>
+        <button class="hz-btn">Schedule Recurring Export</button>
+        <span class="text-muted" style="font-size:var(--text-xs);margin-left:auto;">Exports are encrypted and available for 7 days</span>
+      </div>
+    </form>
+  </div>
+
+</div>
+<!-- ===== End Component Showcase ===== -->
 
 <script src="shell.js"></script>
 <script>

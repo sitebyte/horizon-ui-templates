@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trade Lifecycle — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: { extend: {
-        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-      }}
-    };
-  </script>
   <style>
     .lifecycle-timeline {
       position: relative;
@@ -421,6 +412,243 @@
 
     </div>
   </div>
+
+  <!-- ── UI Component Showcase ── -->
+  <div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+    <div class="mb-5">
+      <h2 class="text-xl font-bold" style="color:var(--text-primary);">Component Showcase</h2>
+      <p class="text-sm" style="color:var(--text-muted);margin-top:0.25rem;">Trading-workflow UI components used across the lifecycle view</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+
+      <!-- ── 1. Trade Detail Summary ── -->
+      <div class="hz-card" style="grid-column:span 1;">
+        <div class="hz-card-header">
+          <div>
+            <div class="hz-card-title">Trade Detail Summary</div>
+            <div class="hz-card-subtitle">BUY-2026-0411-A3F &mdash; compact view</div>
+          </div>
+          <span class="hz-badge green">Active</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="hz-table">
+            <tbody>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);white-space:nowrap;width:40%;">Trade ID</td>
+                <td class="font-mono text-sm">BUY-2026-0411-A3F</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Direction</td>
+                <td><span class="hz-badge green">BUY</span></td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Counterparty</td>
+                <td class="text-sm">Shell Energy Trading</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Benchmark</td>
+                <td class="font-mono text-sm">JKM + $0.50/MMBtu</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Volume</td>
+                <td class="font-mono text-sm">3,200,000 MMBtu</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Price</td>
+                <td class="font-mono text-sm">$14.75/MMBtu</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Status</td>
+                <td><span class="hz-badge blue">In Transit</span></td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Trader</td>
+                <td class="text-sm">j.cobley</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Created</td>
+                <td class="font-mono text-xs">12 Apr 2026 09:42 UTC</td>
+              </tr>
+              <tr>
+                <td class="font-semibold text-sm" style="color:var(--text-muted);">Last Modified</td>
+                <td class="font-mono text-xs">05 Jun 2026 14:08 UTC</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:0.75rem 1rem;border-top:0.0625rem solid var(--border-subtle);display:flex;gap:0.5rem;">
+          <button class="hz-btn sm primary">Edit Trade</button>
+          <button class="hz-btn sm ghost">Audit Log</button>
+        </div>
+      </div>
+
+      <!-- ── 2. Stage Transitions ── -->
+      <div class="hz-card" style="grid-column:span 1;">
+        <div class="hz-card-header">
+          <div>
+            <div class="hz-card-title">Stage Transitions</div>
+            <div class="hz-card-subtitle">Workflow progression audit trail</div>
+          </div>
+          <span class="hz-badge neutral">5 of 8</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="hz-table">
+            <thead>
+              <tr>
+                <th>Stage</th>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="hz-badge green">Capture</span></td>
+                <td class="font-mono text-xs">12 Apr 09:42</td>
+                <td class="text-sm">j.cobley</td>
+                <td class="text-sm">Trade created</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge green">Approval</span></td>
+                <td class="font-mono text-xs">12 Apr 10:15</td>
+                <td class="text-sm">r.mehta</td>
+                <td class="text-sm">Credit approved</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge green">Nomination</span></td>
+                <td class="font-mono text-xs">15 Apr 11:30</td>
+                <td class="text-sm">s.kumar</td>
+                <td class="text-sm">Vessel nominated</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge green">Loading</span></td>
+                <td class="font-mono text-xs">05 Jun 08:00</td>
+                <td class="text-sm">SGS Surveyor</td>
+                <td class="text-sm">B/L issued</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge blue">Voyage</span></td>
+                <td class="font-mono text-xs">05 Jun 18:45</td>
+                <td class="text-sm">system</td>
+                <td class="text-sm">AIS departure</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge neutral">Discharge</span></td>
+                <td class="font-mono text-xs text-muted">&mdash;</td>
+                <td class="text-sm text-muted">&mdash;</td>
+                <td class="text-sm text-muted">Pending</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge neutral">Settlement</span></td>
+                <td class="font-mono text-xs text-muted">&mdash;</td>
+                <td class="text-sm text-muted">&mdash;</td>
+                <td class="text-sm text-muted">Pending</td>
+              </tr>
+              <tr>
+                <td><span class="hz-badge neutral">P&amp;L</span></td>
+                <td class="font-mono text-xs text-muted">&mdash;</td>
+                <td class="text-sm text-muted">&mdash;</td>
+                <td class="text-sm text-muted">Pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── 3. Document Attachments ── -->
+      <div class="hz-card" style="grid-column:span 1;">
+        <div class="hz-card-header">
+          <div>
+            <div class="hz-card-title">Document Attachments</div>
+            <div class="hz-card-subtitle">Trade-related files &amp; records</div>
+          </div>
+          <button class="hz-btn sm primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
+          </button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;padding:0 1rem 1rem 1rem;">
+
+          <!-- Doc row 1 -->
+          <div class="flex items-center gap-3" style="padding:0.625rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);">
+            <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--red-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="text-sm font-semibold" style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Confirmation_BUY-2026-0411-A3F.pdf</div>
+              <div class="text-xs text-muted">284 KB &middot; Uploaded by j.cobley &middot; 12 Apr 2026</div>
+            </div>
+            <button class="hz-btn sm ghost" style="flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+
+          <!-- Doc row 2 -->
+          <div class="flex items-center gap-3" style="padding:0.625rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);">
+            <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--green-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="text-sm font-semibold" style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Credit_Approval_ShellTrading.xlsx</div>
+              <div class="text-xs text-muted">156 KB &middot; Uploaded by r.mehta &middot; 12 Apr 2026</div>
+            </div>
+            <button class="hz-btn sm ghost" style="flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+
+          <!-- Doc row 3 -->
+          <div class="flex items-center gap-3" style="padding:0.625rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);">
+            <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--blue-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="text-sm font-semibold" style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Nomination_AlDafna_Jun26.pdf</div>
+              <div class="text-xs text-muted">412 KB &middot; Uploaded by s.kumar &middot; 15 Apr 2026</div>
+            </div>
+            <button class="hz-btn sm ghost" style="flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+
+          <!-- Doc row 4 -->
+          <div class="flex items-center gap-3" style="padding:0.625rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);">
+            <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--red-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="text-sm font-semibold" style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">BillOfLading_SabinePass_050626.pdf</div>
+              <div class="text-xs text-muted">1.2 MB &middot; Uploaded by SGS &middot; 05 Jun 2026</div>
+            </div>
+            <button class="hz-btn sm ghost" style="flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+
+          <!-- Doc row 5 -->
+          <div class="flex items-center gap-3" style="padding:0.625rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-base);border:0.0625rem solid var(--border-subtle);">
+            <div style="width:2rem;height:2rem;border-radius:var(--radius-sm);background:var(--amber-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="text-sm font-semibold" style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">QualityCert_SGS_GHV1048.pdf</div>
+              <div class="text-xs text-muted">98 KB &middot; Uploaded by SGS &middot; 05 Jun 2026</div>
+            </div>
+            <div class="flex items-center gap-2" style="flex-shrink:0;">
+              <span class="hz-badge amber">Review</span>
+              <button class="hz-btn sm ghost">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div><!-- /showcase -->
 
 </div>
 

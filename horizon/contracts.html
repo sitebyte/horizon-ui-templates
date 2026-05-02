@@ -4,9 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contracts — Horizon ETRM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link href="shell.css" rel="stylesheet" />
   <style>
     /* ===== Step Indicator ===== */
@@ -589,6 +586,263 @@
   </div>
 
 </div>
+
+<!-- ===== Component Showcase ===== -->
+<div style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+
+  <!-- Contract Summary -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Contract Summary</h3>
+      <span class="hz-badge" style="background:var(--accent-bg);color:var(--accent);">6 Active</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="hz-table">
+        <thead>
+          <tr>
+            <th>Contract ID</th>
+            <th>Type</th>
+            <th>Counterparty</th>
+            <th>ACQ (MMBtu/yr)</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">SPA-2024-0087</td>
+            <td><span class="hz-badge" style="background:var(--blue-dim);color:var(--blue);">SPA</span></td>
+            <td>Shell Western LNG</td>
+            <td class="font-mono">13,600,000</td>
+            <td class="font-mono">2024-04-01</td>
+            <td class="font-mono">2044-03-31</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">SPA-2023-0054</td>
+            <td><span class="hz-badge" style="background:var(--blue-dim);color:var(--blue);">SPA</span></td>
+            <td>JERA Co., Inc.</td>
+            <td class="font-mono">10,200,000</td>
+            <td class="font-mono">2023-07-01</td>
+            <td class="font-mono">2043-06-30</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">MSA-2025-0012</td>
+            <td><span class="hz-badge" style="background:rgba(124,58,237,0.15);color:var(--accent-violet);">MSA</span></td>
+            <td>TotalEnergies Gas & Power</td>
+            <td class="font-mono">8,500,000</td>
+            <td class="font-mono">2025-01-01</td>
+            <td class="font-mono">2030-12-31</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">SPOT-2026-0341</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Spot</span></td>
+            <td>Gunvor Group</td>
+            <td class="font-mono">3,200,000</td>
+            <td class="font-mono">2026-03-15</td>
+            <td class="font-mono">2026-06-15</td>
+            <td><span class="hz-badge" style="background:var(--amber-dim);color:var(--amber);">Pending Delivery</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">SPA-2022-0031</td>
+            <td><span class="hz-badge" style="background:var(--blue-dim);color:var(--blue);">SPA</span></td>
+            <td>Kogas (Korea Gas)</td>
+            <td class="font-mono">15,400,000</td>
+            <td class="font-mono">2022-10-01</td>
+            <td class="font-mono">2042-09-30</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="color:var(--accent);">MSA-2024-0008</td>
+            <td><span class="hz-badge" style="background:rgba(124,58,237,0.15);color:var(--accent-violet);">MSA</span></td>
+            <td>BP Gas Marketing Ltd</td>
+            <td class="font-mono">6,800,000</td>
+            <td class="font-mono">2024-01-01</td>
+            <td class="font-mono">2029-12-31</td>
+            <td><span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Active</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Contract Terms -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Contract Terms</h3>
+      <span class="font-mono text-muted" style="font-size:var(--text-xs);">SPA-2024-0087</span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3" style="gap:0;">
+      <!-- Pricing Formula -->
+      <div style="padding:var(--sp-4);border-right:0.0625rem solid var(--border);border-bottom:0.0625rem solid var(--border);">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-3);">Pricing Formula</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Basis</span>
+            <span style="color:var(--text-primary);font-weight:600;">Oil Indexed</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Benchmark</span>
+            <span class="font-mono" style="color:var(--accent-light);">Brent (ICE)</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Slope</span>
+            <span class="font-mono" style="color:var(--text-primary);font-weight:600;">14.85%</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Constant</span>
+            <span class="font-mono" style="color:var(--text-primary);font-weight:600;">+$0.50/MMBtu</span>
+          </div>
+          <div style="margin-top:var(--sp-2);padding:var(--sp-2) var(--sp-3);background:var(--surface-raised);border-radius:var(--radius-md);border:0.0625rem solid var(--border);">
+            <span style="font-size:var(--text-xs);color:var(--text-muted);">Formula:</span>
+            <span class="font-mono" style="font-size:var(--text-sm);color:var(--accent-light);margin-left:var(--sp-2);">14.85% x Brent + $0.50</span>
+          </div>
+        </div>
+      </div>
+      <!-- Delivery Basis -->
+      <div style="padding:var(--sp-4);border-right:0.0625rem solid var(--border);border-bottom:0.0625rem solid var(--border);">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-3);">Delivery Basis</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Incoterms</span>
+            <span style="color:var(--text-primary);font-weight:600;">DES</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Load Port</span>
+            <span style="color:var(--text-primary);">Ras Laffan, Qatar</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Discharge Port</span>
+            <span style="color:var(--text-primary);">Incheon, South Korea</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Schedule</span>
+            <span style="color:var(--text-primary);font-weight:600;">Monthly</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Min / Max Take</span>
+            <span class="font-mono" style="color:var(--text-primary);">80% / 110%</span>
+          </div>
+        </div>
+      </div>
+      <!-- Quality Specs & Force Majeure -->
+      <div style="padding:var(--sp-4);border-bottom:0.0625rem solid var(--border);">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-3);">Quality Specs</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-2);">
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Gross Heating Value</span>
+            <span class="font-mono" style="color:var(--text-primary);">22,400 BTU/lb</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">Wobbe Index</span>
+            <span class="font-mono" style="color:var(--text-primary);">49.2 - 53.5</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">CO2 Max</span>
+            <span class="font-mono" style="color:var(--text-primary);">&le; 50 ppm</span>
+          </div>
+          <div class="flex items-center" style="justify-content:space-between;font-size:var(--text-sm);">
+            <span style="color:var(--text-tertiary);">H2S Max</span>
+            <span class="font-mono" style="color:var(--text-primary);">&le; 5 mg/m3</span>
+          </div>
+        </div>
+        <div style="margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:0.0625rem solid var(--border);">
+          <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:var(--sp-2);">Force Majeure</div>
+          <div style="font-size:var(--text-xs);color:var(--text-tertiary);line-height:1.5;">Clause 18.2 - ICC standard with extended LNG-specific provisions. 180-day cure period. Includes upstream facility outage, shipping force majeure, and regasification terminal unavailability.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amendment Log -->
+  <div class="hz-card mb-5">
+    <div class="hz-card-header">
+      <h3 class="hz-card-title">Amendment Log</h3>
+      <span class="font-mono text-muted" style="font-size:var(--text-xs);">SPA-2024-0087</span>
+    </div>
+    <div style="position:relative;padding-left:1.5rem;">
+      <!-- Timeline line -->
+      <div style="position:absolute;left:0.5rem;top:0;bottom:0;width:0.0625rem;background:var(--border);"></div>
+
+      <!-- Amendment 1 -->
+      <div style="position:relative;margin-bottom:var(--sp-5);">
+        <div style="position:absolute;left:-1.125rem;top:0.375rem;width:0.625rem;height:0.625rem;border-radius:50%;background:var(--accent);border:0.125rem solid var(--accent);z-index:1;"></div>
+        <div style="background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);">
+          <div class="flex items-center" style="justify-content:space-between;margin-bottom:var(--sp-1);">
+            <span style="font-size:var(--text-sm);font-weight:700;color:var(--text-primary);">Amendment #4 - ACQ Volume Increase</span>
+            <span class="font-mono text-muted" style="font-size:var(--text-xs);">2026-03-15</span>
+          </div>
+          <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:var(--sp-2);">
+            Annual Contract Quantity increased from 12,200,000 to 13,600,000 MMBtu/year effective Q2 2026. Reflects expanded regasification capacity at Incheon terminal. Pricing slope unchanged.
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-badge" style="background:var(--accent-bg);color:var(--accent);">Approved</span>
+            <span class="text-muted" style="font-size:var(--text-xs);">by David Chen (VP Trading)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amendment 2 -->
+      <div style="position:relative;margin-bottom:var(--sp-5);">
+        <div style="position:absolute;left:-1.125rem;top:0.375rem;width:0.625rem;height:0.625rem;border-radius:50%;background:var(--amber);border:0.125rem solid var(--amber);z-index:1;"></div>
+        <div style="background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);">
+          <div class="flex items-center" style="justify-content:space-between;margin-bottom:var(--sp-1);">
+            <span style="font-size:var(--text-sm);font-weight:700;color:var(--text-primary);">Amendment #3 - Discharge Port Addition</span>
+            <span class="font-mono text-muted" style="font-size:var(--text-xs);">2025-11-01</span>
+          </div>
+          <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:var(--sp-2);">
+            Added Sodegaura (Japan) as alternate discharge port under diversion clause 14.3. Shell retains right of first refusal on diversion cargoes with 15-day notice period.
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Executed</span>
+            <span class="text-muted" style="font-size:var(--text-xs);">by Sarah Mitchell (Trade Manager)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amendment 3 -->
+      <div style="position:relative;margin-bottom:var(--sp-5);">
+        <div style="position:absolute;left:-1.125rem;top:0.375rem;width:0.625rem;height:0.625rem;border-radius:50%;background:var(--green);border:0.125rem solid var(--green);z-index:1;"></div>
+        <div style="background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);">
+          <div class="flex items-center" style="justify-content:space-between;margin-bottom:var(--sp-1);">
+            <span style="font-size:var(--text-sm);font-weight:700;color:var(--text-primary);">Amendment #2 - Pricing Slope Revision</span>
+            <span class="font-mono text-muted" style="font-size:var(--text-xs);">2025-04-01</span>
+          </div>
+          <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:var(--sp-2);">
+            Oil-indexed slope adjusted from 14.50% to 14.85% following annual price review. Effective for all deliveries from April 2025. Constant component unchanged at $0.50/MMBtu.
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Executed</span>
+            <span class="text-muted" style="font-size:var(--text-xs);">by David Chen (VP Trading)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amendment 4 (original) -->
+      <div style="position:relative;margin-bottom:var(--sp-2);">
+        <div style="position:absolute;left:-1.125rem;top:0.375rem;width:0.625rem;height:0.625rem;border-radius:50%;background:var(--green);border:0.125rem solid var(--green);z-index:1;"></div>
+        <div style="background:var(--surface-raised);border:0.0625rem solid var(--border);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);">
+          <div class="flex items-center" style="justify-content:space-between;margin-bottom:var(--sp-1);">
+            <span style="font-size:var(--text-sm);font-weight:700;color:var(--text-primary);">Amendment #1 - Force Majeure Extension</span>
+            <span class="font-mono text-muted" style="font-size:var(--text-xs);">2024-08-20</span>
+          </div>
+          <div style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:var(--sp-2);">
+            Extended force majeure cure period from 120 to 180 days per mutual agreement. Added upstream facility outage as qualifying event under clause 18.2(f).
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-badge" style="background:var(--green-dim);color:var(--green);">Executed</span>
+            <span class="text-muted" style="font-size:var(--text-xs);">by Lisa Park (Head of Operations)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- ===== End Component Showcase ===== -->
 
 <script src="shell.js"></script>
 <script>

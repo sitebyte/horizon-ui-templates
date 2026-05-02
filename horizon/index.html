@@ -5,15 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Horizon ETRM</title>
   <link href="shell.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: { extend: {
-        fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-      }}
-    };
-  </script>
 </head>
 <body>
 <div id="hz-app">
@@ -75,7 +66,7 @@
                 <td>Jun-26</td>
                 <td style="text-align:right;" class="font-mono text-green">3.2M</td>
                 <td style="text-align:right;" class="font-mono text-red">-1.6M</td>
-                <td style="text-align:right;" class="font-mono" style="font-weight:600;">1.6M</td>
+                <td style="text-align:right;font-weight:600;" class="font-mono">1.6M</td>
                 <td style="text-align:right;" class="font-mono">$14.12</td>
                 <td style="text-align:right;" class="font-mono text-green">+$208K</td>
               </tr>
@@ -405,6 +396,394 @@
             </div>
             <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
               <div class="h-2 rounded-full" style="width:78%;background:var(--blue);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== UI COMPONENT SHOWCASE ===== -->
+  <div id="view-showcase" style="margin-top:var(--sp-8);border-top:0.0625rem solid var(--border);padding-top:var(--sp-6);">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-lg font-bold" style="color:var(--text-primary);">UI Components</h2>
+        <p class="text-xs" style="color:var(--text-muted);">Trading workflow patterns &amp; design system reference</p>
+      </div>
+      <span class="hz-badge neutral">Design System v1.0</span>
+    </div>
+
+    <!-- Row 1: Forms & Inputs -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <div class="hz-card lg:col-span-2">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Form Controls</div>
+          <span class="text-xs" style="color:var(--text-muted);">Trade capture inputs</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label class="hz-label">Counterparty</label>
+            <input type="text" class="hz-input" placeholder="Search counterparty..." value="Shell Trading" />
+          </div>
+          <div>
+            <label class="hz-label">Benchmark</label>
+            <select class="hz-input">
+              <option>JKM (Platts)</option>
+              <option>TTF (ICE)</option>
+              <option>HH (Henry Hub)</option>
+              <option>NBP (ICE)</option>
+              <option>Brent (ICE)</option>
+            </select>
+          </div>
+          <div>
+            <label class="hz-label">Volume (MMBtu)</label>
+            <input type="text" class="hz-input font-mono" value="3,200,000" />
+          </div>
+          <div>
+            <label class="hz-label">Premium ($/MMBtu)</label>
+            <input type="text" class="hz-input font-mono" placeholder="+0.00" value="+0.50" />
+          </div>
+          <div>
+            <label class="hz-label">Delivery Period</label>
+            <select class="hz-input">
+              <option>Jun-26</option><option>Jul-26</option><option>Aug-26</option><option>Q3-26</option><option>Cal-27</option>
+            </select>
+          </div>
+          <div>
+            <label class="hz-label">Incoterm</label>
+            <select class="hz-input">
+              <option>DES (Delivered Ex Ship)</option><option>FOB (Free On Board)</option><option>CIF</option><option>DAP</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center gap-2" style="border-top:0.0625rem solid var(--border-subtle);padding-top:var(--sp-3);">
+          <input type="text" class="hz-input" placeholder="Search trades, cargoes, invoices..." style="max-width:16rem;" />
+          <button class="hz-btn primary">Search</button>
+          <button class="hz-btn">Reset</button>
+          <button class="hz-btn ghost text-xs" style="margin-left:auto;">Advanced Filters</button>
+        </div>
+      </div>
+
+      <!-- Buttons & Actions -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Actions &amp; States</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-1);">PRIMARY</span>
+            <div class="flex gap-2 flex-wrap">
+              <button class="hz-btn primary">Enter Trade</button>
+              <button class="hz-btn primary sm">Confirm</button>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-1);">SECONDARY</span>
+            <div class="flex gap-2 flex-wrap">
+              <button class="hz-btn">Edit Trade</button>
+              <button class="hz-btn sm">Export CSV</button>
+              <button class="hz-btn ghost sm">Cancel</button>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-1);">DESTRUCTIVE</span>
+            <div class="flex gap-2 flex-wrap">
+              <button class="hz-btn destructive sm">Cancel Trade</button>
+              <button class="hz-btn destructive sm">Reject</button>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-1);">TOGGLE GROUP</span>
+            <div class="flex gap-1">
+              <button class="hz-btn sm active">1D</button>
+              <button class="hz-btn sm">1W</button>
+              <button class="hz-btn sm">1M</button>
+              <button class="hz-btn sm">3M</button>
+              <button class="hz-btn sm">YTD</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Badges, Status, Typography -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <!-- Status Badges -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Status Indicators</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">TRADE STATUS</span>
+            <div class="flex gap-2 flex-wrap">
+              <span class="hz-badge green">Confirmed</span>
+              <span class="hz-badge amber">Pending</span>
+              <span class="hz-badge red">Cancelled</span>
+              <span class="hz-badge blue">Draft</span>
+              <span class="hz-badge neutral">Expired</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">CARGO STATUS</span>
+            <div class="flex gap-2 flex-wrap">
+              <span class="hz-badge green">Delivered</span>
+              <span class="hz-badge blue">In Transit</span>
+              <span class="hz-badge amber">Loading</span>
+              <span class="hz-badge neutral">Nominated</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">LIVE INDICATORS</span>
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="flex items-center gap-1"><span class="hz-dot green pulse"></span> <span class="text-xs">Connected</span></span>
+              <span class="flex items-center gap-1"><span class="hz-dot amber"></span> <span class="text-xs">Stale</span></span>
+              <span class="flex items-center gap-1"><span class="hz-dot red"></span> <span class="text-xs">Offline</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Typography</div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div style="font-size:var(--text-hero);font-weight:700;font-family:var(--font-mono);color:var(--text-primary);line-height:1.1;">$14.25</div>
+          <div class="text-lg font-semibold" style="color:var(--text-primary);">Forward Curve — JKM Q3 2026</div>
+          <div class="text-base" style="color:var(--text-secondary);">Body text for descriptions and supporting content in the trading interface.</div>
+          <div class="text-sm" style="color:var(--text-tertiary);">Secondary text — counterparty details, timestamps, metadata</div>
+          <div class="text-xs font-mono" style="color:var(--text-muted);">2026-04-11T09:42:15Z — TRADE-2026-0411-A3F</div>
+          <div style="margin-top:var(--sp-2);display:flex;gap:var(--sp-3);">
+            <span class="font-mono text-green" style="font-size:var(--text-lg);font-weight:600;">+$2.1M</span>
+            <span class="font-mono text-red" style="font-size:var(--text-lg);font-weight:600;">-$840K</span>
+            <span class="font-mono" style="font-size:var(--text-lg);font-weight:600;color:var(--text-primary);">$14.25</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI & Progress Variants -->
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">KPI &amp; Progress</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="hz-kpi" style="padding:var(--sp-3);">
+            <span class="hz-kpi-label">Exposure (MTM)</span>
+            <span class="hz-kpi-value" style="font-size:var(--text-xl);">$18.4M</span>
+            <span class="hz-kpi-delta positive">+$2.1M unrealized</span>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Daily P&amp;L Target</span>
+              <span class="text-xs font-mono font-semibold text-green">$340K / $500K</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:68%;background:var(--green);"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs" style="color:var(--text-muted);">Credit Headroom</span>
+              <span class="text-xs font-mono font-semibold text-amber">$22M / $100M</span>
+            </div>
+            <div class="w-full h-2 rounded-full" style="background:var(--surface-raised);">
+              <div class="h-2 rounded-full" style="width:78%;background:var(--amber);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Data Table -->
+    <div class="hz-card mb-5">
+      <div class="hz-card-header">
+        <div>
+          <div class="hz-card-title">Recent Trades</div>
+          <div class="hz-card-subtitle">Last 10 trades across all benchmarks</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="hz-btn sm active">All</button>
+          <button class="hz-btn sm">Confirmed</button>
+          <button class="hz-btn sm">Pending</button>
+          <button class="hz-btn sm ghost">Export</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Trade ID</th>
+              <th>B/S</th>
+              <th>Counterparty</th>
+              <th>Benchmark</th>
+              <th style="text-align:right;">Volume</th>
+              <th style="text-align:right;">Price</th>
+              <th style="text-align:right;">MTM P&amp;L</th>
+              <th>Status</th>
+              <th>Trader</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1001</td>
+              <td><span class="hz-badge green" style="min-width:1.75rem;text-align:center;">B</span></td>
+              <td>Shell Trading</td>
+              <td>JKM</td>
+              <td style="text-align:right;" class="font-mono">3,200,000</td>
+              <td style="text-align:right;" class="font-mono">$14.62</td>
+              <td style="text-align:right;" class="font-mono text-green">+$340K</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+              <td>J. Cobley</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">11 Apr 09:42</td>
+            </tr>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1002</td>
+              <td><span class="hz-badge red" style="min-width:1.75rem;text-align:center;">S</span></td>
+              <td>JERA Co.</td>
+              <td>TTF</td>
+              <td style="text-align:right;" class="font-mono">2,800,000</td>
+              <td style="text-align:right;" class="font-mono">$12.95</td>
+              <td style="text-align:right;" class="font-mono text-green">+$420K</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+              <td>S. Kumar</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">10 Apr 14:18</td>
+            </tr>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1003</td>
+              <td><span class="hz-badge green" style="min-width:1.75rem;text-align:center;">B</span></td>
+              <td>QatarEnergy</td>
+              <td>JKM</td>
+              <td style="text-align:right;" class="font-mono">3,200,000</td>
+              <td style="text-align:right;" class="font-mono">$14.10</td>
+              <td style="text-align:right;" class="font-mono text-green">+$480K</td>
+              <td><span class="hz-badge amber">Pending</span></td>
+              <td>J. Cobley</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">09 Apr 11:05</td>
+            </tr>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1004</td>
+              <td><span class="hz-badge red" style="min-width:1.75rem;text-align:center;">S</span></td>
+              <td>TotalEnergies</td>
+              <td>HH</td>
+              <td style="text-align:right;" class="font-mono">2,500,000</td>
+              <td style="text-align:right;" class="font-mono">$3.55</td>
+              <td style="text-align:right;" class="font-mono text-red">-$28K</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+              <td>R. Mehta</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">08 Apr 16:30</td>
+            </tr>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1005</td>
+              <td><span class="hz-badge green" style="min-width:1.75rem;text-align:center;">B</span></td>
+              <td>Cheniere Energy</td>
+              <td>HH</td>
+              <td style="text-align:right;" class="font-mono">5,000,000</td>
+              <td style="text-align:right;" class="font-mono">$3.38</td>
+              <td style="text-align:right;" class="font-mono text-green">+$200K</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+              <td>S. Kumar</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">07 Apr 10:22</td>
+            </tr>
+            <tr>
+              <td class="font-mono font-medium" style="color:var(--accent-light);">T-1006</td>
+              <td><span class="hz-badge green" style="min-width:1.75rem;text-align:center;">B</span></td>
+              <td>Woodside Energy</td>
+              <td>JKM</td>
+              <td style="text-align:right;" class="font-mono">3,200,000</td>
+              <td style="text-align:right;" class="font-mono">$14.85</td>
+              <td style="text-align:right;" class="font-mono text-red">-$192K</td>
+              <td><span class="hz-badge blue">Draft</span></td>
+              <td>J. Cobley</td>
+              <td class="font-mono text-xs" style="color:var(--text-muted);">05 Apr 08:50</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Row 4: Alerts & Confirmation patterns -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Alert Patterns</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="hz-error-banner">
+            <span class="hz-error-icon" style="display:flex;">&#9888;</span>
+            <div>
+              <div class="hz-error-title">Position Limit Breach</div>
+              <div class="hz-error-desc">Sep-26 net exceeds $4M limit by $800K</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-3);border-radius:var(--radius-lg);background:var(--amber-dim);border:0.0625rem solid rgba(245,158,11,0.3);color:var(--amber);">
+            <span style="flex-shrink:0;">&#9888;</span>
+            <div>
+              <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--sp-1);">Credit Warning</div>
+              <div style="font-size:var(--text-xs);opacity:0.8;">Shell Trading headroom at 22% — approaching $20M minimum</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:var(--sp-3);padding:var(--sp-3);border-radius:var(--radius-lg);background:var(--green-dim);border:0.0625rem solid rgba(34,197,94,0.3);color:var(--green);">
+            <span style="flex-shrink:0;">&#10004;</span>
+            <div>
+              <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--sp-1);">Trade Confirmed</div>
+              <div style="font-size:var(--text-xs);opacity:0.8;">T-1001 confirmed by counterparty at 09:42</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Confirmation Bar</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="hz-confirm-bar">
+            <div style="color:var(--accent-light);flex-shrink:0;">&#9432;</div>
+            <span class="hz-confirm-text">BUY 3.2M JKM Jun-26 @ $14.62 — Shell Trading</span>
+            <div class="flex gap-2 shrink-0">
+              <button class="hz-btn sm primary">
+                <span class="hz-key-hint" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:#fff;">&#8629;</span> Confirm
+              </button>
+              <button class="hz-btn sm ghost">
+                <span class="hz-key-hint">Esc</span> Cancel
+              </button>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">KEYBOARD HINTS</span>
+            <div class="flex gap-2 flex-wrap">
+              <span class="hz-key-hint">B</span><span class="text-xs" style="color:var(--text-muted);">Buy</span>
+              <span class="hz-key-hint">S</span><span class="text-xs" style="color:var(--text-muted);">Sell</span>
+              <span class="hz-key-hint">Tab</span><span class="text-xs" style="color:var(--text-muted);">Next</span>
+              <span class="hz-key-hint">&#8984;K</span><span class="text-xs" style="color:var(--text-muted);">Search</span>
+              <span class="hz-key-hint">&#8984;B</span><span class="text-xs" style="color:var(--text-muted);">Sidebar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hz-card">
+        <div class="hz-card-header">
+          <div class="hz-card-title">Loading &amp; Empty States</div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">SKELETON</span>
+            <div style="background:var(--card-bg);border:0.0625rem solid var(--border);border-radius:var(--radius-lg);padding:var(--sp-3);">
+              <div class="hz-skeleton hz-skeleton-text lg" style="margin-bottom:var(--sp-2);"></div>
+              <div class="hz-skeleton hz-skeleton-text" style="width:80%;margin-bottom:var(--sp-2);"></div>
+              <div class="hz-skeleton hz-skeleton-text sm" style="width:50%;"></div>
+            </div>
+          </div>
+          <div>
+            <span class="text-xs" style="color:var(--text-muted);display:block;margin-bottom:var(--sp-2);">EMPTY STATE</span>
+            <div style="text-align:center;padding:var(--sp-4);color:var(--text-muted);border:0.0625rem dashed var(--border);border-radius:var(--radius-lg);">
+              <div style="font-size:1.5rem;opacity:0.4;margin-bottom:var(--sp-2);">&#128196;</div>
+              <div class="text-sm font-medium" style="color:var(--text-secondary);margin-bottom:var(--sp-1);">No trades today</div>
+              <div class="text-xs" style="color:var(--text-muted);">Use Quick Entry or Trade Form to get started</div>
             </div>
           </div>
         </div>
