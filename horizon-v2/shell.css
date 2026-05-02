@@ -782,14 +782,14 @@ input, select, textarea {
 .hz-card {
   background: var(--card-bg);
   border: 0.0625rem solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-4);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
 }
 .hz-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-2);
 }
 .hz-card-title {
   font-size: var(--text-sm);
@@ -806,25 +806,25 @@ input, select, textarea {
 .hz-kpi {
   background: var(--card-bg);
   border: 0.0625rem solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-4);
+  border-radius: var(--radius-md);
+  padding: var(--sp-2) var(--sp-3);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
+  gap: 0;
 }
 .hz-kpi-label {
-  font-size: var(--text-xs);
-  font-weight: 500;
+  font-size: 0.5625rem;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 .hz-kpi-value {
   font-family: var(--font-mono);
-  font-size: var(--text-hero);
+  font-size: var(--text-xl);
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.1;
+  line-height: 1.2;
 }
 .hz-kpi-delta {
   font-family: var(--font-mono);
@@ -1005,10 +1005,10 @@ select.hz-input {
   font-family: var(--font-ui);
 }
 .hz-table td {
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--sp-1) var(--sp-3);
   border-bottom: 0.0625rem solid var(--border-subtle);
   color: var(--text-secondary);
-  height: 2.25rem;
+  height: 1.75rem;
 }
 .hz-table tr:hover td { background: var(--hover); }
 

@@ -69,7 +69,7 @@ function svg(name, size) {
 /* ========== FULL ETRM MENU ========== */
 const MENU = [
   {
-    group: 'TRADING', defaultOpen: true, items: [
+    group: 'TRADING', defaultOpen: false, items: [
       { label: 'Dashboard', icon: 'grid', href: 'index.html', key: 'dashboard' },
       { label: 'Quick Entry', icon: 'zap', href: 'quick-entry.html', key: 'quick-entry' },
       { label: 'Trade Lifecycle', icon: 'git-merge', href: 'lifecycle.html', key: 'lifecycle' },
@@ -86,7 +86,7 @@ const MENU = [
     ]
   },
   {
-    group: 'PHYSICAL', defaultOpen: true, items: [
+    group: 'PHYSICAL', defaultOpen: false, items: [
       { label: 'Cargo Board', icon: 'truck', href: 'cargo-board.html', key: 'cargo-board' },
       {
         label: 'Nominations', icon: 'file-text', key: 'nominations', href: 'nominations.html', badge: { count: 2, color: 'amber' }, children: [
