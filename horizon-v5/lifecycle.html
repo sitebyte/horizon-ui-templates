@@ -9,7 +9,7 @@
     .td-layout { display:grid; grid-template-columns:1fr 20rem; gap:var(--sp-3); flex:1; min-height:0; }
     .td-main { overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:var(--sp-3); }
     .td-aside { overflow-y:auto; min-height:0; border-left:0.0625rem solid var(--border); padding-left:var(--sp-3); display:flex; flex-direction:column; gap:var(--sp-3); }
-    .td-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .td-header { display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0; }
     .td-ref { font-family:var(--font-mono); font-size:var(--text-lg); font-weight:700; color:var(--text-primary); }
     .td-sub { font-size:var(--text-xs); color:var(--text-muted); margin-top:2px; }
     .td-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(10rem,1fr)); gap:var(--sp-2); }
@@ -23,13 +23,26 @@
     .tbl .r { text-align:right; }
     .tbl tr:hover td { background:var(--hover); }
     .val-chart { display:flex; align-items:flex-end; gap:2px; height:3rem; }
-    .val-bar { flex:1; border-radius:1px 1px 0 0; min-width:3px; transition:height 0.3s; }
+    .val-bar { flex:1; border-radius:1px 1px 0 0; min-width:3px; }
     .stage-dot { width:0.5rem; height:0.5rem; border-radius:50%; flex-shrink:0; }
     .stage-dot.done { background:var(--green); }
     .stage-dot.active { background:var(--accent); box-shadow:0 0 0 2px var(--accent-bg); }
     .stage-dot.pending { background:var(--surface-elevated); border:1px solid var(--border-strong); }
     .audit-item { padding:var(--sp-1) 0; border-bottom:0.0625rem solid var(--border-subtle); }
     .audit-item:last-child { border-bottom:none; }
+    /* Tabs */
+    .td-tabs { display:flex; gap:0; border-bottom:0.0625rem solid var(--border); flex-shrink:0; margin-bottom:var(--sp-2); }
+    .td-tab { padding:var(--sp-1) var(--sp-3); font-size:var(--text-xs); font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all var(--transition-fast); background:none; border-top:none; border-left:none; border-right:none; }
+    .td-tab:hover { color:var(--text-secondary); }
+    .td-tab.active { color:var(--accent-light); border-bottom-color:var(--accent); font-weight:600; }
+    .td-tab-panel { display:none; }
+    .td-tab-panel.active { display:flex; flex-direction:column; gap:var(--sp-3); }
+    /* Modals / Panels */
+    .td-modal-overlay { position:fixed; inset:0; background:var(--overlay-bg); z-index:500; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(0.25rem); }
+    .td-modal { background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:var(--radius-xl); padding:var(--sp-4); width:28rem; max-width:90vw; box-shadow:0 1rem 3rem rgba(0,0,0,0.4); }
+    .td-modal-title { font-size:var(--text-sm); font-weight:600; color:var(--text-primary); margin-bottom:var(--sp-3); }
+    .td-amend-row { display:grid; grid-template-columns:6rem 1fr 1fr; gap:var(--sp-2); align-items:center; padding:var(--sp-1) 0; font-size:var(--text-xs); border-bottom:0.0625rem solid var(--border-subtle); }
+    .td-amend-row:last-child { border-bottom:none; }
     @media (max-width:64rem) { .td-layout { grid-template-columns:1fr; } .td-aside { border-left:none; padding-left:0; border-top:0.0625rem solid var(--border); padding-top:var(--sp-3); } }
   </style>
 </head>
@@ -37,209 +50,240 @@
 <div id="hz-app">
 
   <!-- Trade Header -->
-  <div class="td-header fade-in" style="margin-bottom:var(--sp-3);">
+  <div class="td-header fade-in" style="margin-bottom:var(--sp-2);">
     <div>
       <div class="flex items-center gap-2">
         <span style="background:var(--green-dim);color:var(--green);font-weight:700;font-size:0.5625rem;padding:0.125rem 0.375rem;border-radius:var(--radius-sm);font-family:var(--font-mono);">BUY</span>
         <span class="td-ref">T-1001</span>
-        <span class="hz-badge blue" style="font-size:0.4375rem;">In Transit</span>
+        <span class="hz-badge blue" style="font-size:0.4375rem;" id="trade-status">In Transit</span>
       </div>
       <div class="td-sub">Shell Energy Trading — 3,200,000 MMBtu JKM+$0.50 DES Jun-26 — Ref: BUY-2026-0411-A3F</div>
     </div>
-    <div class="flex gap-2">
-      <button class="hz-btn sm">Amend</button>
-      <button class="hz-btn sm">Clone</button>
-      <button class="hz-btn sm destructive">Cancel</button>
+    <div class="flex gap-1">
+      <button class="hz-btn sm" onclick="openAmend()">Amend</button>
+      <button class="hz-btn sm" onclick="cloneTrade()">Clone</button>
+      <button class="hz-btn sm primary" onclick="openStageAction()">Record Discharge</button>
+      <button class="hz-btn sm destructive" onclick="openCancel()">Cancel</button>
     </div>
   </div>
 
+  <!-- Lifecycle Progress (always visible) -->
+  <div class="flex items-center gap-1 shrink-0" style="margin-bottom:var(--sp-2);padding:var(--sp-1) 0;">
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Capture</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Approval</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Nomination</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Loading</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--accent);"></span>
+    <span class="stage-dot active"></span><span style="font-size:0.5rem;color:var(--accent);font-weight:600;">Voyage</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Discharge</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Settle</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">P&amp;L</span>
+  </div>
+
   <div class="td-layout">
-    <!-- ===== MAIN: Trade Details ===== -->
+    <!-- ===== MAIN: Tabbed Content ===== -->
     <div class="td-main">
+      <!-- Tab Bar -->
+      <div class="td-tabs">
+        <button class="td-tab active" onclick="switchTab('overview')">Overview</button>
+        <button class="td-tab" onclick="switchTab('valuation')">Valuation</button>
+        <button class="td-tab" onclick="switchTab('physical')">Physical</button>
+        <button class="td-tab" onclick="switchTab('settlement')">Settlement</button>
+      </div>
 
-      <!-- Trade Essentials -->
-      <div class="hz-card">
-        <div class="td-section">Trade Essentials</div>
-        <div class="td-grid">
-          <div class="td-field"><div class="td-field-label">Direction</div><div class="td-field-value pnl-positive">BUY</div></div>
-          <div class="td-field"><div class="td-field-label">Counterparty</div><div class="td-field-value" style="font-family:var(--font-ui);">Shell Energy Trading</div></div>
-          <div class="td-field"><div class="td-field-label">Benchmark</div><div class="td-field-value">JKM</div></div>
-          <div class="td-field"><div class="td-field-label">Premium</div><div class="td-field-value">+$0.50/MMBtu</div></div>
-          <div class="td-field"><div class="td-field-label">Volume</div><div class="td-field-value">3,200,000 MMBtu</div></div>
-          <div class="td-field"><div class="td-field-label">Price</div><div class="td-field-value">$14.75/MMBtu</div></div>
-          <div class="td-field"><div class="td-field-label">Delivery</div><div class="td-field-value">Jun 2026</div></div>
-          <div class="td-field"><div class="td-field-label">Incoterm</div><div class="td-field-value">DES (Sodegaura)</div></div>
-          <div class="td-field"><div class="td-field-label">Trader</div><div class="td-field-value" style="font-family:var(--font-ui);">J. Cobley</div></div>
-          <div class="td-field"><div class="td-field-label">Book</div><div class="td-field-value">Pacific LNG</div></div>
-          <div class="td-field"><div class="td-field-label">Created</div><div class="td-field-value">12 Apr 09:42</div></div>
-          <div class="td-field"><div class="td-field-label">Contract</div><div class="td-field-value"><a href="contracts.html" class="hz-entity-link">SPA-SHELL-2026</a></div></div>
+      <!-- TAB: Overview -->
+      <div class="td-tab-panel active" id="tab-overview">
+        <div class="hz-card">
+          <div class="td-section">Trade Essentials</div>
+          <div class="td-grid">
+            <div class="td-field"><div class="td-field-label">Direction</div><div class="td-field-value pnl-positive">BUY</div></div>
+            <div class="td-field"><div class="td-field-label">Counterparty</div><div class="td-field-value" style="font-family:var(--font-ui);">Shell Energy Trading</div></div>
+            <div class="td-field"><div class="td-field-label">Benchmark</div><div class="td-field-value">JKM</div></div>
+            <div class="td-field"><div class="td-field-label">Premium</div><div class="td-field-value" id="field-premium">+$0.50/MMBtu</div></div>
+            <div class="td-field"><div class="td-field-label">Volume</div><div class="td-field-value" id="field-volume">3,200,000 MMBtu</div></div>
+            <div class="td-field"><div class="td-field-label">Price</div><div class="td-field-value">$14.75/MMBtu</div></div>
+            <div class="td-field"><div class="td-field-label">Delivery</div><div class="td-field-value" id="field-delivery">Jun 2026</div></div>
+            <div class="td-field"><div class="td-field-label">Incoterm</div><div class="td-field-value">DES (Sodegaura)</div></div>
+            <div class="td-field"><div class="td-field-label">Trader</div><div class="td-field-value" style="font-family:var(--font-ui);">J. Cobley</div></div>
+            <div class="td-field"><div class="td-field-label">Book</div><div class="td-field-value">Pacific LNG</div></div>
+            <div class="td-field"><div class="td-field-label">Created</div><div class="td-field-value">12 Apr 09:42</div></div>
+            <div class="td-field"><div class="td-field-label">Contract</div><div class="td-field-value"><a href="contracts.html" class="hz-entity-link">SPA-SHELL-2026</a></div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Current Valuation <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">02 May 17:30 EOD</span></div>
+          <div class="td-grid" style="grid-template-columns:repeat(6,1fr);">
+            <div class="td-field"><div class="td-field-label">Notional</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">MTM Value</div><div class="td-field-value pnl-positive">$47,540,000</div></div>
+            <div class="td-field"><div class="td-field-label">Unrealised P&amp;L</div><div class="td-field-value pnl-positive">+$340,000</div></div>
+            <div class="td-field"><div class="td-field-label">WACOG</div><div class="td-field-value">$14.75</div></div>
+            <div class="td-field"><div class="td-field-label">Spot (JKM)</div><div class="td-field-value">$14.25</div></div>
+            <div class="td-field"><div class="td-field-label">DV01</div><div class="td-field-value">$32,000</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Related Entities</div>
+          <div class="td-grid" style="grid-template-columns:repeat(4,1fr);">
+            <div class="td-field"><div class="td-field-label">Cargo</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+            <div class="td-field"><div class="td-field-label">Nomination</div><div class="td-field-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
+            <div class="td-field"><div class="td-field-label">Invoice (Prov)</div><div class="td-field-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
+            <div class="td-field"><div class="td-field-label">B/L Number</div><div class="td-field-value">SBLNG-2026-0605-A</div></div>
+          </div>
         </div>
       </div>
 
-      <!-- Current Valuation -->
-      <div class="hz-card">
-        <div class="td-section">Current Valuation <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">as of 02 May 17:30 EOD</span></div>
-        <div class="td-grid" style="grid-template-columns:repeat(6,1fr);">
-          <div class="td-field"><div class="td-field-label">Notional</div><div class="td-field-value">$47,200,000</div></div>
-          <div class="td-field"><div class="td-field-label">MTM Value</div><div class="td-field-value pnl-positive">$47,540,000</div></div>
-          <div class="td-field"><div class="td-field-label">Unrealised P&amp;L</div><div class="td-field-value pnl-positive">+$340,000</div></div>
-          <div class="td-field"><div class="td-field-label">WACOG</div><div class="td-field-value">$14.75</div></div>
-          <div class="td-field"><div class="td-field-label">Spot (JKM)</div><div class="td-field-value">$14.25</div></div>
-          <div class="td-field"><div class="td-field-label">DV01</div><div class="td-field-value">$32,000</div></div>
+      <!-- TAB: Valuation -->
+      <div class="td-tab-panel" id="tab-valuation">
+        <div class="hz-card">
+          <div class="td-section">Valuation History (EOD) <div class="flex gap-1"><button class="hz-btn sm active" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1W</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">3M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">Life</button></div></div>
+          <div class="val-chart" style="margin-bottom:var(--sp-2);">
+            <div class="val-bar" style="height:40%;background:var(--green);" title="+$115K"></div>
+            <div class="val-bar" style="height:55%;background:var(--green);" title="+$180K"></div>
+            <div class="val-bar" style="height:35%;background:var(--green);" title="+$160K"></div>
+            <div class="val-bar" style="height:20%;background:var(--red);" title="-$85K"></div>
+            <div class="val-bar" style="height:50%;background:var(--green);" title="+$220K"></div>
+            <div class="val-bar" style="height:65%;background:var(--green);" title="+$290K"></div>
+            <div class="val-bar" style="height:75%;background:var(--green);" title="+$340K"></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th class="r">JKM Spot</th><th class="r">MTM</th><th class="r">Daily P&amp;L</th><th class="r">Cumulative</th><th class="r">Delta</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">02 May</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td class="r font-mono pnl-positive">+$340K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">01 May</td><td class="r font-mono">$14.22</td><td class="r font-mono">$47.49M</td><td class="r font-mono pnl-positive">+$70K</td><td class="r font-mono pnl-positive">+$290K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">30 Apr</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.42M</td><td class="r font-mono pnl-positive">+$305K</td><td class="r font-mono pnl-positive">+$220K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">29 Apr</td><td class="r font-mono">$13.99</td><td class="r font-mono">$47.11M</td><td class="r font-mono pnl-negative">-$245K</td><td class="r font-mono pnl-negative">-$85K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">28 Apr</td><td class="r font-mono">$14.15</td><td class="r font-mono">$47.36M</td><td class="r font-mono pnl-negative">-$20K</td><td class="r font-mono pnl-positive">+$160K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">27 Apr</td><td class="r font-mono">$14.16</td><td class="r font-mono">$47.38M</td><td class="r font-mono pnl-positive">+$65K</td><td class="r font-mono pnl-positive">+$180K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">26 Apr</td><td class="r font-mono">$14.12</td><td class="r font-mono">$47.31M</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono">$32K</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Intraday Movement <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">02 May 2026</span></div>
+          <div class="val-chart" style="margin-bottom:var(--sp-2);height:2rem;">
+            <div class="val-bar" style="height:30%;background:var(--green);"></div>
+            <div class="val-bar" style="height:45%;background:var(--green);"></div>
+            <div class="val-bar" style="height:60%;background:var(--green);"></div>
+            <div class="val-bar" style="height:50%;background:var(--green);"></div>
+            <div class="val-bar" style="height:35%;background:var(--green);"></div>
+            <div class="val-bar" style="height:25%;background:var(--red);"></div>
+            <div class="val-bar" style="height:40%;background:var(--green);"></div>
+            <div class="val-bar" style="height:55%;background:var(--green);"></div>
+            <div class="val-bar" style="height:70%;background:var(--green);"></div>
+            <div class="val-bar" style="height:75%;background:var(--green);"></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Time</th><th class="r">JKM Mid</th><th class="r">MTM</th><th class="r">vs Open</th><th>Event</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">17:30</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td><span class="hz-badge green" style="font-size:0.375rem;">EOD</span> Settlement fixed</td></tr>
+              <tr><td class="font-mono">16:00</td><td class="r font-mono">$14.28</td><td class="r font-mono">$47.56M</td><td class="r font-mono pnl-positive">+$68K</td><td>Asia close — JKM +$0.03</td></tr>
+              <tr><td class="font-mono">14:00</td><td class="r font-mono">$14.24</td><td class="r font-mono">$47.52M</td><td class="r font-mono pnl-positive">+$44K</td><td>Recovery from lunch dip</td></tr>
+              <tr><td class="font-mono">13:00</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.46M</td><td class="r font-mono pnl-negative">-$8K</td><td>Intraday low — TTF drag</td></tr>
+              <tr><td class="font-mono">10:00</td><td class="r font-mono">$14.30</td><td class="r font-mono">$47.58M</td><td class="r font-mono pnl-positive">+$72K</td><td>Intraday high</td></tr>
+              <tr><td class="font-mono">08:00</td><td class="r font-mono">$14.23</td><td class="r font-mono">$47.49M</td><td class="r font-mono" style="color:var(--text-muted);">—</td><td><span class="hz-badge neutral" style="font-size:0.375rem;">OPEN</span> Asia open</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- Valuation History (EOD) -->
-      <div class="hz-card">
-        <div class="td-section">Valuation History <div class="flex gap-1"><button class="hz-btn sm active" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1W</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">3M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">Life</button></div></div>
-        <!-- Mini bar chart showing P&L over time -->
-        <div class="val-chart" style="margin-bottom:var(--sp-2);">
-          <div class="val-bar" style="height:40%;background:var(--green);" title="26 Apr: +$180K"></div>
-          <div class="val-bar" style="height:55%;background:var(--green);" title="27 Apr: +$245K"></div>
-          <div class="val-bar" style="height:35%;background:var(--green);" title="28 Apr: +$160K"></div>
-          <div class="val-bar" style="height:20%;background:var(--red);" title="29 Apr: -$85K"></div>
-          <div class="val-bar" style="height:50%;background:var(--green);" title="30 Apr: +$220K"></div>
-          <div class="val-bar" style="height:65%;background:var(--green);" title="01 May: +$290K"></div>
-          <div class="val-bar" style="height:75%;background:var(--green);" title="02 May: +$340K"></div>
+      <!-- TAB: Physical -->
+      <div class="td-tab-panel" id="tab-physical">
+        <div class="hz-card">
+          <div class="td-section">Cargo &amp; Vessel</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Cargo Ref</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+            <div class="td-field"><div class="td-field-label">Vessel</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">Al Dafna</a></div></div>
+            <div class="td-field"><div class="td-field-label">IMO</div><div class="td-field-value">9431111</div></div>
+            <div class="td-field"><div class="td-field-label">Load Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sabine Pass LNG, USA</div></div>
+            <div class="td-field"><div class="td-field-label">Discharge Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sodegaura, Japan</div></div>
+            <div class="td-field"><div class="td-field-label">ETA</div><div class="td-field-value">17 Jun 2026 (46 days)</div></div>
+          </div>
         </div>
-        <table class="tbl">
-          <thead><tr><th>Date</th><th class="r">JKM Spot</th><th class="r">MTM</th><th class="r">Daily P&amp;L</th><th class="r">Cumulative P&amp;L</th><th class="r">Delta</th></tr></thead>
-          <tbody>
-            <tr><td class="font-mono">02 May</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td class="r font-mono pnl-positive">+$340K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">01 May</td><td class="r font-mono">$14.22</td><td class="r font-mono">$47.49M</td><td class="r font-mono pnl-positive">+$70K</td><td class="r font-mono pnl-positive">+$290K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">30 Apr</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.42M</td><td class="r font-mono pnl-positive">+$305K</td><td class="r font-mono pnl-positive">+$220K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">29 Apr</td><td class="r font-mono">$13.99</td><td class="r font-mono">$47.11M</td><td class="r font-mono pnl-negative">-$245K</td><td class="r font-mono pnl-negative">-$85K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">28 Apr</td><td class="r font-mono">$14.15</td><td class="r font-mono">$47.36M</td><td class="r font-mono pnl-negative">-$20K</td><td class="r font-mono pnl-positive">+$160K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">27 Apr</td><td class="r font-mono">$14.16</td><td class="r font-mono">$47.38M</td><td class="r font-mono pnl-positive">+$65K</td><td class="r font-mono pnl-positive">+$180K</td><td class="r font-mono">+$32K</td></tr>
-            <tr><td class="font-mono">26 Apr</td><td class="r font-mono">$14.12</td><td class="r font-mono">$47.31M</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono">+$32K</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Intraday P&L -->
-      <div class="hz-card">
-        <div class="td-section">Intraday Movement <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">02 May 2026</span></div>
-        <div class="val-chart" style="margin-bottom:var(--sp-2);height:2rem;">
-          <div class="val-bar" style="height:30%;background:var(--green);" title="08:00"></div>
-          <div class="val-bar" style="height:45%;background:var(--green);" title="09:00"></div>
-          <div class="val-bar" style="height:60%;background:var(--green);" title="10:00"></div>
-          <div class="val-bar" style="height:50%;background:var(--green);" title="11:00"></div>
-          <div class="val-bar" style="height:35%;background:var(--green);" title="12:00"></div>
-          <div class="val-bar" style="height:25%;background:var(--red);" title="13:00"></div>
-          <div class="val-bar" style="height:40%;background:var(--green);" title="14:00"></div>
-          <div class="val-bar" style="height:55%;background:var(--green);" title="15:00"></div>
-          <div class="val-bar" style="height:70%;background:var(--green);" title="16:00"></div>
-          <div class="val-bar" style="height:75%;background:var(--green);" title="17:00"></div>
+        <div class="hz-card">
+          <div class="td-section">Loading Details</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">B/L Number</div><div class="td-field-value">SBLNG-2026-0605-A</div></div>
+            <div class="td-field"><div class="td-field-label">B/L Quantity</div><div class="td-field-value">3,186,400 MMBtu</div></div>
+            <div class="td-field"><div class="td-field-label">B/L Date</div><div class="td-field-value">05 Jun 2026</div></div>
+            <div class="td-field"><div class="td-field-label">GHV (Gross)</div><div class="td-field-value">1,087 BTU/scf</div></div>
+            <div class="td-field"><div class="td-field-label">Temperature</div><div class="td-field-value">-161.2°C</div></div>
+            <div class="td-field"><div class="td-field-label">Surveyor</div><div class="td-field-value" style="font-family:var(--font-ui);">SGS SA</div></div>
+          </div>
         </div>
-        <table class="tbl">
-          <thead><tr><th>Time</th><th class="r">JKM Mid</th><th class="r">MTM</th><th class="r">P&amp;L vs Open</th><th>Event</th></tr></thead>
-          <tbody>
-            <tr><td class="font-mono">17:30</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td><span class="hz-badge green" style="font-size:0.375rem;">EOD</span> Settlement price fixed</td></tr>
-            <tr><td class="font-mono">16:00</td><td class="r font-mono">$14.28</td><td class="r font-mono">$47.56M</td><td class="r font-mono pnl-positive">+$68K</td><td>Asia close — JKM +$0.03</td></tr>
-            <tr><td class="font-mono">14:00</td><td class="r font-mono">$14.24</td><td class="r font-mono">$47.52M</td><td class="r font-mono pnl-positive">+$44K</td><td>Recovery from lunch dip</td></tr>
-            <tr><td class="font-mono">13:00</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.46M</td><td class="r font-mono pnl-negative">-$8K</td><td>Intraday low — TTF drag</td></tr>
-            <tr><td class="font-mono">10:00</td><td class="r font-mono">$14.30</td><td class="r font-mono">$47.58M</td><td class="r font-mono pnl-positive">+$72K</td><td>Intraday high</td></tr>
-            <tr><td class="font-mono">08:00</td><td class="r font-mono">$14.23</td><td class="r font-mono">$47.49M</td><td class="r font-mono" style="color:var(--text-muted);">—</td><td><span class="hz-badge neutral" style="font-size:0.375rem;">OPEN</span> Asia open</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Lifecycle Stage Progress -->
-      <div class="hz-card">
-        <div class="td-section">Lifecycle Progress</div>
-        <div class="flex items-center gap-1" style="margin-bottom:var(--sp-2);">
-          <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Capture</span>
-          <span style="flex:1;height:1px;background:var(--green);"></span>
-          <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Approval</span>
-          <span style="flex:1;height:1px;background:var(--green);"></span>
-          <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Nomination</span>
-          <span style="flex:1;height:1px;background:var(--green);"></span>
-          <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Loading</span>
-          <span style="flex:1;height:1px;background:var(--accent);"></span>
-          <span class="stage-dot active"></span><span style="font-size:0.5rem;color:var(--accent);">Voyage</span>
-          <span style="flex:1;height:1px;background:var(--border);"></span>
-          <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Discharge</span>
-          <span style="flex:1;height:1px;background:var(--border);"></span>
-          <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Settle</span>
-          <span style="flex:1;height:1px;background:var(--border);"></span>
-          <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">P&amp;L</span>
-        </div>
-        <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
-          <div class="td-field"><div class="td-field-label">Current Stage</div><div class="td-field-value" style="color:var(--accent);">Voyage — In Transit</div></div>
-          <div class="td-field"><div class="td-field-label">Vessel</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">Al Dafna</a></div></div>
-          <div class="td-field"><div class="td-field-label">ETA</div><div class="td-field-value">17 Jun 2026 (46 days)</div></div>
-          <div class="td-field"><div class="td-field-label">Cargo Ref</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
-          <div class="td-field"><div class="td-field-label">Load Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sabine Pass LNG</div></div>
-          <div class="td-field"><div class="td-field-label">Discharge Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sodegaura, Japan</div></div>
+        <div class="hz-card">
+          <div class="td-section">Nomination</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Nomination ID</div><div class="td-field-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
+            <div class="td-field"><div class="td-field-label">Laycan</div><div class="td-field-value">01-10 Jun 2026</div></div>
+            <div class="td-field"><div class="td-field-label">Status</div><div class="td-field-value"><span class="hz-badge green" style="font-size:0.4375rem;">Confirmed</span></div></div>
+            <div class="td-field"><div class="td-field-label">ADP Window</div><div class="td-field-value">Jun 2026 — Cargo 3 of 4</div></div>
+            <div class="td-field"><div class="td-field-label">Nominated By</div><div class="td-field-value" style="font-family:var(--font-ui);">S. Kumar</div></div>
+            <div class="td-field"><div class="td-field-label">Nominated On</div><div class="td-field-value">15 Apr 11:30</div></div>
+          </div>
         </div>
       </div>
 
-      <!-- Related Entities -->
-      <div class="hz-card">
-        <div class="td-section">Related Entities</div>
-        <div class="td-grid" style="grid-template-columns:repeat(4,1fr);">
-          <div class="td-field"><div class="td-field-label">Nomination</div><div class="td-field-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
-          <div class="td-field"><div class="td-field-label">Invoice (Prov)</div><div class="td-field-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
-          <div class="td-field"><div class="td-field-label">Invoice (Final)</div><div class="td-field-value" style="color:var(--text-muted);">Pending</div></div>
-          <div class="td-field"><div class="td-field-label">B/L Number</div><div class="td-field-value">SBLNG-2026-0605-A</div></div>
+      <!-- TAB: Settlement -->
+      <div class="td-tab-panel" id="tab-settlement">
+        <div class="hz-card">
+          <div class="td-section">Invoice Status</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Provisional Invoice</div><div class="td-field-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
+            <div class="td-field"><div class="td-field-label">Amount</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">Status</div><div class="td-field-value"><span class="hz-badge amber" style="font-size:0.4375rem;">Pending Approval</span></div></div>
+            <div class="td-field"><div class="td-field-label">Final Invoice</div><div class="td-field-value" style="color:var(--text-muted);">Awaiting discharge outturn</div></div>
+            <div class="td-field"><div class="td-field-label">Reconciliation</div><div class="td-field-value" style="color:var(--text-muted);">Not started</div></div>
+            <div class="td-field"><div class="td-field-label">Payment Due</div><div class="td-field-value" style="color:var(--text-muted);">T+30 from final</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Settlement Breakdown (Provisional)</div>
+          <table class="tbl">
+            <thead><tr><th>Line</th><th>Description</th><th class="r">Qty (MMBtu)</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">1</td><td>LNG Cargo — JKM + $0.50</td><td class="r font-mono">3,200,000</td><td class="r font-mono">$14.75</td><td class="r font-mono">$47,200,000</td></tr>
+              <tr><td class="font-mono">2</td><td>Shipping Surcharge (DES)</td><td class="r font-mono">3,200,000</td><td class="r font-mono">$0.12</td><td class="r font-mono">$384,000</td></tr>
+              <tr><td class="font-mono">3</td><td>Quality Adjustment (est.)</td><td class="r font-mono">3,200,000</td><td class="r font-mono">-$0.03</td><td class="r font-mono pnl-negative">-$96,000</td></tr>
+            </tbody>
+            <tfoot><tr style="border-top:0.125rem solid var(--border-strong);"><td colspan="4" class="r" style="font-weight:600;color:var(--text-primary);">Provisional Total</td><td class="r font-mono font-bold">$47,488,000</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Credit Impact</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Counterparty</div><div class="td-field-value" style="font-family:var(--font-ui);">Shell Energy Trading</div></div>
+            <div class="td-field"><div class="td-field-label">Credit Limit</div><div class="td-field-value">$100,000,000</div></div>
+            <div class="td-field"><div class="td-field-label">This Trade</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">Total Exposure</div><div class="td-field-value">$78,400,000</div></div>
+            <div class="td-field"><div class="td-field-label">Headroom</div><div class="td-field-value" style="color:var(--amber);">$21,600,000</div></div>
+            <div class="td-field"><div class="td-field-label">Utilisation</div><div class="td-field-value" style="color:var(--amber);">78.4%</div></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ===== RIGHT: Audit Trail ===== -->
+    <!-- ===== RIGHT: Audit Trail (persistent across tabs) ===== -->
     <div class="td-aside">
       <div>
-        <div class="td-section">Audit Trail <span class="hz-badge neutral" style="font-size:0.375rem;">14 events</span></div>
-        <div style="display:flex;flex-direction:column;">
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Sailed</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">AIS departure confirmed — Sabine Pass</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 18:45 — system</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">B/L Issued</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">3,186,400 MMBtu loaded — SGS surveyor</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 08:00 — SGS Surveyor</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Loading Commenced</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna berthed at Sabine Pass T2</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">03 Jun 14:30 — s.kumar</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Nominated</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna assigned — Laycan 01-10 Jun</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">15 Apr 11:30 — s.kumar</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot amber" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Premium Amended</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Premium: <span class="pnl-negative" style="font-size:0.5rem;">$0.35</span> &rarr; <span class="pnl-positive" style="font-size:0.5rem;">$0.50</span></div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">14 Apr 16:20 — j.cobley</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Prov. Invoice Created</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;"><a href="invoices.html" class="hz-entity-link" style="font-size:0.5rem;">INV-P-4521</a> — $47.2M</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">13 Apr 09:15 — system</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Credit Approved</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Shell headroom: $22M — <span class="hz-badge green" style="font-size:0.34375rem;">PASS</span></div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:15 — r.mehta</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Confirmed</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Counterparty confirmation received</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:02 — shell-api</div>
-          </div>
-          <div class="audit-item">
-            <div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Created</span></div>
-            <div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">BUY 3.2M JKM+$0.50 DES Jun-26</div>
-            <div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 09:42 — j.cobley</div>
-          </div>
+        <div class="td-section">Audit Trail <span class="hz-badge neutral" style="font-size:0.375rem;" id="audit-count">9 events</span></div>
+        <div id="audit-list" style="display:flex;flex-direction:column;">
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Sailed</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">AIS departure — Sabine Pass</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 18:45 — system</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">B/L Issued</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">3,186,400 MMBtu — SGS</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 08:00 — SGS</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Loading Commenced</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna berthed T2</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">03 Jun 14:30 — s.kumar</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Nominated</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna — Laycan 01-10 Jun</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">15 Apr 11:30 — s.kumar</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot amber" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Premium Amended</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;"><span class="pnl-negative" style="font-size:0.5rem;">$0.35</span> &rarr; <span class="pnl-positive" style="font-size:0.5rem;">$0.50</span></div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">14 Apr 16:20 — j.cobley</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Invoice Created</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;"><a href="invoices.html" class="hz-entity-link" style="font-size:0.5rem;">INV-P-4521</a> — $47.2M</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">13 Apr 09:15 — system</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Credit Approved</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Shell $22M headroom — <span class="hz-badge green" style="font-size:0.3125rem;">PASS</span></div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:15 — r.mehta</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Confirmed</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Counterparty confirmed</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:02 — shell-api</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Created</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">BUY 3.2M JKM+$0.50 DES Jun-26</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 09:42 — j.cobley</div></div>
         </div>
       </div>
-
-      <!-- Documents -->
       <div>
         <div class="td-section">Documents <span class="hz-badge neutral" style="font-size:0.375rem;">4</span></div>
         <div style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:0.5625rem;">
@@ -252,11 +296,193 @@
     </div>
   </div>
 
+  <!-- Amend Modal -->
+  <div id="amend-modal" class="td-modal-overlay" style="display:none;" onclick="closeAmend()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title">Amend Trade T-1001</div>
+      <div style="margin-bottom:var(--sp-3);">
+        <div class="td-amend-row" style="font-weight:600;color:var(--text-muted);border-bottom:0.0625rem solid var(--border);">
+          <span>Field</span><span>Current</span><span>New Value</span>
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Premium</span>
+          <span class="font-mono">+$0.50</span>
+          <input type="text" class="hz-input font-mono" value="+0.55" style="height:1.5rem;font-size:var(--text-xs);" id="amend-premium" />
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Volume</span>
+          <span class="font-mono">3,200,000</span>
+          <input type="text" class="hz-input font-mono" value="3,200,000" style="height:1.5rem;font-size:var(--text-xs);" id="amend-volume" />
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Delivery</span>
+          <span class="font-mono">Jun 2026</span>
+          <select class="hz-input font-mono" style="height:1.5rem;font-size:var(--text-xs);" id="amend-delivery">
+            <option selected>Jun 2026</option><option>Jul 2026</option><option>Aug 2026</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Reason for Amendment</label>
+        <input type="text" class="hz-input" placeholder="e.g. Price renegotiation with counterparty" style="height:1.75rem;font-size:var(--text-xs);" id="amend-reason" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeAmend()">Cancel</button>
+        <button class="hz-btn sm primary" onclick="submitAmend()">Submit Amendment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div id="cancel-modal" class="td-modal-overlay" style="display:none;" onclick="closeCancel()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title" style="color:var(--red);">Cancel Trade T-1001</div>
+      <div class="hz-error-banner" style="margin-bottom:var(--sp-3);font-size:var(--text-xs);">
+        <span style="flex-shrink:0;">&#9888;</span>
+        <div>
+          <div class="hz-error-title" style="font-size:var(--text-xs);">Position Impact</div>
+          <div class="hz-error-desc">Net position will decrease by <strong>3.2M MMBtu</strong>. Hedge ratio will change from 78% to 92%. Cancellation may trigger contractual penalties under SPA-SHELL-2026.</div>
+        </div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Cancellation Reason (required)</label>
+        <select class="hz-input" style="height:1.75rem;font-size:var(--text-xs);margin-bottom:var(--sp-2);" id="cancel-reason-type">
+          <option value="">Select reason...</option>
+          <option>Counterparty default</option>
+          <option>Force majeure</option>
+          <option>Pricing error</option>
+          <option>Duplicate entry</option>
+          <option>Other</option>
+        </select>
+        <input type="text" class="hz-input" placeholder="Additional details..." style="height:1.75rem;font-size:var(--text-xs);" id="cancel-reason-detail" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeCancel()">Keep Trade</button>
+        <button class="hz-btn sm destructive" onclick="submitCancel()">Confirm Cancellation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage Action Modal (Record Discharge) -->
+  <div id="stage-modal" class="td-modal-overlay" style="display:none;" onclick="closeStageAction()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title">Record Discharge — T-1001</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-3);">
+        <div><label class="td-field-label">Discharge Port</label><input type="text" class="hz-input font-mono" value="Sodegaura" readonly style="height:1.5rem;font-size:var(--text-xs);background:var(--surface-raised);color:var(--text-tertiary);" /></div>
+        <div><label class="td-field-label">Arrival Date</label><input type="date" class="hz-input font-mono" value="2026-06-17" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">Outturn Volume (MMBtu)</label><input type="text" class="hz-input font-mono" placeholder="3,172,800" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">BOG Allowance (MMBtu)</label><input type="text" class="hz-input font-mono" placeholder="13,600" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">GHV at Discharge</label><input type="text" class="hz-input font-mono" placeholder="1,085 BTU/scf" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">Surveyor</label><input type="text" class="hz-input" value="SGS SA" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Notes</label>
+        <input type="text" class="hz-input" placeholder="Discharge notes..." style="height:1.75rem;font-size:var(--text-xs);" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeStageAction()">Cancel</button>
+        <button class="hz-btn sm primary" onclick="submitStageAction()">Record Discharge</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="shell.js"></script>
 <script>
 initShell('lifecycle', 'Trade Detail');
+
+/* Tab switching */
+function switchTab(tabId) {
+  document.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.td-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* Amend workflow */
+function openAmend() { document.getElementById('amend-modal').style.display = 'flex'; }
+function closeAmend() { document.getElementById('amend-modal').style.display = 'none'; }
+function submitAmend() {
+  var premium = document.getElementById('amend-premium').value;
+  var reason = document.getElementById('amend-reason').value;
+  if (!reason) { showToast('Please provide a reason for the amendment', 'error'); return; }
+  closeAmend();
+  // Update displayed values
+  document.getElementById('field-premium').textContent = '+$' + premium + '/MMBtu';
+  // Add audit entry
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--accent-bg)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot amber" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Amended</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Premium: <span class="pnl-negative" style="font-size:0.5rem;">$0.50</span> &rarr; <span class="pnl-positive" style="font-size:0.5rem;">$' + premium + '</span> — ' + reason + '</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  showToast('Trade T-1001 amended — premium changed to +$' + premium, 'success');
+  // Update audit count
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Cancel workflow */
+function openCancel() { document.getElementById('cancel-modal').style.display = 'flex'; }
+function closeCancel() { document.getElementById('cancel-modal').style.display = 'none'; }
+function submitCancel() {
+  var reason = document.getElementById('cancel-reason-type').value;
+  if (!reason) { showToast('Please select a cancellation reason', 'error'); return; }
+  closeCancel();
+  // Update status badge
+  document.getElementById('trade-status').className = 'hz-badge red';
+  document.getElementById('trade-status').style.fontSize = '0.4375rem';
+  document.getElementById('trade-status').textContent = 'Cancelled';
+  // Add audit entry
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--red-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot red" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--red);">Trade Cancelled</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Reason: ' + reason + '</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  showToast('Trade T-1001 cancelled', 'warning', function() {
+    document.getElementById('trade-status').className = 'hz-badge blue';
+    document.getElementById('trade-status').textContent = 'In Transit';
+    auditList.removeChild(auditList.firstChild);
+    showToast('Cancellation undone', 'success');
+  });
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Clone */
+function cloneTrade() {
+  showToast('Trade cloned as T-1009 (Draft)', 'success');
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--blue-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Cloned</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">New trade: <span class="hz-entity-link" style="font-size:0.5rem;">T-1009</span> (Draft)</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Stage Action (Record Discharge) */
+function openStageAction() { document.getElementById('stage-modal').style.display = 'flex'; }
+function closeStageAction() { document.getElementById('stage-modal').style.display = 'none'; }
+function submitStageAction() {
+  closeStageAction();
+  showToast('Discharge recorded for T-1001 — proceeding to Settlement', 'success');
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--green-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Discharge Recorded</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Outturn: 3,172,800 MMBtu — Sodegaura</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  // Update status
+  document.getElementById('trade-status').textContent = 'Discharged';
+  document.getElementById('trade-status').className = 'hz-badge green';
+  document.getElementById('trade-status').style.fontSize = '0.4375rem';
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
 </script>
 
 </body>
