@@ -15,6 +15,7 @@
 - **NO FIXED WIDTHS** — No px values. Use rem, em, %, vh/vw, or Tailwind's responsive classes. Design must be scalable.
 - **MAKE IT A PLEASURE** — Right data, right time. LNG numbers are HUGE ($47M cargoes, 3.2M MMBtu volumes). Big numbers should feel big and important. The UI should be functional, easy, and cool.
 - **SCALABLE** — Everything responsive. Works on laptop to ultrawide. No breakage at any viewport.
+- **KEYBOARD-FIRST** — Users don't want to spend time in this system. Every form must support type-and-tab flow. Date fields accept typed input (not date-picker-only). Selects are searchable/typeable. Tab order is logical. Enter submits. Escape cancels. No mouse required for core workflows. Auto-focus on first field when a form opens.
 
 ## Technical Rules
 - AG Grid containers: use `height:calc(100vh - Xrem)` not flexbox (flex chain breaks when initShell restructures DOM)
