@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Style Guide — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .sg-section {
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .sg-section:last-child {
+      border-bottom: none;
+    }
+    .sg-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .sg-desc {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .sg-example {
+      padding: 1rem;
+      background: var(--surface-base);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 0.75rem;
+    }
+    .sg-code {
+      position: relative;
+    }
+    .sg-code pre {
+      background: var(--surface-canvas);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      line-height: 1.6;
+      color: var(--text-tertiary);
+      margin: 0;
+    }
+    .sg-code code {
+      font-family: inherit;
+    }
+    .sg-swatch {
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+    .sg-swatch-label {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      text-align: center;
+    }
+    .sg-swatch-var {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+    .sg-subsection {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="hz-app">
+
+    <!-- 1. Design Tokens -->
+    <section id="design-tokens" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">1. Design Tokens</h2>
+      <p class="sg-desc">All colors are defined as CSS custom properties in :root. An AI can reskin the app by editing these variables.</p>
+
+      <h3 class="sg-subsection">Accent &amp; Semantic Colors</h3>
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--accent);"></div>
+            <div class="sg-swatch-label">Accent</div>
+            <div class="sg-swatch-var">--accent</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--accent-hover);"></div>
+            <div class="sg-swatch-label">Accent Hover</div>
+            <div class="sg-swatch-var">--accent-hover</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--accent-light);"></div>
+            <div class="sg-swatch-label">Accent Light</div>
+            <div class="sg-swatch-var">--accent-light</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--accent-violet);"></div>
+            <div class="sg-swatch-label">Violet</div>
+            <div class="sg-swatch-var">--accent-violet</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--green);"></div>
+            <div class="sg-swatch-label">Green</div>
+            <div class="sg-swatch-var">--green</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--red);"></div>
+            <div class="sg-swatch-label">Red</div>
+            <div class="sg-swatch-var">--red</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--amber);"></div>
+            <div class="sg-swatch-label">Amber</div>
+            <div class="sg-swatch-var">--amber</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--blue);"></div>
+            <div class="sg-swatch-label">Blue</div>
+            <div class="sg-swatch-var">--blue</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Surface Tiers</h3>
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--surface-canvas);"></div>
+            <div class="sg-swatch-label">Canvas</div>
+            <div class="sg-swatch-var">--surface-canvas</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--surface-base);"></div>
+            <div class="sg-swatch-label">Base</div>
+            <div class="sg-swatch-var">--surface-base</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--surface-raised);"></div>
+            <div class="sg-swatch-label">Raised</div>
+            <div class="sg-swatch-var">--surface-raised</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--surface-elevated);"></div>
+            <div class="sg-swatch-label">Elevated</div>
+            <div class="sg-swatch-var">--surface-elevated</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--surface-overlay);"></div>
+            <div class="sg-swatch-label">Overlay</div>
+            <div class="sg-swatch-var">--surface-overlay</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Text Tiers</h3>
+      <div class="sg-example">
+        <div class="flex flex-col gap-2">
+          <span style="color: var(--text-primary); font-weight: 600;">--text-primary — Headings, emphasis (this text)</span>
+          <span style="color: var(--text-secondary);">--text-secondary — Body text (this text)</span>
+          <span style="color: var(--text-tertiary);">--text-tertiary — Supporting text (this text)</span>
+          <span style="color: var(--text-muted);">--text-muted — Disabled/meta text (this text)</span>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Spacing Scale</h3>
+      <div class="sg-example">
+        <div class="flex flex-wrap items-end gap-3">
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-1); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-1</span>
+            <span class="sg-swatch-label">0.25rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-2); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-2</span>
+            <span class="sg-swatch-label">0.5rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-3); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-3</span>
+            <span class="sg-swatch-label">0.75rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-4); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-4</span>
+            <span class="sg-swatch-label">1rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-6); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-6</span>
+            <span class="sg-swatch-label">1.5rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-8); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-8</span>
+            <span class="sg-swatch-label">2rem</span>
+          </div>
+          <div class="flex flex-col items-center gap-1">
+            <div style="width: var(--sp-12); height: 2rem; background: var(--accent); border-radius: 2px;"></div>
+            <span class="sg-swatch-var">--sp-12</span>
+            <span class="sg-swatch-label">3rem</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Typography -->
+    <section id="typography" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">2. Typography</h2>
+      <p class="sg-desc">Type scale from hero (2rem) to xs (0.6875rem). Font: Inter for UI, JetBrains Mono for numbers.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-col gap-3">
+          <div>
+            <span style="font-size: var(--text-hero); font-weight: 700; color: var(--text-primary); line-height: 1.2;">Hero — 2rem / 32px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-hero &middot; Used for hero KPI values</div>
+          </div>
+          <div>
+            <span style="font-size: var(--text-xl); font-weight: 700; color: var(--text-primary);">XL — 1.5rem / 24px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-xl &middot; Page titles</div>
+          </div>
+          <div>
+            <span style="font-size: var(--text-lg); font-weight: 600; color: var(--text-primary);">LG — 1.125rem / 18px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-lg &middot; Section titles, KPI values</div>
+          </div>
+          <div>
+            <span style="font-size: var(--text-base); color: var(--text-secondary);">Base — 0.875rem / 14px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-base &middot; Body text</div>
+          </div>
+          <div>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">SM — 0.8125rem / 13px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-sm &middot; Compact body, table cells, buttons</div>
+          </div>
+          <div>
+            <span style="font-size: var(--text-xs); color: var(--text-tertiary);">XS — 0.6875rem / 11px</span>
+            <div style="font-size: var(--text-xs); color: var(--text-muted);">--text-xs &middot; Labels, badges, captions</div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;span style="font-size: var(--text-hero);"&gt;Hero Text&lt;/span&gt;
+&lt;span style="font-size: var(--text-xl);"&gt;XL Text&lt;/span&gt;
+&lt;span style="font-size: var(--text-lg);"&gt;LG Text&lt;/span&gt;
+&lt;span style="font-size: var(--text-base);"&gt;Base Text&lt;/span&gt;
+&lt;span style="font-size: var(--text-sm);"&gt;SM Text&lt;/span&gt;
+&lt;span style="font-size: var(--text-xs);"&gt;XS Text&lt;/span&gt;
+
+&lt;!-- Mono numbers --&gt;
+&lt;span class="font-mono"&gt;$1,234,567.89&lt;/span&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 3. KPI Cards -->
+    <section id="kpi-cards" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">3. KPI Cards</h2>
+      <p class="sg-desc">Compact key-performance-indicator cards with label, value, and optional delta indicator.</p>
+
+      <div class="sg-example">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="hz-kpi">
+            <span class="hz-kpi-label">Net Position</span>
+            <span class="hz-kpi-value">+4.8M</span>
+            <span class="hz-kpi-delta positive">+320K vs prev</span>
+          </div>
+          <div class="hz-kpi">
+            <span class="hz-kpi-label">Unrealised P&amp;L</span>
+            <span class="hz-kpi-value">$2.11M</span>
+            <span class="hz-kpi-delta positive">+$140K</span>
+          </div>
+          <div class="hz-kpi">
+            <span class="hz-kpi-label">Hedge Ratio</span>
+            <span class="hz-kpi-value">78%</span>
+            <span class="hz-kpi-delta negative">-2% vs target</span>
+          </div>
+          <div class="hz-kpi">
+            <span class="hz-kpi-label">Active Cargoes</span>
+            <span class="hz-kpi-value">7</span>
+            <span class="hz-kpi-delta" style="color: var(--text-muted);">Unchanged</span>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;div class="hz-kpi"&gt;
+  &lt;span class="hz-kpi-label"&gt;Net Position&lt;/span&gt;
+  &lt;span class="hz-kpi-value"&gt;+4.8M&lt;/span&gt;
+  &lt;span class="hz-kpi-delta positive"&gt;+320K vs prev&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Negative delta --&gt;
+&lt;div class="hz-kpi"&gt;
+  &lt;span class="hz-kpi-label"&gt;Hedge Ratio&lt;/span&gt;
+  &lt;span class="hz-kpi-value"&gt;78%&lt;/span&gt;
+  &lt;span class="hz-kpi-delta negative"&gt;-2% vs target&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 4. Status Badges -->
+    <section id="status-badges" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">4. Status Badges</h2>
+      <p class="sg-desc">Semantic status badges for trade states, approvals, and alerts.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-3 items-center">
+          <span class="hz-badge green">Confirmed</span>
+          <span class="hz-badge red">Rejected</span>
+          <span class="hz-badge amber">Pending</span>
+          <span class="hz-badge blue">In Transit</span>
+          <span class="hz-badge neutral">Draft</span>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;span class="hz-badge green"&gt;Confirmed&lt;/span&gt;
+&lt;span class="hz-badge red"&gt;Rejected&lt;/span&gt;
+&lt;span class="hz-badge amber"&gt;Pending&lt;/span&gt;
+&lt;span class="hz-badge blue"&gt;In Transit&lt;/span&gt;
+&lt;span class="hz-badge neutral"&gt;Draft&lt;/span&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 5. Status Dots -->
+    <section id="status-dots" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">5. Status Dots</h2>
+      <p class="sg-desc">Compact status indicators. Add .pulse for an animated glow effect (typically for "connected" states).</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-6 items-center">
+          <div class="flex items-center gap-2">
+            <span class="hz-dot green"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Green</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-dot amber"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Amber</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-dot red"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Red</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-dot blue"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Blue</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hz-dot green pulse"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Green + Pulse</span>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;span class="hz-dot green"&gt;&lt;/span&gt;
+&lt;span class="hz-dot amber"&gt;&lt;/span&gt;
+&lt;span class="hz-dot red"&gt;&lt;/span&gt;
+&lt;span class="hz-dot blue"&gt;&lt;/span&gt;
+&lt;span class="hz-dot green pulse"&gt;&lt;/span&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 6. Buttons -->
+    <section id="buttons" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">6. Buttons</h2>
+      <p class="sg-desc">Button variants: default, primary, ghost, destructive. Sizes: sm, default, lg. State: active.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-col gap-4">
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Variants</div>
+            <div class="flex flex-wrap gap-2 items-center">
+              <button class="hz-btn">Default</button>
+              <button class="hz-btn primary">Primary</button>
+              <button class="hz-btn ghost">Ghost</button>
+              <button class="hz-btn destructive">Destructive</button>
+              <button class="hz-btn active">Active</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Sizes</div>
+            <div class="flex flex-wrap gap-2 items-center">
+              <button class="hz-btn sm">Small</button>
+              <button class="hz-btn">Default</button>
+              <button class="hz-btn lg">Large</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;button class="hz-btn"&gt;Default&lt;/button&gt;
+&lt;button class="hz-btn primary"&gt;Primary&lt;/button&gt;
+&lt;button class="hz-btn ghost"&gt;Ghost&lt;/button&gt;
+&lt;button class="hz-btn destructive"&gt;Destructive&lt;/button&gt;
+&lt;button class="hz-btn active"&gt;Active&lt;/button&gt;
+
+&lt;!-- Sizes --&gt;
+&lt;button class="hz-btn sm"&gt;Small&lt;/button&gt;
+&lt;button class="hz-btn lg"&gt;Large&lt;/button&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 7. Form Inputs -->
+    <section id="form-inputs" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">7. Form Inputs</h2>
+      <p class="sg-desc">Text inputs, select dropdowns, labels, and the searchable combobox component.</p>
+
+      <div class="sg-example">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="hz-label">Text Input</label>
+            <input class="hz-input" type="text" placeholder="Enter value..." />
+          </div>
+          <div>
+            <label class="hz-label">Select</label>
+            <select class="hz-input">
+              <option>JKM</option>
+              <option>TTF</option>
+              <option>HH</option>
+              <option>Brent</option>
+            </select>
+          </div>
+          <div>
+            <label class="hz-label">Combobox</label>
+            <div class="hz-combobox" id="sg-combobox">
+              <input class="hz-combobox-input" placeholder="Search counterparty..." />
+              <div class="hz-combobox-dropdown"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;label class="hz-label"&gt;Text Input&lt;/label&gt;
+&lt;input class="hz-input" type="text" placeholder="Enter value..." /&gt;
+
+&lt;label class="hz-label"&gt;Select&lt;/label&gt;
+&lt;select class="hz-input"&gt;
+  &lt;option&gt;JKM&lt;/option&gt;
+  &lt;option&gt;TTF&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;!-- Combobox (requires initCombobox() in JS) --&gt;
+&lt;div class="hz-combobox" id="my-combo"&gt;
+  &lt;input class="hz-combobox-input" placeholder="Search..." /&gt;
+  &lt;div class="hz-combobox-dropdown"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  initCombobox(document.getElementById('my-combo'), [
+    { label: 'Shell Trading', value: 'shell' },
+    { label: 'JERA Co.', value: 'jera' },
+  ]);
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 8. Data Tables -->
+    <section id="data-tables" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">8. Data Tables</h2>
+      <p class="sg-desc">Two variants: .hz-table (standard) and .tbl (compact mono-spaced for dense data).</p>
+
+      <h3 class="sg-subsection">Standard Table (.hz-table)</h3>
+      <div class="sg-example" style="overflow-x: auto;">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Trade ID</th>
+              <th>Counterparty</th>
+              <th>Benchmark</th>
+              <th>Volume</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a class="hz-entity-link">T-1001</a></td>
+              <td>Shell Trading</td>
+              <td>JKM</td>
+              <td class="font-mono">3,200,000</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+            </tr>
+            <tr>
+              <td><a class="hz-entity-link">T-1002</a></td>
+              <td>JERA Co.</td>
+              <td>TTF</td>
+              <td class="font-mono">2,800,000</td>
+              <td><span class="hz-badge green">Confirmed</span></td>
+            </tr>
+            <tr>
+              <td><a class="hz-entity-link">T-1003</a></td>
+              <td>QatarEnergy</td>
+              <td>JKM</td>
+              <td class="font-mono">3,200,000</td>
+              <td><span class="hz-badge amber">Pending</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sg-subsection">Compact Table (.tbl)</h3>
+      <div class="sg-example" style="overflow-x: auto;">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>JKM</th>
+              <th>TTF</th>
+              <th>HH</th>
+              <th>Spread</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-05-01</td>
+              <td>14.25</td>
+              <td>12.80</td>
+              <td>3.42</td>
+              <td class="pnl-positive">+1.45</td>
+            </tr>
+            <tr>
+              <td>2026-04-30</td>
+              <td>13.90</td>
+              <td>12.95</td>
+              <td>3.40</td>
+              <td class="pnl-negative">-0.95</td>
+            </tr>
+            <tr>
+              <td>2026-04-29</td>
+              <td>14.10</td>
+              <td>12.70</td>
+              <td>3.38</td>
+              <td class="pnl-positive">+1.40</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Standard Table --&gt;
+&lt;table class="hz-table"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th&gt;Trade ID&lt;/th&gt;&lt;th&gt;Counterparty&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;a class="hz-entity-link"&gt;T-1001&lt;/a&gt;&lt;/td&gt;
+      &lt;td&gt;Shell Trading&lt;/td&gt;
+      &lt;td&gt;&lt;span class="hz-badge green"&gt;Confirmed&lt;/span&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;!-- Compact Table --&gt;
+&lt;table class="tbl"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th&gt;Date&lt;/th&gt;&lt;th&gt;JKM&lt;/th&gt;&lt;th&gt;Spread&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2026-05-01&lt;/td&gt;
+      &lt;td&gt;14.25&lt;/td&gt;
+      &lt;td class="pnl-positive"&gt;+1.45&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 9. Entity Links -->
+    <section id="entity-links" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">9. Entity Links</h2>
+      <p class="sg-desc">Clickable identifiers for trades, cargoes, invoices, and other entities. Mono-spaced, accent-colored.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-4 items-center">
+          <a class="hz-entity-link" href="#">T-1001</a>
+          <a class="hz-entity-link" href="#">INV-2026-0042</a>
+          <a class="hz-entity-link" href="#">CARGO-Q2-01</a>
+          <a class="hz-entity-link" href="#">SPA-QATAR-2026</a>
+          <a class="hz-entity-link" href="#">NOM-2026-Q2-001</a>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;a class="hz-entity-link" href="lifecycle.html?id=T-1001"&gt;T-1001&lt;/a&gt;
+&lt;a class="hz-entity-link" href="invoices.html?id=INV-2026-0042"&gt;INV-2026-0042&lt;/a&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 10. P&L Values -->
+    <section id="pnl-values" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">10. P&amp;L Values</h2>
+      <p class="sg-desc">Profit and loss display with semantic coloring. Green for gains, red for losses.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-6 items-center">
+          <div class="flex flex-col items-center">
+            <span class="font-mono pnl-positive" style="font-size: var(--text-hero);">+$2,114,500</span>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">pnl-positive</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="font-mono pnl-negative" style="font-size: var(--text-hero);">-$847,200</span>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">pnl-negative</span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="font-mono pnl-neutral" style="font-size: var(--text-hero);">$0</span>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">pnl-neutral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;span class="font-mono pnl-positive"&gt;+$2,114,500&lt;/span&gt;
+&lt;span class="font-mono pnl-negative"&gt;-$847,200&lt;/span&gt;
+&lt;span class="font-mono pnl-neutral"&gt;$0&lt;/span&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 11. Alerts & Toasts -->
+    <section id="alerts-toasts" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">11. Alerts &amp; Toasts</h2>
+      <p class="sg-desc">Error banners for inline alerts, confirmation bars for actions, and toast notifications.</p>
+
+      <h3 class="sg-subsection">Error Banner</h3>
+      <div class="sg-example">
+        <div class="hz-error-banner">
+          <span class="hz-error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+          <div>
+            <div class="hz-error-title">Validation Error</div>
+            <div class="hz-error-desc">Trade T-1003 is missing required counterparty credit check. Please review before confirmation.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Confirmation Bar</h3>
+      <div class="sg-example">
+        <div class="hz-confirm-bar">
+          <span class="hz-confirm-text">Confirm trade T-1001: BUY 3.2M MMBtu JKM @ $14.25 with Shell Trading?</span>
+          <button class="hz-btn primary sm">Confirm</button>
+          <button class="hz-btn sm">Cancel</button>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Toast Notifications</h3>
+      <div class="sg-example">
+        <div class="flex flex-col gap-2" style="max-width: 24rem;">
+          <div class="hz-toast success show" style="position: static; transform: none;">
+            <span>Trade T-1001 confirmed successfully</span>
+          </div>
+          <div class="hz-toast error show" style="position: static; transform: none;">
+            <span>Failed to save trade: network error</span>
+          </div>
+          <div class="hz-toast warning show" style="position: static; transform: none;">
+            <span>Credit limit approaching threshold (92%)</span>
+          </div>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <button class="hz-btn sm" onclick="showToast('This is a live toast!', 'success')">Trigger Success Toast</button>
+          <button class="hz-btn sm" onclick="showToast('Something went wrong', 'error')" style="margin-left: 0.5rem;">Trigger Error Toast</button>
+          <button class="hz-btn sm" onclick="showToast('Trade saved', 'success', function(){ alert('Undo clicked!'); })" style="margin-left: 0.5rem;">Toast with Undo</button>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Error Banner --&gt;
+&lt;div class="hz-error-banner"&gt;
+  &lt;span class="hz-error-icon"&gt;...svg...&lt;/span&gt;
+  &lt;div&gt;
+    &lt;div class="hz-error-title"&gt;Validation Error&lt;/div&gt;
+    &lt;div class="hz-error-desc"&gt;Description text&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Confirmation Bar --&gt;
+&lt;div class="hz-confirm-bar"&gt;
+  &lt;span class="hz-confirm-text"&gt;Confirm action?&lt;/span&gt;
+  &lt;button class="hz-btn primary sm"&gt;Confirm&lt;/button&gt;
+  &lt;button class="hz-btn sm"&gt;Cancel&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Toast (via JavaScript) --&gt;
+&lt;script&gt;
+  showToast('Trade confirmed', 'success');
+  showToast('Error occurred', 'error');
+  showToast('Warning', 'warning');
+  showToast('Saved', 'success', function() { /* undo */ });
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 12. KPI Strip -->
+    <section id="kpi-strip" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">12. KPI Strip</h2>
+      <p class="sg-desc">Compact horizontal KPI bar for use above data grids. Replaces KPI cards when vertical space is limited.</p>
+
+      <div class="sg-example">
+        <div class="hz-kpi-strip">
+          <span class="strip-label">Trades</span><span class="strip-value">142</span>
+          <span class="strip-sep">|</span>
+          <span class="strip-label">Volume</span><span class="strip-value">48.2M MMBtu</span>
+          <span class="strip-sep">|</span>
+          <span class="strip-label">Notional</span><span class="strip-value">$687.4M</span>
+          <span class="strip-sep">|</span>
+          <span class="strip-label">P&amp;L</span><span class="strip-value pnl-positive" style="color: var(--green);">+$2.11M</span>
+          <span class="strip-sep">|</span>
+          <span class="strip-label">Pending</span><span class="strip-value" style="color: var(--amber);">3</span>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;div class="hz-kpi-strip"&gt;
+  &lt;span class="strip-label"&gt;Trades&lt;/span&gt;&lt;span class="strip-value"&gt;142&lt;/span&gt;
+  &lt;span class="strip-sep"&gt;|&lt;/span&gt;
+  &lt;span class="strip-label"&gt;Volume&lt;/span&gt;&lt;span class="strip-value"&gt;48.2M MMBtu&lt;/span&gt;
+  &lt;span class="strip-sep"&gt;|&lt;/span&gt;
+  &lt;span class="strip-label"&gt;P&amp;amp;L&lt;/span&gt;&lt;span class="strip-value" style="color: var(--green);"&gt;+$2.11M&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="shell.js"></script>
+  <script>
+    initShell('style-guide', 'Style Guide');
+
+    // Initialize the combobox example
+    var sgCombo = document.getElementById('sg-combobox');
+    if (sgCombo) {
+      initCombobox(sgCombo, [
+        { label: 'Shell Trading', value: 'shell' },
+        { label: 'JERA Co.', value: 'jera' },
+        { label: 'QatarEnergy', value: 'qatar' },
+        { label: 'TotalEnergies', value: 'total' },
+        { label: 'Cheniere', value: 'cheniere' },
+        { label: 'Woodside', value: 'woodside' },
+        { label: 'KOGAS', value: 'kogas' },
+      ]);
+    }
+  </script>
+</body>
+</html>
