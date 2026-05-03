@@ -17,6 +17,13 @@
 - **SCALABLE** — Everything responsive. Works on laptop to ultrawide. No breakage at any viewport.
 - **KEYBOARD-FIRST** — Users don't want to spend time in this system. Every form must support type-and-tab flow. Date fields accept typed input (not date-picker-only). Selects are searchable/typeable. Tab order is logical. Enter submits. Escape cancels. No mouse required for core workflows. Auto-focus on first field when a form opens.
 
+## AI-Aware Design (MANDATORY)
+- **SEMANTIC HTML** — Use data attributes, aria labels, and clear class naming so an AI can understand what every component does and how to modify it.
+- **SKINNABLE** — Themes via CSS custom properties. Changing a skin = changing variable values, not rewriting components. An AI should be able to reskin the entire app by modifying the `:root` block.
+- **COMPONENT STYLE GUIDE** — Each component type (card, table, KPI, badge, form, grid) must have a documented pattern. Publish as a living style guide page within the template set.
+- **COPY-PASTE COMPONENTS** — Every component should be self-contained HTML that an AI can copy into a new page and it just works. No hidden dependencies, no magic JS init beyond `initShell()`.
+- **CLEAR NAMING** — Class names describe function: `hz-kpi`, `hz-entity-link`, `pnl-positive`. An AI reading the class name should understand the component's purpose.
+
 ## Technical Rules
 - AG Grid containers: use `height:calc(100vh - Xrem)` not flexbox (flex chain breaks when initShell restructures DOM)
 - Grid init: use `setTimeout(function(){...}, 100)` not `DOMContentLoaded`
