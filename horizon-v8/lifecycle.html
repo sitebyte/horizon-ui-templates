@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Detail — Horizon ETRM</title>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .td-layout { display:grid; grid-template-columns:1fr 20rem; gap:var(--sp-3); flex:1; min-height:0; }
+    .td-main { overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:var(--sp-3); }
+    .td-aside { overflow-y:auto; min-height:0; border-left:0.0625rem solid var(--border); padding-left:var(--sp-3); display:flex; flex-direction:column; gap:var(--sp-3); }
+    .td-header { display:flex; align-items:flex-start; justify-content:space-between; flex-shrink:0; }
+    .td-ref { font-family:var(--font-mono); font-size:var(--text-lg); font-weight:700; color:var(--text-primary); }
+    .td-sub { font-size:var(--text-xs); color:var(--text-muted); margin-top:2px; }
+    .td-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(10rem,1fr)); gap:var(--sp-2); }
+    .td-field { font-size:0.5625rem; }
+    .td-field-label { color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; font-size:0.5rem; margin-bottom:1px; }
+    .td-field-value { color:var(--text-primary); font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+    .td-section { font-size:var(--text-xs); font-weight:600; color:var(--text-primary); margin-bottom:var(--sp-1); display:flex; align-items:center; justify-content:space-between; }
+    .tbl { font-size:var(--text-xs); width:100%; border-collapse:collapse; }
+    .tbl th { font-size:0.5rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; padding:0.125rem var(--sp-2); text-align:left; border-bottom:0.0625rem solid var(--border); }
+    .tbl td { padding:0.125rem var(--sp-2); border-bottom:0.0625rem solid var(--border-subtle); height:1.25rem; }
+    .tbl .r { text-align:right; }
+    .tbl tr:hover td { background:var(--hover); }
+    .val-chart { display:flex; align-items:flex-end; gap:2px; height:3rem; }
+    .val-bar { flex:1; border-radius:1px 1px 0 0; min-width:3px; }
+    .stage-dot { width:0.5rem; height:0.5rem; border-radius:50%; flex-shrink:0; }
+    .stage-dot.done { background:var(--green); }
+    .stage-dot.active { background:var(--accent); box-shadow:0 0 0 2px var(--accent-bg); }
+    .stage-dot.pending { background:var(--surface-elevated); border:1px solid var(--border-strong); }
+    .audit-item { padding:var(--sp-1) 0; border-bottom:0.0625rem solid var(--border-subtle); }
+    .audit-item:last-child { border-bottom:none; }
+    /* Tabs */
+    .td-tabs { display:flex; gap:0; border-bottom:0.0625rem solid var(--border); flex-shrink:0; margin-bottom:var(--sp-2); overflow-x:auto; }
+    .td-tab { padding:var(--sp-1) var(--sp-2); font-size:var(--text-xs); font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; transition:all var(--transition-fast); background:none; border-top:none; border-left:none; border-right:none; white-space:nowrap; }
+    .td-tab:hover { color:var(--text-secondary); }
+    .td-tab.active { color:var(--accent-light); border-bottom-color:var(--accent); font-weight:600; }
+    .td-tab-panel { display:none; }
+    .td-tab-panel.active { display:flex; flex-direction:column; gap:var(--sp-3); }
+    /* Modals / Panels */
+    .td-modal-overlay { position:fixed; inset:0; background:var(--overlay-bg); z-index:500; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(0.25rem); }
+    .td-modal { background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:var(--radius-xl); padding:var(--sp-4); width:28rem; max-width:90vw; box-shadow:0 1rem 3rem rgba(0,0,0,0.4); }
+    .td-modal-title { font-size:var(--text-sm); font-weight:600; color:var(--text-primary); margin-bottom:var(--sp-3); }
+    .td-amend-row { display:grid; grid-template-columns:6rem 1fr 1fr; gap:var(--sp-2); align-items:center; padding:var(--sp-1) 0; font-size:var(--text-xs); border-bottom:0.0625rem solid var(--border-subtle); }
+    .td-amend-row:last-child { border-bottom:none; }
+    /* Dense form field highlight */
+    .df-highlight { background:rgba(245,158,11,0.08); padding:1px 4px; border-radius:2px; }
+    /* Variance colours in tables */
+    .var-pos { color:var(--green); }
+    .var-neg { color:var(--red); }
+    /* Locked row styling */
+    .row-locked td { opacity:0.7; }
+    @media (max-width:64rem) { .td-layout { grid-template-columns:1fr; } .td-aside { border-left:none; padding-left:0; border-top:0.0625rem solid var(--border); padding-top:var(--sp-3); } }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Trade Header -->
+  <div class="td-header fade-in" style="margin-bottom:var(--sp-2);">
+    <div>
+      <div class="flex items-center gap-2">
+        <span style="background:var(--green-dim);color:var(--green);font-weight:700;font-size:0.5625rem;padding:0.125rem 0.375rem;border-radius:var(--radius-sm);font-family:var(--font-mono);">BUY</span>
+        <span class="td-ref">T-1001</span>
+        <span class="hz-badge blue" style="font-size:0.4375rem;" id="trade-status">In Transit</span>
+      </div>
+      <div class="td-sub">Shell Energy Trading — 3,200,000 MMBtu JKM+$0.50 DES Jun-26 — Ref: BUY-2026-0411-A3F</div>
+    </div>
+    <div class="flex gap-1">
+      <button class="hz-btn sm" onclick="openAmend()">Amend</button>
+      <button class="hz-btn sm" onclick="cloneTrade()">Clone</button>
+      <button class="hz-btn sm primary" onclick="openStageAction()">Record Discharge</button>
+      <button class="hz-btn sm destructive" onclick="openCancel()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Lifecycle Progress (always visible) -->
+  <div class="flex items-center gap-1 shrink-0" style="margin-bottom:var(--sp-2);padding:var(--sp-1) 0;">
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Capture</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Approval</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Nomination</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--green);"></span>
+    <span class="stage-dot done"></span><span style="font-size:0.5rem;color:var(--green);">Loading</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--accent);"></span>
+    <span class="stage-dot active"></span><span style="font-size:0.5rem;color:var(--accent);font-weight:600;">Voyage</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Discharge</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">Settle</span>
+    <span style="flex:1;max-width:2rem;height:1px;background:var(--border);"></span>
+    <span class="stage-dot pending"></span><span style="font-size:0.5rem;color:var(--text-muted);">P&amp;L</span>
+  </div>
+
+  <div class="td-layout">
+    <!-- ===== MAIN: Tabbed Content ===== -->
+    <div class="td-main">
+      <!-- Tab Bar (8 tabs) -->
+      <div class="td-tabs">
+        <button class="td-tab active" onclick="switchTab('trade-entry',this)">Trade Entry</button>
+        <button class="td-tab" onclick="switchTab('valuation',this)">Valuation</button>
+        <button class="td-tab" onclick="switchTab('physical',this)">Physical</button>
+        <button class="td-tab" onclick="switchTab('settlement',this)">Settlement</button>
+        <button class="td-tab" onclick="switchTab('invoice-schedule',this)">Invoice Schedule</button>
+        <button class="td-tab" onclick="switchTab('linked-trades',this)">Linked Trades</button>
+        <button class="td-tab" onclick="switchTab('supply-plan',this)">Supply Plan</button>
+        <button class="td-tab" onclick="switchTab('attributes',this)">Attributes</button>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 1: Trade Entry (was Overview) — 30+ fields, 4-col dense -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel active" id="tab-trade-entry">
+        <div class="hz-card">
+          <div class="td-section">Trade Entry <span class="hz-badge green" style="font-size:0.375rem;">FO-Validated</span></div>
+          <div class="hz-dense-form">
+            <!-- Row 1 -->
+            <div><div class="df-label">Direction</div><div class="df-value pnl-positive">BUY</div></div>
+            <div><div class="df-label">Counterparty</div><div class="df-value" style="font-family:var(--font-ui);">Shell Energy Trading</div></div>
+            <div><div class="df-label">Legal Entity</div><div class="df-value" style="font-family:var(--font-ui);">Pacific LNG Ltd</div></div>
+            <div><div class="df-label">LE Book</div><div class="df-value">Pacific LNG</div></div>
+            <!-- Row 2 -->
+            <div><div class="df-label">Cpty Book</div><div class="df-value">Shell Book A</div></div>
+            <div><div class="df-label">Strategy</div><div class="df-value">Inventory</div></div>
+            <div><div class="df-label">Product</div><div class="df-value">LNG DES</div></div>
+            <div><div class="df-label">Volume</div><div class="df-value" id="field-volume">3,200,000 MMBtu</div></div>
+            <!-- Row 3 -->
+            <div><div class="df-label">Tolerance Min</div><div class="df-value">95%</div></div>
+            <div><div class="df-label">Tolerance Max</div><div class="df-value">105%</div></div>
+            <div><div class="df-label">Start Date</div><div class="df-value">01 Jun 2026</div></div>
+            <div><div class="df-label">End Date</div><div class="df-value">30 Nov 2026</div></div>
+            <!-- Row 4 -->
+            <div><div class="df-label">Delivery Terms</div><div class="df-value">DES</div></div>
+            <div><div class="df-label">Location Restriction</div><div class="df-value">Constrained</div></div>
+            <div><div class="df-label">Credit Security</div><div class="df-value">Open with LoC</div></div>
+            <div><div class="df-label">Index</div><div class="df-value df-highlight">SGP_Platts JKM Month Ahead</div></div>
+            <!-- Row 5 -->
+            <div><div class="df-label">Price</div><div class="df-value df-highlight">$14.75</div></div>
+            <div><div class="df-label">Premium</div><div class="df-value df-highlight" id="field-premium">+$0.50</div></div>
+            <div><div class="df-label">Currency</div><div class="df-value">USD</div></div>
+            <div><div class="df-label">Option Right</div><div class="df-value" style="color:var(--text-muted);">N/A</div></div>
+            <!-- Row 6 -->
+            <div><div class="df-label">Trader</div><div class="df-value" style="font-family:var(--font-ui);">J. Cobley</div></div>
+            <div><div class="df-label">Trade Group ID</div><div class="df-value">TG-4521</div></div>
+            <div><div class="df-label">Matched</div><div class="df-value">Yes</div></div>
+            <div><div class="df-label">Cargo</div><div class="df-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+            <!-- Row 7 -->
+            <div><div class="df-label">Contract</div><div class="df-value"><a href="contracts.html" class="hz-entity-link">SPA-SHELL-2026</a></div></div>
+            <div><div class="df-label">Trade Date</div><div class="df-value">12 Apr 2026</div></div>
+            <div><div class="df-label">Status</div><div class="df-value"><span class="hz-badge green" style="font-size:0.375rem;">FO-Validated</span></div></div>
+            <div><div class="df-label">Delivery</div><div class="df-value" id="field-delivery">Jun 2026</div></div>
+            <!-- Row 8 -->
+            <div><div class="df-label">Incoterm</div><div class="df-value">DES (Sodegaura)</div></div>
+            <div><div class="df-label">Benchmark</div><div class="df-value">JKM</div></div>
+            <div><div class="df-label">Created</div><div class="df-value">12 Apr 09:42</div></div>
+            <div><div class="df-label">Book</div><div class="df-value">Pacific LNG</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Current Valuation <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">02 May 17:30 EOD</span></div>
+          <div class="td-grid" style="grid-template-columns:repeat(6,1fr);">
+            <div class="td-field"><div class="td-field-label">Notional</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">MTM Value</div><div class="td-field-value pnl-positive">$47,540,000</div></div>
+            <div class="td-field"><div class="td-field-label">Unrealised P&amp;L</div><div class="td-field-value pnl-positive">+$340,000</div></div>
+            <div class="td-field"><div class="td-field-label">WACOG</div><div class="td-field-value">$14.75</div></div>
+            <div class="td-field"><div class="td-field-label">Spot (JKM)</div><div class="td-field-value">$14.25</div></div>
+            <div class="td-field"><div class="td-field-label">DV01</div><div class="td-field-value">$32,000</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Related Entities</div>
+          <div class="td-grid" style="grid-template-columns:repeat(4,1fr);">
+            <div class="td-field"><div class="td-field-label">Cargo</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+            <div class="td-field"><div class="td-field-label">Nomination</div><div class="td-field-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
+            <div class="td-field"><div class="td-field-label">Invoice (Prov)</div><div class="td-field-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
+            <div class="td-field"><div class="td-field-label">B/L Number</div><div class="td-field-value">SBLNG-2026-0605-A</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 2: Valuation -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-valuation">
+        <div class="hz-card">
+          <div class="td-section">Valuation History (EOD) <div class="flex gap-1"><button class="hz-btn sm active" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1W</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">1M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">3M</button><button class="hz-btn sm" style="height:1.125rem;font-size:0.4375rem;padding:0 0.375rem;">Life</button></div></div>
+          <div class="val-chart" style="margin-bottom:var(--sp-2);">
+            <div class="val-bar" style="height:40%;background:var(--green);" title="+$115K"></div>
+            <div class="val-bar" style="height:55%;background:var(--green);" title="+$180K"></div>
+            <div class="val-bar" style="height:35%;background:var(--green);" title="+$160K"></div>
+            <div class="val-bar" style="height:20%;background:var(--red);" title="-$85K"></div>
+            <div class="val-bar" style="height:50%;background:var(--green);" title="+$220K"></div>
+            <div class="val-bar" style="height:65%;background:var(--green);" title="+$290K"></div>
+            <div class="val-bar" style="height:75%;background:var(--green);" title="+$340K"></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th class="r">JKM Spot</th><th class="r">MTM</th><th class="r">Daily P&amp;L</th><th class="r">Cumulative</th><th class="r">Delta</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">02 May</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td class="r font-mono pnl-positive">+$340K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">01 May</td><td class="r font-mono">$14.22</td><td class="r font-mono">$47.49M</td><td class="r font-mono pnl-positive">+$70K</td><td class="r font-mono pnl-positive">+$290K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">30 Apr</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.42M</td><td class="r font-mono pnl-positive">+$305K</td><td class="r font-mono pnl-positive">+$220K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">29 Apr</td><td class="r font-mono">$13.99</td><td class="r font-mono">$47.11M</td><td class="r font-mono pnl-negative">-$245K</td><td class="r font-mono pnl-negative">-$85K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">28 Apr</td><td class="r font-mono">$14.15</td><td class="r font-mono">$47.36M</td><td class="r font-mono pnl-negative">-$20K</td><td class="r font-mono pnl-positive">+$160K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">27 Apr</td><td class="r font-mono">$14.16</td><td class="r font-mono">$47.38M</td><td class="r font-mono pnl-positive">+$65K</td><td class="r font-mono pnl-positive">+$180K</td><td class="r font-mono">$32K</td></tr>
+              <tr><td class="font-mono">26 Apr</td><td class="r font-mono">$14.12</td><td class="r font-mono">$47.31M</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono pnl-positive">+$115K</td><td class="r font-mono">$32K</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Intraday Movement <span class="text-xs font-mono" style="color:var(--text-muted);font-weight:400;">02 May 2026</span></div>
+          <div class="val-chart" style="margin-bottom:var(--sp-2);height:2rem;">
+            <div class="val-bar" style="height:30%;background:var(--green);"></div>
+            <div class="val-bar" style="height:45%;background:var(--green);"></div>
+            <div class="val-bar" style="height:60%;background:var(--green);"></div>
+            <div class="val-bar" style="height:50%;background:var(--green);"></div>
+            <div class="val-bar" style="height:35%;background:var(--green);"></div>
+            <div class="val-bar" style="height:25%;background:var(--red);"></div>
+            <div class="val-bar" style="height:40%;background:var(--green);"></div>
+            <div class="val-bar" style="height:55%;background:var(--green);"></div>
+            <div class="val-bar" style="height:70%;background:var(--green);"></div>
+            <div class="val-bar" style="height:75%;background:var(--green);"></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Time</th><th class="r">JKM Mid</th><th class="r">MTM</th><th class="r">vs Open</th><th>Event</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">17:30</td><td class="r font-mono">$14.25</td><td class="r font-mono">$47.54M</td><td class="r font-mono pnl-positive">+$50K</td><td><span class="hz-badge green" style="font-size:0.375rem;">EOD</span> Settlement fixed</td></tr>
+              <tr><td class="font-mono">16:00</td><td class="r font-mono">$14.28</td><td class="r font-mono">$47.56M</td><td class="r font-mono pnl-positive">+$68K</td><td>Asia close — JKM +$0.03</td></tr>
+              <tr><td class="font-mono">14:00</td><td class="r font-mono">$14.24</td><td class="r font-mono">$47.52M</td><td class="r font-mono pnl-positive">+$44K</td><td>Recovery from lunch dip</td></tr>
+              <tr><td class="font-mono">13:00</td><td class="r font-mono">$14.18</td><td class="r font-mono">$47.46M</td><td class="r font-mono pnl-negative">-$8K</td><td>Intraday low — TTF drag</td></tr>
+              <tr><td class="font-mono">10:00</td><td class="r font-mono">$14.30</td><td class="r font-mono">$47.58M</td><td class="r font-mono pnl-positive">+$72K</td><td>Intraday high</td></tr>
+              <tr><td class="font-mono">08:00</td><td class="r font-mono">$14.23</td><td class="r font-mono">$47.49M</td><td class="r font-mono" style="color:var(--text-muted);">—</td><td><span class="hz-badge neutral" style="font-size:0.375rem;">OPEN</span> Asia open</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 3: Physical -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-physical">
+        <div class="hz-card">
+          <div class="td-section">Cargo &amp; Vessel</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Cargo Ref</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+            <div class="td-field"><div class="td-field-label">Vessel</div><div class="td-field-value"><a href="cargo-board.html" class="hz-entity-link">Al Dafna</a></div></div>
+            <div class="td-field"><div class="td-field-label">IMO</div><div class="td-field-value">9431111</div></div>
+            <div class="td-field"><div class="td-field-label">Load Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sabine Pass LNG, USA</div></div>
+            <div class="td-field"><div class="td-field-label">Discharge Port</div><div class="td-field-value" style="font-family:var(--font-ui);">Sodegaura, Japan</div></div>
+            <div class="td-field"><div class="td-field-label">ETA</div><div class="td-field-value">17 Jun 2026 (46 days)</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Loading Details</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">B/L Number</div><div class="td-field-value">SBLNG-2026-0605-A</div></div>
+            <div class="td-field"><div class="td-field-label">B/L Quantity</div><div class="td-field-value">3,186,400 MMBtu</div></div>
+            <div class="td-field"><div class="td-field-label">B/L Date</div><div class="td-field-value">05 Jun 2026</div></div>
+            <div class="td-field"><div class="td-field-label">GHV (Gross)</div><div class="td-field-value">1,087 BTU/scf</div></div>
+            <div class="td-field"><div class="td-field-label">Temperature</div><div class="td-field-value">-161.2&deg;C</div></div>
+            <div class="td-field"><div class="td-field-label">Surveyor</div><div class="td-field-value" style="font-family:var(--font-ui);">SGS SA</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Nomination</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Nomination ID</div><div class="td-field-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
+            <div class="td-field"><div class="td-field-label">Laycan</div><div class="td-field-value">01-10 Jun 2026</div></div>
+            <div class="td-field"><div class="td-field-label">Status</div><div class="td-field-value"><span class="hz-badge green" style="font-size:0.4375rem;">Confirmed</span></div></div>
+            <div class="td-field"><div class="td-field-label">ADP Window</div><div class="td-field-value">Jun 2026 — Cargo 3 of 4</div></div>
+            <div class="td-field"><div class="td-field-label">Nominated By</div><div class="td-field-value" style="font-family:var(--font-ui);">S. Kumar</div></div>
+            <div class="td-field"><div class="td-field-label">Nominated On</div><div class="td-field-value">15 Apr 11:30</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 4: Settlement -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-settlement">
+        <div class="hz-card">
+          <div class="td-section">Invoice Status</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Provisional Invoice</div><div class="td-field-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
+            <div class="td-field"><div class="td-field-label">Amount</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">Status</div><div class="td-field-value"><span class="hz-badge amber" style="font-size:0.4375rem;">Pending Approval</span></div></div>
+            <div class="td-field"><div class="td-field-label">Final Invoice</div><div class="td-field-value" style="color:var(--text-muted);">Awaiting discharge outturn</div></div>
+            <div class="td-field"><div class="td-field-label">Reconciliation</div><div class="td-field-value" style="color:var(--text-muted);">Not started</div></div>
+            <div class="td-field"><div class="td-field-label">Payment Due</div><div class="td-field-value" style="color:var(--text-muted);">T+30 from final</div></div>
+          </div>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Settlement Breakdown (Provisional)</div>
+          <table class="tbl">
+            <thead><tr><th>Line</th><th>Description</th><th class="r">Qty (MMBtu)</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead>
+            <tbody>
+              <tr><td class="font-mono">1</td><td>LNG Cargo — JKM + $0.50</td><td class="r font-mono">3,200,000</td><td class="r font-mono">$14.75</td><td class="r font-mono">$47,200,000</td></tr>
+              <tr><td class="font-mono">2</td><td>Shipping Surcharge (DES)</td><td class="r font-mono">3,200,000</td><td class="r font-mono">$0.12</td><td class="r font-mono">$384,000</td></tr>
+              <tr><td class="font-mono">3</td><td>Quality Adjustment (est.)</td><td class="r font-mono">3,200,000</td><td class="r font-mono">-$0.03</td><td class="r font-mono pnl-negative">-$96,000</td></tr>
+            </tbody>
+            <tfoot><tr style="border-top:0.125rem solid var(--border-strong);"><td colspan="4" class="r" style="font-weight:600;color:var(--text-primary);">Provisional Total</td><td class="r font-mono font-bold">$47,488,000</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="hz-card">
+          <div class="td-section">Credit Impact</div>
+          <div class="td-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="td-field"><div class="td-field-label">Counterparty</div><div class="td-field-value" style="font-family:var(--font-ui);">Shell Energy Trading</div></div>
+            <div class="td-field"><div class="td-field-label">Credit Limit</div><div class="td-field-value">$100,000,000</div></div>
+            <div class="td-field"><div class="td-field-label">This Trade</div><div class="td-field-value">$47,200,000</div></div>
+            <div class="td-field"><div class="td-field-label">Total Exposure</div><div class="td-field-value">$78,400,000</div></div>
+            <div class="td-field"><div class="td-field-label">Headroom</div><div class="td-field-value" style="color:var(--amber);">$21,600,000</div></div>
+            <div class="td-field"><div class="td-field-label">Utilisation</div><div class="td-field-value" style="color:var(--amber);">78.4%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 5: Invoice Schedule (NEW) -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-invoice-schedule">
+        <div class="hz-card">
+          <div class="td-section">Invoice Schedule — T-1001 <span class="hz-badge neutral" style="font-size:0.375rem;">6 periods</span></div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Seq</th>
+                <th>Type</th>
+                <th>Period</th>
+                <th class="r">Volume (MMBtu)</th>
+                <th class="r">Rate</th>
+                <th class="r">Amount</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th style="width:1.5rem;text-align:center;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">1</td>
+                <td>Provisional</td>
+                <td class="font-mono">Jun 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,662</td>
+                <td class="font-mono">15 Jul 2026</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Paid</span></td>
+                <td style="text-align:center;font-size:0.5rem;">&#128274;</td>
+              </tr>
+              <tr class="row-locked">
+                <td class="font-mono">2</td>
+                <td>Provisional</td>
+                <td class="font-mono">Jul 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,662</td>
+                <td class="font-mono">15 Aug 2026</td>
+                <td><span class="hz-badge blue" style="font-size:0.375rem;">Locked</span></td>
+                <td style="text-align:center;font-size:0.5rem;">&#128274;</td>
+              </tr>
+              <tr class="row-locked">
+                <td class="font-mono">3</td>
+                <td>Provisional</td>
+                <td class="font-mono">Aug 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,662</td>
+                <td class="font-mono">15 Sep 2026</td>
+                <td><span class="hz-badge blue" style="font-size:0.375rem;">Locked</span></td>
+                <td style="text-align:center;font-size:0.5rem;">&#128274;</td>
+              </tr>
+              <tr>
+                <td class="font-mono">4</td>
+                <td>Provisional</td>
+                <td class="font-mono">Sep 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,662</td>
+                <td class="font-mono">15 Oct 2026</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Open</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="font-mono">5</td>
+                <td>Provisional</td>
+                <td class="font-mono">Oct 2026</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,677</td>
+                <td class="font-mono">15 Nov 2026</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Open</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="font-mono">6</td>
+                <td>Provisional</td>
+                <td class="font-mono">Nov 2026</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono">$14.75</td>
+                <td class="r font-mono">$7,866,677</td>
+                <td class="font-mono">15 Dec 2026</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Open</span></td>
+                <td></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:0.125rem solid var(--border-strong);">
+                <td colspan="3" class="r" style="font-weight:600;color:var(--text-primary);">Total</td>
+                <td class="r font-mono font-bold">3,200,000</td>
+                <td></td>
+                <td class="r font-mono font-bold">$47,200,002</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 6: Linked Trades (NEW) -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-linked-trades">
+        <div class="hz-card">
+          <div class="td-section">Linked Trades <span class="hz-badge neutral" style="font-size:0.375rem;">1 trade</span></div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Trade ID</th>
+                <th>Direction</th>
+                <th>Counterparty</th>
+                <th class="r">Volume (MMBtu)</th>
+                <th>Status</th>
+                <th>Relationship</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono"><a href="lifecycle.html" class="hz-entity-link">T-1001</a></td>
+                <td><span style="background:var(--green-dim);color:var(--green);font-weight:700;font-size:0.4375rem;padding:0.0625rem 0.25rem;border-radius:var(--radius-sm);font-family:var(--font-mono);">BUY</span></td>
+                <td style="font-family:var(--font-ui);">Shell Energy Trading</td>
+                <td class="r font-mono">3,200,000</td>
+                <td><span class="hz-badge blue" style="font-size:0.375rem;">In Transit</span></td>
+                <td style="font-family:var(--font-ui);">Self (this trade)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:var(--sp-2);padding:var(--sp-2);background:var(--surface-elevated);border-radius:var(--radius-sm);font-size:var(--text-xs);color:var(--text-muted);text-align:center;">
+            No linked trades for this trade type. Book transfers and spread legs will appear here when applicable.
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 7: Supply Plan (NEW) -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-supply-plan">
+        <div class="hz-card">
+          <div class="td-section">Supply Plan — T-1001 <span class="hz-badge neutral" style="font-size:0.375rem;">Jun–Nov 2026</span></div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th class="r">Planned</th>
+                <th class="r">Expected</th>
+                <th class="r">Actual</th>
+                <th class="r">Variance</th>
+                <th>Status</th>
+                <th>Cargo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono">Jun 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">531,067</td>
+                <td class="r font-mono var-neg">-2,266</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Loaded</span></td>
+                <td class="font-mono"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono">Jul 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">535,000</td>
+                <td class="r font-mono" style="color:var(--text-muted);">--</td>
+                <td class="r font-mono var-pos">+1,667</td>
+                <td><span class="hz-badge blue" style="font-size:0.375rem;">In Transit</span></td>
+                <td class="font-mono"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q3-02</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono">Aug 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono" style="color:var(--text-muted);">--</td>
+                <td class="r font-mono" style="color:var(--text-muted);">0</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Nominated</span></td>
+                <td class="font-mono"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q3-03</a></td>
+              </tr>
+              <tr>
+                <td class="font-mono">Sep 2026</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono">533,333</td>
+                <td class="r font-mono" style="color:var(--text-muted);">--</td>
+                <td class="r font-mono" style="color:var(--text-muted);">0</td>
+                <td><span class="hz-badge neutral" style="font-size:0.375rem;">Planned</span></td>
+                <td class="font-mono" style="color:var(--text-muted);">TBD</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Oct 2026</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono" style="color:var(--text-muted);">--</td>
+                <td class="r font-mono" style="color:var(--text-muted);">0</td>
+                <td><span class="hz-badge neutral" style="font-size:0.375rem;">Planned</span></td>
+                <td class="font-mono" style="color:var(--text-muted);">TBD</td>
+              </tr>
+              <tr>
+                <td class="font-mono">Nov 2026</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono">533,334</td>
+                <td class="r font-mono" style="color:var(--text-muted);">--</td>
+                <td class="r font-mono" style="color:var(--text-muted);">0</td>
+                <td><span class="hz-badge neutral" style="font-size:0.375rem;">Planned</span></td>
+                <td class="font-mono" style="color:var(--text-muted);">TBD</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:0.125rem solid var(--border-strong);">
+                <td style="font-weight:600;color:var(--text-primary);">Total</td>
+                <td class="r font-mono font-bold">3,200,000</td>
+                <td class="r font-mono font-bold">3,201,667</td>
+                <td class="r font-mono font-bold">531,067</td>
+                <td class="r font-mono var-neg">-599</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- TAB 8: Attributes (NEW — 5 collapsible sections, 67 fields) -->
+      <!-- ============================================================ -->
+      <div class="td-tab-panel" id="tab-attributes">
+
+        <!-- === Section 1: Discharge Info (14 fields) === -->
+        <div class="hz-card" style="padding-bottom:0;">
+          <div class="hz-collapse-header collapsed" onclick="toggleCollapse(this)">
+            <span class="collapse-arrow">&#9660;</span>
+            Discharge Info
+            <span class="hz-badge neutral" style="font-size:0.375rem;margin-left:auto;">14 fields</span>
+          </div>
+          <div class="hz-collapse-body">
+            <div class="hz-dense-form" style="margin-bottom:var(--sp-3);">
+              <div><div class="df-label">Discharge Port</div><div class="df-value" style="font-family:var(--font-ui);">Sodegaura</div></div>
+              <div><div class="df-label">Arrival Date</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">NOR Tendered</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Berthing Date</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Discharge Start</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Discharge Complete</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Outturn Volume</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Outturn CV</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Density</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Temperature</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Surveyor</div><div class="df-value" style="font-family:var(--font-ui);">SGS SA</div></div>
+              <div><div class="df-label">B/L Number</div><div class="df-value">SBLNG-2026-0605-A</div></div>
+              <div><div class="df-label">B/L Date</div><div class="df-value">05 Jun 2026</div></div>
+              <div><div class="df-label">B/L Quantity</div><div class="df-value">3,186,400</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Section 2: Loading Info (17 fields) — open by default === -->
+        <div class="hz-card" style="padding-bottom:0;">
+          <div class="hz-collapse-header" onclick="toggleCollapse(this)">
+            <span class="collapse-arrow">&#9660;</span>
+            Loading Info
+            <span class="hz-badge neutral" style="font-size:0.375rem;margin-left:auto;">17 fields</span>
+          </div>
+          <div class="hz-collapse-body">
+            <div class="hz-dense-form" style="margin-bottom:var(--sp-3);">
+              <div><div class="df-label">Load Port</div><div class="df-value" style="font-family:var(--font-ui);">Sabine Pass</div></div>
+              <div><div class="df-label">Berth Date</div><div class="df-value">03 Jun 2026</div></div>
+              <div><div class="df-label">Loading Start</div><div class="df-value">04 Jun 2026</div></div>
+              <div><div class="df-label">Loading Complete</div><div class="df-value">05 Jun 2026</div></div>
+              <div><div class="df-label">GHV Gross</div><div class="df-value">1,087 BTU/scf</div></div>
+              <div><div class="df-label">GHV Net</div><div class="df-value">1,082 BTU/scf</div></div>
+              <div><div class="df-label">CV</div><div class="df-value">23.0</div></div>
+              <div><div class="df-label">Density</div><div class="df-value">442.5 kg/m&sup3;</div></div>
+              <div><div class="df-label">Temperature</div><div class="df-value">-161.2&deg;C</div></div>
+              <div><div class="df-label">Tank Before</div><div class="df-value">2,450 m&sup3;</div></div>
+              <div><div class="df-label">Tank After</div><div class="df-value">138,200 m&sup3;</div></div>
+              <div><div class="df-label">Ship Gauge</div><div class="df-value">135,750 m&sup3;</div></div>
+              <div><div class="df-label">Shore Gauge</div><div class="df-value">135,820 m&sup3;</div></div>
+              <div><div class="df-label">Surveyor</div><div class="df-value" style="font-family:var(--font-ui);">SGS SA</div></div>
+              <div><div class="df-label">NOR Date</div><div class="df-value">02 Jun 2026</div></div>
+              <div><div class="df-label">Readiness Date</div><div class="df-value">03 Jun 2026</div></div>
+              <div><div class="df-label">Hose Connected</div><div class="df-value">04 Jun 2026</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Section 3: Dates (12 fields) === -->
+        <div class="hz-card" style="padding-bottom:0;">
+          <div class="hz-collapse-header collapsed" onclick="toggleCollapse(this)">
+            <span class="collapse-arrow">&#9660;</span>
+            Dates
+            <span class="hz-badge neutral" style="font-size:0.375rem;margin-left:auto;">12 fields</span>
+          </div>
+          <div class="hz-collapse-body">
+            <div class="hz-dense-form" style="margin-bottom:var(--sp-3);">
+              <div><div class="df-label">Trade Date</div><div class="df-value">12 Apr 2026</div></div>
+              <div><div class="df-label">Confirmation Date</div><div class="df-value">12 Apr 2026</div></div>
+              <div><div class="df-label">Nomination Deadline</div><div class="df-value">15 Mar 2026</div></div>
+              <div><div class="df-label">ADP Window</div><div class="df-value">Jun 2026</div></div>
+              <div><div class="df-label">Laycan Start</div><div class="df-value">01 Jun 2026</div></div>
+              <div><div class="df-label">Laycan End</div><div class="df-value">10 Jun 2026</div></div>
+              <div><div class="df-label">B/L Date</div><div class="df-value">05 Jun 2026</div></div>
+              <div><div class="df-label">ETA</div><div class="df-value">17 Jun 2026</div></div>
+              <div><div class="df-label">Discharge Date</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Invoice Date</div><div class="df-value">13 Apr 2026</div></div>
+              <div><div class="df-label">Payment Due</div><div class="df-value">13 May 2026</div></div>
+              <div><div class="df-label">Settlement Date</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Section 4: References (9 fields) === -->
+        <div class="hz-card" style="padding-bottom:0;">
+          <div class="hz-collapse-header collapsed" onclick="toggleCollapse(this)">
+            <span class="collapse-arrow">&#9660;</span>
+            References
+            <span class="hz-badge neutral" style="font-size:0.375rem;margin-left:auto;">9 fields</span>
+          </div>
+          <div class="hz-collapse-body">
+            <div class="hz-dense-form" style="margin-bottom:var(--sp-3);">
+              <div><div class="df-label">Internal Ref</div><div class="df-value">BUY-2026-0411-A3F</div></div>
+              <div><div class="df-label">External Ref</div><div class="df-value">SHELL-LNG-2026-0142</div></div>
+              <div><div class="df-label">Broker Ref</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Vessel Booking</div><div class="df-value">VB-2026-0411</div></div>
+              <div><div class="df-label">Nomination ID</div><div class="df-value"><a href="nominations.html" class="hz-entity-link">NOM-Q2-001</a></div></div>
+              <div><div class="df-label">Cargo ID</div><div class="df-value"><a href="cargo-board.html" class="hz-entity-link">CARGO-Q2-01</a></div></div>
+              <div><div class="df-label">B/L Number</div><div class="df-value">SBLNG-2026-0605-A</div></div>
+              <div><div class="df-label">Invoice Number</div><div class="df-value"><a href="invoices.html" class="hz-entity-link">INV-P-4521</a></div></div>
+              <div><div class="df-label">Contract Ref</div><div class="df-value"><a href="contracts.html" class="hz-entity-link">SPA-SHELL-2026</a></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Section 5: Trading Info (15 fields) === -->
+        <div class="hz-card" style="padding-bottom:0;">
+          <div class="hz-collapse-header collapsed" onclick="toggleCollapse(this)">
+            <span class="collapse-arrow">&#9660;</span>
+            Trading Info
+            <span class="hz-badge neutral" style="font-size:0.375rem;margin-left:auto;">15 fields</span>
+          </div>
+          <div class="hz-collapse-body">
+            <div class="hz-dense-form" style="margin-bottom:var(--sp-3);">
+              <div><div class="df-label">Portfolio</div><div class="df-value">Pacific LNG</div></div>
+              <div><div class="df-label">Book</div><div class="df-value">Pacific</div></div>
+              <div><div class="df-label">Strategy</div><div class="df-value">Inventory</div></div>
+              <div><div class="df-label">Trader</div><div class="df-value" style="font-family:var(--font-ui);">J. Cobley</div></div>
+              <div><div class="df-label">Broker</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Commission</div><div class="df-value" style="color:var(--text-muted);">--</div></div>
+              <div><div class="df-label">Cpty Rating</div><div class="df-value">AA-</div></div>
+              <div><div class="df-label">Credit Limit</div><div class="df-value">$100M</div></div>
+              <div><div class="df-label">Credit Used</div><div class="df-value">$78.4M</div></div>
+              <div><div class="df-label">Headroom</div><div class="df-value" style="color:var(--amber);">$21.6M</div></div>
+              <div><div class="df-label">VaR Contribution</div><div class="df-value">$84K</div></div>
+              <div><div class="df-label">DV01</div><div class="df-value">$32K</div></div>
+              <div><div class="df-label">Gamma</div><div class="df-value">$1.2K</div></div>
+              <div><div class="df-label">Theta</div><div class="df-value pnl-negative">-$0.8K</div></div>
+              <div><div class="df-label">Delivery Region</div><div class="df-value">Far East</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- END TAB 8 -->
+
+    </div>
+
+    <!-- ===== RIGHT: Audit Trail (persistent across tabs) ===== -->
+    <div class="td-aside">
+      <div>
+        <div class="td-section">Audit Trail <span class="hz-badge neutral" style="font-size:0.375rem;" id="audit-count">9 events</span></div>
+        <div id="audit-list" style="display:flex;flex-direction:column;">
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Sailed</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">AIS departure — Sabine Pass</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 18:45 — system</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">B/L Issued</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">3,186,400 MMBtu — SGS</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">05 Jun 08:00 — SGS</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Loading Commenced</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna berthed T2</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">03 Jun 14:30 — s.kumar</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Vessel Nominated</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Al Dafna — Laycan 01-10 Jun</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">15 Apr 11:30 — s.kumar</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot amber" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Premium Amended</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;"><span class="pnl-negative" style="font-size:0.5rem;">$0.35</span> &rarr; <span class="pnl-positive" style="font-size:0.5rem;">$0.50</span></div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">14 Apr 16:20 — j.cobley</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Invoice Created</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;"><a href="invoices.html" class="hz-entity-link" style="font-size:0.5rem;">INV-P-4521</a> — $47.2M</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">13 Apr 09:15 — system</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Credit Approved</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Shell $22M headroom — <span class="hz-badge green" style="font-size:0.3125rem;">PASS</span></div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:15 — r.mehta</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Confirmed</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Counterparty confirmed</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 10:02 — shell-api</div></div>
+          <div class="audit-item"><div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Created</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">BUY 3.2M JKM+$0.50 DES Jun-26</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">12 Apr 09:42 — j.cobley</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="td-section">Documents <span class="hz-badge neutral" style="font-size:0.375rem;">4</span></div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp-1);font-size:0.5625rem;">
+          <div class="flex items-center gap-2"><span style="color:var(--red);font-size:0.5rem;">&#9632;</span><span style="color:var(--text-secondary);">Confirmation_T-1001.pdf</span><span style="color:var(--text-muted);margin-left:auto;font-size:0.4375rem;">1.2MB</span></div>
+          <div class="flex items-center gap-2"><span style="color:var(--green);font-size:0.5rem;">&#9632;</span><span style="color:var(--text-secondary);">Credit_Approval_Shell.pdf</span><span style="color:var(--text-muted);margin-left:auto;font-size:0.4375rem;">340KB</span></div>
+          <div class="flex items-center gap-2"><span style="color:var(--blue);font-size:0.5rem;">&#9632;</span><span style="color:var(--text-secondary);">Nomination_ADP-Jun26.pdf</span><span style="color:var(--text-muted);margin-left:auto;font-size:0.4375rem;">890KB</span></div>
+          <div class="flex items-center gap-2"><span style="color:var(--amber);font-size:0.5rem;">&#9632;</span><span style="color:var(--text-secondary);">BL_Loading_Sabine.pdf</span><span style="color:var(--text-muted);margin-left:auto;font-size:0.4375rem;">2.1MB</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Amend Modal -->
+  <div id="amend-modal" class="td-modal-overlay" style="display:none;" onclick="closeAmend()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title">Amend Trade T-1001</div>
+      <div style="margin-bottom:var(--sp-3);">
+        <div class="td-amend-row" style="font-weight:600;color:var(--text-muted);border-bottom:0.0625rem solid var(--border);">
+          <span>Field</span><span>Current</span><span>New Value</span>
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Premium</span>
+          <span class="font-mono">+$0.50</span>
+          <input type="text" class="hz-input font-mono" value="+0.55" style="height:1.5rem;font-size:var(--text-xs);" id="amend-premium" />
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Volume</span>
+          <span class="font-mono">3,200,000</span>
+          <input type="text" class="hz-input font-mono" value="3,200,000" style="height:1.5rem;font-size:var(--text-xs);" id="amend-volume" />
+        </div>
+        <div class="td-amend-row">
+          <span style="color:var(--text-muted);">Delivery</span>
+          <span class="font-mono">Jun 2026</span>
+          <select class="hz-input font-mono" style="height:1.5rem;font-size:var(--text-xs);" id="amend-delivery">
+            <option selected>Jun 2026</option><option>Jul 2026</option><option>Aug 2026</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Reason for Amendment</label>
+        <input type="text" class="hz-input" placeholder="e.g. Price renegotiation with counterparty" style="height:1.75rem;font-size:var(--text-xs);" id="amend-reason" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeAmend()">Cancel</button>
+        <button class="hz-btn sm primary" onclick="submitAmend()">Submit Amendment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div id="cancel-modal" class="td-modal-overlay" style="display:none;" onclick="closeCancel()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title" style="color:var(--red);">Cancel Trade T-1001</div>
+      <div class="hz-error-banner" style="margin-bottom:var(--sp-3);font-size:var(--text-xs);">
+        <span style="flex-shrink:0;">&#9888;</span>
+        <div>
+          <div class="hz-error-title" style="font-size:var(--text-xs);">Position Impact</div>
+          <div class="hz-error-desc">Net position will decrease by <strong>3.2M MMBtu</strong>. Hedge ratio will change from 78% to 92%. Cancellation may trigger contractual penalties under SPA-SHELL-2026.</div>
+        </div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Cancellation Reason (required)</label>
+        <select class="hz-input" style="height:1.75rem;font-size:var(--text-xs);margin-bottom:var(--sp-2);" id="cancel-reason-type">
+          <option value="">Select reason...</option>
+          <option>Counterparty default</option>
+          <option>Force majeure</option>
+          <option>Pricing error</option>
+          <option>Duplicate entry</option>
+          <option>Other</option>
+        </select>
+        <input type="text" class="hz-input" placeholder="Additional details..." style="height:1.75rem;font-size:var(--text-xs);" id="cancel-reason-detail" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeCancel()">Keep Trade</button>
+        <button class="hz-btn sm destructive" onclick="submitCancel()">Confirm Cancellation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage Action Modal (Record Discharge) -->
+  <div id="stage-modal" class="td-modal-overlay" style="display:none;" onclick="closeStageAction()">
+    <div class="td-modal" onclick="event.stopPropagation()">
+      <div class="td-modal-title">Record Discharge — T-1001</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-3);">
+        <div><label class="td-field-label">Discharge Port</label><input type="text" class="hz-input font-mono" value="Sodegaura" readonly style="height:1.5rem;font-size:var(--text-xs);background:var(--surface-raised);color:var(--text-tertiary);" /></div>
+        <div><label class="td-field-label">Arrival Date</label><input type="date" class="hz-input font-mono" value="2026-06-17" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">Outturn Volume (MMBtu)</label><input type="text" class="hz-input font-mono" placeholder="3,172,800" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">BOG Allowance (MMBtu)</label><input type="text" class="hz-input font-mono" placeholder="13,600" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">GHV at Discharge</label><input type="text" class="hz-input font-mono" placeholder="1,085 BTU/scf" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+        <div><label class="td-field-label">Surveyor</label><input type="text" class="hz-input" value="SGS SA" style="height:1.5rem;font-size:var(--text-xs);" /></div>
+      </div>
+      <div style="margin-bottom:var(--sp-3);">
+        <label class="td-field-label">Notes</label>
+        <input type="text" class="hz-input" placeholder="Discharge notes..." style="height:1.75rem;font-size:var(--text-xs);" />
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button class="hz-btn sm ghost" onclick="closeStageAction()">Cancel</button>
+        <button class="hz-btn sm primary" onclick="submitStageAction()">Record Discharge</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('lifecycle', 'Trade Detail');
+
+/* Tab switching (8 tabs) */
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.td-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.td-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('tab-' + tabId).classList.add('active');
+  if (btn) { btn.classList.add('active'); }
+}
+
+/* Collapse toggle for Attributes sections */
+function toggleCollapse(el) {
+  el.classList.toggle('collapsed');
+}
+
+/* Amend workflow */
+function openAmend() { document.getElementById('amend-modal').style.display = 'flex'; }
+function closeAmend() { document.getElementById('amend-modal').style.display = 'none'; }
+function submitAmend() {
+  var premium = document.getElementById('amend-premium').value;
+  var reason = document.getElementById('amend-reason').value;
+  if (!reason) { showToast('Please provide a reason for the amendment', 'error'); return; }
+  closeAmend();
+  // Update displayed values
+  document.getElementById('field-premium').textContent = '+$' + premium;
+  // Add audit entry
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--accent-bg)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot amber" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Amended</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Premium: <span class="pnl-negative" style="font-size:0.5rem;">$0.50</span> &rarr; <span class="pnl-positive" style="font-size:0.5rem;">$' + premium + '</span> — ' + reason + '</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  showToast('Trade T-1001 amended — premium changed to +$' + premium, 'success');
+  // Update audit count
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Cancel workflow */
+function openCancel() { document.getElementById('cancel-modal').style.display = 'flex'; }
+function closeCancel() { document.getElementById('cancel-modal').style.display = 'none'; }
+function submitCancel() {
+  var reason = document.getElementById('cancel-reason-type').value;
+  if (!reason) { showToast('Please select a cancellation reason', 'error'); return; }
+  closeCancel();
+  // Update status badge
+  document.getElementById('trade-status').className = 'hz-badge red';
+  document.getElementById('trade-status').style.fontSize = '0.4375rem';
+  document.getElementById('trade-status').textContent = 'Cancelled';
+  // Add audit entry
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--red-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot red" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--red);">Trade Cancelled</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Reason: ' + reason + '</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  showToast('Trade T-1001 cancelled', 'warning', function() {
+    document.getElementById('trade-status').className = 'hz-badge blue';
+    document.getElementById('trade-status').textContent = 'In Transit';
+    auditList.removeChild(auditList.firstChild);
+    showToast('Cancellation undone', 'success');
+  });
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Clone */
+function cloneTrade() {
+  showToast('Trade cloned as T-1009 (Draft)', 'success');
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--blue-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot blue" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Trade Cloned</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">New trade: <span class="hz-entity-link" style="font-size:0.5rem;">T-1009</span> (Draft)</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+
+/* Stage Action (Record Discharge) */
+function openStageAction() { document.getElementById('stage-modal').style.display = 'flex'; }
+function closeStageAction() { document.getElementById('stage-modal').style.display = 'none'; }
+function submitStageAction() {
+  closeStageAction();
+  showToast('Discharge recorded for T-1001 — proceeding to Settlement', 'success');
+  var auditList = document.getElementById('audit-list');
+  var newEntry = document.createElement('div');
+  newEntry.className = 'audit-item';
+  newEntry.style.background = 'var(--green-dim)';
+  newEntry.innerHTML = '<div class="flex items-center gap-2"><span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span><span style="font-size:0.5625rem;font-weight:600;color:var(--text-primary);">Discharge Recorded</span></div><div style="font-size:0.5rem;color:var(--text-tertiary);margin-top:1px;">Outturn: 3,172,800 MMBtu — Sodegaura</div><div style="font-size:0.4375rem;color:var(--text-muted);" class="font-mono">Just now — j.cobley</div>';
+  auditList.insertBefore(newEntry, auditList.firstChild);
+  // Update status
+  document.getElementById('trade-status').textContent = 'Discharged';
+  document.getElementById('trade-status').className = 'hz-badge green';
+  document.getElementById('trade-status').style.fontSize = '0.4375rem';
+  var count = auditList.querySelectorAll('.audit-item').length;
+  document.getElementById('audit-count').textContent = count + ' events';
+}
+</script>
+
+</body>
+</html>
