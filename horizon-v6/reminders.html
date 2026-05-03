@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reminders — Horizon ETRM</title>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .countdown-badge {
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:2rem; padding:0.0625rem 0.375rem;
+      border-radius:var(--radius-full);
+      font-family:var(--font-mono); font-size:0.625rem; font-weight:700;
+    }
+    .countdown-badge.urgent   { background:var(--red-dim); color:var(--red); }
+    .countdown-badge.warning  { background:var(--amber-dim); color:var(--amber); }
+    .countdown-badge.normal   { background:var(--surface-elevated); color:var(--text-tertiary); }
+    .countdown-badge.overdue  { background:var(--red); color:#fff; }
+
+    .reminder-complete td { opacity:0.5; }
+    .reminder-complete td .hz-badge { background:var(--green-dim); color:var(--green); }
+
+    .mark-btn {
+      display:inline-flex; align-items:center; gap:0.25rem;
+      padding:0.125rem 0.5rem;
+      border:0.0625rem solid var(--border);
+      border-radius:var(--radius-md);
+      font-size:0.625rem; font-weight:500;
+      color:var(--text-tertiary);
+      background:transparent;
+      cursor:pointer;
+      transition:all 0.15s;
+    }
+    .mark-btn:hover { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+
+    .filter-bar {
+      display:flex; flex-wrap:wrap; align-items:flex-end; gap:0.75rem;
+      padding:0.5rem 0.75rem;
+      background:var(--card-bg);
+      border:0.0625rem solid var(--border);
+      border-radius:var(--radius-md);
+      margin-bottom:0.75rem;
+    }
+    .filter-group { display:flex; flex-direction:column; gap:0.25rem; }
+    .filter-group label {
+      font-size:0.5625rem; font-weight:600; text-transform:uppercase;
+      letter-spacing:0.04em; color:var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Filter bar -->
+  <div class="filter-bar fade-in">
+    <div class="filter-group">
+      <label>Status</label>
+      <select class="hz-input" id="flt-status" onchange="applyFilters()" style="width:8rem;">
+        <option value="all">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Complete">Complete</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Source</label>
+      <select class="hz-input" id="flt-source" onchange="applyFilters()" style="width:8rem;">
+        <option value="all">All</option>
+        <option value="Contract">Contract</option>
+        <option value="Trade">Trade</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>From</label>
+      <input type="date" class="hz-input" id="flt-from" value="2026-04-20" style="width:9rem;" onchange="applyFilters()" />
+    </div>
+    <div class="filter-group">
+      <label>To</label>
+      <input type="date" class="hz-input" id="flt-to" value="2026-05-31" style="width:9rem;" onchange="applyFilters()" />
+    </div>
+    <button class="hz-btn sm primary" onclick="applyFilters()">Search</button>
+    <button class="hz-btn sm" onclick="resetFilters()">Reset</button>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+      <span class="hz-inline-kpi">Total <span class="kpi-val" id="rem-count">10</span></span>
+      <span class="hz-inline-kpi">Overdue <span class="kpi-val pnl-negative" id="rem-overdue">1</span></span>
+    </div>
+  </div>
+
+  <!-- Reminder list (borderless table) -->
+  <div class="hz-card borderless fade-in-d1" style="overflow-x:auto; flex:1; min-height:0;">
+    <table class="hz-table" id="reminder-table">
+      <thead>
+        <tr>
+          <th style="width:5.5rem;">Due Date</th>
+          <th style="width:3.5rem;">Countdown</th>
+          <th>Source</th>
+          <th>Entity</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Owner</th>
+          <th>Status</th>
+          <th style="width:6rem;"></th>
+        </tr>
+      </thead>
+      <tbody id="reminder-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('reminders', 'Reminders');
+
+/* Today reference for countdown calculation */
+var TODAY = new Date('2026-05-02');
+
+var reminderData = [
+  { id:1,  due:'2026-05-01', source:'Contract', entity:'SPA-QATAR-2026', entityHref:'contracts.html', type:'ContractConfirmation', desc:'Confirm Q3 lifting schedule with QatarEnergy',                 owner:'Operator',  status:'Pending' },
+  { id:2,  due:'2026-05-04', source:'Trade',    entity:'T-1001',         entityHref:'lifecycle.html',  type:'Nomination',           desc:'Submit vessel nomination for May cargo ex-Ras Laffan',        owner:'Operator',  status:'Pending' },
+  { id:3,  due:'2026-05-09', source:'Trade',    entity:'T-1003',         entityHref:'lifecycle.html',  type:'Payment',              desc:'Wire transfer due for provisional invoice INV-4519',          owner:'Connect',   status:'Pending' },
+  { id:4,  due:'2026-05-10', source:'Contract', entity:'SPA-SHELL-2026', entityHref:'contracts.html',  type:'ContractConfirmation', desc:'Annual volume review meeting with Shell Trading',             owner:'Trader',    status:'Pending' },
+  { id:5,  due:'2026-05-16', source:'Trade',    entity:'T-1005',         entityHref:'lifecycle.html',  type:'Nomination',           desc:'Nomination deadline for Sabine Pass June loading window',     owner:'Operator',  status:'Pending' },
+  { id:6,  due:'2026-05-18', source:'Trade',    entity:'T-1002',         entityHref:'lifecycle.html',  type:'Payment',              desc:'Final invoice payment for TTF cargo delivery',                owner:'Connect',   status:'Pending' },
+  { id:7,  due:'2026-05-22', source:'Contract', entity:'MSA-JERA-2025', entityHref:'contracts.html',  type:'ContractConfirmation', desc:'JERA master agreement annual renewal review',                 owner:'Trader',    status:'Pending' },
+  { id:8,  due:'2026-04-28', source:'Trade',    entity:'T-1004',         entityHref:'lifecycle.html',  type:'Nomination',           desc:'Confirm discharge port for HH-linked cargo',                  owner:'Operator',  status:'Complete' },
+  { id:9,  due:'2026-04-25', source:'Contract', entity:'SPOT-TOTAL-Q2', entityHref:'contracts.html',  type:'Payment',              desc:'Spot contract margin call settlement with TotalEnergies',     owner:'Connect',   status:'Complete' },
+  { id:10, due:'2026-05-30', source:'Trade',    entity:'T-1006',         entityHref:'lifecycle.html',  type:'Nomination',           desc:'ADP schedule submission for Woodside July allocation',        owner:'Operator',  status:'Pending' },
+];
+
+function daysDiff(dueDateStr) {
+  var due = new Date(dueDateStr);
+  var diff = Math.round((due - TODAY) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function countdownBadge(days) {
+  if (days < 0)  return '<span class="countdown-badge overdue">' + Math.abs(days) + 'd ago</span>';
+  if (days <= 2) return '<span class="countdown-badge urgent">' + days + 'd</span>';
+  if (days <= 7) return '<span class="countdown-badge warning">' + days + 'd</span>';
+  return '<span class="countdown-badge normal">' + days + 'd</span>';
+}
+
+function applyFilters() {
+  var statusF = document.getElementById('flt-status').value;
+  var sourceF = document.getElementById('flt-source').value;
+  var fromF   = document.getElementById('flt-from').value;
+  var toF     = document.getElementById('flt-to').value;
+
+  var filtered = reminderData.filter(function(r) {
+    if (statusF !== 'all' && r.status !== statusF) return false;
+    if (sourceF !== 'all' && r.source !== sourceF) return false;
+    if (fromF && r.due < fromF) return false;
+    if (toF && r.due > toF) return false;
+    return true;
+  });
+
+  renderReminders(filtered);
+}
+
+function resetFilters() {
+  document.getElementById('flt-status').value = 'all';
+  document.getElementById('flt-source').value = 'all';
+  document.getElementById('flt-from').value = '2026-04-20';
+  document.getElementById('flt-to').value = '2026-05-31';
+  renderReminders(reminderData);
+}
+
+function markComplete(id) {
+  var item = reminderData.find(function(r) { return r.id === id; });
+  if (item) {
+    item.status = 'Complete';
+    showToast('Reminder marked complete: ' + item.entity + ' - ' + item.type, 'success');
+    applyFilters();
+  }
+}
+
+function renderReminders(data) {
+  var tbody = document.getElementById('reminder-body');
+  var overdueCount = 0;
+
+  /* Sort: pending first (by due asc), then complete */
+  var sorted = data.slice().sort(function(a, b) {
+    if (a.status === 'Complete' && b.status !== 'Complete') return 1;
+    if (a.status !== 'Complete' && b.status === 'Complete') return -1;
+    return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+  });
+
+  var html = '';
+  sorted.forEach(function(r) {
+    var days = daysDiff(r.due);
+    var isComplete = r.status === 'Complete';
+    if (days < 0 && !isComplete) overdueCount++;
+
+    var statusBadge = isComplete
+      ? '<span class="hz-badge green">Complete</span>'
+      : '<span class="hz-badge amber">Pending</span>';
+
+    var ownerColor = '';
+    if (r.owner === 'Operator') ownerColor = 'color:var(--blue)';
+    if (r.owner === 'Trader')   ownerColor = 'color:var(--accent-light)';
+    if (r.owner === 'Connect')  ownerColor = 'color:var(--amber)';
+
+    var typeLabel = r.type;
+    if (r.type === 'ContractConfirmation') typeLabel = 'Contract Confirm';
+
+    html += '<tr class="' + (isComplete ? 'reminder-complete' : '') + '">';
+    html += '<td class="font-mono" style="color:var(--text-tertiary); white-space:nowrap;">' + r.due + '</td>';
+    html += '<td>' + countdownBadge(days) + '</td>';
+    html += '<td><span class="hz-badge ' + (r.source === 'Contract' ? 'blue' : 'neutral') + '">' + r.source + '</span></td>';
+    html += '<td><a href="' + r.entityHref + '" class="hz-entity-link">' + r.entity + '</a></td>';
+    html += '<td style="white-space:nowrap;">' + typeLabel + '</td>';
+    html += '<td style="color:var(--text-secondary); max-width:20rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + r.desc + '</td>';
+    html += '<td><span style="font-weight:500; ' + ownerColor + ';">' + r.owner + '</span></td>';
+    html += '<td>' + statusBadge + '</td>';
+    html += '<td>';
+    if (!isComplete) {
+      html += '<button class="mark-btn" onclick="markComplete(' + r.id + ')">';
+      html += '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      html += 'Mark Complete';
+      html += '</button>';
+    }
+    html += '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+
+  /* Update counts */
+  document.getElementById('rem-count').textContent = data.length;
+  document.getElementById('rem-overdue').textContent = overdueCount;
+}
+
+/* Initial render */
+renderReminders(reminderData);
+</script>
+
+</body>
+</html>
