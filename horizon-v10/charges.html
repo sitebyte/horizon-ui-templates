@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charge Management — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-4 gap-2 mb-3 fade-in">
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Total Charges</span>
+      <span class="hz-kpi-value">47</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Pending</span>
+      <span class="hz-kpi-value" style="color:var(--amber);">8</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">This Month</span>
+      <span class="hz-kpi-value">$3.2M</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Avg per Cargo</span>
+      <span class="hz-kpi-value">$142K</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex items-center gap-2 mb-2 fade-in-d1" style="flex-wrap:wrap;">
+    <div class="flex gap-1">
+      <button class="hz-btn sm active" id="flt-all" onclick="filterCharges('all')">All</button>
+      <button class="hz-btn sm" id="flt-entered" onclick="filterCharges('FO-Entered')">FO-Entered</button>
+      <button class="hz-btn sm" id="flt-checked" onclick="filterCharges('Trade Checked')">Checked</button>
+      <button class="hz-btn sm" id="flt-cancelled" onclick="filterCharges('Cancelled')">Cancelled</button>
+    </div>
+    <span class="hz-inline-kpi" style="margin-left:var(--sp-3);">Cargo Charges <span class="kpi-val">$1.84M</span></span>
+    <span class="hz-inline-kpi">Service Charges <span class="kpi-val">$620K</span></span>
+    <div style="margin-left:auto; display:flex; gap:0.375rem;">
+      <button class="hz-btn primary sm" onclick="showToast('New charge form opened','success')">+ New Charge</button>
+      <button class="hz-btn sm" onclick="showToast('Exported charges.csv','success')">Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Charge grid (borderless table) -->
+  <div class="hz-card borderless fade-in-d2" style="overflow-x:auto; flex:1; min-height:0;">
+    <table class="hz-table" id="charge-table">
+      <thead>
+        <tr>
+          <th>Charge ID</th>
+          <th>Parent Trade</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Volume Type</th>
+          <th style="text-align:right;">Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="charge-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('charges', 'Charge Management');
+
+var chargeData = [
+  { id:'CHG-3001', trade:'T-1001', type:'Demurrage',     category:'Cargo',      volType:'Flat',        amount:284500,  status:'FO-Entered',    date:'2026-04-28' },
+  { id:'CHG-3002', trade:'T-1002', type:'Storage',        category:'Cargo',      volType:'Volumetric',  amount:127300,  status:'Trade Checked',  date:'2026-04-27' },
+  { id:'CHG-3003', trade:'T-1003', type:'Inspection',     category:'Cargo',      volType:'Flat',        amount:18750,   status:'FO-Entered',    date:'2026-04-26' },
+  { id:'CHG-3004', trade:'T-1001', type:'Charter Fee',    category:'Chartering', volType:'Flat',        amount:1450000, status:'Trade Checked',  date:'2026-04-25' },
+  { id:'CHG-3005', trade:'T-1004', type:'Fuel Oil',       category:'Chartering', volType:'BAV',         amount:312600,  status:'FO-Entered',    date:'2026-04-24' },
+  { id:'CHG-3006', trade:'T-1002', type:'Port Charges',   category:'Service',    volType:'Flat',        amount:96400,   status:'Trade Checked',  date:'2026-04-23' },
+  { id:'CHG-3007', trade:'T-1005', type:'Pilotage',       category:'Service',    volType:'Flat',        amount:42100,   status:'FO-Entered',    date:'2026-04-22' },
+  { id:'CHG-3008', trade:'T-1003', type:'Agency Fee',     category:'Service',    volType:'Flat',        amount:28500,   status:'Cancelled',     date:'2026-04-21' },
+  { id:'CHG-3009', trade:'T-1006', type:'LC Fee',         category:'Finance',    volType:'Flat',        amount:185000,  status:'Trade Checked',  date:'2026-04-20' },
+  { id:'CHG-3010', trade:'T-1004', type:'Demurrage',      category:'Cargo',      volType:'Volumetric',  amount:198200,  status:'FO-Entered',    date:'2026-04-19' },
+  { id:'CHG-3011', trade:'T-1007', type:'Storage',        category:'Cargo',      volType:'BAV',         amount:72400,   status:'Cancelled',     date:'2026-04-18' },
+  { id:'CHG-3012', trade:'T-1005', type:'Charter Fee',    category:'Chartering', volType:'Flat',        amount:1620000, status:'Trade Checked',  date:'2026-04-17' },
+];
+
+var activeChargeFilter = 'all';
+
+function filterCharges(status) {
+  activeChargeFilter = status;
+  document.querySelectorAll('#flt-all, #flt-entered, #flt-checked, #flt-cancelled').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  if (status === 'all')           document.getElementById('flt-all').classList.add('active');
+  if (status === 'FO-Entered')    document.getElementById('flt-entered').classList.add('active');
+  if (status === 'Trade Checked') document.getElementById('flt-checked').classList.add('active');
+  if (status === 'Cancelled')     document.getElementById('flt-cancelled').classList.add('active');
+  renderCharges();
+}
+
+function renderCharges() {
+  var tbody = document.getElementById('charge-body');
+  var filtered = activeChargeFilter === 'all'
+    ? chargeData
+    : chargeData.filter(function(c) { return c.status === activeChargeFilter; });
+
+  var html = '';
+  filtered.forEach(function(c) {
+    var statusClass = '';
+    if (c.status === 'FO-Entered')    statusClass = 'amber';
+    if (c.status === 'Trade Checked') statusClass = 'green';
+    if (c.status === 'Cancelled')     statusClass = 'red';
+
+    var catColor = '';
+    if (c.category === 'Cargo')      catColor = 'color:var(--blue)';
+    if (c.category === 'Chartering') catColor = 'color:var(--accent-light)';
+    if (c.category === 'Service')    catColor = 'color:var(--text-secondary)';
+    if (c.category === 'Finance')    catColor = 'color:var(--amber)';
+
+    html += '<tr>';
+    html += '<td><a href="lifecycle.html" class="hz-entity-link">' + c.id + '</a></td>';
+    html += '<td><a href="lifecycle.html" class="hz-entity-link">' + c.trade + '</a></td>';
+    html += '<td>' + c.type + '</td>';
+    html += '<td><span style="' + catColor + '; font-weight:500;">' + c.category + '</span></td>';
+    html += '<td><span class="hz-badge neutral" style="font-size:0.5625rem;">' + c.volType + '</span></td>';
+    html += '<td style="text-align:right;" class="font-mono">$' + c.amount.toLocaleString() + '</td>';
+    html += '<td><span class="hz-badge ' + statusClass + '">' + c.status + '</span></td>';
+    html += '<td class="font-mono" style="color:var(--text-tertiary);">' + c.date + '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+renderCharges();
+</script>
+
+</body>
+</html>
