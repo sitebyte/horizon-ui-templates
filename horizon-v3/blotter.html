@@ -9,16 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
   <link href="shell.css" rel="stylesheet" />
   <style>
-    /* Skeleton loader */
-    .hz-skeleton { background: var(--surface-elevated); border-radius: 0.25rem; position: relative; overflow: hidden; }
-    .hz-skeleton::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent); animation: shimmer 1.5s infinite; }
-    @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-    .hz-skeleton-row { display:flex; gap:0.5rem; padding:0.375rem 0.5rem; border-bottom:0.0625rem solid var(--border); }
-    .hz-skeleton-cell { height:0.875rem; flex:1; }
-    .hz-skeleton-cell.w-sm { max-width:4rem; }
-    .hz-skeleton-cell.w-md { max-width:6rem; }
-    .hz-skeleton-cell.w-lg { max-width:10rem; }
-
     /* Column toggle panel */
     .hz-col-panel { position:absolute; right:0; top:100%; margin-top:0.25rem; background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:0.375rem; padding:0.5rem; z-index:20; min-width:10rem; box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3); display:none; }
     .hz-col-panel.open { display:block; }
