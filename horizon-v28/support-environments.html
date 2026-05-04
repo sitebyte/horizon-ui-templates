@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Environments — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Section: Page-level table + section styles
+       ============================================================ */
+    .tbl { font-size: var(--text-xs); width: 100%; border-collapse: collapse; }
+    .tbl th {
+      font-size: 0.5rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.125rem var(--sp-2); text-align: left;
+      border-bottom: 0.0625rem solid var(--border);
+      font-family: var(--font-ui);
+      position: sticky; top: 0; background: var(--surface-canvas); z-index: 1;
+    }
+    .tbl td {
+      padding: 0.125rem var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      height: 1.25rem;
+    }
+    .tbl tr:hover td { background: var(--hover); }
+    .tbl .r { text-align: right; }
+
+    .env-sections {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    .sec-title {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--sp-1);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+    .ai-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+    .ai-metric-table { flex: 1; }
+    .exc-row {
+      display: flex; align-items: center; gap: var(--sp-2);
+      padding: 0.1875rem var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      font-size: var(--text-xs);
+    }
+    .exc-row:last-child { border-bottom: none; }
+    .exc-row:hover { background: var(--hover); border-radius: var(--radius-sm); }
+
+    /* ============================================================
+       Section: Integration Flow Diagram
+       ============================================================ */
+    .flow-diagram-wrap {
+      background: var(--surface-canvas);
+      border: 0.0625rem solid rgba(79,70,229,0.3);
+      border-radius: var(--radius-md);
+      padding: var(--sp-4) var(--sp-3);
+      position: relative;
+      overflow: hidden;
+    }
+    /* Sci-fi glow background */
+    .flow-diagram-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 60%, rgba(79,70,229,0.12) 0%, transparent 40%),
+        radial-gradient(ellipse at 20% 50%, rgba(34,197,94,0.05) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 50%, rgba(124,58,237,0.05) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    /* Scanline overlay */
+    .flow-diagram-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(79,70,229,0.015) 2px,
+        rgba(79,70,229,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 3;
+    }
+    /* Grid dots background */
+    .flow-diagram::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle, rgba(79,70,229,0.15) 1px, transparent 1px);
+      background-size: 1.5rem 1.5rem;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .flow-diagram {
+      display: grid;
+      grid-template-columns: 10rem 11rem 10rem 11rem 10rem;
+      gap: var(--sp-2);
+      position: relative;
+      margin: 0 auto;
+      min-height: 42rem;
+      padding: var(--sp-2);
+    }
+
+    /* Column headers */
+    .col-header {
+      font-size: 0.4375rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-align: center;
+      padding: var(--sp-1) 0;
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      margin-bottom: var(--sp-1);
+      z-index: 2;
+    }
+
+    /* Flow nodes */
+    .flow-node {
+      background: rgba(20,20,23,0.9);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-1) var(--sp-2);
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      cursor: pointer;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s, opacity 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.125rem;
+      backdrop-filter: blur(0.5rem);
+      justify-self: center;
+      align-self: start;
+      width: 100%;
+      max-width: 9.5rem;
+    }
+    .flow-node:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.3);
+    }
+    .flow-node.active-filter {
+      box-shadow: 0 0 0 0.125rem var(--accent), 0 0 1.5rem rgba(79,70,229,0.4);
+    }
+    .flow-node.dimmed { opacity: 0.25; }
+
+    /* Node type variants */
+    .flow-node.node-external {
+      border-radius: 1rem;
+      border-style: dashed;
+      border-color: rgba(99,102,241,0.4);
+    }
+    .flow-node.node-glint {
+      border-radius: var(--radius-sm);
+      border-color: rgba(34,197,94,0.4);
+      padding: var(--sp-1);
+    }
+    .flow-node.node-core {
+      border-width: 0.125rem;
+      border-style: solid;
+    }
+    .flow-node.node-destination {
+      border-radius: 0.75rem;
+      border-color: rgba(124,58,237,0.5);
+    }
+
+    /* EOS specific */
+    .flow-node.node-eos {
+      border-image: linear-gradient(135deg, #4f46e5, #7c3aed) 1;
+      min-height: 5rem;
+      padding: var(--sp-2);
+      box-shadow: 0 0 1.5rem rgba(79,70,229,0.2), inset 0 0 1rem rgba(79,70,229,0.05);
+    }
+    .flow-node.node-eos .flow-node-name { font-size: 0.75rem; }
+
+    /* RabbitMQ specific */
+    .flow-node.node-rmq {
+      border-image: linear-gradient(135deg, #f97316, #fb923c) 1;
+      min-height: 3.5rem;
+      padding: var(--sp-2);
+      box-shadow: 0 0 1.5rem rgba(249,115,22,0.2), inset 0 0 1rem rgba(249,115,22,0.05);
+    }
+    .flow-node.node-rmq .flow-node-name { color: #fb923c; font-size: 0.6875rem; }
+
+    /* Sci-fi glow per status */
+    .flow-node.healthy {
+      border-color: var(--green);
+      box-shadow: 0 0 0.5rem rgba(34,197,94,0.15), inset 0 0 0.5rem rgba(34,197,94,0.05);
+    }
+    .flow-node.healthy:hover { box-shadow: 0 0 1.5rem rgba(34,197,94,0.3), inset 0 0 0.5rem rgba(34,197,94,0.1); }
+    .flow-node.degraded {
+      border-color: var(--amber);
+      box-shadow: 0 0 0.5rem rgba(245,158,11,0.15), inset 0 0 0.5rem rgba(245,158,11,0.05);
+      animation: pulseAmber 2s ease infinite;
+    }
+    .flow-node.degraded:hover { box-shadow: 0 0 1.5rem rgba(245,158,11,0.3); }
+    .flow-node.neutral {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+    .flow-node.node-eos.healthy {
+      box-shadow: 0 0 1.5rem rgba(79,70,229,0.2), inset 0 0 1rem rgba(79,70,229,0.05);
+    }
+    .flow-node.node-rmq.healthy {
+      box-shadow: 0 0 1.5rem rgba(249,115,22,0.2), inset 0 0 1rem rgba(249,115,22,0.05);
+    }
+
+    @keyframes pulseAmber {
+      0%, 100% { box-shadow: 0 0 0.5rem rgba(245,158,11,0.15), inset 0 0 0.5rem rgba(245,158,11,0.05); }
+      50% { box-shadow: 0 0 1rem rgba(245,158,11,0.3), inset 0 0 0.75rem rgba(245,158,11,0.1); }
+    }
+
+    .flow-node-name {
+      font-size: 0.5625rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .flow-node-type {
+      font-size: 0.4375rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .flow-node-status {
+      display: flex;
+      align-items: center;
+      gap: 0.1875rem;
+      margin-top: 0.125rem;
+    }
+    .flow-node-count {
+      font-size: 0.4375rem;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    /* Sparkline bars */
+    .flow-sparkline {
+      display: flex;
+      align-items: flex-end;
+      gap: 1px;
+      height: 0.625rem;
+      margin-top: 0.125rem;
+    }
+    .flow-sparkline .bar {
+      width: 0.1875rem;
+      border-radius: 1px 1px 0 0;
+      min-height: 1px;
+      transition: height 0.3s ease;
+    }
+    .flow-sparkline .bar.g { background: var(--green); }
+    .flow-sparkline .bar.a { background: var(--amber); }
+    .flow-sparkline .bar.ac { background: var(--accent-light); }
+    .flow-sparkline .bar.o { background: #fb923c; }
+    .flow-sparkline .bar.v { background: #7c3aed; }
+
+    /* Connector lines (SVG-based) */
+    .flow-connectors {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .flow-connectors line, .flow-connectors path {
+      stroke: var(--accent-light);
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.3;
+      filter: drop-shadow(0 0 2px rgba(79,70,229,0.3));
+    }
+    .flow-connectors .connector-active {
+      opacity: 0.7;
+      stroke-width: 1.5;
+      stroke-dasharray: 8 4;
+      animation: flowDash 0.8s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(99,102,241,0.5));
+    }
+    .flow-connectors .connector-rmq {
+      stroke: #fb923c;
+      opacity: 0.6;
+      stroke-width: 1.5;
+      stroke-dasharray: 8 4;
+      animation: flowDash 0.8s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(249,115,22,0.4));
+    }
+    .flow-connectors .connector-degraded {
+      stroke: var(--amber);
+      opacity: 0.5;
+      stroke-width: 1;
+      stroke-dasharray: 4 6;
+      animation: flowDash 1.2s linear infinite;
+      filter: drop-shadow(0 0 3px rgba(245,158,11,0.3));
+    }
+    .flow-connectors .connector-manual {
+      stroke: var(--text-muted);
+      opacity: 0.3;
+      stroke-width: 1;
+      stroke-dasharray: 2 4;
+    }
+    .flow-connectors .connector-highlight {
+      opacity: 1;
+      stroke-width: 2.5;
+      filter: drop-shadow(0 0 6px rgba(99,102,241,0.8));
+    }
+    .flow-connectors .connector-dim {
+      opacity: 0.08;
+    }
+    @keyframes flowDash {
+      to { stroke-dashoffset: -18; }
+    }
+    @keyframes flowDashReverse {
+      to { stroke-dashoffset: 18; }
+    }
+
+    /* Pulse dot on connectors */
+    .flow-connectors circle.pulse-dot {
+      fill: var(--accent-light);
+      r: 2.5;
+      opacity: 0;
+    }
+    .flow-connectors circle.pulse-dot.active {
+      animation: pulseDot 2.5s ease-in-out infinite;
+    }
+    .flow-connectors circle.pulse-dot.orange { fill: #fb923c; }
+    @keyframes pulseDot {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Connector arrow tips */
+    .flow-connectors .arrowhead {
+      fill: var(--accent-light);
+      opacity: 0.6;
+    }
+
+    /* ============================================================
+       Section: Message Explorer
+       ============================================================ */
+    .msg-search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--card-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      align-items: end;
+    }
+    .msg-search-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+    .msg-search-field label {
+      font-size: 0.4375rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font-ui);
+    }
+    .msg-search-field input,
+    .msg-search-field select {
+      background: var(--input-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.1875rem var(--sp-2);
+      color: var(--text-primary);
+      font-size: var(--text-xs);
+      height: 1.5rem;
+      font-family: var(--font-ui);
+    }
+    .msg-search-field input:focus,
+    .msg-search-field select:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 0.125rem var(--accent-bg);
+    }
+    .msg-search-field input.mono-input {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.02em;
+    }
+    .msg-search-field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.375rem center;
+      padding-right: 1.25rem;
+      cursor: pointer;
+    }
+
+    /* Message table */
+    .msg-table { border-collapse: collapse; width: 100%; font-size: var(--text-xs); }
+    .msg-table th {
+      font-size: 0.4375rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0.25rem var(--sp-2); text-align: left;
+      border-bottom: 0.0625rem solid var(--border);
+      font-family: var(--font-ui);
+      position: sticky; top: 0; background: var(--card-bg); z-index: 3;
+    }
+    .msg-table td {
+      padding: 0.1875rem var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      height: 1.375rem;
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+    }
+    .msg-table tr.msg-row { cursor: pointer; transition: background 0.1s; }
+    .msg-table tr.msg-row:hover td { background: var(--hover); }
+    .msg-table tr.msg-row.expanded td { background: var(--accent-bg2); border-bottom-color: transparent; }
+    .msg-table .r { text-align: right; }
+
+    /* Message detail (expandable row) */
+    .msg-detail {
+      background: var(--surface-base);
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .msg-detail td {
+      padding: 0;
+      height: auto;
+      font-family: var(--font-ui);
+      font-size: var(--text-xs);
+    }
+    .msg-detail-inner {
+      padding: var(--sp-2) var(--sp-3);
+    }
+
+    /* Detail tabs */
+    .msg-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 0.0625rem solid var(--border);
+      margin-bottom: var(--sp-2);
+    }
+    .msg-tab {
+      padding: var(--sp-1) var(--sp-3);
+      font-size: 0.5625rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all var(--transition-fast);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: var(--font-ui);
+    }
+    .msg-tab:hover { color: var(--text-secondary); }
+    .msg-tab.active { color: var(--accent-light); border-bottom-color: var(--accent); font-weight: 600; }
+
+    .msg-tab-panel { display: none; }
+    .msg-tab-panel.active { display: block; }
+
+    /* Header info grid */
+    .msg-header-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-1) var(--sp-3);
+      font-size: 0.5625rem;
+    }
+    .msg-header-grid .mh-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.4375rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .msg-header-grid .mh-value {
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    /* JSON viewer */
+    .json-viewer {
+      background: var(--surface-canvas);
+      border: 0.0625rem solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--sp-3);
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      overflow-x: auto;
+      line-height: 1.7;
+      max-height: 16rem;
+      tab-size: 2;
+      white-space: pre;
+    }
+    .json-key { color: var(--accent-light); }
+    .json-string { color: var(--green); }
+    .json-number { color: var(--amber); }
+    .json-bool { color: var(--accent-violet); }
+    .json-null { color: var(--text-muted); }
+    .json-brace { color: var(--text-tertiary); }
+
+    /* Message flow chain */
+    .flow-chain {
+      padding: var(--sp-1) 0;
+    }
+    .flow-chain-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-1) var(--sp-2);
+      position: relative;
+      font-size: 0.5625rem;
+    }
+    .flow-chain-item::before {
+      content: '';
+      position: absolute;
+      left: 0.6rem;
+      top: 1.5rem;
+      bottom: -0.5rem;
+      width: 1px;
+      background: var(--border);
+    }
+    .flow-chain-item:last-child::before { display: none; }
+    .flow-chain-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .flow-chain-dot.ok { background: var(--green); }
+    .flow-chain-dot.fail { background: var(--red); }
+    .flow-chain-dot.pending { background: var(--amber); }
+    .flow-chain-time {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-size: 0.5rem;
+      min-width: 3.5rem;
+      flex-shrink: 0;
+    }
+    .flow-chain-desc {
+      color: var(--text-secondary);
+      flex: 1;
+    }
+    .flow-chain-type {
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      min-width: 6rem;
+    }
+    .flow-chain-status {
+      font-size: 0.5rem;
+      font-weight: 600;
+      min-width: 4rem;
+      text-align: right;
+    }
+    .flow-chain-status.ok { color: var(--green); }
+    .flow-chain-status.fail { color: var(--red); }
+
+    /* ============================================================
+       Section: Collapsible section headers
+       ============================================================ */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-1) 0;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      margin-bottom: var(--sp-2);
+    }
+    .collapsible-header .collapse-icon {
+      transition: transform 0.15s;
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+    }
+    .collapsible-header.collapsed .collapse-icon { transform: rotate(-90deg); }
+    .collapsible-body { display: block; }
+    .collapsible-header.collapsed + .collapsible-body { display: none; }
+
+    /* Glow effect for active filter */
+    .flow-node.active-filter.healthy { box-shadow: 0 0 0 0.125rem var(--green), 0 0 1rem rgba(34,197,94,0.15); }
+    .flow-node.active-filter.degraded { box-shadow: 0 0 0 0.125rem var(--amber), 0 0 1rem rgba(245,158,11,0.15); }
+
+    /* Filter reset button */
+    .filter-reset {
+      display: none;
+      align-items: center;
+      gap: var(--sp-1);
+      font-size: 0.5rem;
+      color: var(--accent-light);
+      cursor: pointer;
+      padding: 0.125rem var(--sp-2);
+      background: var(--accent-bg);
+      border-radius: var(--radius-full);
+      border: none;
+      font-family: var(--font-ui);
+      transition: background var(--transition-fast);
+    }
+    .filter-reset:hover { background: var(--accent-bg2); }
+    .filter-reset.visible { display: inline-flex; }
+
+    /* Tooltip */
+    .node-tooltip {
+      position: absolute;
+      background: rgba(10,10,12,0.95);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-2);
+      font-size: 0.5rem;
+      color: var(--text-secondary);
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      min-width: 10rem;
+      box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.5);
+    }
+    .node-tooltip.visible { opacity: 1; }
+    .node-tooltip .tt-title { font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .node-tooltip .tt-row { display: flex; justify-content: space-between; gap: var(--sp-2); padding: 0.0625rem 0; }
+    .node-tooltip .tt-label { color: var(--text-muted); }
+    .node-tooltip .tt-value { font-family: var(--font-mono); color: var(--text-primary); }
+
+    @media (max-width: 80rem) {
+      .flow-diagram { grid-template-columns: repeat(5, 1fr); font-size: 0.85em; }
+    }
+    @media (max-width: 64rem) {
+      .ai-metrics { grid-template-columns: 1fr; }
+      .flow-diagram { grid-template-columns: repeat(3, 1fr); overflow-x: auto; }
+      .msg-header-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <div class="hz-content-fill">
+
+    <!-- KPI Strip -->
+    <div class="hz-kpi-strip">
+      <span><span class="strip-label">Services</span><span class="strip-value"><span style="color:var(--green);">14</span>/15 Healthy</span></span>
+      <span class="strip-sep">|</span>
+      <span><span class="strip-label">Glint Containers</span><span class="strip-value">10 Running</span></span>
+      <span class="strip-sep">|</span>
+      <span><span class="strip-label">RabbitMQ Queues</span><span class="strip-value">12</span></span>
+      <span class="strip-sep">|</span>
+      <span><span class="strip-label">Messages/hr</span><span class="strip-value">6,842</span></span>
+      <span class="strip-sep">|</span>
+      <span><span class="strip-label">Degraded</span><span class="strip-value" style="color:var(--amber);">1 (Price Loading)</span></span>
+      <span class="strip-sep">|</span>
+      <span><span class="strip-label">Version</span><span class="strip-value">v28.0</span></span>
+    </div>
+
+    <!-- Scrollable sections -->
+    <div class="env-sections">
+
+      <!-- ============================================================
+           Section 1: Integration Flow Diagram — EOS Architecture
+           ============================================================ -->
+      <div>
+        <div class="sec-title">
+          EOS System Topology
+          <span class="hz-badge green" style="font-size:0.375rem;">Live</span>
+          <span class="hz-badge blue" style="font-size:0.375rem;">v28.0</span>
+          <button id="filter-reset-btn" class="filter-reset" onclick="clearNodeFilter()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Clear filter
+          </button>
+        </div>
+        <div class="flow-diagram-wrap">
+          <div class="flow-diagram" id="flow-diagram">
+
+            <!-- SVG Connectors (drawn behind nodes) -->
+            <svg class="flow-connectors" id="flow-svg" preserveAspectRatio="none">
+              <defs>
+                <marker id="arrowG" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+                  <polygon points="0 0, 6 2, 0 4" class="arrowhead" style="fill:var(--green);"/>
+                </marker>
+                <marker id="arrowA" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+                  <polygon points="0 0, 6 2, 0 4" class="arrowhead" style="fill:var(--accent-light);"/>
+                </marker>
+                <marker id="arrowO" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+                  <polygon points="0 0, 6 2, 0 4" class="arrowhead" style="fill:#fb923c;"/>
+                </marker>
+                <marker id="arrowV" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+                  <polygon points="0 0, 6 2, 0 4" class="arrowhead" style="fill:#7c3aed;"/>
+                </marker>
+              </defs>
+            </svg>
+
+            <!-- Tooltip element -->
+            <div class="node-tooltip" id="node-tooltip">
+              <div class="tt-title"></div>
+              <div class="tt-row"><span class="tt-label">Type:</span><span class="tt-value" id="tt-type"></span></div>
+              <div class="tt-row"><span class="tt-label">Status:</span><span class="tt-value" id="tt-status"></span></div>
+              <div class="tt-row"><span class="tt-label">Last Msg:</span><span class="tt-value" id="tt-lastmsg"></span></div>
+              <div class="tt-row"><span class="tt-label">Latency:</span><span class="tt-value" id="tt-latency"></span></div>
+            </div>
+
+            <!-- ========== COLUMN HEADERS ========== -->
+            <div class="col-header" style="grid-column:1;grid-row:1;">External Systems</div>
+            <div class="col-header" style="grid-column:2;grid-row:1;">Glint Integration</div>
+            <div class="col-header" style="grid-column:3;grid-row:1;">Core</div>
+            <div class="col-header" style="grid-column:4;grid-row:1;">Output Connectors</div>
+            <div class="col-header" style="grid-column:5;grid-row:1;">Destinations</div>
+
+            <!-- ========== COLUMN 1: External Systems ========== -->
+
+            <!-- DQ Prices -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:2;" data-node="dq-prices" data-flows="price-flow,price-loading" data-tooltip="DQ Prices|External|Healthy|09:42:10|5ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">DQ Prices</div>
+              <div class="flow-node-type">Cloud / External</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Price data feed</span>
+              </div>
+            </div>
+
+            <!-- ICE -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:3;" data-node="ice" data-flows="ice-trade-flow" data-tooltip="ICE|Exchange Data|Healthy|09:41:58|12ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">ICE</div>
+              <div class="flow-node-type">KTP / Shovel pipeline</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Exchange data</span>
+              </div>
+            </div>
+
+            <!-- HQ PnL Reporting -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:4;" data-node="hq-pnl" data-flows="hq-pnl-flow" data-tooltip="HQ PnL|Internal Reporting|Healthy|09:40:12|8ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">HQ PnL Reporting</div>
+              <div class="flow-node-type">Internal Reporting</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">PnL destination</span>
+              </div>
+            </div>
+
+            <!-- Credit Cube -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:5;" data-node="credit-cube" data-flows="credit-flow" data-tooltip="Credit Cube|Credit Risk|Healthy|09:39:44|15ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Credit Cube</div>
+              <div class="flow-node-type">Credit Risk System</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Risk data</span>
+              </div>
+            </div>
+
+            <!-- Endur -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:6;" data-node="endur" data-flows="spanish-gas-flow" data-tooltip="Endur|Legacy ETRM|Healthy|09:38:22|22ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Endur</div>
+              <div class="flow-node-type">Legacy ETRM</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Spanish gas trades</span>
+              </div>
+            </div>
+
+            <!-- VaR Engine -->
+            <div class="flow-node node-external healthy" style="grid-column:1;grid-row:7;" data-node="var-engine" data-flows="var-flow" data-tooltip="VaR Engine|Risk Calc|Healthy|09:37:15|18ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">VaR Engine</div>
+              <div class="flow-node-type">Risk Calculation</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">VaR destination</span>
+              </div>
+            </div>
+
+            <!-- ========== COLUMN 2: Glint Integration Modules ========== -->
+
+            <!-- Glint Price Loading -->
+            <div class="flow-node node-glint degraded" style="grid-column:2;grid-row:2;" data-node="glint-price-loading" data-flows="price-loading" data-tooltip="Glint Price Loading|Docker/K8s|Degraded|09:42:08|145ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Price Loading</div>
+              <div class="flow-node-type">glint-price-loading</div>
+              <div class="flow-node-status">
+                <span class="hz-dot amber pulse" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count" style="color:var(--amber);">Slow ingress</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:60%"></div><div class="bar g" style="height:45%"></div><div class="bar a" style="height:30%"></div><div class="bar a" style="height:25%"></div><div class="bar a" style="height:20%"></div><div class="bar a" style="height:35%"></div><div class="bar g" style="height:40%"></div><div class="bar a" style="height:25%"></div>
+              </div>
+            </div>
+
+            <!-- Glint ICE Trade Capture -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:3;" data-node="glint-ice" data-flows="ice-trade-flow" data-tooltip="Glint ICE Trade Capture|Docker/K8s|Healthy|09:41:55|3ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint ICE Trade Capture</div>
+              <div class="flow-node-type">glint-ice-capture</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">312 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:50%"></div><div class="bar g" style="height:70%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:80%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:75%"></div><div class="bar g" style="height:65%"></div><div class="bar g" style="height:90%"></div>
+              </div>
+            </div>
+
+            <!-- Glint HQ PnL Reporting -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:4;" data-node="glint-hq-pnl" data-flows="hq-pnl-flow" data-tooltip="Glint HQ PnL|Docker/K8s|Healthy|09:40:10|4ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint HQ PnL</div>
+              <div class="flow-node-type">glint-hq-pnl-reporting</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">48 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:30%"></div><div class="bar g" style="height:45%"></div><div class="bar g" style="height:35%"></div><div class="bar g" style="height:50%"></div><div class="bar g" style="height:40%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:45%"></div><div class="bar g" style="height:60%"></div>
+              </div>
+            </div>
+
+            <!-- Glint Credit Cube -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:5;" data-node="glint-credit" data-flows="credit-flow" data-tooltip="Glint Credit Cube|Docker/K8s|Healthy|09:39:42|5ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Credit Cube</div>
+              <div class="flow-node-type">glint-credit-cube</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">86 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:40%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:50%"></div><div class="bar g" style="height:65%"></div><div class="bar g" style="height:45%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:70%"></div>
+              </div>
+            </div>
+
+            <!-- Glint Endur Spanish Gas -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:6;" data-node="glint-endur" data-flows="spanish-gas-flow" data-tooltip="Glint Endur Spanish Gas|Docker/K8s|Healthy|09:38:20|6ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Endur Spanish Gas</div>
+              <div class="flow-node-type">glint-endur-spanish-gas</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">24 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:20%"></div><div class="bar g" style="height:30%"></div><div class="bar g" style="height:25%"></div><div class="bar g" style="height:35%"></div><div class="bar g" style="height:20%"></div><div class="bar g" style="height:40%"></div><div class="bar g" style="height:30%"></div><div class="bar g" style="height:25%"></div>
+              </div>
+            </div>
+
+            <!-- Glint VaR Extract -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:7;" data-node="glint-var" data-flows="var-flow" data-tooltip="Glint VaR Extract|Docker/K8s|Healthy|09:37:12|4ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint VaR Extract</div>
+              <div class="flow-node-type">glint-var-extract</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">156 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:45%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:70%"></div><div class="bar g" style="height:50%"></div><div class="bar g" style="height:65%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:75%"></div>
+              </div>
+            </div>
+
+            <!-- Glint Price EoD Export -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:8;" data-node="glint-price-eod" data-flows="price-eod-flow" data-tooltip="Glint Price EoD Export|Docker/K8s|Healthy|09:36:45|3ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Price EoD Export</div>
+              <div class="flow-node-type">glint-price-eod-export</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">EOD batch</span>
+              </div>
+            </div>
+
+            <!-- Glint MA -->
+            <div class="flow-node node-glint healthy" style="grid-column:2;grid-row:9;" data-node="glint-ma" data-flows="ma-flow" data-tooltip="Glint MA|Docker/K8s|Healthy|09:35:22|5ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint MA</div>
+              <div class="flow-node-type">glint-master-agreements</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Settlements</span>
+              </div>
+            </div>
+
+            <!-- ========== COLUMN 3: Core ========== -->
+
+            <!-- RabbitMQ -->
+            <div class="flow-node node-core node-rmq healthy" style="grid-column:3;grid-row:2;grid-row-end:4;align-self:center;" data-node="rabbitmq" data-flows="ice-trade-flow,pioneer-trade-flow,pioneer-settle-flow,spanish-gas-flow,var-flow,credit-flow,hq-pnl-flow,price-eod-flow,price-loading,ma-flow" data-tooltip="RabbitMQ|Message Broker|Healthy|09:42:15|2ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">RabbitMQ</div>
+              <div class="flow-node-type">Message Hub</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">12 queues &middot; 2ms</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar o" style="height:50%"></div><div class="bar o" style="height:75%"></div><div class="bar o" style="height:60%"></div><div class="bar o" style="height:90%"></div><div class="bar o" style="height:80%"></div><div class="bar o" style="height:95%"></div><div class="bar o" style="height:70%"></div><div class="bar o" style="height:85%"></div><div class="bar o" style="height:65%"></div><div class="bar o" style="height:100%"></div><div class="bar o" style="height:55%"></div><div class="bar o" style="height:80%"></div>
+              </div>
+            </div>
+
+            <!-- EOS -->
+            <div class="flow-node node-core node-eos healthy" style="grid-column:3;grid-row:4;grid-row-end:8;align-self:center;" data-node="eos" data-flows="price-flow,ice-trade-flow,pioneer-trade-flow,pioneer-settle-flow,spanish-gas-flow,var-flow,credit-flow,hq-pnl-flow,price-eod-flow,price-loading,ma-flow,invoice-flow,port-data-flow,eod-flow" data-tooltip="EOS|Core ETRM|Healthy|09:42:15|—" onclick="filterByNode(this)">
+              <div class="flow-node-name">EOS</div>
+              <div class="flow-node-type">Core ETRM Application</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">6,842 msg/hr total</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar v" style="height:60%"></div><div class="bar v" style="height:80%"></div><div class="bar v" style="height:70%"></div><div class="bar v" style="height:95%"></div><div class="bar v" style="height:85%"></div><div class="bar v" style="height:90%"></div><div class="bar v" style="height:75%"></div><div class="bar v" style="height:100%"></div><div class="bar v" style="height:80%"></div><div class="bar v" style="height:90%"></div><div class="bar v" style="height:65%"></div><div class="bar v" style="height:85%"></div>
+              </div>
+            </div>
+
+            <!-- EOS Scheduler EOD -->
+            <div class="flow-node node-core healthy" style="grid-column:3;grid-row:8;grid-row-end:10;align-self:center;border-color:rgba(79,70,229,0.4);" data-node="eos-scheduler" data-flows="eod-flow" data-tooltip="EOS Scheduler EOD|Scheduler|Healthy|18:00:00|—" onclick="filterByNode(this)">
+              <div class="flow-node-name">EOS Scheduler EOD</div>
+              <div class="flow-node-type">End-of-Day Jobs</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Next run: 18:00</span>
+              </div>
+            </div>
+
+            <!-- ========== COLUMN 4: Output Connectors ========== -->
+
+            <!-- Glint Pioneer Trade Connector -->
+            <div class="flow-node node-glint healthy" style="grid-column:4;grid-row:2;" data-node="glint-pioneer-trade" data-flows="pioneer-trade-flow" data-tooltip="Glint Pioneer Trade|Docker/K8s|Healthy|09:42:12|4ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Pioneer Trade</div>
+              <div class="flow-node-type">glint-pioneer-trade-conn</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">428 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:55%"></div><div class="bar g" style="height:70%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:85%"></div><div class="bar g" style="height:75%"></div><div class="bar g" style="height:90%"></div><div class="bar g" style="height:65%"></div><div class="bar g" style="height:80%"></div>
+              </div>
+            </div>
+
+            <!-- Glint Pioneer Settlements Connector -->
+            <div class="flow-node node-glint healthy" style="grid-column:4;grid-row:3;" data-node="glint-pioneer-settle" data-flows="pioneer-settle-flow" data-tooltip="Glint Pioneer Settlements|Docker/K8s|Healthy|09:41:48|5ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Glint Pioneer Settlements</div>
+              <div class="flow-node-type">glint-pioneer-settle-conn</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">64 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:30%"></div><div class="bar g" style="height:40%"></div><div class="bar g" style="height:35%"></div><div class="bar g" style="height:50%"></div><div class="bar g" style="height:45%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:40%"></div><div class="bar g" style="height:50%"></div>
+              </div>
+            </div>
+
+            <!-- spacer for column 4 alignment -->
+            <div style="grid-column:4;grid-row:4;"></div>
+            <div style="grid-column:4;grid-row:5;"></div>
+            <div style="grid-column:4;grid-row:6;"></div>
+            <div style="grid-column:4;grid-row:7;"></div>
+            <div style="grid-column:4;grid-row:8;"></div>
+            <div style="grid-column:4;grid-row:9;"></div>
+
+            <!-- ========== COLUMN 5: Destination Systems ========== -->
+
+            <!-- Pioneer -->
+            <div class="flow-node node-destination healthy" style="grid-column:5;grid-row:2;grid-row-end:4;align-self:center;" data-node="pioneer" data-flows="pioneer-trade-flow,pioneer-settle-flow" data-tooltip="Pioneer|Destination|Healthy|09:42:10|8ms" onclick="filterByNode(this)">
+              <div class="flow-node-name">Pioneer</div>
+              <div class="flow-node-type">Trade Recap + Settlements</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">492 msg/hr</span>
+              </div>
+              <div class="flow-sparkline">
+                <div class="bar g" style="height:50%"></div><div class="bar g" style="height:65%"></div><div class="bar g" style="height:55%"></div><div class="bar g" style="height:75%"></div><div class="bar g" style="height:70%"></div><div class="bar g" style="height:80%"></div><div class="bar g" style="height:60%"></div><div class="bar g" style="height:70%"></div>
+              </div>
+            </div>
+
+            <!-- a2kvan -->
+            <div class="flow-node node-destination neutral" style="grid-column:5;grid-row:4;" data-node="a2kvan" data-flows="port-data-flow" data-tooltip="a2kvan|Port Distance|Manual|—|—" onclick="filterByNode(this)">
+              <div class="flow-node-name">a2kvan</div>
+              <div class="flow-node-type">Port Distance Data</div>
+              <div class="flow-node-status">
+                <span class="hz-dot" style="width:0.3125rem;height:0.3125rem;background:var(--text-muted);"></span>
+                <span class="flow-node-count">Manual pull</span>
+              </div>
+            </div>
+
+            <!-- AX Cloud Shared Drive -->
+            <div class="flow-node node-destination healthy" style="grid-column:5;grid-row:5;" data-node="ax-cloud" data-flows="invoice-flow" data-tooltip="AX Cloud|Shared Drive|Healthy|09:35:10|—" onclick="filterByNode(this)">
+              <div class="flow-node-name">AX Cloud Shared Drive</div>
+              <div class="flow-node-type">Invoices (PDF)</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">PDF export</span>
+              </div>
+            </div>
+
+            <!-- SAP Document -->
+            <div class="flow-node node-destination healthy" style="grid-column:5;grid-row:6;" data-node="sap-doc" data-flows="ma-flow" data-tooltip="SAP Document|Download|Healthy|09:34:50|—" onclick="filterByNode(this)">
+              <div class="flow-node-name">SAP Document</div>
+              <div class="flow-node-type">Via Download</div>
+              <div class="flow-node-status">
+                <span class="hz-dot green" style="width:0.3125rem;height:0.3125rem;"></span>
+                <span class="flow-node-count">Settlement docs</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           Section 2: Message Explorer
+           ============================================================ -->
+      <div>
+        <div class="sec-title">
+          Message Explorer
+          <span class="hz-badge blue" style="font-size:0.375rem;">Archive Search</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="msg-search-bar" style="margin-bottom:var(--sp-2);">
+          <div class="msg-search-field" style="flex:1.5;min-width:10rem;">
+            <label>Correlation ID</label>
+            <input type="text" class="mono-input" placeholder="COR-T1001-20260502" id="msg-search-corid" />
+          </div>
+          <div class="msg-search-field" style="min-width:8rem;">
+            <label>Message Type</label>
+            <select id="msg-search-type">
+              <option value="">All Types</option>
+              <option value="Trade.Captured">Trade.Captured</option>
+              <option value="Trade.Validated">Trade.Validated</option>
+              <option value="Trade.Pioneer">Trade.Pioneer</option>
+              <option value="Settlement.Export">Settlement.Export</option>
+              <option value="Price.Loaded">Price.Loaded</option>
+              <option value="Price.EoD">Price.EoD</option>
+              <option value="ICE.Trade">ICE.Trade</option>
+              <option value="VaR.Extract">VaR.Extract</option>
+              <option value="Credit.Update">Credit.Update</option>
+              <option value="PnL.Report">PnL.Report</option>
+            </select>
+          </div>
+          <div class="msg-search-field" style="min-width:6rem;">
+            <label>Date From</label>
+            <input type="date" value="2026-05-02" />
+          </div>
+          <div class="msg-search-field" style="min-width:6rem;">
+            <label>Date To</label>
+            <input type="date" value="2026-05-02" />
+          </div>
+          <div class="msg-search-field" style="min-width:7rem;">
+            <label>Source Service</label>
+            <select>
+              <option value="">All Sources</option>
+              <option value="eos-core">EOS Core</option>
+              <option value="glint-ice">Glint ICE</option>
+              <option value="glint-pioneer-trade">Glint Pioneer Trade</option>
+              <option value="glint-pioneer-settle">Glint Pioneer Settle</option>
+              <option value="glint-price-loading">Glint Price Loading</option>
+              <option value="glint-endur">Glint Endur</option>
+              <option value="glint-var">Glint VaR</option>
+              <option value="glint-credit">Glint Credit</option>
+              <option value="glint-hq-pnl">Glint HQ PnL</option>
+              <option value="glint-ma">Glint MA</option>
+            </select>
+          </div>
+          <div class="msg-search-field" style="min-width:7rem;">
+            <label>Target Queue</label>
+            <select>
+              <option value="">All Queues</option>
+              <option value="eos.trade.ice">eos.trade.ice</option>
+              <option value="eos.trade.pioneer">eos.trade.pioneer</option>
+              <option value="eos.settle.pioneer">eos.settle.pioneer</option>
+              <option value="eos.price.loading">eos.price.loading</option>
+              <option value="eos.price.eod">eos.price.eod</option>
+              <option value="eos.var.extract">eos.var.extract</option>
+              <option value="eos.credit.update">eos.credit.update</option>
+              <option value="eos.pnl.report">eos.pnl.report</option>
+              <option value="eos.endur.gas">eos.endur.gas</option>
+              <option value="eos.ma.settlement">eos.ma.settlement</option>
+            </select>
+          </div>
+          <div class="msg-search-field" style="min-width:5rem;">
+            <label>Status</label>
+            <select>
+              <option value="">All</option>
+              <option value="delivered">Delivered</option>
+              <option value="processing">Processing</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+          <div class="msg-search-field" style="align-self:end;">
+            <button class="hz-btn primary sm" onclick="showToast('Search complete: 15 messages found','success')" style="height:1.5rem;font-size:0.5625rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div style="background:var(--card-bg);border:0.0625rem solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+          <table class="msg-table" id="msg-results-table">
+            <thead>
+              <tr>
+                <th style="width:5.5rem;">Time</th>
+                <th style="width:9rem;">Correlation ID</th>
+                <th>Type</th>
+                <th>Source &rarr; Queue</th>
+                <th class="r" style="width:3rem;">Size</th>
+                <th style="width:4rem;">Status</th>
+                <th class="r" style="width:3rem;">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- Row 1: ICE Trade via Glint -->
+              <tr class="msg-row" data-service="glint-ice" data-corid="COR-ICE-4821" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:42:15.234</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-ICE-4821</a></td>
+                <td style="color:var(--text-secondary);">ICE.Trade</td>
+                <td style="color:var(--text-tertiary);">ICE &rarr; RabbitMQ &rarr; Glint ICE &rarr; EOS</td>
+                <td class="r" style="color:var(--text-tertiary);">1.4 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">12ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;">
+                <td colspan="7">
+                  <div class="msg-detail-inner">
+                    <div class="msg-tabs">
+                      <button class="msg-tab active" onclick="switchMsgTab('tab-header-1', this)">Header</button>
+                      <button class="msg-tab" onclick="switchMsgTab('tab-payload-1', this)">Payload</button>
+                      <button class="msg-tab" onclick="switchMsgTab('tab-flow-1', this)">Flow</button>
+                    </div>
+                    <div class="msg-tab-panel active" id="tab-header-1">
+                      <div class="msg-header-grid">
+                        <div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-ice-4821</div></div>
+                        <div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-ICE-4821</div></div>
+                        <div><div class="mh-label">Type</div><div class="mh-value">ICE.Trade</div></div>
+                        <div><div class="mh-label">Timestamp</div><div class="mh-value">2026-05-02T09:42:15.234Z</div></div>
+                        <div><div class="mh-label">Source</div><div class="mh-value">ICE via KTP/Shovel</div></div>
+                        <div><div class="mh-label">Queue</div><div class="mh-value">eos.trade.ice</div></div>
+                        <div><div class="mh-label">Consumer</div><div class="mh-value">glint-ice-capture-7d4f8</div></div>
+                        <div><div class="mh-label">Exchange</div><div class="mh-value">eos.events</div></div>
+                        <div><div class="mh-label">Routing Key</div><div class="mh-value">trade.ice.captured</div></div>
+                        <div><div class="mh-label">Redelivered</div><div class="mh-value" style="color:var(--green);">false</div></div>
+                        <div><div class="mh-label">Content-Type</div><div class="mh-value">application/json</div></div>
+                        <div><div class="mh-label">Delivery Tag</div><div class="mh-value">891204</div></div>
+                      </div>
+                    </div>
+                    <div class="msg-tab-panel" id="tab-payload-1">
+                      <div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"messageId"</span>: <span class="json-string">"msg-2026-0502-ice-4821"</span>,
+  <span class="json-key">"correlationId"</span>: <span class="json-string">"COR-ICE-4821"</span>,
+  <span class="json-key">"type"</span>: <span class="json-string">"ICE.Trade"</span>,
+  <span class="json-key">"source"</span>: <span class="json-string">"ICE-KTP-Shovel"</span>,
+  <span class="json-key">"payload"</span>: <span class="json-brace">{</span>
+    <span class="json-key">"tradeId"</span>: <span class="json-string">"ICE-4821"</span>,
+    <span class="json-key">"direction"</span>: <span class="json-string">"BUY"</span>,
+    <span class="json-key">"commodity"</span>: <span class="json-string">"NBP Gas"</span>,
+    <span class="json-key">"counterparty"</span>: <span class="json-string">"Shell Energy Trading"</span>,
+    <span class="json-key">"volume"</span>: <span class="json-number">50000</span>,
+    <span class="json-key">"volumeUnits"</span>: <span class="json-string">"therms/day"</span>,
+    <span class="json-key">"price"</span>: <span class="json-number">72.45</span>,
+    <span class="json-key">"currency"</span>: <span class="json-string">"GBp/therm"</span>,
+    <span class="json-key">"deliveryMonth"</span>: <span class="json-string">"2026-06"</span>
+  <span class="json-brace">}</span>
+<span class="json-brace">}</span></div>
+                    </div>
+                    <div class="msg-tab-panel" id="tab-flow-1">
+                      <div style="font-size:0.5rem;color:var(--text-muted);margin-bottom:var(--sp-2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Message chain for COR-ICE-4821</div>
+                      <div class="flow-chain">
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:15</div><div class="flow-chain-desc">ICE &rarr; KTP &rarr; Shovel</div><div class="flow-chain-type">Exchange Capture</div><div class="flow-chain-status ok">Received</div></div>
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:15</div><div class="flow-chain-desc">Shovel &rarr; RabbitMQ (eos.trade.ice)</div><div class="flow-chain-type">Queue Published</div><div class="flow-chain-status ok">Delivered</div></div>
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:15</div><div class="flow-chain-desc">Glint ICE Trade Capture consumed</div><div class="flow-chain-type">Processing</div><div class="flow-chain-status ok">OK</div></div>
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:15</div><div class="flow-chain-desc">Glint ICE &rarr; EOS (trade ingested)</div><div class="flow-chain-type">Trade.Captured</div><div class="flow-chain-status ok">Delivered</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 2: Pioneer Trade Export -->
+              <tr class="msg-row" data-service="glint-pioneer-trade" data-corid="COR-PT-20260502-1847" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:42:12.018</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PT-20260502-1847</a></td>
+                <td style="color:var(--text-secondary);">Trade.Pioneer</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint Pioneer &rarr; Pioneer</td>
+                <td class="r" style="color:var(--text-tertiary);">0.9 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">8ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;">
+                <td colspan="7">
+                  <div class="msg-detail-inner">
+                    <div class="msg-tabs">
+                      <button class="msg-tab active" onclick="switchMsgTab('tab-header-2', this)">Header</button>
+                      <button class="msg-tab" onclick="switchMsgTab('tab-payload-2', this)">Payload</button>
+                      <button class="msg-tab" onclick="switchMsgTab('tab-flow-2', this)">Flow</button>
+                    </div>
+                    <div class="msg-tab-panel active" id="tab-header-2">
+                      <div class="msg-header-grid">
+                        <div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-pt-1847</div></div>
+                        <div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PT-20260502-1847</div></div>
+                        <div><div class="mh-label">Type</div><div class="mh-value">Trade.Pioneer</div></div>
+                        <div><div class="mh-label">Timestamp</div><div class="mh-value">2026-05-02T09:42:12.018Z</div></div>
+                        <div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div>
+                        <div><div class="mh-label">Queue</div><div class="mh-value">eos.trade.pioneer</div></div>
+                        <div><div class="mh-label">Consumer</div><div class="mh-value">glint-pioneer-trade-5c7a1</div></div>
+                        <div><div class="mh-label">Delivery Tag</div><div class="mh-value">891205</div></div>
+                      </div>
+                    </div>
+                    <div class="msg-tab-panel" id="tab-payload-2">
+                      <div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"tradeId"</span>: <span class="json-string">"T-1847"</span>,
+  <span class="json-key">"pioneerRef"</span>: <span class="json-string">"PIO-2026-1847"</span>,
+  <span class="json-key">"direction"</span>: <span class="json-string">"SELL"</span>,
+  <span class="json-key">"counterparty"</span>: <span class="json-string">"JERA Co."</span>,
+  <span class="json-key">"benchmark"</span>: <span class="json-string">"JKM"</span>,
+  <span class="json-key">"volume"</span>: <span class="json-number">3200000</span>,
+  <span class="json-key">"volumeUnits"</span>: <span class="json-string">"MMBtu"</span>
+<span class="json-brace">}</span></div>
+                    </div>
+                    <div class="msg-tab-panel" id="tab-flow-2">
+                      <div style="font-size:0.5rem;color:var(--text-muted);margin-bottom:var(--sp-2);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Message chain for COR-PT-20260502-1847</div>
+                      <div class="flow-chain">
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:12</div><div class="flow-chain-desc">EOS &rarr; RabbitMQ (eos.trade.pioneer)</div><div class="flow-chain-type">Trade.Pioneer</div><div class="flow-chain-status ok">Published</div></div>
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:12</div><div class="flow-chain-desc">Glint Pioneer Trade consumed</div><div class="flow-chain-type">Processing</div><div class="flow-chain-status ok">OK</div></div>
+                        <div class="flow-chain-item"><div class="flow-chain-dot ok"></div><div class="flow-chain-time">09:42:12</div><div class="flow-chain-desc">Glint Pioneer &rarr; Pioneer (recap delivered)</div><div class="flow-chain-type">Pioneer.Recap</div><div class="flow-chain-status ok">Delivered</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Row 3: Price Loading (Degraded) -->
+              <tr class="msg-row" data-service="glint-price-loading" data-corid="COR-PL-JKM-20260502" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:42:08.891</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PL-JKM-20260502</a></td>
+                <td style="color:var(--text-secondary);">Price.Loaded</td>
+                <td style="color:var(--text-tertiary);">DQ &rarr; Glint Price &rarr; RabbitMQ &rarr; EOS</td>
+                <td class="r" style="color:var(--text-tertiary);">4.8 KB</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Slow</span></td>
+                <td class="r" style="color:var(--amber);">145ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-3', this)">Header</button><button class="msg-tab" onclick="switchMsgTab('tab-payload-3', this)">Payload</button></div><div class="msg-tab-panel active" id="tab-header-3"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-pl-jkm</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PL-JKM-20260502</div></div><div><div class="mh-label">Type</div><div class="mh-value">Price.Loaded</div></div><div><div class="mh-label">Source</div><div class="mh-value">glint-price-loading</div></div><div><div class="mh-label">Queue</div><div class="mh-value" style="color:var(--amber);">eos.price.loading (slow)</div></div><div><div class="mh-label">Latency</div><div class="mh-value" style="color:var(--amber);">145ms (target: 20ms)</div></div></div></div><div class="msg-tab-panel" id="tab-payload-3"><div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"benchmark"</span>: <span class="json-string">"JKM"</span>,
+  <span class="json-key">"curveDate"</span>: <span class="json-string">"2026-05-02"</span>,
+  <span class="json-key">"tenors"</span>: <span class="json-number">24</span>,
+  <span class="json-key">"frontMonth"</span>: <span class="json-number">14.25</span>,
+  <span class="json-key">"currency"</span>: <span class="json-string">"USD/MMBtu"</span>
+<span class="json-brace">}</span></div></div></div></td></tr>
+
+              <!-- Row 4: Spanish Gas from Endur -->
+              <tr class="msg-row" data-service="glint-endur" data-corid="COR-END-SG-0412" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:52.334</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-END-SG-0412</a></td>
+                <td style="color:var(--text-secondary);">Endur.SpanishGas</td>
+                <td style="color:var(--text-tertiary);">Endur &rarr; Glint Endur &rarr; RabbitMQ &rarr; EOS</td>
+                <td class="r" style="color:var(--text-tertiary);">2.1 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">6ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-4', this)">Header</button><button class="msg-tab" onclick="switchMsgTab('tab-payload-4', this)">Payload</button></div><div class="msg-tab-panel active" id="tab-header-4"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-end-sg0412</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-END-SG-0412</div></div><div><div class="mh-label">Type</div><div class="mh-value">Endur.SpanishGas</div></div><div><div class="mh-label">Source</div><div class="mh-value">glint-endur-spanish-gas</div></div></div></div><div class="msg-tab-panel" id="tab-payload-4"><div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"endurTradeId"</span>: <span class="json-string">"END-SG-0412"</span>,
+  <span class="json-key">"commodity"</span>: <span class="json-string">"Spanish Natural Gas"</span>,
+  <span class="json-key">"counterparty"</span>: <span class="json-string">"Naturgy Energy Group"</span>,
+  <span class="json-key">"volume"</span>: <span class="json-number">125000</span>,
+  <span class="json-key">"volumeUnits"</span>: <span class="json-string">"MWh"</span>,
+  <span class="json-key">"deliveryPoint"</span>: <span class="json-string">"VIP Iberico"</span>
+<span class="json-brace">}</span></div></div></div></td></tr>
+
+              <!-- Row 5: VaR Extract -->
+              <tr class="msg-row" data-service="glint-var" data-corid="COR-VAR-20260502-PM" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:49.008</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-VAR-20260502-PM</a></td>
+                <td style="color:var(--text-secondary);">VaR.Extract</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint VaR &rarr; VaR Engine</td>
+                <td class="r" style="color:var(--text-tertiary);">8.2 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">18ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-5', this)">Header</button><button class="msg-tab" onclick="switchMsgTab('tab-payload-5', this)">Payload</button></div><div class="msg-tab-panel active" id="tab-header-5"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-var-pm</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-VAR-20260502-PM</div></div><div><div class="mh-label">Type</div><div class="mh-value">VaR.Extract</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div><div class="msg-tab-panel" id="tab-payload-5"><div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"extractId"</span>: <span class="json-string">"VAR-2026-0502-PM"</span>,
+  <span class="json-key">"portfolios"</span>: <span class="json-number">12</span>,
+  <span class="json-key">"positions"</span>: <span class="json-number">847</span>,
+  <span class="json-key">"confidenceLevel"</span>: <span class="json-number">99</span>,
+  <span class="json-key">"horizon"</span>: <span class="json-string">"1D"</span>,
+  <span class="json-key">"totalVaR"</span>: <span class="json-number">4250000</span>,
+  <span class="json-key">"currency"</span>: <span class="json-string">"USD"</span>
+<span class="json-brace">}</span></div></div></div></td></tr>
+
+              <!-- Row 6: Credit Update -->
+              <tr class="msg-row" data-service="glint-credit" data-corid="COR-CRD-SHELL-0502" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:44.672</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-CRD-SHELL-0502</a></td>
+                <td style="color:var(--text-secondary);">Credit.Update</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint Credit &rarr; Credit Cube</td>
+                <td class="r" style="color:var(--text-tertiary);">1.6 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">15ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-6', this)">Header</button><button class="msg-tab" onclick="switchMsgTab('tab-payload-6', this)">Payload</button></div><div class="msg-tab-panel active" id="tab-header-6"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-crd-shell</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-CRD-SHELL-0502</div></div><div><div class="mh-label">Type</div><div class="mh-value">Credit.Update</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div><div class="msg-tab-panel" id="tab-payload-6"><div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"counterparty"</span>: <span class="json-string">"Shell Energy Trading"</span>,
+  <span class="json-key">"creditLimit"</span>: <span class="json-number">500000000</span>,
+  <span class="json-key">"utilisation"</span>: <span class="json-number">62.4</span>,
+  <span class="json-key">"currency"</span>: <span class="json-string">"USD"</span>,
+  <span class="json-key">"rating"</span>: <span class="json-string">"AA-"</span>
+<span class="json-brace">}</span></div></div></div></td></tr>
+
+              <!-- Row 7: HQ PnL Report -->
+              <tr class="msg-row" data-service="glint-hq-pnl" data-corid="COR-PNL-20260502-0942" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:38.887</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PNL-20260502-0942</a></td>
+                <td style="color:var(--text-secondary);">PnL.Report</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint HQ &rarr; HQ PnL</td>
+                <td class="r" style="color:var(--text-tertiary);">3.4 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">8ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-7', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-7"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-pnl-0942</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PNL-20260502-0942</div></div><div><div class="mh-label">Type</div><div class="mh-value">PnL.Report</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div></div></td></tr>
+
+              <!-- Row 8: Settlement to Pioneer -->
+              <tr class="msg-row" data-service="glint-pioneer-settle" data-corid="COR-PS-20260502-0088" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:35.441</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PS-20260502-0088</a></td>
+                <td style="color:var(--text-secondary);">Settlement.Export</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint Pioneer Settle &rarr; Pioneer</td>
+                <td class="r" style="color:var(--text-tertiary);">1.8 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">5ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-8', this)">Header</button><button class="msg-tab" onclick="switchMsgTab('tab-payload-8', this)">Payload</button></div><div class="msg-tab-panel active" id="tab-header-8"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-ps-0088</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PS-20260502-0088</div></div><div><div class="mh-label">Type</div><div class="mh-value">Settlement.Export</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div><div class="msg-tab-panel" id="tab-payload-8"><div class="json-viewer"><span class="json-brace">{</span>
+  <span class="json-key">"settlementId"</span>: <span class="json-string">"SETT-2026-0088"</span>,
+  <span class="json-key">"counterparty"</span>: <span class="json-string">"KOGAS"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-number">28450000</span>,
+  <span class="json-key">"currency"</span>: <span class="json-string">"USD"</span>,
+  <span class="json-key">"dueDate"</span>: <span class="json-string">"2026-05-30"</span>
+<span class="json-brace">}</span></div></div></div></td></tr>
+
+              <!-- Row 9: MA Settlement to SAP -->
+              <tr class="msg-row" data-service="glint-ma" data-corid="COR-MA-SAP-0502-14" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:32.118</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-MA-SAP-0502-14</a></td>
+                <td style="color:var(--text-secondary);">MA.Settlement</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint MA &rarr; SAP</td>
+                <td class="r" style="color:var(--text-tertiary);">2.2 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">5ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-9', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-9"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-ma-sap-14</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-MA-SAP-0502-14</div></div><div><div class="mh-label">Type</div><div class="mh-value">MA.Settlement</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div></div></td></tr>
+
+              <!-- Row 10: Price EoD Export -->
+              <tr class="msg-row" data-service="glint-price-eod" data-corid="COR-EOD-PRC-20260501" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:28.553</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-EOD-PRC-20260501</a></td>
+                <td style="color:var(--text-secondary);">Price.EoD</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint Price EoD</td>
+                <td class="r" style="color:var(--text-tertiary);">12.4 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">4ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-10', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-10"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-eod-prc</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-EOD-PRC-20260501</div></div><div><div class="mh-label">Type</div><div class="mh-value">Price.EoD</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div></div></td></tr>
+
+              <!-- Row 11: Invoice to AX Cloud -->
+              <tr class="msg-row" data-service="eos" data-corid="COR-INV-PDF-0502-42" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:22.104</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-INV-PDF-0502-42</a></td>
+                <td style="color:var(--text-secondary);">Invoice.PDF</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; AX Cloud Shared Drive</td>
+                <td class="r" style="color:var(--text-tertiary);">248 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">320ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-11', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-11"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-inv-pdf-42</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-INV-PDF-0502-42</div></div><div><div class="mh-label">Type</div><div class="mh-value">Invoice.PDF</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div><div><div class="mh-label">Destination</div><div class="mh-value">AX Cloud Shared Drive</div></div><div><div class="mh-label">Format</div><div class="mh-value">application/pdf</div></div></div></div></div></td></tr>
+
+              <!-- Row 12: Pioneer Trade 2 -->
+              <tr class="msg-row" data-service="glint-pioneer-trade" data-corid="COR-PT-20260502-1848" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:18.446</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PT-20260502-1848</a></td>
+                <td style="color:var(--text-secondary);">Trade.Pioneer</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint Pioneer &rarr; Pioneer</td>
+                <td class="r" style="color:var(--text-tertiary);">0.8 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">7ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-12', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-12"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-pt-1848</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PT-20260502-1848</div></div><div><div class="mh-label">Type</div><div class="mh-value">Trade.Pioneer</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div></div></td></tr>
+
+              <!-- Row 13: ICE Trade 2 -->
+              <tr class="msg-row" data-service="glint-ice" data-corid="COR-ICE-4822" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:12.221</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-ICE-4822</a></td>
+                <td style="color:var(--text-secondary);">ICE.Trade</td>
+                <td style="color:var(--text-tertiary);">ICE &rarr; RabbitMQ &rarr; Glint ICE &rarr; EOS</td>
+                <td class="r" style="color:var(--text-tertiary);">1.3 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">11ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-13', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-13"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-ice-4822</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-ICE-4822</div></div><div><div class="mh-label">Type</div><div class="mh-value">ICE.Trade</div></div><div><div class="mh-label">Source</div><div class="mh-value">ICE-KTP-Shovel</div></div></div></div></div></td></tr>
+
+              <!-- Row 14: VaR Extract 2 -->
+              <tr class="msg-row" data-service="glint-var" data-corid="COR-VAR-20260502-AM" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:08.118</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-VAR-20260502-AM</a></td>
+                <td style="color:var(--text-secondary);">VaR.Extract</td>
+                <td style="color:var(--text-tertiary);">EOS &rarr; RabbitMQ &rarr; Glint VaR &rarr; VaR Engine</td>
+                <td class="r" style="color:var(--text-tertiary);">7.8 KB</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Delivered</span></td>
+                <td class="r" style="color:var(--green);">16ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-14', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-14"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-var-am</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-VAR-20260502-AM</div></div><div><div class="mh-label">Type</div><div class="mh-value">VaR.Extract</div></div><div><div class="mh-label">Source</div><div class="mh-value">eos-core</div></div></div></div></div></td></tr>
+
+              <!-- Row 15: Price Loading TTF -->
+              <tr class="msg-row" data-service="glint-price-loading" data-corid="COR-PL-TTF-20260502" onclick="toggleMessageDetail(this)">
+                <td style="color:var(--text-muted);">09:41:02.445</td>
+                <td><a class="hz-entity-link" style="font-size:0.5625rem;">COR-PL-TTF-20260502</a></td>
+                <td style="color:var(--text-secondary);">Price.Loaded</td>
+                <td style="color:var(--text-tertiary);">DQ &rarr; Glint Price &rarr; RabbitMQ &rarr; EOS</td>
+                <td class="r" style="color:var(--text-tertiary);">4.5 KB</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Slow</span></td>
+                <td class="r" style="color:var(--amber);">138ms</td>
+              </tr>
+              <tr class="msg-detail" style="display:none;"><td colspan="7"><div class="msg-detail-inner"><div class="msg-tabs"><button class="msg-tab active" onclick="switchMsgTab('tab-header-15', this)">Header</button></div><div class="msg-tab-panel active" id="tab-header-15"><div class="msg-header-grid"><div><div class="mh-label">Message ID</div><div class="mh-value">msg-2026-0502-pl-ttf</div></div><div><div class="mh-label">Correlation ID</div><div class="mh-value" style="color:var(--accent-light);">COR-PL-TTF-20260502</div></div><div><div class="mh-label">Type</div><div class="mh-value">Price.Loaded</div></div><div><div class="mh-label">Source</div><div class="mh-value">glint-price-loading</div></div><div><div class="mh-label">Latency</div><div class="mh-value" style="color:var(--amber);">138ms (target: 20ms)</div></div></div></div></div></td></tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           Section 3: Glint Containers (collapsible)
+           ============================================================ -->
+      <div>
+        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapse-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          <span style="font-size:var(--text-xs);font-weight:600;color:var(--text-primary);">Glint Integration Containers</span>
+          <span class="hz-badge green" style="font-size:0.375rem;">9 Healthy</span>
+          <span class="hz-badge amber" style="font-size:0.375rem;">1 Degraded</span>
+        </div>
+        <div class="collapsible-body">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Container</th>
+                <th>Image</th>
+                <th>Status</th>
+                <th class="r">Msg/hr</th>
+                <th class="r">Latency</th>
+                <th class="r">CPU</th>
+                <th class="r">Memory</th>
+                <th>Last Restart</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-ice-capture</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/ice-capture:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">312</td>
+                <td class="r font-mono" style="color:var(--green);">3ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">8%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">128MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">7d ago</td>
+              </tr>
+              <tr style="background:var(--amber-dim);">
+                <td style="font-weight:600;color:var(--text-primary);">glint-price-loading</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/price-load:2.4.1</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Degraded</span></td>
+                <td class="r font-mono" style="color:var(--amber);">840</td>
+                <td class="r font-mono" style="color:var(--amber);">145ms</td>
+                <td class="r font-mono" style="color:var(--amber);">72%</td>
+                <td class="r font-mono" style="color:var(--amber);">480MB</td>
+                <td class="font-mono" style="color:var(--amber);">2h ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-price-eod-export</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/price-eod:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">batch</td>
+                <td class="r font-mono" style="color:var(--green);">3ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">2%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">64MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-hq-pnl-reporting</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/hq-pnl:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">48</td>
+                <td class="r font-mono" style="color:var(--green);">4ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">5%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">96MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-credit-cube</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/credit-cube:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">86</td>
+                <td class="r font-mono" style="color:var(--green);">5ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">6%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">112MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-endur-spanish-gas</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/endur-gas:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">24</td>
+                <td class="r font-mono" style="color:var(--green);">6ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">4%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">96MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-var-extract</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/var-extract:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">156</td>
+                <td class="r font-mono" style="color:var(--green);">4ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">10%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">192MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">7d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-pioneer-trade-conn</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/pioneer-trade:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">428</td>
+                <td class="r font-mono" style="color:var(--green);">4ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">12%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">256MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">7d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-pioneer-settle-conn</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/pioneer-settle:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">64</td>
+                <td class="r font-mono" style="color:var(--green);">5ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">8%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">128MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">glint-master-agreements</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">glint/ma-settle:2.4.1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></td>
+                <td class="r font-mono" style="color:var(--text-secondary);">18</td>
+                <td class="r font-mono" style="color:var(--green);">5ms</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">3%</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">64MB</td>
+                <td class="font-mono" style="color:var(--text-muted);">14d ago</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           Section 4: Core Systems (collapsible)
+           ============================================================ -->
+      <div>
+        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapse-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          <span style="font-size:var(--text-xs);font-weight:600;color:var(--text-primary);">Core & External Systems</span>
+          <span class="hz-badge green" style="font-size:0.375rem;">All Healthy</span>
+        </div>
+        <div class="collapsible-body">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>System</th>
+                <th>Type</th>
+                <th>Endpoint</th>
+                <th>Status</th>
+                <th class="r">Latency</th>
+                <th>Last Check</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">EOS Core</td>
+                <td style="color:var(--text-tertiary);">ETRM Application</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://eos.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">5ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:42:15</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">RabbitMQ</td>
+                <td style="color:var(--text-tertiary);">Message Broker</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">amqp://eos-rmq-prod:5672</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">2ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:42:15</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">EOS Scheduler EOD</td>
+                <td style="color:var(--text-tertiary);">Batch Scheduler</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">eos-scheduler.internal:8080</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">3ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:42:00</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">Pioneer</td>
+                <td style="color:var(--text-tertiary);">Trade/Settlement Dest</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://pioneer.partner.net/api</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">8ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:42:10</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">DQ Prices</td>
+                <td style="color:var(--text-tertiary);">Market Data</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://dq.marketdata.cloud/feed</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">12ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:42:10</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">ICE / KTP / Shovel</td>
+                <td style="color:var(--text-tertiary);">Exchange Pipeline</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">ice-ktp-shovel.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">15ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:41:58</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">Credit Cube</td>
+                <td style="color:var(--text-tertiary);">Credit Risk</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://creditcube.risk.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">15ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:39:44</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">Endur</td>
+                <td style="color:var(--text-tertiary);">Legacy ETRM</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">endur-gateway.legacy.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">22ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:38:22</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">VaR Engine</td>
+                <td style="color:var(--text-tertiary);">Risk Calculation</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://var-engine.risk.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">18ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:37:15</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">a2kvan</td>
+                <td style="color:var(--text-tertiary);">Port Distance</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">manual pull</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot" style="width:0.375rem;height:0.375rem;background:var(--text-muted);"></span><span class="hz-badge" style="font-size:0.375rem;background:var(--surface-base);color:var(--text-muted);">Manual</span></span></td>
+                <td class="r font-mono" style="color:var(--text-muted);">&mdash;</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">&mdash;</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">AX Cloud Shared Drive</td>
+                <td style="color:var(--text-tertiary);">File Storage</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://axcloud.sharepoint.com</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">45ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:35:10</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600;color:var(--text-primary);">SAP Document</td>
+                <td style="color:var(--text-tertiary);">ERP Integration</td>
+                <td class="font-mono" style="color:var(--text-tertiary);font-size:0.5625rem;">https://sap-doc.erp.internal</td>
+                <td><span class="flex items-center gap-1"><span class="hz-dot green" style="width:0.375rem;height:0.375rem;"></span><span class="hz-badge green" style="font-size:0.375rem;">Healthy</span></span></td>
+                <td class="r font-mono" style="color:var(--green);">28ms</td>
+                <td class="font-mono" style="color:var(--text-muted);font-size:0.5625rem;">09:34:50</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           Section 5: RabbitMQ Queue Status (collapsible)
+           ============================================================ -->
+      <div>
+        <div class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapse-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          <span style="font-size:var(--text-xs);font-weight:600;color:var(--text-primary);">RabbitMQ Queue Status</span>
+          <span class="hz-badge green" style="font-size:0.375rem;">12 Active</span>
+        </div>
+        <div class="collapsible-body">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Queue</th>
+                <th>Consumers</th>
+                <th class="r">Messages/hr</th>
+                <th class="r">Ready</th>
+                <th class="r">Unacked</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.trade.ice</td>
+                <td class="font-mono" style="color:var(--text-secondary);">2</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">312</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.trade.pioneer</td>
+                <td class="font-mono" style="color:var(--text-secondary);">2</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">428</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">1</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.settle.pioneer</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">64</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr style="background:var(--amber-dim);">
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.price.loading</td>
+                <td class="font-mono" style="color:var(--text-secondary);">2</td>
+                <td class="r font-mono" style="color:var(--amber);">840</td>
+                <td class="r font-mono" style="color:var(--amber);">12</td>
+                <td class="r font-mono" style="color:var(--amber);">4</td>
+                <td><span class="hz-badge amber" style="font-size:0.375rem;">Slow</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.price.eod</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">batch</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.var.extract</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">156</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.credit.update</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">86</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.pnl.report</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">48</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.endur.gas</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">24</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.ma.settlement</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">18</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.eod.scheduler</td>
+                <td class="font-mono" style="color:var(--text-secondary);">1</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">batch</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+              <tr>
+                <td class="font-mono" style="font-weight:600;color:var(--text-primary);font-size:0.5625rem;">eos.price.bidirectional</td>
+                <td class="font-mono" style="color:var(--text-secondary);">2</td>
+                <td class="r font-mono" style="color:var(--text-secondary);">2,712</td>
+                <td class="r font-mono" style="color:var(--green);">0</td>
+                <td class="r font-mono" style="color:var(--green);">2</td>
+                <td><span class="hz-badge green" style="font-size:0.375rem;">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /env-sections -->
+
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('support-environments', 'Environments');
+
+  /* ========== Message Detail Toggle ========== */
+  function toggleMessageDetail(rowEl) {
+    var detail = rowEl.nextElementSibling;
+    if (detail && detail.classList.contains('msg-detail')) {
+      var isHidden = detail.style.display === 'none';
+      document.querySelectorAll('.msg-detail').forEach(function(d) {
+        d.style.display = 'none';
+        if (d.previousElementSibling) d.previousElementSibling.classList.remove('expanded');
+      });
+      if (isHidden) {
+        detail.style.display = '';
+        rowEl.classList.add('expanded');
+      }
+    }
+  }
+
+  /* ========== Message Detail Tab Switching ========== */
+  function switchMsgTab(tabId, btn) {
+    var panel = btn.closest('.msg-detail-inner');
+    panel.querySelectorAll('.msg-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    panel.querySelectorAll('.msg-tab').forEach(function(t) { t.classList.remove('active'); });
+    var target = panel.querySelector('#' + tabId);
+    if (target) target.classList.add('active');
+    btn.classList.add('active');
+  }
+
+  /* ========== Collapsible Sections ========== */
+  function toggleCollapsible(headerEl) {
+    headerEl.classList.toggle('collapsed');
+  }
+
+  /* ========== Flow Diagram Node Filtering ========== */
+  var activeFilterNode = null;
+
+  function filterByNode(nodeEl) {
+    var nodeId = nodeEl.dataset.node;
+    var flows = (nodeEl.dataset.flows || '').split(',');
+
+    // Toggle off if same node clicked again
+    if (activeFilterNode === nodeId) {
+      clearNodeFilter();
+      return;
+    }
+
+    activeFilterNode = nodeId;
+
+    // Highlight the active node and dim others
+    document.querySelectorAll('.flow-node').forEach(function(n) {
+      n.classList.remove('active-filter');
+      var nFlows = (n.dataset.flows || '').split(',');
+      var connected = nFlows.some(function(f) { return flows.indexOf(f) !== -1; });
+      if (connected || n.dataset.node === nodeId) {
+        n.classList.remove('dimmed');
+      } else {
+        n.classList.add('dimmed');
+      }
+    });
+    nodeEl.classList.add('active-filter');
+
+    // Show reset button
+    document.getElementById('filter-reset-btn').classList.add('visible');
+
+    // Filter message table by the node's service identifier
+    var service = nodeEl.dataset.node;
+    var rows = document.querySelectorAll('.msg-row');
+    rows.forEach(function(row) {
+      var rowService = row.dataset.service;
+      var detail = row.nextElementSibling;
+      if (rowService === service) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+        if (detail && detail.classList.contains('msg-detail')) {
+          detail.style.display = 'none';
+          row.classList.remove('expanded');
+        }
+      }
+    });
+  }
+
+  function clearNodeFilter() {
+    activeFilterNode = null;
+    document.querySelectorAll('.flow-node').forEach(function(n) {
+      n.classList.remove('active-filter');
+      n.classList.remove('dimmed');
+    });
+    document.getElementById('filter-reset-btn').classList.remove('visible');
+    document.querySelectorAll('.msg-row').forEach(function(row) {
+      row.style.display = '';
+    });
+  }
+
+  /* ========== Tooltip ========== */
+  var tooltipEl = document.getElementById('node-tooltip');
+  document.querySelectorAll('.flow-node[data-tooltip]').forEach(function(node) {
+    node.addEventListener('mouseenter', function(e) {
+      var parts = node.dataset.tooltip.split('|');
+      tooltipEl.querySelector('.tt-title').textContent = parts[0] || '';
+      document.getElementById('tt-type').textContent = parts[1] || '';
+      document.getElementById('tt-status').textContent = parts[2] || '';
+      document.getElementById('tt-lastmsg').textContent = parts[3] || '';
+      document.getElementById('tt-latency').textContent = parts[4] || '';
+      var rect = node.getBoundingClientRect();
+      var diagRect = document.getElementById('flow-diagram').getBoundingClientRect();
+      tooltipEl.style.left = (rect.right - diagRect.left + 8) + 'px';
+      tooltipEl.style.top = (rect.top - diagRect.top) + 'px';
+      tooltipEl.classList.add('visible');
+    });
+    node.addEventListener('mouseleave', function() {
+      tooltipEl.classList.remove('visible');
+    });
+  });
+
+  /* ========== Draw Flow Connectors ========== */
+  function drawConnectors() {
+    var diagram = document.getElementById('flow-diagram');
+    var svgEl = document.getElementById('flow-svg');
+    if (!diagram || !svgEl) return;
+
+    var dRect = diagram.getBoundingClientRect();
+    svgEl.setAttribute('viewBox', '0 0 ' + dRect.width + ' ' + dRect.height);
+    svgEl.style.width = dRect.width + 'px';
+    svgEl.style.height = dRect.height + 'px';
+
+    function getNodeRect(nodeId) {
+      var el = diagram.querySelector('[data-node="' + nodeId + '"]');
+      if (!el) return null;
+      var r = el.getBoundingClientRect();
+      return {
+        x: r.left - dRect.left + r.width / 2,
+        y: r.top - dRect.top + r.height / 2,
+        left: r.left - dRect.left,
+        right: r.left - dRect.left + r.width,
+        top: r.top - dRect.top,
+        bottom: r.top - dRect.top + r.height
+      };
+    }
+
+    var lines = '';
+
+    // Helper: draw a connector line
+    function drawLine(fromId, toId, cls, markerId) {
+      var from = getNodeRect(fromId);
+      var to = getNodeRect(toId);
+      if (!from || !to) return;
+      var x1 = from.right;
+      var y1 = from.y;
+      var x2 = to.left;
+      var y2 = to.y;
+      var marker = markerId ? ' marker-end="url(#' + markerId + ')"' : '';
+      lines += '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"' + marker + ' />';
+    }
+
+    // Helper: draw a path connector (for non-straight lines)
+    function drawPath(fromId, toId, cls, markerId, bendDir) {
+      var from = getNodeRect(fromId);
+      var to = getNodeRect(toId);
+      if (!from || !to) return;
+      var x1 = from.right;
+      var y1 = from.y;
+      var x2 = to.left;
+      var y2 = to.y;
+      var mx = (x1 + x2) / 2;
+      var marker = markerId ? ' marker-end="url(#' + markerId + ')"' : '';
+      lines += '<path class="' + cls + '" d="M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ', ' + mx + ' ' + y2 + ', ' + x2 + ' ' + y2 + '"' + marker + ' />';
+    }
+
+    // ===== FLOW CONNECTIONS =====
+
+    // 1. Price Flow: DQ Prices <-> EOS (bidirectional via Glint Price Loading)
+    drawLine('dq-prices', 'glint-price-loading', 'connector-degraded', 'arrowA');
+    drawLine('glint-price-loading', 'rabbitmq', 'connector-degraded', 'arrowO');
+
+    // 2. ICE Trade Flow: ICE -> Glint ICE -> RabbitMQ -> EOS
+    drawLine('ice', 'glint-ice', 'connector-active', 'arrowA');
+    drawLine('glint-ice', 'rabbitmq', 'connector-rmq', 'arrowO');
+
+    // 3. HQ PnL Flow (outbound): EOS -> RabbitMQ -> Glint HQ PnL -> HQ PnL
+    drawLine('glint-hq-pnl', 'hq-pnl', 'connector-active', 'arrowA');
+
+    // 4. Credit Flow (outbound): EOS -> RabbitMQ -> Glint Credit -> Credit Cube
+    drawLine('glint-credit', 'credit-cube', 'connector-active', 'arrowA');
+
+    // 5. Spanish Gas Flow: Endur -> Glint Endur -> RabbitMQ -> EOS
+    drawLine('endur', 'glint-endur', 'connector-active', 'arrowA');
+    drawLine('glint-endur', 'rabbitmq', 'connector-rmq', 'arrowO');
+
+    // 6. VaR Flow (outbound): EOS -> RabbitMQ -> Glint VaR -> VaR Engine
+    drawLine('glint-var', 'var-engine', 'connector-active', 'arrowA');
+
+    // 7. RabbitMQ -> Glint modules (left side, going outbound to Col 2)
+    // These show RMQ pushing to the outbound glint modules
+    var rmq = getNodeRect('rabbitmq');
+    var glintHqPnl = getNodeRect('glint-hq-pnl');
+    var glintCredit = getNodeRect('glint-credit');
+    var glintVar = getNodeRect('glint-var');
+    var glintPriceEod = getNodeRect('glint-price-eod');
+    var glintMa = getNodeRect('glint-ma');
+
+    if (rmq && glintHqPnl) {
+      lines += '<path class="connector-rmq" d="M' + rmq.left + ' ' + rmq.y + ' C ' + (rmq.left - 30) + ' ' + rmq.y + ', ' + (glintHqPnl.right + 30) + ' ' + glintHqPnl.y + ', ' + glintHqPnl.right + ' ' + glintHqPnl.y + '" marker-end="url(#arrowO)" />';
+    }
+    if (rmq && glintCredit) {
+      lines += '<path class="connector-rmq" d="M' + rmq.left + ' ' + rmq.y + ' C ' + (rmq.left - 40) + ' ' + (rmq.y + 20) + ', ' + (glintCredit.right + 40) + ' ' + glintCredit.y + ', ' + glintCredit.right + ' ' + glintCredit.y + '" marker-end="url(#arrowO)" />';
+    }
+    if (rmq && glintVar) {
+      lines += '<path class="connector-rmq" d="M' + rmq.left + ' ' + rmq.y + ' C ' + (rmq.left - 50) + ' ' + (rmq.y + 30) + ', ' + (glintVar.right + 50) + ' ' + glintVar.y + ', ' + glintVar.right + ' ' + glintVar.y + '" marker-end="url(#arrowO)" />';
+    }
+    if (rmq && glintPriceEod) {
+      lines += '<path class="connector-rmq" d="M' + rmq.left + ' ' + rmq.y + ' C ' + (rmq.left - 55) + ' ' + (rmq.y + 35) + ', ' + (glintPriceEod.right + 55) + ' ' + glintPriceEod.y + ', ' + glintPriceEod.right + ' ' + glintPriceEod.y + '" marker-end="url(#arrowO)" />';
+    }
+    if (rmq && glintMa) {
+      lines += '<path class="connector-rmq" d="M' + rmq.left + ' ' + rmq.y + ' C ' + (rmq.left - 60) + ' ' + (rmq.y + 40) + ', ' + (glintMa.right + 60) + ' ' + glintMa.y + ', ' + glintMa.right + ' ' + glintMa.y + '" marker-end="url(#arrowO)" />';
+    }
+
+    // 8. RabbitMQ -> EOS (central vertical connection)
+    var eos = getNodeRect('eos');
+    if (rmq && eos) {
+      lines += '<line class="connector-rmq" x1="' + rmq.x + '" y1="' + rmq.bottom + '" x2="' + eos.x + '" y2="' + eos.top + '" marker-end="url(#arrowO)" />';
+      // Pulse dot on RMQ->EOS
+      var midX = (rmq.x + eos.x) / 2;
+      var midY = (rmq.bottom + eos.top) / 2;
+      lines += '<circle class="pulse-dot active orange" cx="' + midX + '" cy="' + midY + '" />';
+    }
+
+    // 9. EOS -> RabbitMQ (upward, for publishing)
+    if (eos && rmq) {
+      lines += '<line class="connector-active" x1="' + (eos.x + 20) + '" y1="' + eos.top + '" x2="' + (rmq.x + 20) + '" y2="' + rmq.bottom + '" marker-end="url(#arrowA)" />';
+    }
+
+    // 10. RabbitMQ -> Output connectors (Col 4)
+    var glintPioneerTrade = getNodeRect('glint-pioneer-trade');
+    var glintPioneerSettle = getNodeRect('glint-pioneer-settle');
+    if (rmq && glintPioneerTrade) {
+      lines += '<line class="connector-rmq" x1="' + rmq.right + '" y1="' + rmq.y + '" x2="' + glintPioneerTrade.left + '" y2="' + glintPioneerTrade.y + '" marker-end="url(#arrowO)" />';
+      // Pulse dot
+      var px = (rmq.right + glintPioneerTrade.left) / 2;
+      var py = (rmq.y + glintPioneerTrade.y) / 2;
+      lines += '<circle class="pulse-dot active orange" cx="' + px + '" cy="' + py + '" style="animation-delay:0.5s" />';
+    }
+    if (rmq && glintPioneerSettle) {
+      lines += '<line class="connector-rmq" x1="' + rmq.right + '" y1="' + (rmq.y + 10) + '" x2="' + glintPioneerSettle.left + '" y2="' + glintPioneerSettle.y + '" marker-end="url(#arrowO)" />';
+    }
+
+    // 11. Output connectors -> Destinations (Col 4 -> Col 5)
+    drawLine('glint-pioneer-trade', 'pioneer', 'connector-active', 'arrowV');
+    drawLine('glint-pioneer-settle', 'pioneer', 'connector-active', 'arrowV');
+
+    // 12. Glint MA -> SAP Document
+    var sapDoc = getNodeRect('sap-doc');
+    if (glintMa && sapDoc) {
+      lines += '<path class="connector-active" d="M' + glintMa.right + ' ' + glintMa.y + ' C ' + (glintMa.right + 80) + ' ' + glintMa.y + ', ' + (sapDoc.left - 80) + ' ' + sapDoc.y + ', ' + sapDoc.left + ' ' + sapDoc.y + '" marker-end="url(#arrowV)" />';
+    }
+
+    // 13. EOS -> AX Cloud (direct invoice export)
+    var axCloud = getNodeRect('ax-cloud');
+    if (eos && axCloud) {
+      lines += '<path class="connector-active" d="M' + eos.right + ' ' + eos.y + ' C ' + (eos.right + 60) + ' ' + eos.y + ', ' + (axCloud.left - 60) + ' ' + axCloud.y + ', ' + axCloud.left + ' ' + axCloud.y + '" marker-end="url(#arrowV)" />';
+    }
+
+    // 14. a2kvan -> EOS (manual pull, dashed and muted)
+    var a2kvan = getNodeRect('a2kvan');
+    if (a2kvan && eos) {
+      lines += '<path class="connector-manual" d="M' + a2kvan.left + ' ' + a2kvan.y + ' C ' + (a2kvan.left - 40) + ' ' + a2kvan.y + ', ' + (eos.right + 40) + ' ' + (eos.y - 20) + ', ' + eos.right + ' ' + (eos.y - 20) + '" marker-end="url(#arrowA)" />';
+    }
+
+    // 15. EOS Scheduler -> EOS
+    var scheduler = getNodeRect('eos-scheduler');
+    if (scheduler && eos) {
+      lines += '<line class="connector-active" x1="' + scheduler.x + '" y1="' + scheduler.top + '" x2="' + eos.x + '" y2="' + eos.bottom + '" marker-end="url(#arrowA)" />';
+    }
+
+    // 16. DQ Prices -> EOS (bidirectional direct price flow)
+    var dqPrices = getNodeRect('dq-prices');
+    if (dqPrices && eos) {
+      lines += '<path class="connector-active" d="M' + dqPrices.right + ' ' + (dqPrices.y + 8) + ' C ' + (dqPrices.right + 30) + ' ' + (dqPrices.y + 8) + ', ' + (eos.left - 30) + ' ' + (eos.y - 40) + ', ' + eos.left + ' ' + (eos.y - 40) + '" marker-end="url(#arrowA)" />';
+    }
+
+    svgEl.innerHTML = svgEl.querySelector('defs').outerHTML + lines;
+  }
+
+  // Draw connectors after layout settles
+  setTimeout(drawConnectors, 150);
+  window.addEventListener('resize', function() {
+    setTimeout(drawConnectors, 50);
+  });
+</script>
+</body>
+</html>
