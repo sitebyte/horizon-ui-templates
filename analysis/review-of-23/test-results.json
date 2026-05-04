@@ -1,0 +1,1013 @@
+{
+  "timestamp": "2026-05-03T22:44:11.928Z",
+  "summary": {
+    "total": 168,
+    "passed": 153,
+    "failed": 15,
+    "warnings": 0
+  },
+  "tests": {
+    "test1_menuStructure": [
+      {
+        "file": "index.html",
+        "key": "dashboard",
+        "expectedGroup": "TRADING",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "TRADING"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "TRADING"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Trades View"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "trade-form.html",
+        "key": "trade-form",
+        "expectedGroup": "TRADING",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "TRADING"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "TRADING"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Trade Capture"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "charges.html",
+        "key": "charges",
+        "expectedGroup": "TRADING",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "TRADING"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "TRADING"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Charge Capture"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "vessel-charters.html",
+        "key": "vessel-charters",
+        "expectedGroup": "TRADING",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "TRADING"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "TRADING"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Vessel Charter"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "master-agreements.html",
+        "key": "master-agreements",
+        "expectedGroup": "CONTRACTS",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "CONTRACTS"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "CONTRACTS"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Master Agreements"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "contracts.html",
+        "key": "contracts",
+        "expectedGroup": "CONTRACTS",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "CONTRACTS"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "CONTRACTS"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Contracts"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "counterparties.html",
+        "key": "counterparties",
+        "expectedGroup": "CONTRACTS",
+        "totalGroups": 7,
+        "openGroupCount": 2,
+        "openGroupNames": [
+          "CONTRACTS",
+          "ADMINISTRATION"
+        ],
+        "activeGroupBtnCount": 2,
+        "activeGroupNames": [
+          "CONTRACTS",
+          "ADMINISTRATION"
+        ],
+        "activeItemCount": 4,
+        "activeItemLabels": [
+          "Contact Counterparties",
+          "Static Data",
+          "Companies",
+          "Manage Companies"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 2 (CONTRACTS, ADMINISTRATION)"
+        ]
+      },
+      {
+        "file": "cargo-board.html",
+        "key": "cargo-board",
+        "expectedGroup": "OPERATIONS",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Cargo View"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "cargo-matching.html",
+        "key": "cargo-matching",
+        "expectedGroup": "OPERATIONS",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Matching"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "manage-schedule.html",
+        "key": "manage-schedule",
+        "expectedGroup": "OPERATIONS",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "OPERATIONS"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Manage Schedule"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "audit-log.html",
+        "key": "audit-log",
+        "expectedGroup": "OPERATIONS",
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Cargo Audit Summary"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 0 ()"
+        ]
+      },
+      {
+        "file": "nominations.html",
+        "key": "nominations",
+        "expectedGroup": "OPERATIONS",
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Shipments"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 0 ()"
+        ]
+      },
+      {
+        "file": "valuations.html",
+        "key": "valuations",
+        "expectedGroup": "FINANCE",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "FINANCE"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "FINANCE"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Valuations"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "invoices.html",
+        "key": "invoices",
+        "expectedGroup": "FINANCE",
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Statements"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 0 ()"
+        ]
+      },
+      {
+        "file": "positions.html",
+        "key": "positions",
+        "expectedGroup": "FINANCE",
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Portfolio"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 0 ()"
+        ]
+      },
+      {
+        "file": "curves.html",
+        "key": "curves",
+        "expectedGroup": "FINANCE",
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Prices"
+        ],
+        "hasSidebar": true,
+        "issues": [
+          "Expected 1 open group, got 0 ()"
+        ]
+      },
+      {
+        "file": "settings.html",
+        "key": "settings",
+        "expectedGroup": "ADMINISTRATION",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Settings"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "reminders.html",
+        "key": "reminders",
+        "expectedGroup": "SYSTEM",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "SYSTEM"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "SYSTEM"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Reminder Dashboard"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "support-dashboard.html",
+        "key": "support-dashboard",
+        "expectedGroup": "SUPPORT",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "SUPPORT"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "SUPPORT"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "System Status"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "support-audit.html",
+        "key": "support-audit",
+        "expectedGroup": "SUPPORT",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "SUPPORT"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "SUPPORT"
+        ],
+        "activeItemCount": 2,
+        "activeItemLabels": [
+          "Logs",
+          "Audit Search"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "support-data-quality.html",
+        "key": "data-quality",
+        "expectedGroup": "SUPPORT",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "SUPPORT"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "SUPPORT"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "Data Quality"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "support-sql-checks.html",
+        "key": "support-sql-checks",
+        "expectedGroup": "SUPPORT",
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "SUPPORT"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "SUPPORT"
+        ],
+        "activeItemCount": 1,
+        "activeItemLabels": [
+          "SQL Checks"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "blotter.html",
+        "key": "blotter",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "quick-entry.html",
+        "key": "quick-entry",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "lifecycle.html",
+        "key": "lifecycle",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "hedges.html",
+        "key": "hedges",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "reconciliation.html",
+        "key": "reconciliation",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "style-guide.html",
+        "key": "style-guide",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 0,
+        "openGroupNames": [],
+        "activeGroupBtnCount": 0,
+        "activeGroupNames": [],
+        "activeItemCount": 0,
+        "activeItemLabels": [],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "curve-management.html",
+        "key": "curve-management",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeItemCount": 3,
+        "activeItemLabels": [
+          "Static Data",
+          "Prices",
+          "Manage Curve Definitions"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      },
+      {
+        "file": "index-builder.html",
+        "key": "index-builder",
+        "expectedGroup": null,
+        "totalGroups": 7,
+        "openGroupCount": 1,
+        "openGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeGroupBtnCount": 1,
+        "activeGroupNames": [
+          "ADMINISTRATION"
+        ],
+        "activeItemCount": 3,
+        "activeItemLabels": [
+          "Static Data",
+          "Prices",
+          "Manage Price Basis"
+        ],
+        "hasSidebar": true,
+        "issues": []
+      }
+    ],
+    "test2_accordionBehavior": {
+      "steps": [
+        {
+          "step": "Initial state - index.html",
+          "openGroups": [
+            "TRADING"
+          ],
+          "expected": [
+            "TRADING"
+          ],
+          "pass": true
+        },
+        {
+          "step": "After clicking CONTRACTS",
+          "openGroups": [
+            "CONTRACTS"
+          ],
+          "expected": [
+            "CONTRACTS"
+          ],
+          "pass": true
+        },
+        {
+          "step": "After clicking OPERATIONS",
+          "openGroups": [
+            "OPERATIONS"
+          ],
+          "expected": [
+            "OPERATIONS"
+          ],
+          "pass": true
+        },
+        {
+          "step": "After clicking OPERATIONS again (toggle close)",
+          "openGroups": [],
+          "expected": [],
+          "pass": true
+        }
+      ]
+    },
+    "test3_navigationLinks": [
+      {
+        "label": "Trades View",
+        "href": "index.html",
+        "group": "TRADING",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "TRADING"
+        ],
+        "activeItems": [
+          "Trades View"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Trade Capture",
+        "href": "trade-form.html",
+        "group": "TRADING",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "TRADING"
+        ],
+        "activeItems": [
+          "Trade Capture"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Charge Capture",
+        "href": "charges.html",
+        "group": "TRADING",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "TRADING"
+        ],
+        "activeItems": [
+          "Charge Capture"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Vessel Charter",
+        "href": "vessel-charters.html",
+        "group": "TRADING",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "TRADING"
+        ],
+        "activeItems": [
+          "Vessel Charter"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Master Agreements",
+        "href": "master-agreements.html",
+        "group": "CONTRACTS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "CONTRACTS"
+        ],
+        "activeItems": [
+          "Master Agreements"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Contracts",
+        "href": "contracts.html",
+        "group": "CONTRACTS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "CONTRACTS"
+        ],
+        "activeItems": [
+          "Contracts"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Contact Counterparties",
+        "href": "counterparties.html",
+        "group": "CONTRACTS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": false,
+        "openGroups": [
+          "CONTRACTS",
+          "ADMINISTRATION"
+        ],
+        "activeItems": [
+          "Contact Counterparties",
+          "Static Data",
+          "Companies",
+          "Manage Companies"
+        ],
+        "pass": false
+      },
+      {
+        "label": "Cargo View",
+        "href": "cargo-board.html",
+        "group": "OPERATIONS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "OPERATIONS"
+        ],
+        "activeItems": [
+          "Cargo View"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Matching",
+        "href": "cargo-matching.html",
+        "group": "OPERATIONS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "OPERATIONS"
+        ],
+        "activeItems": [
+          "Matching"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Manage Schedule",
+        "href": "manage-schedule.html",
+        "group": "OPERATIONS",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "OPERATIONS"
+        ],
+        "activeItems": [
+          "Manage Schedule"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Shipments",
+        "href": "nominations.html",
+        "group": "OPERATIONS",
+        "pageLoaded": true,
+        "correctGroupOpen": false,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": false,
+        "openGroups": [],
+        "activeItems": [
+          "Shipments"
+        ],
+        "pass": false
+      },
+      {
+        "label": "Valuations",
+        "href": "valuations.html",
+        "group": "FINANCE",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "FINANCE"
+        ],
+        "activeItems": [
+          "Valuations"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Statements",
+        "href": "invoices.html",
+        "group": "FINANCE",
+        "pageLoaded": true,
+        "correctGroupOpen": false,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": false,
+        "openGroups": [],
+        "activeItems": [
+          "Statements"
+        ],
+        "pass": false
+      },
+      {
+        "label": "Portfolio",
+        "href": "positions.html",
+        "group": "FINANCE",
+        "pageLoaded": true,
+        "correctGroupOpen": false,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": false,
+        "openGroups": [],
+        "activeItems": [
+          "Portfolio"
+        ],
+        "pass": false
+      },
+      {
+        "label": "Prices",
+        "href": "curves.html",
+        "group": "FINANCE",
+        "pageLoaded": true,
+        "correctGroupOpen": false,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": false,
+        "openGroups": [],
+        "activeItems": [
+          "Prices"
+        ],
+        "pass": false
+      },
+      {
+        "label": "Settings",
+        "href": "settings.html",
+        "group": "ADMINISTRATION",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "ADMINISTRATION"
+        ],
+        "activeItems": [
+          "Settings"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Reminder Dashboard",
+        "href": "reminders.html",
+        "group": "SYSTEM",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "SYSTEM"
+        ],
+        "activeItems": [
+          "Reminder Dashboard"
+        ],
+        "pass": true
+      },
+      {
+        "label": "System Status",
+        "href": "support-dashboard.html",
+        "group": "SUPPORT",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "SUPPORT"
+        ],
+        "activeItems": [
+          "System Status"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Audit Search",
+        "href": "support-audit.html",
+        "group": "SUPPORT",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "SUPPORT"
+        ],
+        "activeItems": [
+          "Logs",
+          "Audit Search"
+        ],
+        "pass": true
+      },
+      {
+        "label": "Data Quality",
+        "href": "support-data-quality.html",
+        "group": "SUPPORT",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "SUPPORT"
+        ],
+        "activeItems": [
+          "Data Quality"
+        ],
+        "pass": true
+      },
+      {
+        "label": "SQL Checks",
+        "href": "support-sql-checks.html",
+        "group": "SUPPORT",
+        "pageLoaded": true,
+        "correctGroupOpen": true,
+        "hasActiveItem": true,
+        "onlyOneGroupOpen": true,
+        "openGroups": [
+          "SUPPORT"
+        ],
+        "activeItems": [
+          "SQL Checks"
+        ],
+        "pass": true
+      }
+    ],
+    "test4_sidebarCollapse": {
+      "steps": [
+        {
+          "step": "Initial state - sidebar expanded",
+          "collapsed": false,
+          "width": 248,
+          "dataExpanded": "true",
+          "pass": true
+        },
+        {
+          "step": "After collapse click",
+          "collapsed": true,
+          "width": 56,
+          "dataExpanded": "false",
+          "pass": true
+        },
+        {
+          "step": "After expand click",
+          "collapsed": false,
+          "width": 248,
+          "dataExpanded": "true",
+          "pass": true
+        }
+      ]
+    },
+    "test5_fullscreenToggle": {
+      "steps": [
+        {
+          "step": "Normal state",
+          "isFullscreen": false,
+          "headerVisible": true,
+          "sidebarVisible": true,
+          "statusBarVisible": true,
+          "contextStripVisible": true,
+          "pass": true
+        },
+        {
+          "step": "Fullscreen mode",
+          "isFullscreen": true,
+          "headerDisplay": "none",
+          "sidebarDisplay": "none",
+          "statusBarDisplay": "none",
+          "contextStripDisplay": "none",
+          "headerHidden": true,
+          "sidebarHidden": true,
+          "statusBarHidden": true,
+          "contextStripHidden": true,
+          "pass": true
+        },
+        {
+          "step": "Restored from fullscreen",
+          "isFullscreen": false,
+          "headerVisible": true,
+          "sidebarVisible": true,
+          "statusBarVisible": true,
+          "pass": true
+        }
+      ]
+    }
+  }
+}

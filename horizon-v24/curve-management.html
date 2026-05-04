@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curve Management — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* ===== Toolbar ===== */
+    .cm-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-3);
+      flex-shrink: 0;
+    }
+    .cm-toolbar-search {
+      position: relative;
+      flex: 1;
+      max-width: 14rem;
+    }
+    .cm-toolbar-search svg {
+      position: absolute;
+      left: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    .cm-toolbar-search input {
+      padding-left: 1.75rem;
+    }
+
+    /* ===== Type filter pills ===== */
+    .cm-pill {
+      padding: 0.1875rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.625rem;
+      font-weight: 500;
+      border: 0.0625rem solid var(--border);
+      color: var(--text-tertiary);
+      background: transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .cm-pill:hover {
+      border-color: var(--text-muted);
+      color: var(--text-secondary);
+    }
+    .cm-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ===== Search Rule (compact) ===== */
+    .cm-search-rule {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      color: var(--text-tertiary);
+      max-width: 14rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ===== Active toggle ===== */
+    .cm-toggle {
+      width: 2rem;
+      height: 1.125rem;
+      border-radius: var(--radius-full);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: none;
+      flex-shrink: 0;
+    }
+    .cm-toggle.on { background: var(--green); }
+    .cm-toggle.off { background: var(--surface-overlay); }
+    .cm-toggle::after {
+      content: '';
+      position: absolute;
+      top: 0.125rem;
+      width: 0.875rem;
+      height: 0.875rem;
+      border-radius: 50%;
+      background: #fff;
+      transition: left 0.2s;
+    }
+    .cm-toggle.on::after { left: calc(100% - 1rem); }
+    .cm-toggle.off::after { left: 0.125rem; }
+
+    /* ===== Last Load indicator ===== */
+    .cm-last-load {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-1);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+    .cm-last-load-time {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- KPI Strip -->
+  <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-2 mb-3 fade-in" id="cm-kpis">
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Total Curves</span>
+      <span class="hz-kpi-value">24</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Forward</span>
+      <span class="hz-kpi-value" style="color:var(--blue);">12</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Settlement</span>
+      <span class="hz-kpi-value" style="color:var(--green);">8</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Constant</span>
+      <span class="hz-kpi-value">4</span>
+    </div>
+    <div class="hz-kpi">
+      <span class="hz-kpi-label">Last Load</span>
+      <span class="hz-kpi-value" style="font-size:var(--text-base);">17:02</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="cm-toolbar fade-in-d1">
+    <div class="cm-toolbar-search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="hz-input" placeholder="Search curves..." id="cm-search" oninput="filterCurves()" style="width:100%;" />
+    </div>
+    <div style="display:flex; gap:0.25rem;">
+      <button class="cm-pill active" data-type="all" onclick="filterType('all', this)">All</button>
+      <button class="cm-pill" data-type="Forward" onclick="filterType('Forward', this)">Forward</button>
+      <button class="cm-pill" data-type="Settlement" onclick="filterType('Settlement', this)">Settlement</button>
+      <button class="cm-pill" data-type="Constant" onclick="filterType('Constant', this)">Constant</button>
+    </div>
+    <button class="hz-btn sm primary" onclick="showToast('Curve load triggered', 'success')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Reload Curves
+    </button>
+    <span style="margin-left:auto;" class="cm-last-load">
+      <span class="hz-dot green pulse" style="width:0.375rem; height:0.375rem;"></span>
+      Last load: <span class="cm-last-load-time">17:02 UTC</span>
+    </span>
+  </div>
+
+  <!-- Curve Grid -->
+  <div class="hz-card fade-in-d2" style="overflow-x:auto; flex:1;">
+    <table class="hz-table" id="cm-table">
+      <thead>
+        <tr>
+          <th>Curve</th>
+          <th>Type</th>
+          <th>Market Source</th>
+          <th>Price Units</th>
+          <th>Search Rule</th>
+          <th style="text-align:center;">Active</th>
+        </tr>
+      </thead>
+      <tbody id="cm-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('curve-management', 'Curve Management');
+
+/* ========== DATA ========== */
+var curves = [
+  { name: 'JKM Forward',      type: 'Forward',    source: 'Platts (S&P Global)', units: '$/MMBtu',  rule: 'PLATTS:JKM:FWD:M+1..M+36',   active: true },
+  { name: 'JKM Settlement',   type: 'Settlement', source: 'Platts (S&P Global)', units: '$/MMBtu',  rule: 'PLATTS:JKM:SETTLE:DAILY',     active: true },
+  { name: 'TTF Forward',      type: 'Forward',    source: 'ICE Endex',           units: 'EUR/MWh',  rule: 'ICE:TTF:FWD:M+1..M+24',      active: true },
+  { name: 'TTF Settlement',   type: 'Settlement', source: 'ICE Endex',           units: 'EUR/MWh',  rule: 'ICE:TTF:SETTLE:DAILY',        active: true },
+  { name: 'HH Forward',       type: 'Forward',    source: 'NYMEX (CME)',         units: '$/MMBtu',  rule: 'NYMEX:HH:FWD:M+1..M+36',     active: true },
+  { name: 'HH Settlement',    type: 'Settlement', source: 'NYMEX (CME)',         units: '$/MMBtu',  rule: 'NYMEX:HH:SETTLE:DAILY',       active: true },
+  { name: 'Brent Forward',    type: 'Forward',    source: 'ICE Futures Europe',  units: '$/bbl',    rule: 'ICE:BRENT:FWD:M+1..M+36',    active: true },
+  { name: 'Brent Settlement', type: 'Settlement', source: 'ICE Futures Europe',  units: '$/bbl',    rule: 'ICE:BRENT:SETTLE:DAILY',      active: true },
+  { name: 'EURUSD',           type: 'Constant',   source: 'ECB / Reuters',       units: 'EUR/USD',  rule: 'ECB:EURUSD:FIX:DAILY',        active: true },
+  { name: 'JCC',              type: 'Constant',   source: 'METI Japan',          units: '$/bbl',    rule: 'METI:JCC:MONTHLY:M-3',        active: true },
+];
+
+var activeTypeFilter = 'all';
+
+/* ========== RENDER ========== */
+function renderCurves() {
+  var tbody = document.getElementById('cm-tbody');
+  var q = (document.getElementById('cm-search').value || '').toLowerCase();
+  var html = '';
+
+  curves.forEach(function(c, i) {
+    /* Filter by search */
+    if (q && c.name.toLowerCase().indexOf(q) < 0 && c.source.toLowerCase().indexOf(q) < 0 && c.rule.toLowerCase().indexOf(q) < 0) return;
+    /* Filter by type */
+    if (activeTypeFilter !== 'all' && c.type !== activeTypeFilter) return;
+
+    var typeBadge = '';
+    if (c.type === 'Forward') typeBadge = '<span class="hz-badge blue">' + c.type + '</span>';
+    else if (c.type === 'Settlement') typeBadge = '<span class="hz-badge green">' + c.type + '</span>';
+    else typeBadge = '<span class="hz-badge neutral">' + c.type + '</span>';
+
+    html += '<tr>';
+    html += '<td style="font-weight:600; color:var(--text-primary);">' + c.name + '</td>';
+    html += '<td>' + typeBadge + '</td>';
+    html += '<td>' + c.source + '</td>';
+    html += '<td><span class="font-mono">' + c.units + '</span></td>';
+    html += '<td><span class="cm-search-rule" title="' + c.rule + '">' + c.rule + '</span></td>';
+    html += '<td style="text-align:center;"><button class="cm-toggle ' + (c.active ? 'on' : 'off') + '" onclick="toggleCurve(' + i + ')" title="' + (c.active ? 'Active' : 'Inactive') + '"></button></td>';
+    html += '</tr>';
+  });
+
+  if (!html) {
+    html = '<tr><td colspan="6" style="text-align:center; padding:var(--sp-6); color:var(--text-muted);">No curves match the current filter.</td></tr>';
+  }
+
+  tbody.innerHTML = html;
+}
+
+/* ========== INTERACTIONS ========== */
+function filterCurves() {
+  renderCurves();
+}
+
+function filterType(type, btn) {
+  activeTypeFilter = type;
+  document.querySelectorAll('.cm-pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  renderCurves();
+}
+
+function toggleCurve(idx) {
+  curves[idx].active = !curves[idx].active;
+  var status = curves[idx].active ? 'activated' : 'deactivated';
+  showToast(curves[idx].name + ' ' + status, curves[idx].active ? 'success' : 'warning');
+  renderCurves();
+}
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded', function() {
+  renderCurves();
+});
+</script>
+
+</body>
+</html>
