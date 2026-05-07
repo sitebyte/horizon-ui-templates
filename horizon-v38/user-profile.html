@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    .profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    @media (max-width:48rem) { .profile-grid { grid-template-columns:1fr; } }
+
+    .profile-header-card { display:flex; align-items:center; gap:1rem; padding:1rem; }
+    .profile-avatar-lg {
+      width:3.5rem; height:3.5rem; border-radius:var(--radius-full);
+      background:var(--gradient); display:flex; align-items:center; justify-content:center;
+      font-size:1.125rem; font-weight:700; color:#fff; flex-shrink:0;
+    }
+    .profile-name { font-size:1.125rem; font-weight:600; color:var(--text-primary); font-family:'Inter',sans-serif; }
+    .profile-title { font-size:0.75rem; color:var(--text-tertiary); font-family:'Inter',sans-serif; }
+    .profile-email { font-size:0.6875rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .profile-status-dot { display:inline-block; width:0.5rem; height:0.5rem; border-radius:var(--radius-full); background:var(--green); margin-right:0.25rem; }
+
+    .detail-section { margin-bottom:0.5rem; }
+    .detail-title { font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:0.5rem; font-family:'Inter',sans-serif; }
+    .detail-row { display:flex; align-items:center; justify-content:space-between; padding:0.3125rem 0; border-bottom:0.0625rem solid var(--border); }
+    .detail-row:last-child { border-bottom:none; }
+    .detail-label { font-size:0.6875rem; color:var(--text-tertiary); font-family:'Inter',sans-serif; }
+    .detail-value { font-size:0.6875rem; color:var(--text-secondary); font-family:'Inter',sans-serif; text-align:right; }
+    .detail-value.mono { font-family:'JetBrains Mono',monospace; }
+
+    .perm-grid { display:flex; flex-wrap:wrap; gap:0.25rem; margin-top:0.25rem; }
+    .perm-pill { display:inline-flex; align-items:center; gap:0.25rem; padding:0.125rem 0.5rem; border-radius:var(--radius-full); font-size:0.625rem; font-weight:500; font-family:'Inter',sans-serif; }
+    .perm-pill.granted { background:var(--green-dim); color:var(--green); }
+    .perm-pill.denied { background:var(--red-dim); color:var(--red); }
+    .perm-pill.limited { background:var(--amber-dim); color:var(--amber); }
+
+    .activity-list { list-style:none; padding:0; margin:0; }
+    .activity-item { display:flex; gap:0.5rem; padding:0.375rem 0; border-bottom:0.0625rem solid var(--border); }
+    .activity-item:last-child { border-bottom:none; }
+    .activity-dot { width:0.375rem; height:0.375rem; border-radius:var(--radius-full); margin-top:0.3125rem; flex-shrink:0; }
+    .activity-dot.trade { background:var(--accent); }
+    .activity-dot.login { background:var(--green); }
+    .activity-dot.settings { background:var(--amber); }
+    .activity-dot.admin { background:var(--blue); }
+    .activity-text { font-size:0.6875rem; color:var(--text-secondary); font-family:'Inter',sans-serif; }
+    .activity-time { font-size:0.625rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; white-space:nowrap; margin-left:auto; flex-shrink:0; }
+
+    .session-table { width:100%; border-collapse:collapse; }
+    .session-table th { text-align:left; padding:0.25rem 0.375rem; font-size:0.625rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); border-bottom:0.0625rem solid var(--border); font-family:'Inter',sans-serif; }
+    .session-table td { padding:0.25rem 0.375rem; font-size:0.6875rem; color:var(--text-secondary); border-bottom:0.0625rem solid var(--border); font-family:'Inter',sans-serif; }
+    .session-table tr:last-child td { border-bottom:none; }
+    .session-current { color:var(--green) !important; font-weight:500; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Profile Header -->
+  <div class="hz-card fade-in profile-header-card" style="margin-bottom:0.75rem;">
+    <div class="profile-avatar-lg">JC</div>
+    <div style="flex:1;min-width:0;">
+      <div class="profile-name">Jonathan Cobley</div>
+      <div class="profile-title">Senior LNG Trader &mdash; GLNG Trading Desk</div>
+      <div class="profile-email" style="margin-top:0.125rem;">
+        <span class="profile-status-dot"></span>
+        Online &middot; j.cobley@glng.com
+      </div>
+    </div>
+    <div style="display:flex;gap:0.375rem;">
+      <a href="settings.html" class="hz-btn" style="font-size:0.6875rem;padding:0.375rem 0.75rem;display:inline-flex;align-items:center;gap:0.25rem;background:var(--surface-elevated);color:var(--text-secondary);border:0.0625rem solid var(--border);border-radius:var(--radius-md);text-decoration:none;cursor:pointer;transition:all 0.15s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <!-- Left Column -->
+    <div>
+      <!-- Account Details -->
+      <div class="hz-card fade-in-d1" style="margin-bottom:0.75rem;">
+        <div class="detail-section">
+          <div class="detail-title">Account Details</div>
+          <div class="detail-row">
+            <span class="detail-label">Username</span>
+            <span class="detail-value mono">j.cobley</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">j.cobley@glng.com</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Employee ID</span>
+            <span class="detail-value mono">EMP-00412</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Department</span>
+            <span class="detail-value">LNG Trading</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Desk</span>
+            <span class="detail-value">GLNG Trading Desk</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Location</span>
+            <span class="detail-value">London, UK</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value mono">+44 20 7946 0958</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Manager</span>
+            <span class="detail-value"><a class="hz-entity-link" href="#">R. Thompson</a></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roles & Permissions -->
+      <div class="hz-card fade-in-d2" style="margin-bottom:0.75rem;">
+        <div class="detail-section">
+          <div class="detail-title">Roles &amp; Groups</div>
+          <div class="detail-row">
+            <span class="detail-label">Primary Role</span>
+            <span class="detail-value">Trader</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Secondary Roles</span>
+            <span class="detail-value">Admin, Approver</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Groups</span>
+            <span class="detail-value">LNG Traders, London Office, Senior Staff</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Legal Entity</span>
+            <span class="detail-value mono">GLNG-UK-001</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Default Book</span>
+            <span class="detail-value">Pacific</span>
+          </div>
+        </div>
+        <div class="detail-section" style="margin-top:0.5rem;">
+          <div class="detail-title">Permissions</div>
+          <div class="perm-grid">
+            <span class="perm-pill granted">Trade Capture</span>
+            <span class="perm-pill granted">Trade Amend</span>
+            <span class="perm-pill granted">Trade Cancel</span>
+            <span class="perm-pill granted">View Valuations</span>
+            <span class="perm-pill granted">Approve Invoices</span>
+            <span class="perm-pill granted">Manage Contracts</span>
+            <span class="perm-pill limited">Price Override (Limit: $5M)</span>
+            <span class="perm-pill granted">Cargo Operations</span>
+            <span class="perm-pill granted">Export Data</span>
+            <span class="perm-pill denied">Delete Trades</span>
+            <span class="perm-pill denied">Manage Users</span>
+            <span class="perm-pill granted">View Audit Log</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authentication -->
+      <div class="hz-card fade-in-d3">
+        <div class="detail-section">
+          <div class="detail-title">Authentication</div>
+          <div class="detail-row">
+            <span class="detail-label">Auth Provider</span>
+            <span class="detail-value">Keycloak (AD-federated)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">MFA Status</span>
+            <span class="detail-value"><span class="hz-badge green" style="font-size:0.5625rem;">Enabled</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Last Password Change</span>
+            <span class="detail-value mono">2026-03-15</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Password Expiry</span>
+            <span class="detail-value mono">2026-09-15</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Account Created</span>
+            <span class="detail-value mono">2024-06-12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+      <!-- Recent Activity -->
+      <div class="hz-card fade-in-d1" style="margin-bottom:0.75rem;">
+        <div class="detail-section">
+          <div class="detail-title">Recent Activity</div>
+          <ul class="activity-list">
+            <li class="activity-item">
+              <span class="activity-dot trade"></span>
+              <span class="activity-text">Created trade <a class="hz-entity-link" href="lifecycle.html">T-1006</a> — BUY 3.2M MMBtu JKM from Woodside</span>
+              <span class="activity-time">10 min ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot trade"></span>
+              <span class="activity-text">Amended trade <a class="hz-entity-link" href="lifecycle.html">T-1003</a> — updated delivery window</span>
+              <span class="activity-time">42 min ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot trade"></span>
+              <span class="activity-text">Approved invoice <a class="hz-entity-link" href="invoices.html">INV-2026-0042</a> — $45.6M Shell Trading</span>
+              <span class="activity-time">1h ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot login"></span>
+              <span class="activity-text">Signed in from 10.0.45.12 (London Office)</span>
+              <span class="activity-time">2h ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot settings"></span>
+              <span class="activity-text">Changed default portfolio to Pacific</span>
+              <span class="activity-time">Yesterday</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot trade"></span>
+              <span class="activity-text">Confirmed cargo <a class="hz-entity-link" href="cargo-board.html">CARGO-Q2-01</a> — Al Dafna loading</span>
+              <span class="activity-time">Yesterday</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot admin"></span>
+              <span class="activity-text">Exported trade blotter to CSV (24 records)</span>
+              <span class="activity-time">2 days ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot trade"></span>
+              <span class="activity-text">Created trade <a class="hz-entity-link" href="lifecycle.html">T-1005</a> — BUY 5M MMBtu HH from Cheniere</span>
+              <span class="activity-time">2 days ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot login"></span>
+              <span class="activity-text">Signed in from 192.168.1.20 (VPN - Home)</span>
+              <span class="activity-time">3 days ago</span>
+            </li>
+            <li class="activity-item">
+              <span class="activity-dot settings"></span>
+              <span class="activity-text">Enabled auto-refresh on position ladder</span>
+              <span class="activity-time">3 days ago</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Active Sessions -->
+      <div class="hz-card fade-in-d2" style="margin-bottom:0.75rem;">
+        <div class="detail-section">
+          <div class="detail-title">Active Sessions</div>
+          <table class="session-table">
+            <thead>
+              <tr>
+                <th>Device</th>
+                <th>IP Address</th>
+                <th>Location</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="session-current">Chrome — macOS (current)</td>
+                <td style="font-family:'JetBrains Mono',monospace;">10.0.45.12</td>
+                <td>London Office</td>
+                <td class="session-current">Now</td>
+              </tr>
+              <tr>
+                <td>Chrome — Windows</td>
+                <td style="font-family:'JetBrains Mono',monospace;">10.0.45.87</td>
+                <td>London Office</td>
+                <td>Yesterday</td>
+              </tr>
+              <tr>
+                <td>Safari — iPhone</td>
+                <td style="font-family:'JetBrains Mono',monospace;">192.168.1.20</td>
+                <td>VPN — Home</td>
+                <td>3 days ago</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Trading Summary -->
+      <div class="hz-card fade-in-d3">
+        <div class="detail-section">
+          <div class="detail-title">Trading Summary (MTD)</div>
+          <div class="detail-row">
+            <span class="detail-label">Trades Created</span>
+            <span class="detail-value mono" style="font-weight:600;">18</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Trades Amended</span>
+            <span class="detail-value mono">7</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Invoices Approved</span>
+            <span class="detail-value mono">12</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Volume Traded</span>
+            <span class="detail-value mono" style="font-weight:600;">28.4M <span style="font-weight:400;color:var(--text-muted)">MMBtu</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Notional</span>
+            <span class="detail-value mono" style="font-weight:600;">$412.8M</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Realised P&L</span>
+            <span class="detail-value mono pnl-positive" style="font-weight:700;">+$2.11M</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('user-profile', 'User Profile');
+</script>
+</body>
+</html>
