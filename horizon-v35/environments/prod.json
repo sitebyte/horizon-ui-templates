@@ -22,7 +22,7 @@
       "size": "md",
       "borderStyle": "dashed",
       "borderColor": "var(--border-strong)",
-      "glowColor": "rgba(79,70,229,0.15)",
+      "glowColor": "rgba(79,70,229,0.2)",
       "icon": "cloud"
     },
     "pipeline": {
@@ -31,7 +31,7 @@
       "size": "sm",
       "borderStyle": "solid",
       "borderColor": "var(--border)",
-      "glowColor": "rgba(79,70,229,0.1)",
+      "glowColor": "rgba(79,70,229,0.15)",
       "icon": "arrow-right"
     },
     "glint": {
@@ -40,7 +40,7 @@
       "size": "md",
       "borderStyle": "solid",
       "borderColor": "#22c55e",
-      "glowColor": "rgba(34,197,94,0.15)",
+      "glowColor": "rgba(34,197,94,0.25)",
       "icon": "container"
     },
     "broker": {
@@ -49,7 +49,7 @@
       "size": "lg",
       "borderStyle": "solid",
       "borderColor": "#f97316",
-      "glowColor": "rgba(249,115,22,0.25)",
+      "glowColor": "rgba(249,115,22,0.35)",
       "icon": "message-square"
     },
     "core": {
@@ -58,7 +58,7 @@
       "size": "xl",
       "borderStyle": "solid",
       "borderColor": "var(--accent)",
-      "glowColor": "rgba(79,70,229,0.25)",
+      "glowColor": "rgba(79,70,229,0.35)",
       "icon": "database"
     },
     "core-secondary": {
@@ -67,7 +67,7 @@
       "size": "md",
       "borderStyle": "solid",
       "borderColor": "rgba(79,70,229,0.5)",
-      "glowColor": "rgba(79,70,229,0.1)",
+      "glowColor": "rgba(79,70,229,0.15)",
       "icon": "clock"
     },
     "destination": {
@@ -76,7 +76,7 @@
       "size": "md",
       "borderStyle": "solid",
       "borderColor": "#7c3aed",
-      "glowColor": "rgba(124,58,237,0.15)",
+      "glowColor": "rgba(124,58,237,0.25)",
       "icon": "external-link"
     }
   },
@@ -84,9 +84,12 @@
     {
       "id": "eos",
       "name": "EOS",
-      "description": "Core ETRM application — trade capture, cargo operations, valuations, settlement",
+      "description": "Core ETRM application \u2014 trade capture, cargo operations, valuations, settlement",
       "type": "core",
-      "position": { "x": 45, "y": 52 },
+      "position": {
+        "x": 45,
+        "y": 52
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://eos-prod.glng.internal/api/health",
@@ -119,9 +122,12 @@
     {
       "id": "rabbitmq",
       "name": "RabbitMQ",
-      "description": "Single message broker instance — all integration flows through this",
+      "description": "Single message broker instance \u2014 all integration flows through this",
       "type": "broker",
-      "position": { "x": 45, "y": 25 },
+      "position": {
+        "x": 45,
+        "y": 25
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://eos-rmq-prod:15672/api/healthchecks/node",
@@ -155,9 +161,12 @@
     {
       "id": "eos-scheduler",
       "name": "EOS Scheduler EOD",
-      "description": "End-of-day batch scheduler — triggers EOD processing in EOS",
+      "description": "End-of-day batch scheduler \u2014 triggers EOD processing in EOS",
       "type": "core-secondary",
-      "position": { "x": 45, "y": 78 },
+      "position": {
+        "x": 45,
+        "y": 78
+      },
       "status": "healthy",
       "health": {
         "checkUrl": null,
@@ -184,9 +193,12 @@
     {
       "id": "dq-prices",
       "name": "DQ Prices",
-      "description": "External price data provider — supplies market prices to EOS",
+      "description": "External price data provider \u2014 supplies market prices to EOS",
       "type": "external",
-      "position": { "x": 3, "y": 8 },
+      "position": {
+        "x": 3,
+        "y": 8
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://dq.prices.provider.com/api/health",
@@ -213,9 +225,12 @@
     {
       "id": "ice",
       "name": "ICE",
-      "description": "Intercontinental Exchange — source of exchange-traded data",
+      "description": "Intercontinental Exchange \u2014 source of exchange-traded data",
       "type": "external",
-      "position": { "x": 3, "y": 22 },
+      "position": {
+        "x": 3,
+        "y": 22
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "wss://ice.exchange.com/feed/status",
@@ -242,9 +257,12 @@
     {
       "id": "ktp",
       "name": "KTP",
-      "description": "ICE data adapter — receives raw ICE data and normalises it",
+      "description": "ICE data adapter \u2014 receives raw ICE data and normalises it",
       "type": "pipeline",
-      "position": { "x": 12, "y": 22 },
+      "position": {
+        "x": 12,
+        "y": 22
+      },
       "status": "healthy",
       "health": {
         "checkUrl": null,
@@ -271,9 +289,12 @@
     {
       "id": "shovel",
       "name": "Shovel",
-      "description": "RabbitMQ Shovel plugin — moves messages from KTP into the main RabbitMQ instance",
+      "description": "RabbitMQ Shovel plugin \u2014 moves messages from KTP into the main RabbitMQ instance",
       "type": "pipeline",
-      "position": { "x": 19, "y": 22 },
+      "position": {
+        "x": 19,
+        "y": 22
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://eos-rmq-prod:15672/api/shovels",
@@ -300,9 +321,12 @@
     {
       "id": "pioneer",
       "name": "Pioneer",
-      "description": "Downstream system — receives trade/recap data and settlement data from EOS",
+      "description": "Downstream system \u2014 receives trade/recap data and settlement data from EOS",
       "type": "destination",
-      "position": { "x": 85, "y": 15 },
+      "position": {
+        "x": 85,
+        "y": 15
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://pioneer.glng.internal/api/health",
@@ -331,7 +355,10 @@
       "name": "HQ PnL Reporting",
       "description": "Head-quarter P&L reporting system",
       "type": "external",
-      "position": { "x": 3, "y": 42 },
+      "position": {
+        "x": 3,
+        "y": 42
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://hq-pnl.glng.internal/api/health",
@@ -358,9 +385,12 @@
     {
       "id": "credit-cube",
       "name": "Credit Cube",
-      "description": "Credit risk management system — receives exposure data from EOS",
+      "description": "Credit risk management system \u2014 receives exposure data from EOS",
       "type": "external",
-      "position": { "x": 3, "y": 55 },
+      "position": {
+        "x": 3,
+        "y": 55
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://creditcube.glng.internal/api/health",
@@ -387,9 +417,12 @@
     {
       "id": "endur",
       "name": "Endur",
-      "description": "Legacy ETRM — source of Spanish gas trade data",
+      "description": "Legacy ETRM \u2014 source of Spanish gas trade data",
       "type": "external",
-      "position": { "x": 3, "y": 68 },
+      "position": {
+        "x": 3,
+        "y": 68
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://endur.glng.internal/api/health",
@@ -416,9 +449,12 @@
     {
       "id": "var-engine",
       "name": "VaR Engine",
-      "description": "Value-at-Risk calculation engine — receives position data from EOS",
+      "description": "Value-at-Risk calculation engine \u2014 receives position data from EOS",
       "type": "external",
-      "position": { "x": 3, "y": 82 },
+      "position": {
+        "x": 3,
+        "y": 82
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://var.glng.internal/api/health",
@@ -445,16 +481,19 @@
     {
       "id": "a2kvan",
       "name": "a2kvan",
-      "description": "Port distance calculation service — provides voyage distance data to EOS",
+      "description": "Port distance calculation service \u2014 provides voyage distance data to EOS",
       "type": "destination",
-      "position": { "x": 85, "y": 42 },
+      "position": {
+        "x": 85,
+        "y": 42
+      },
       "status": "manual",
       "health": {
         "checkUrl": null,
         "lastCheck": null,
         "latencyMs": null,
         "responseCode": null,
-        "message": "Manual process — no automated health check",
+        "message": "Manual process \u2014 no automated health check",
         "upSince": null,
         "uptimePercent": null
       },
@@ -474,9 +513,12 @@
     {
       "id": "ax-cloud",
       "name": "AX Cloud Shared Drive",
-      "description": "SharePoint / cloud storage — EOS exports invoices as PDF here",
+      "description": "SharePoint / cloud storage \u2014 EOS exports invoices as PDF here",
       "type": "destination",
-      "position": { "x": 85, "y": 58 },
+      "position": {
+        "x": 85,
+        "y": 58
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "https://axcloud.sharepoint.com/sites/glng/_api/web",
@@ -503,16 +545,19 @@
     {
       "id": "sap",
       "name": "SAP Document",
-      "description": "SAP financial system — receives settlement documents from EOS",
+      "description": "SAP financial system \u2014 receives settlement documents from EOS",
       "type": "destination",
-      "position": { "x": 85, "y": 82 },
+      "position": {
+        "x": 85,
+        "y": 82
+      },
       "status": "healthy",
       "health": {
         "checkUrl": null,
         "lastCheck": "2026-05-07T14:28:00Z",
         "latencyMs": null,
         "responseCode": null,
-        "message": "SAP accessible — document export functional",
+        "message": "SAP accessible \u2014 document export functional",
         "upSince": "2026-04-01T00:00:00Z",
         "uptimePercent": 99.8
       },
@@ -536,7 +581,10 @@
       "name": "Glint ICE Trade Capture",
       "description": "Consumes ICE trade data from RabbitMQ, transforms and writes to EOS",
       "type": "glint",
-      "position": { "x": 28, "y": 15 },
+      "position": {
+        "x": 28,
+        "y": 15
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-ice-7d4f8-xk2j4:8080/health",
@@ -574,14 +622,17 @@
       "name": "Glint Price Loading",
       "description": "Loads price/curve data into EOS from external sources",
       "type": "glint",
-      "position": { "x": 28, "y": 25 },
+      "position": {
+        "x": 28,
+        "y": 25
+      },
       "status": "degraded",
       "health": {
         "checkUrl": "http://glint-price-8b3e2-mn5p1:8080/health",
         "lastCheck": "2026-05-07T14:29:52Z",
         "latencyMs": 342,
         "responseCode": 200,
-        "message": "Responding but slow — DQ feed latency elevated",
+        "message": "Responding but slow \u2014 DQ feed latency elevated",
         "upSince": "2026-04-28T10:00:00Z",
         "uptimePercent": 99.9
       },
@@ -605,21 +656,24 @@
           "age": "9d"
         }
       },
-      "issue": "Slow ingress — DQ feed latency elevated (342ms, threshold 200ms)"
+      "issue": "Slow ingress \u2014 DQ feed latency elevated (342ms, threshold 200ms)"
     },
     {
       "id": "glint-price-eod",
       "name": "Glint Price EoD Export",
       "description": "Exports end-of-day settlement prices from EOS",
       "type": "glint",
-      "position": { "x": 28, "y": 33 },
+      "position": {
+        "x": 28,
+        "y": 33
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-eod-5c7a1-qr8w3:8080/health",
         "lastCheck": "2026-05-07T14:29:48Z",
         "latencyMs": 8,
         "responseCode": 200,
-        "message": "Idle — awaiting next EOD trigger",
+        "message": "Idle \u2014 awaiting next EOD trigger",
         "upSince": "2026-04-28T10:00:00Z",
         "uptimePercent": 99.99
       },
@@ -650,7 +704,10 @@
       "name": "Glint Pioneer Trade Connector",
       "description": "Pushes trade/recap data from EOS to Pioneer",
       "type": "glint",
-      "position": { "x": 65, "y": 15 },
+      "position": {
+        "x": 65,
+        "y": 15
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-pio-t-3g2h7-wn8r5:8080/health",
@@ -688,14 +745,17 @@
       "name": "Glint Pioneer Settlements Connector",
       "description": "Pushes settlement data from EOS to Pioneer",
       "type": "glint",
-      "position": { "x": 65, "y": 28 },
+      "position": {
+        "x": 65,
+        "y": 28
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-pio-s-8k4m1-tz7v2:8080/health",
         "lastCheck": "2026-05-07T14:29:53Z",
         "latencyMs": 15,
         "responseCode": 200,
-        "message": "Idle — no active settlement window",
+        "message": "Idle \u2014 no active settlement window",
         "upSince": "2026-04-28T10:00:00Z",
         "uptimePercent": 99.96
       },
@@ -726,7 +786,10 @@
       "name": "Glint HQ PnL Reporting",
       "description": "Extracts P&L data from EOS and pushes to HQ reporting system",
       "type": "glint",
-      "position": { "x": 20, "y": 42 },
+      "position": {
+        "x": 20,
+        "y": 42
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-hqpnl-2a8c5-bv6n9:8080/health",
@@ -764,7 +827,10 @@
       "name": "Glint Credit Cube",
       "description": "Pushes credit exposure data from EOS to Credit Cube",
       "type": "glint",
-      "position": { "x": 20, "y": 55 },
+      "position": {
+        "x": 20,
+        "y": 55
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-credit-4e7b3-hs2m8:8080/health",
@@ -802,7 +868,10 @@
       "name": "Glint Endur Spanish Gas",
       "description": "Imports Spanish gas trades from Endur into EOS",
       "type": "glint",
-      "position": { "x": 20, "y": 68 },
+      "position": {
+        "x": 20,
+        "y": 68
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-endur-6d9a4-jw5x1:8080/health",
@@ -840,14 +909,17 @@
       "name": "Glint VaR Extract",
       "description": "Extracts position data from EOS for VaR calculation",
       "type": "glint",
-      "position": { "x": 20, "y": 82 },
+      "position": {
+        "x": 20,
+        "y": 82
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-var-1b5f8-cp4q6:8080/health",
         "lastCheck": "2026-05-07T14:29:32Z",
         "latencyMs": 10,
         "responseCode": 200,
-        "message": "Idle — last extract at 17:45 yesterday",
+        "message": "Idle \u2014 last extract at 17:45 yesterday",
         "upSince": "2026-04-28T10:00:00Z",
         "uptimePercent": 99.95
       },
@@ -876,9 +948,12 @@
     {
       "id": "glint-ma",
       "name": "Glint MA",
-      "description": "Master Agreements / Settlements connector — pushes settlement data to SAP",
+      "description": "Master Agreements / Settlements connector \u2014 pushes settlement data to SAP",
       "type": "glint",
-      "position": { "x": 45, "y": 90 },
+      "position": {
+        "x": 45,
+        "y": 90
+      },
       "status": "healthy",
       "health": {
         "checkUrl": "http://glint-ma-5p9s3-fx1y8:8080/health",
@@ -917,9 +992,14 @@
       "id": "price-ingress",
       "name": "Price Ingress",
       "description": "Market prices from DQ Prices into EOS for curve building and valuation",
-      "path": ["dq-prices", "eos"],
+      "path": [
+        "dq-prices",
+        "eos"
+      ],
       "bidirectional": true,
-      "messageTypes": ["Price.Updated"],
+      "messageTypes": [
+        "Price.Updated"
+      ],
       "volume": 240,
       "schedule": "Continuous",
       "criticality": "critical",
@@ -929,9 +1009,18 @@
       "id": "ice-trade-ingress",
       "name": "ICE Trade Ingress",
       "description": "Exchange-traded data from ICE through KTP/Shovel pipeline into EOS",
-      "path": ["ice", "ktp", "shovel", "rabbitmq", "glint-ice", "eos"],
+      "path": [
+        "ice",
+        "ktp",
+        "shovel",
+        "rabbitmq",
+        "glint-ice",
+        "eos"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Trade.IceCaptured"],
+      "messageTypes": [
+        "Trade.IceCaptured"
+      ],
       "volume": 1420,
       "schedule": "Continuous",
       "criticality": "critical",
@@ -941,9 +1030,19 @@
       "id": "pioneer-trade",
       "name": "Trade/Recap to Pioneer",
       "description": "Trade lifecycle events pushed to Pioneer for downstream processing",
-      "path": ["eos", "rabbitmq", "glint-pioneer-trade", "pioneer"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-pioneer-trade",
+        "pioneer"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Trade.Captured", "Trade.Validated", "Trade.Amended", "Trade.Cancelled"],
+      "messageTypes": [
+        "Trade.Captured",
+        "Trade.Validated",
+        "Trade.Amended",
+        "Trade.Cancelled"
+      ],
       "volume": 48,
       "schedule": "Continuous",
       "criticality": "high",
@@ -953,9 +1052,18 @@
       "id": "pioneer-settlement",
       "name": "Settlements to Pioneer",
       "description": "Settlement completion events pushed to Pioneer",
-      "path": ["eos", "rabbitmq", "glint-pioneer-settle", "pioneer"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-pioneer-settle",
+        "pioneer"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Settlement.Completed", "Invoice.Approved", "Invoice.Paid"],
+      "messageTypes": [
+        "Settlement.Completed",
+        "Invoice.Approved",
+        "Invoice.Paid"
+      ],
       "volume": 12,
       "schedule": "Batch",
       "criticality": "high",
@@ -965,9 +1073,16 @@
       "id": "spanish-gas",
       "name": "Spanish Gas Trade Import",
       "description": "Spanish gas trades from Endur legacy system into EOS",
-      "path": ["endur", "glint-endur", "rabbitmq", "eos"],
+      "path": [
+        "endur",
+        "glint-endur",
+        "rabbitmq",
+        "eos"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Trade.EndurImported"],
+      "messageTypes": [
+        "Trade.EndurImported"
+      ],
       "volume": 4,
       "schedule": "Continuous",
       "criticality": "medium",
@@ -977,9 +1092,16 @@
       "id": "var-extract",
       "name": "VaR Position Extract",
       "description": "Position data extracted from EOS for VaR engine processing",
-      "path": ["eos", "rabbitmq", "glint-var", "var-engine"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-var",
+        "var-engine"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Risk.PositionExtract"],
+      "messageTypes": [
+        "Risk.PositionExtract"
+      ],
       "volume": 2,
       "schedule": "Daily",
       "criticality": "medium",
@@ -989,9 +1111,17 @@
       "id": "credit-exposure",
       "name": "Credit Exposure Update",
       "description": "Credit exposure data pushed to Credit Cube on trade events and EOD",
-      "path": ["eos", "rabbitmq", "glint-credit", "credit-cube"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-credit",
+        "credit-cube"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Credit.ExposureUpdate", "Credit.LimitBreach"],
+      "messageTypes": [
+        "Credit.ExposureUpdate",
+        "Credit.LimitBreach"
+      ],
       "volume": 8,
       "schedule": "Continuous",
       "criticality": "medium",
@@ -1001,9 +1131,17 @@
       "id": "hq-pnl",
       "name": "HQ PnL Reporting",
       "description": "P&L reports extracted and pushed to HQ reporting system",
-      "path": ["eos", "rabbitmq", "glint-hq-pnl", "hq-pnl"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-hq-pnl",
+        "hq-pnl"
+      ],
       "bidirectional": false,
-      "messageTypes": ["PnL.DailyReport", "PnL.MonthEndReport"],
+      "messageTypes": [
+        "PnL.DailyReport",
+        "PnL.MonthEndReport"
+      ],
       "volume": 12,
       "schedule": "Daily",
       "criticality": "medium",
@@ -1013,9 +1151,16 @@
       "id": "settlement-sap",
       "name": "Settlement to SAP",
       "description": "Settlement documents generated and pushed to SAP via Glint MA",
-      "path": ["eos", "rabbitmq", "glint-ma", "sap"],
+      "path": [
+        "eos",
+        "rabbitmq",
+        "glint-ma",
+        "sap"
+      ],
       "bidirectional": false,
-      "messageTypes": ["Settlement.SapExport"],
+      "messageTypes": [
+        "Settlement.SapExport"
+      ],
       "volume": 6,
       "schedule": "Batch",
       "criticality": "medium",
@@ -1025,7 +1170,10 @@
       "id": "invoice-pdf",
       "name": "Invoice PDF Export",
       "description": "EOS exports invoices as PDF to AX Cloud shared drive",
-      "path": ["eos", "ax-cloud"],
+      "path": [
+        "eos",
+        "ax-cloud"
+      ],
       "bidirectional": false,
       "messageTypes": [],
       "volume": 6,
@@ -1037,7 +1185,10 @@
       "id": "port-distance",
       "name": "Port Distance Manual Pull",
       "description": "Operators manually retrieve port distance data from a2kvan into EOS",
-      "path": ["a2kvan", "eos"],
+      "path": [
+        "a2kvan",
+        "eos"
+      ],
       "bidirectional": false,
       "messageTypes": [],
       "volume": 0,
@@ -1049,7 +1200,10 @@
       "id": "eod-batch",
       "name": "EOD Batch Trigger",
       "description": "EOS Scheduler triggers end-of-day processing in EOS",
-      "path": ["eos-scheduler", "eos"],
+      "path": [
+        "eos-scheduler",
+        "eos"
+      ],
       "bidirectional": false,
       "messageTypes": [],
       "volume": 1,
@@ -1065,36 +1219,168 @@
         "type": "topic",
         "description": "Inbound data flowing INTO EOS from external systems",
         "routingKeyPattern": "{source}.{entity}.{action}",
-        "examples": ["ice.trade.captured", "price.curve.published", "endur.trade.imported"]
+        "examples": [
+          "ice.trade.captured",
+          "price.curve.published",
+          "endur.trade.imported"
+        ]
       },
       {
         "name": "eos.outbound",
         "type": "topic",
         "description": "Outbound data flowing FROM EOS to downstream systems",
         "routingKeyPattern": "{destination}.{entity}.{action}",
-        "examples": ["pioneer.trade.captured", "hq.pnl.daily", "credit.exposure.updated"]
+        "examples": [
+          "pioneer.trade.captured",
+          "hq.pnl.daily",
+          "credit.exposure.updated"
+        ]
       },
       {
         "name": "eos.internal",
         "type": "topic",
         "description": "Internal EOS events (audit, notifications, scheduler triggers)",
         "routingKeyPattern": "{domain}.{entity}.{action}",
-        "examples": ["audit.trade.amended", "notification.deadline.approaching", "scheduler.eod.triggered"]
+        "examples": [
+          "audit.trade.amended",
+          "notification.deadline.approaching",
+          "scheduler.eod.triggered"
+        ]
       }
     ],
     "queues": [
-      { "name": "eos.ice.trade.capture", "exchange": "eos.inbound", "routingKey": "ice.trade.#", "consumer": "glint-ice", "messages": 0, "consumers": 2, "rate": 23.6, "unacked": 0, "status": "healthy" },
-      { "name": "eos.price.loading", "exchange": "eos.inbound", "routingKey": "price.#", "consumer": "glint-price-load", "messages": 12, "consumers": 2, "rate": 4.0, "unacked": 2, "status": "healthy" },
-      { "name": "eos.endur.spanish.gas", "exchange": "eos.inbound", "routingKey": "endur.trade.#", "consumer": "glint-endur", "messages": 0, "consumers": 1, "rate": 0.07, "unacked": 0, "status": "healthy" },
-      { "name": "eos.pioneer.trade", "exchange": "eos.outbound", "routingKey": "pioneer.trade.#", "consumer": "glint-pioneer-trade", "messages": 0, "consumers": 2, "rate": 0.8, "unacked": 0, "status": "healthy" },
-      { "name": "eos.pioneer.settlement", "exchange": "eos.outbound", "routingKey": "pioneer.settlement.#", "consumer": "glint-pioneer-settle", "messages": 0, "consumers": 1, "rate": 0.2, "unacked": 0, "status": "healthy" },
-      { "name": "eos.price.eod.export", "exchange": "eos.outbound", "routingKey": "price.eod.#", "consumer": "glint-price-eod", "messages": 0, "consumers": 1, "rate": 0.8, "unacked": 0, "status": "healthy" },
-      { "name": "eos.hq.pnl", "exchange": "eos.outbound", "routingKey": "hq.pnl.#", "consumer": "glint-hq-pnl", "messages": 0, "consumers": 1, "rate": 0.2, "unacked": 0, "status": "healthy" },
-      { "name": "eos.credit.cube", "exchange": "eos.outbound", "routingKey": "credit.#", "consumer": "glint-credit", "messages": 0, "consumers": 1, "rate": 0.13, "unacked": 0, "status": "healthy" },
-      { "name": "eos.var.extract", "exchange": "eos.outbound", "routingKey": "risk.var.#", "consumer": "glint-var", "messages": 0, "consumers": 1, "rate": 0.03, "unacked": 0, "status": "healthy" },
-      { "name": "eos.settlement.ma", "exchange": "eos.outbound", "routingKey": "settlement.sap.#", "consumer": "glint-ma", "messages": 0, "consumers": 1, "rate": 0.1, "unacked": 0, "status": "healthy" },
-      { "name": "eos.audit.event", "exchange": "eos.internal", "routingKey": "audit.#", "consumer": "audit-logger", "messages": 0, "consumers": 2, "rate": 8.7, "unacked": 0, "status": "healthy" },
-      { "name": "eos.notification.send", "exchange": "eos.internal", "routingKey": "notification.#", "consumer": "notification-service", "messages": 847, "consumers": 0, "rate": 0.0, "unacked": 0, "status": "critical" }
+      {
+        "name": "eos.ice.trade.capture",
+        "exchange": "eos.inbound",
+        "routingKey": "ice.trade.#",
+        "consumer": "glint-ice",
+        "messages": 0,
+        "consumers": 2,
+        "rate": 23.6,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.price.loading",
+        "exchange": "eos.inbound",
+        "routingKey": "price.#",
+        "consumer": "glint-price-load",
+        "messages": 12,
+        "consumers": 2,
+        "rate": 4.0,
+        "unacked": 2,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.endur.spanish.gas",
+        "exchange": "eos.inbound",
+        "routingKey": "endur.trade.#",
+        "consumer": "glint-endur",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.07,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.pioneer.trade",
+        "exchange": "eos.outbound",
+        "routingKey": "pioneer.trade.#",
+        "consumer": "glint-pioneer-trade",
+        "messages": 0,
+        "consumers": 2,
+        "rate": 0.8,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.pioneer.settlement",
+        "exchange": "eos.outbound",
+        "routingKey": "pioneer.settlement.#",
+        "consumer": "glint-pioneer-settle",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.2,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.price.eod.export",
+        "exchange": "eos.outbound",
+        "routingKey": "price.eod.#",
+        "consumer": "glint-price-eod",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.8,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.hq.pnl",
+        "exchange": "eos.outbound",
+        "routingKey": "hq.pnl.#",
+        "consumer": "glint-hq-pnl",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.2,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.credit.cube",
+        "exchange": "eos.outbound",
+        "routingKey": "credit.#",
+        "consumer": "glint-credit",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.13,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.var.extract",
+        "exchange": "eos.outbound",
+        "routingKey": "risk.var.#",
+        "consumer": "glint-var",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.03,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.settlement.ma",
+        "exchange": "eos.outbound",
+        "routingKey": "settlement.sap.#",
+        "consumer": "glint-ma",
+        "messages": 0,
+        "consumers": 1,
+        "rate": 0.1,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.audit.event",
+        "exchange": "eos.internal",
+        "routingKey": "audit.#",
+        "consumer": "audit-logger",
+        "messages": 0,
+        "consumers": 2,
+        "rate": 8.7,
+        "unacked": 0,
+        "status": "healthy"
+      },
+      {
+        "name": "eos.notification.send",
+        "exchange": "eos.internal",
+        "routingKey": "notification.#",
+        "consumer": "notification-service",
+        "messages": 847,
+        "consumers": 0,
+        "rate": 0.0,
+        "unacked": 0,
+        "status": "critical"
+      }
     ]
   },
   "messageTypes": [
@@ -1104,14 +1390,16 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "pioneer.trade.captured",
-      "consumers": ["glint-pioneer-trade"],
+      "consumers": [
+        "glint-pioneer-trade"
+      ],
       "frequency": "~10-30/day",
       "samplePayload": {
         "tradeId": "T-1001",
         "direction": "BUY",
         "counterparty": "Shell Energy Trading",
         "benchmark": "JKM",
-        "premium": 0.50,
+        "premium": 0.5,
         "volume": 3200000,
         "volumeUnits": "MMBtu",
         "deliveryMonth": "2026-06",
@@ -1128,7 +1416,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "pioneer.trade.validated",
-      "consumers": ["glint-pioneer-trade"],
+      "consumers": [
+        "glint-pioneer-trade"
+      ],
       "frequency": "~10-30/day",
       "samplePayload": {
         "tradeId": "T-1001",
@@ -1143,11 +1433,19 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "pioneer.trade.amended",
-      "consumers": ["glint-pioneer-trade"],
+      "consumers": [
+        "glint-pioneer-trade"
+      ],
       "frequency": "~5-10/day",
       "samplePayload": {
         "tradeId": "T-998",
-        "amendments": [{ "field": "volume", "from": 3000000, "to": 3200000 }],
+        "amendments": [
+          {
+            "field": "volume",
+            "from": 3000000,
+            "to": 3200000
+          }
+        ],
         "amendedBy": "j.cobley",
         "reason": "Quantity correction per counterparty confirmation"
       }
@@ -1158,7 +1456,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "pioneer.trade.cancelled",
-      "consumers": ["glint-pioneer-trade"],
+      "consumers": [
+        "glint-pioneer-trade"
+      ],
       "frequency": "~1-2/week",
       "samplePayload": {
         "tradeId": "T-995",
@@ -1173,7 +1473,9 @@
       "source": "ice",
       "exchange": "eos.inbound",
       "routingKey": "ice.trade.captured",
-      "consumers": ["glint-ice"],
+      "consumers": [
+        "glint-ice"
+      ],
       "frequency": "~1400/hour",
       "samplePayload": {
         "iceTradeId": "ICE-4821",
@@ -1194,7 +1496,9 @@
       "source": "endur",
       "exchange": "eos.inbound",
       "routingKey": "endur.trade.imported",
-      "consumers": ["glint-endur"],
+      "consumers": [
+        "glint-endur"
+      ],
       "frequency": "~4/hour",
       "samplePayload": {
         "endurDealId": "END-SG-0412",
@@ -1213,7 +1517,9 @@
       "source": "dq-prices",
       "exchange": "eos.inbound",
       "routingKey": "price.curve.updated",
-      "consumers": ["glint-price-load"],
+      "consumers": [
+        "glint-price-load"
+      ],
       "frequency": "~240/hour",
       "samplePayload": {
         "curveId": "JKM-M1",
@@ -1231,7 +1537,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "price.eod.exported",
-      "consumers": ["glint-price-eod"],
+      "consumers": [
+        "glint-price-eod"
+      ],
       "frequency": "Once daily",
       "samplePayload": {
         "exportId": "EOD-20260507",
@@ -1247,7 +1555,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "pioneer.settlement.completed",
-      "consumers": ["glint-pioneer-settle"],
+      "consumers": [
+        "glint-pioneer-settle"
+      ],
       "frequency": "~12/hour",
       "samplePayload": {
         "settlementId": "STL-2026-0507-014",
@@ -1264,7 +1574,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "settlement.sap.export",
-      "consumers": ["glint-ma"],
+      "consumers": [
+        "glint-ma"
+      ],
       "frequency": "~6/hour",
       "samplePayload": {
         "documentId": "SAP-DOC-20260507-014",
@@ -1280,7 +1592,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "hq.pnl.daily",
-      "consumers": ["glint-hq-pnl"],
+      "consumers": [
+        "glint-hq-pnl"
+      ],
       "frequency": "Once daily",
       "samplePayload": {
         "reportId": "PNL-20260507",
@@ -1293,11 +1607,13 @@
     },
     {
       "type": "Credit.ExposureUpdate",
-      "description": "Credit exposure recalculated — pushed to Credit Cube",
+      "description": "Credit exposure recalculated \u2014 pushed to Credit Cube",
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "credit.exposure.updated",
-      "consumers": ["glint-credit"],
+      "consumers": [
+        "glint-credit"
+      ],
       "frequency": "~8/hour",
       "samplePayload": {
         "counterpartyId": "CP-SHELL",
@@ -1315,7 +1631,9 @@
       "source": "eos",
       "exchange": "eos.outbound",
       "routingKey": "risk.var.position",
-      "consumers": ["glint-var"],
+      "consumers": [
+        "glint-var"
+      ],
       "frequency": "Once daily",
       "samplePayload": {
         "extractId": "VAR-EXT-20260507",
@@ -1368,7 +1686,9 @@
         "expectedStatus": 200,
         "timeoutMs": 3000,
         "intervalSeconds": 15,
-        "headers": { "Authorization": "Basic ***" }
+        "headers": {
+          "Authorization": "Basic ***"
+        }
       },
       "lastResult": {
         "status": "pass",
@@ -1536,7 +1856,9 @@
         "expectedStatus": 200,
         "timeoutMs": 3000,
         "intervalSeconds": 30,
-        "headers": { "Authorization": "Basic ***" }
+        "headers": {
+          "Authorization": "Basic ***"
+        }
       },
       "lastResult": {
         "status": "pass",
@@ -1794,7 +2116,7 @@
         "status": "warn",
         "latencyMs": 342,
         "responseCode": 200,
-        "message": "Responding but slow — DQ feed latency elevated (342ms exceeds 200ms threshold)",
+        "message": "Responding but slow \u2014 DQ feed latency elevated (342ms exceeds 200ms threshold)",
         "checkedAt": "2026-05-07T14:29:52Z",
         "consecutiveFailures": 0
       },
@@ -1822,7 +2144,7 @@
         "status": "pass",
         "latencyMs": 8,
         "responseCode": 200,
-        "message": "Idle — awaiting next EOD trigger",
+        "message": "Idle \u2014 awaiting next EOD trigger",
         "checkedAt": "2026-05-07T14:29:48Z",
         "consecutiveFailures": 0
       },
@@ -1878,7 +2200,7 @@
         "status": "pass",
         "latencyMs": 15,
         "responseCode": 200,
-        "message": "Idle — no active settlement window",
+        "message": "Idle \u2014 no active settlement window",
         "checkedAt": "2026-05-07T14:29:53Z",
         "consecutiveFailures": 0
       },
@@ -1990,7 +2312,7 @@
         "status": "pass",
         "latencyMs": 10,
         "responseCode": 200,
-        "message": "Idle — last extract at 17:45 yesterday",
+        "message": "Idle \u2014 last extract at 17:45 yesterday",
         "checkedAt": "2026-05-07T14:29:32Z",
         "consecutiveFailures": 0
       },
@@ -2040,13 +2362,15 @@
         "expectedStatus": 200,
         "timeoutMs": 3000,
         "intervalSeconds": 30,
-        "headers": { "Authorization": "Basic ***" }
+        "headers": {
+          "Authorization": "Basic ***"
+        }
       },
       "lastResult": {
         "status": "fail",
         "latencyMs": 3,
         "responseCode": 200,
-        "message": "Consumer down — 0 consumers, 847 messages backed up",
+        "message": "Consumer down \u2014 0 consumers, 847 messages backed up",
         "checkedAt": "2026-05-07T14:29:51Z",
         "consecutiveFailures": 12
       },
@@ -2074,7 +2398,7 @@
         "status": "fail",
         "latencyMs": null,
         "responseCode": null,
-        "message": "TCP connection failed — connection refused on port 587",
+        "message": "TCP connection failed \u2014 connection refused on port 587",
         "checkedAt": "2026-05-07T14:29:55Z",
         "consecutiveFailures": 8
       },
