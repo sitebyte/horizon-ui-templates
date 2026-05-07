@@ -1,0 +1,2089 @@
+{
+  "environment": {
+    "id": "prod",
+    "name": "Production",
+    "label": "PROD",
+    "region": "SGP",
+    "color": "#22c55e",
+    "url": "https://eos-prod.glng.internal"
+  },
+  "versions": {
+    "eos": "4.2.1",
+    "horizon": "1.0.30",
+    "database": "4.2.1.3847",
+    "rabbitmq": "3.12.14",
+    "kubernetes": "1.28.4"
+  },
+  "asOf": "2026-05-07T14:30:00Z",
+  "nodeTypes": {
+    "external": {
+      "label": "External System",
+      "shape": "pill",
+      "size": "md",
+      "borderStyle": "dashed",
+      "borderColor": "var(--border-strong)",
+      "glowColor": "rgba(79,70,229,0.15)",
+      "icon": "cloud"
+    },
+    "pipeline": {
+      "label": "Pipeline",
+      "shape": "circle",
+      "size": "sm",
+      "borderStyle": "solid",
+      "borderColor": "var(--border)",
+      "glowColor": "rgba(79,70,229,0.1)",
+      "icon": "arrow-right"
+    },
+    "glint": {
+      "label": "Glint Integration Module",
+      "shape": "rounded",
+      "size": "md",
+      "borderStyle": "solid",
+      "borderColor": "#22c55e",
+      "glowColor": "rgba(34,197,94,0.15)",
+      "icon": "container"
+    },
+    "broker": {
+      "label": "Message Broker",
+      "shape": "hexagon",
+      "size": "lg",
+      "borderStyle": "solid",
+      "borderColor": "#f97316",
+      "glowColor": "rgba(249,115,22,0.25)",
+      "icon": "message-square"
+    },
+    "core": {
+      "label": "Core System",
+      "shape": "rounded-xl",
+      "size": "xl",
+      "borderStyle": "solid",
+      "borderColor": "var(--accent)",
+      "glowColor": "rgba(79,70,229,0.25)",
+      "icon": "database"
+    },
+    "core-secondary": {
+      "label": "Core Secondary",
+      "shape": "rounded",
+      "size": "md",
+      "borderStyle": "solid",
+      "borderColor": "rgba(79,70,229,0.5)",
+      "glowColor": "rgba(79,70,229,0.1)",
+      "icon": "clock"
+    },
+    "destination": {
+      "label": "Destination System",
+      "shape": "rounded",
+      "size": "md",
+      "borderStyle": "solid",
+      "borderColor": "#7c3aed",
+      "glowColor": "rgba(124,58,237,0.15)",
+      "icon": "external-link"
+    }
+  },
+  "systems": [
+    {
+      "id": "eos",
+      "name": "EOS",
+      "description": "Core ETRM application — trade capture, cargo operations, valuations, settlement",
+      "type": "core",
+      "position": { "x": 45, "y": 52 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://eos-prod.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:29:45Z",
+        "latencyMs": 18,
+        "responseCode": 200,
+        "message": "All services operational",
+        "upSince": "2026-04-12T06:00:00Z",
+        "uptimePercent": 99.97
+      },
+      "metrics": {
+        "messagesPerHour": 4230,
+        "errorsLast24h": 2,
+        "avgLatencyMs": 18
+      },
+      "metadata": {
+        "endpoint": "https://eos-prod.glng.internal",
+        "technology": "WinForms / .NET",
+        "owner": "EOS Core Team",
+        "criticality": "critical",
+        "core": {
+          "trades": 1247,
+          "cargoes": 7,
+          "activeUsers": 42,
+          "dbConnections": 68
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "rabbitmq",
+      "name": "RabbitMQ",
+      "description": "Single message broker instance — all integration flows through this",
+      "type": "broker",
+      "position": { "x": 45, "y": 25 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://eos-rmq-prod:15672/api/healthchecks/node",
+        "lastCheck": "2026-05-07T14:29:50Z",
+        "latencyMs": 2,
+        "responseCode": 200,
+        "message": "Node running, all alarms clear",
+        "upSince": "2026-03-28T02:15:00Z",
+        "uptimePercent": 99.99
+      },
+      "metrics": {
+        "messagesPerHour": 4230,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 2
+      },
+      "metadata": {
+        "endpoint": "amqp://eos-rmq-prod:5672",
+        "technology": "RabbitMQ 3.12.14",
+        "owner": "Platform Team",
+        "criticality": "critical",
+        "broker": {
+          "queues": 12,
+          "consumers": 14,
+          "unackedMessages": 3,
+          "publishRate": 70.5,
+          "deliverRate": 69.8
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "eos-scheduler",
+      "name": "EOS Scheduler EOD",
+      "description": "End-of-day batch scheduler — triggers EOD processing in EOS",
+      "type": "core-secondary",
+      "position": { "x": 45, "y": 78 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": null,
+        "lastCheck": "2026-05-07T14:29:00Z",
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "Last EOD completed successfully at 17:30:54",
+        "upSince": "2026-04-12T06:00:00Z",
+        "uptimePercent": 99.95
+      },
+      "metrics": {
+        "messagesPerHour": 1,
+        "errorsLast24h": 0,
+        "avgLatencyMs": null
+      },
+      "metadata": {
+        "endpoint": null,
+        "technology": "Windows Service / Hangfire",
+        "owner": "EOS Core Team",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "dq-prices",
+      "name": "DQ Prices",
+      "description": "External price data provider — supplies market prices to EOS",
+      "type": "external",
+      "position": { "x": 3, "y": 8 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://dq.prices.provider.com/api/health",
+        "lastCheck": "2026-05-07T14:29:30Z",
+        "latencyMs": 12,
+        "responseCode": 200,
+        "message": "Feed active",
+        "upSince": "2026-05-01T00:00:00Z",
+        "uptimePercent": 99.8
+      },
+      "metrics": {
+        "messagesPerHour": 240,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 12
+      },
+      "metadata": {
+        "endpoint": "https://dq.prices.provider.com/api",
+        "technology": "REST API / proprietary feed",
+        "owner": "External vendor",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "ice",
+      "name": "ICE",
+      "description": "Intercontinental Exchange — source of exchange-traded data",
+      "type": "external",
+      "position": { "x": 3, "y": 22 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "wss://ice.exchange.com/feed/status",
+        "lastCheck": "2026-05-07T14:29:55Z",
+        "latencyMs": 8,
+        "responseCode": 200,
+        "message": "WebSocket connected, market open",
+        "upSince": "2026-05-07T07:00:00Z",
+        "uptimePercent": 99.9
+      },
+      "metrics": {
+        "messagesPerHour": 1420,
+        "errorsLast24h": 1,
+        "avgLatencyMs": 8
+      },
+      "metadata": {
+        "endpoint": "wss://ice.exchange.com/feed",
+        "technology": "WebSocket / FIX protocol",
+        "owner": "External (ICE)",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "ktp",
+      "name": "KTP",
+      "description": "ICE data adapter — receives raw ICE data and normalises it",
+      "type": "pipeline",
+      "position": { "x": 12, "y": 22 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": null,
+        "lastCheck": "2026-05-07T14:29:40Z",
+        "latencyMs": 2,
+        "responseCode": null,
+        "message": "Processing normally",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.95
+      },
+      "metrics": {
+        "messagesPerHour": 1420,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 2
+      },
+      "metadata": {
+        "endpoint": null,
+        "technology": "Custom service",
+        "owner": "Platform Team",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "shovel",
+      "name": "Shovel",
+      "description": "RabbitMQ Shovel plugin — moves messages from KTP into the main RabbitMQ instance",
+      "type": "pipeline",
+      "position": { "x": 19, "y": 22 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://eos-rmq-prod:15672/api/shovels",
+        "lastCheck": "2026-05-07T14:29:50Z",
+        "latencyMs": 1,
+        "responseCode": 200,
+        "message": "Shovel running",
+        "upSince": "2026-03-28T02:15:00Z",
+        "uptimePercent": 99.99
+      },
+      "metrics": {
+        "messagesPerHour": 1420,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 1
+      },
+      "metadata": {
+        "endpoint": null,
+        "technology": "RabbitMQ Shovel plugin",
+        "owner": "Platform Team",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "pioneer",
+      "name": "Pioneer",
+      "description": "Downstream system — receives trade/recap data and settlement data from EOS",
+      "type": "destination",
+      "position": { "x": 85, "y": 15 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://pioneer.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:29:35Z",
+        "latencyMs": 25,
+        "responseCode": 200,
+        "message": "Online and accepting data",
+        "upSince": "2026-04-20T08:00:00Z",
+        "uptimePercent": 99.92
+      },
+      "metrics": {
+        "messagesPerHour": 60,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 25
+      },
+      "metadata": {
+        "endpoint": "https://pioneer.glng.internal/api",
+        "technology": "External system",
+        "owner": "Finance / downstream team",
+        "criticality": "high"
+      },
+      "issue": null
+    },
+    {
+      "id": "hq-pnl",
+      "name": "HQ PnL Reporting",
+      "description": "Head-quarter P&L reporting system",
+      "type": "external",
+      "position": { "x": 3, "y": 42 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://hq-pnl.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:29:20Z",
+        "latencyMs": 45,
+        "responseCode": 200,
+        "message": "Accepting reports",
+        "upSince": "2026-05-01T06:00:00Z",
+        "uptimePercent": 99.7
+      },
+      "metrics": {
+        "messagesPerHour": 12,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 45
+      },
+      "metadata": {
+        "endpoint": "https://hq-pnl.glng.internal/api",
+        "technology": "Internal reporting platform",
+        "owner": "Finance / HQ",
+        "criticality": "medium"
+      },
+      "issue": null
+    },
+    {
+      "id": "credit-cube",
+      "name": "Credit Cube",
+      "description": "Credit risk management system — receives exposure data from EOS",
+      "type": "external",
+      "position": { "x": 3, "y": 55 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://creditcube.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:29:25Z",
+        "latencyMs": 22,
+        "responseCode": 200,
+        "message": "Running",
+        "upSince": "2026-04-15T00:00:00Z",
+        "uptimePercent": 99.85
+      },
+      "metrics": {
+        "messagesPerHour": 8,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 22
+      },
+      "metadata": {
+        "endpoint": "https://creditcube.glng.internal/api",
+        "technology": "Internal credit system",
+        "owner": "Risk / Credit team",
+        "criticality": "medium"
+      },
+      "issue": null
+    },
+    {
+      "id": "endur",
+      "name": "Endur",
+      "description": "Legacy ETRM — source of Spanish gas trade data",
+      "type": "external",
+      "position": { "x": 3, "y": 68 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://endur.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:28:50Z",
+        "latencyMs": 35,
+        "responseCode": 200,
+        "message": "Legacy system responding",
+        "upSince": "2026-04-10T06:00:00Z",
+        "uptimePercent": 99.5
+      },
+      "metrics": {
+        "messagesPerHour": 4,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 35
+      },
+      "metadata": {
+        "endpoint": "https://endur.glng.internal/api",
+        "technology": "OpenLink Endur",
+        "owner": "European trading desk",
+        "criticality": "medium"
+      },
+      "issue": null
+    },
+    {
+      "id": "var-engine",
+      "name": "VaR Engine",
+      "description": "Value-at-Risk calculation engine — receives position data from EOS",
+      "type": "external",
+      "position": { "x": 3, "y": 82 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://var.glng.internal/api/health",
+        "lastCheck": "2026-05-07T14:28:55Z",
+        "latencyMs": 120,
+        "responseCode": 200,
+        "message": "Calculation engine idle",
+        "upSince": "2026-04-20T00:00:00Z",
+        "uptimePercent": 99.6
+      },
+      "metrics": {
+        "messagesPerHour": 2,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 120
+      },
+      "metadata": {
+        "endpoint": "https://var.glng.internal/api",
+        "technology": "Custom / vendor risk engine",
+        "owner": "Risk team",
+        "criticality": "medium"
+      },
+      "issue": null
+    },
+    {
+      "id": "a2kvan",
+      "name": "a2kvan",
+      "description": "Port distance calculation service — provides voyage distance data to EOS",
+      "type": "destination",
+      "position": { "x": 85, "y": 42 },
+      "status": "manual",
+      "health": {
+        "checkUrl": null,
+        "lastCheck": null,
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "Manual process — no automated health check",
+        "upSince": null,
+        "uptimePercent": null
+      },
+      "metrics": {
+        "messagesPerHour": 0,
+        "errorsLast24h": 0,
+        "avgLatencyMs": null
+      },
+      "metadata": {
+        "endpoint": "https://a2kvan.glng.internal",
+        "technology": "Web service / manual",
+        "owner": "Operations",
+        "criticality": "low"
+      },
+      "issue": null
+    },
+    {
+      "id": "ax-cloud",
+      "name": "AX Cloud Shared Drive",
+      "description": "SharePoint / cloud storage — EOS exports invoices as PDF here",
+      "type": "destination",
+      "position": { "x": 85, "y": 58 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "https://axcloud.sharepoint.com/sites/glng/_api/web",
+        "lastCheck": "2026-05-07T14:29:10Z",
+        "latencyMs": 180,
+        "responseCode": 200,
+        "message": "SharePoint accessible",
+        "upSince": "2026-04-01T00:00:00Z",
+        "uptimePercent": 99.9
+      },
+      "metrics": {
+        "messagesPerHour": 6,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 180
+      },
+      "metadata": {
+        "endpoint": "https://axcloud.sharepoint.com/sites/glng",
+        "technology": "SharePoint Online / Azure Files",
+        "owner": "Finance / IT",
+        "criticality": "medium"
+      },
+      "issue": null
+    },
+    {
+      "id": "sap",
+      "name": "SAP Document",
+      "description": "SAP financial system — receives settlement documents from EOS",
+      "type": "destination",
+      "position": { "x": 85, "y": 82 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": null,
+        "lastCheck": "2026-05-07T14:28:00Z",
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "SAP accessible — document export functional",
+        "upSince": "2026-04-01T00:00:00Z",
+        "uptimePercent": 99.8
+      },
+      "metrics": {
+        "messagesPerHour": 6,
+        "errorsLast24h": 0,
+        "avgLatencyMs": null
+      },
+      "metadata": {
+        "endpoint": "Manual download",
+        "technology": "SAP (via Excel download)",
+        "owner": "Finance",
+        "criticality": "medium"
+      },
+      "issue": null
+    }
+  ],
+  "integrationComponents": [
+    {
+      "id": "glint-ice",
+      "name": "Glint ICE Trade Capture",
+      "description": "Consumes ICE trade data from RabbitMQ, transforms and writes to EOS",
+      "type": "glint",
+      "position": { "x": 28, "y": 15 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-ice-7d4f8-xk2j4:8080/health",
+        "lastCheck": "2026-05-07T14:29:58Z",
+        "latencyMs": 4,
+        "responseCode": 200,
+        "message": "Processing ICE feed normally",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.98
+      },
+      "metrics": {
+        "messagesPerHour": 1420,
+        "errorsLast24h": 1,
+        "avgLatencyMs": 4
+      },
+      "metadata": {
+        "endpoint": "http://glint-ice-7d4f8-xk2j4:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "critical",
+        "container": {
+          "image": "eos/glint-ice-trade-capture:4.2.1",
+          "pod": "glint-ice-7d4f8-xk2j4",
+          "namespace": "eos-prod",
+          "cpuPercent": 12,
+          "memoryMb": 256,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-price-load",
+      "name": "Glint Price Loading",
+      "description": "Loads price/curve data into EOS from external sources",
+      "type": "glint",
+      "position": { "x": 28, "y": 25 },
+      "status": "degraded",
+      "health": {
+        "checkUrl": "http://glint-price-8b3e2-mn5p1:8080/health",
+        "lastCheck": "2026-05-07T14:29:52Z",
+        "latencyMs": 342,
+        "responseCode": 200,
+        "message": "Responding but slow — DQ feed latency elevated",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.9
+      },
+      "metrics": {
+        "messagesPerHour": 240,
+        "errorsLast24h": 5,
+        "avgLatencyMs": 342
+      },
+      "metadata": {
+        "endpoint": "http://glint-price-8b3e2-mn5p1:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "critical",
+        "container": {
+          "image": "eos/glint-price-loading:4.2.1",
+          "pod": "glint-price-8b3e2-mn5p1",
+          "namespace": "eos-prod",
+          "cpuPercent": 8,
+          "memoryMb": 128,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": "Slow ingress — DQ feed latency elevated (342ms, threshold 200ms)"
+    },
+    {
+      "id": "glint-price-eod",
+      "name": "Glint Price EoD Export",
+      "description": "Exports end-of-day settlement prices from EOS",
+      "type": "glint",
+      "position": { "x": 28, "y": 33 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-eod-5c7a1-qr8w3:8080/health",
+        "lastCheck": "2026-05-07T14:29:48Z",
+        "latencyMs": 8,
+        "responseCode": 200,
+        "message": "Idle — awaiting next EOD trigger",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.99
+      },
+      "metrics": {
+        "messagesPerHour": 48,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 8
+      },
+      "metadata": {
+        "endpoint": "http://glint-eod-5c7a1-qr8w3:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "high",
+        "container": {
+          "image": "eos/glint-price-eod-export:4.2.1",
+          "pod": "glint-eod-5c7a1-qr8w3",
+          "namespace": "eos-prod",
+          "cpuPercent": 3,
+          "memoryMb": 96,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-pioneer-trade",
+      "name": "Glint Pioneer Trade Connector",
+      "description": "Pushes trade/recap data from EOS to Pioneer",
+      "type": "glint",
+      "position": { "x": 65, "y": 15 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-pio-t-3g2h7-wn8r5:8080/health",
+        "lastCheck": "2026-05-07T14:29:55Z",
+        "latencyMs": 12,
+        "responseCode": 200,
+        "message": "Processing trade events",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.97
+      },
+      "metrics": {
+        "messagesPerHour": 48,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 12
+      },
+      "metadata": {
+        "endpoint": "http://glint-pio-t-3g2h7-wn8r5:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "high",
+        "container": {
+          "image": "eos/glint-pioneer-trade-connector:4.2.1",
+          "pod": "glint-pio-t-3g2h7-wn8r5",
+          "namespace": "eos-prod",
+          "cpuPercent": 4,
+          "memoryMb": 128,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-pioneer-settle",
+      "name": "Glint Pioneer Settlements Connector",
+      "description": "Pushes settlement data from EOS to Pioneer",
+      "type": "glint",
+      "position": { "x": 65, "y": 28 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-pio-s-8k4m1-tz7v2:8080/health",
+        "lastCheck": "2026-05-07T14:29:53Z",
+        "latencyMs": 15,
+        "responseCode": 200,
+        "message": "Idle — no active settlement window",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.96
+      },
+      "metrics": {
+        "messagesPerHour": 12,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 15
+      },
+      "metadata": {
+        "endpoint": "http://glint-pio-s-8k4m1-tz7v2:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "high",
+        "container": {
+          "image": "eos/glint-pioneer-settlements-connector:4.2.1",
+          "pod": "glint-pio-s-8k4m1-tz7v2",
+          "namespace": "eos-prod",
+          "cpuPercent": 3,
+          "memoryMb": 96,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-hq-pnl",
+      "name": "Glint HQ PnL Reporting",
+      "description": "Extracts P&L data from EOS and pushes to HQ reporting system",
+      "type": "glint",
+      "position": { "x": 20, "y": 42 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-hqpnl-2a8c5-bv6n9:8080/health",
+        "lastCheck": "2026-05-07T14:29:40Z",
+        "latencyMs": 6,
+        "responseCode": 200,
+        "message": "Last report sent at 07:15 SGT",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.95
+      },
+      "metrics": {
+        "messagesPerHour": 12,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 6
+      },
+      "metadata": {
+        "endpoint": "http://glint-hqpnl-2a8c5-bv6n9:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "medium",
+        "container": {
+          "image": "eos/glint-hq-pnl-reporting:4.2.1",
+          "pod": "glint-hqpnl-2a8c5-bv6n9",
+          "namespace": "eos-prod",
+          "cpuPercent": 2,
+          "memoryMb": 64,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-credit",
+      "name": "Glint Credit Cube",
+      "description": "Pushes credit exposure data from EOS to Credit Cube",
+      "type": "glint",
+      "position": { "x": 20, "y": 55 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-credit-4e7b3-hs2m8:8080/health",
+        "lastCheck": "2026-05-07T14:29:38Z",
+        "latencyMs": 5,
+        "responseCode": 200,
+        "message": "Processing exposure updates",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.98
+      },
+      "metrics": {
+        "messagesPerHour": 8,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 5
+      },
+      "metadata": {
+        "endpoint": "http://glint-credit-4e7b3-hs2m8:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "medium",
+        "container": {
+          "image": "eos/glint-credit-cube:4.2.1",
+          "pod": "glint-credit-4e7b3-hs2m8",
+          "namespace": "eos-prod",
+          "cpuPercent": 1,
+          "memoryMb": 64,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-endur",
+      "name": "Glint Endur Spanish Gas",
+      "description": "Imports Spanish gas trades from Endur into EOS",
+      "type": "glint",
+      "position": { "x": 20, "y": 68 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-endur-6d9a4-jw5x1:8080/health",
+        "lastCheck": "2026-05-07T14:29:30Z",
+        "latencyMs": 15,
+        "responseCode": 200,
+        "message": "Awaiting Endur messages",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.9
+      },
+      "metrics": {
+        "messagesPerHour": 4,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 15
+      },
+      "metadata": {
+        "endpoint": "http://glint-endur-6d9a4-jw5x1:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "medium",
+        "container": {
+          "image": "eos/glint-endur-spanish-gas:4.2.1",
+          "pod": "glint-endur-6d9a4-jw5x1",
+          "namespace": "eos-prod",
+          "cpuPercent": 1,
+          "memoryMb": 64,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-var",
+      "name": "Glint VaR Extract",
+      "description": "Extracts position data from EOS for VaR calculation",
+      "type": "glint",
+      "position": { "x": 20, "y": 82 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-var-1b5f8-cp4q6:8080/health",
+        "lastCheck": "2026-05-07T14:29:32Z",
+        "latencyMs": 10,
+        "responseCode": 200,
+        "message": "Idle — last extract at 17:45 yesterday",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.95
+      },
+      "metrics": {
+        "messagesPerHour": 2,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 10
+      },
+      "metadata": {
+        "endpoint": "http://glint-var-1b5f8-cp4q6:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "medium",
+        "container": {
+          "image": "eos/glint-var-extract:4.2.1",
+          "pod": "glint-var-1b5f8-cp4q6",
+          "namespace": "eos-prod",
+          "cpuPercent": 5,
+          "memoryMb": 128,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    },
+    {
+      "id": "glint-ma",
+      "name": "Glint MA",
+      "description": "Master Agreements / Settlements connector — pushes settlement data to SAP",
+      "type": "glint",
+      "position": { "x": 45, "y": 90 },
+      "status": "healthy",
+      "health": {
+        "checkUrl": "http://glint-ma-5p9s3-fx1y8:8080/health",
+        "lastCheck": "2026-05-07T14:29:28Z",
+        "latencyMs": 8,
+        "responseCode": 200,
+        "message": "Processing settlement documents",
+        "upSince": "2026-04-28T10:00:00Z",
+        "uptimePercent": 99.97
+      },
+      "metrics": {
+        "messagesPerHour": 6,
+        "errorsLast24h": 0,
+        "avgLatencyMs": 8
+      },
+      "metadata": {
+        "endpoint": "http://glint-ma-5p9s3-fx1y8:8080",
+        "technology": ".NET 8 / Docker",
+        "owner": "Integration Team",
+        "criticality": "medium",
+        "container": {
+          "image": "eos/glint-ma:4.2.1",
+          "pod": "glint-ma-5p9s3-fx1y8",
+          "namespace": "eos-prod",
+          "cpuPercent": 2,
+          "memoryMb": 64,
+          "restarts": 0,
+          "age": "9d"
+        }
+      },
+      "issue": null
+    }
+  ],
+  "dataFlows": [
+    {
+      "id": "price-ingress",
+      "name": "Price Ingress",
+      "description": "Market prices from DQ Prices into EOS for curve building and valuation",
+      "path": ["dq-prices", "eos"],
+      "bidirectional": true,
+      "messageTypes": ["Price.Updated"],
+      "volume": 240,
+      "schedule": "Continuous",
+      "criticality": "critical",
+      "annotation": null
+    },
+    {
+      "id": "ice-trade-ingress",
+      "name": "ICE Trade Ingress",
+      "description": "Exchange-traded data from ICE through KTP/Shovel pipeline into EOS",
+      "path": ["ice", "ktp", "shovel", "rabbitmq", "glint-ice", "eos"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.IceCaptured"],
+      "volume": 1420,
+      "schedule": "Continuous",
+      "criticality": "critical",
+      "annotation": null
+    },
+    {
+      "id": "pioneer-trade",
+      "name": "Trade/Recap to Pioneer",
+      "description": "Trade lifecycle events pushed to Pioneer for downstream processing",
+      "path": ["eos", "rabbitmq", "glint-pioneer-trade", "pioneer"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.Captured", "Trade.Validated", "Trade.Amended", "Trade.Cancelled"],
+      "volume": 48,
+      "schedule": "Continuous",
+      "criticality": "high",
+      "annotation": "Trade/Recap data"
+    },
+    {
+      "id": "pioneer-settlement",
+      "name": "Settlements to Pioneer",
+      "description": "Settlement completion events pushed to Pioneer",
+      "path": ["eos", "rabbitmq", "glint-pioneer-settle", "pioneer"],
+      "bidirectional": false,
+      "messageTypes": ["Settlement.Completed", "Invoice.Approved", "Invoice.Paid"],
+      "volume": 12,
+      "schedule": "Batch",
+      "criticality": "high",
+      "annotation": "Settlements data"
+    },
+    {
+      "id": "spanish-gas",
+      "name": "Spanish Gas Trade Import",
+      "description": "Spanish gas trades from Endur legacy system into EOS",
+      "path": ["endur", "glint-endur", "rabbitmq", "eos"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.EndurImported"],
+      "volume": 4,
+      "schedule": "Continuous",
+      "criticality": "medium",
+      "annotation": "Spanish gas trade data flow"
+    },
+    {
+      "id": "var-extract",
+      "name": "VaR Position Extract",
+      "description": "Position data extracted from EOS for VaR engine processing",
+      "path": ["eos", "rabbitmq", "glint-var", "var-engine"],
+      "bidirectional": false,
+      "messageTypes": ["Risk.PositionExtract"],
+      "volume": 2,
+      "schedule": "Daily",
+      "criticality": "medium",
+      "annotation": "VaR Extract"
+    },
+    {
+      "id": "credit-exposure",
+      "name": "Credit Exposure Update",
+      "description": "Credit exposure data pushed to Credit Cube on trade events and EOD",
+      "path": ["eos", "rabbitmq", "glint-credit", "credit-cube"],
+      "bidirectional": false,
+      "messageTypes": ["Credit.ExposureUpdate", "Credit.LimitBreach"],
+      "volume": 8,
+      "schedule": "Continuous",
+      "criticality": "medium",
+      "annotation": "Credit Data"
+    },
+    {
+      "id": "hq-pnl",
+      "name": "HQ PnL Reporting",
+      "description": "P&L reports extracted and pushed to HQ reporting system",
+      "path": ["eos", "rabbitmq", "glint-hq-pnl", "hq-pnl"],
+      "bidirectional": false,
+      "messageTypes": ["PnL.DailyReport", "PnL.MonthEndReport"],
+      "volume": 12,
+      "schedule": "Daily",
+      "criticality": "medium",
+      "annotation": "PnL Reports"
+    },
+    {
+      "id": "settlement-sap",
+      "name": "Settlement to SAP",
+      "description": "Settlement documents generated and pushed to SAP via Glint MA",
+      "path": ["eos", "rabbitmq", "glint-ma", "sap"],
+      "bidirectional": false,
+      "messageTypes": ["Settlement.SapExport"],
+      "volume": 6,
+      "schedule": "Batch",
+      "criticality": "medium",
+      "annotation": "SAP Document"
+    },
+    {
+      "id": "invoice-pdf",
+      "name": "Invoice PDF Export",
+      "description": "EOS exports invoices as PDF to AX Cloud shared drive",
+      "path": ["eos", "ax-cloud"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "volume": 6,
+      "schedule": "Continuous",
+      "criticality": "low",
+      "annotation": "Invoices saved as PDF"
+    },
+    {
+      "id": "port-distance",
+      "name": "Port Distance Manual Pull",
+      "description": "Operators manually retrieve port distance data from a2kvan into EOS",
+      "path": ["a2kvan", "eos"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "volume": 0,
+      "schedule": "Manual",
+      "criticality": "low",
+      "annotation": "Port Distance data\npull (manual)"
+    },
+    {
+      "id": "eod-batch",
+      "name": "EOD Batch Trigger",
+      "description": "EOS Scheduler triggers end-of-day processing in EOS",
+      "path": ["eos-scheduler", "eos"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "volume": 1,
+      "schedule": "Daily",
+      "criticality": "critical",
+      "annotation": "EOD Batch"
+    }
+  ],
+  "rabbitMq": {
+    "exchanges": [
+      {
+        "name": "eos.inbound",
+        "type": "topic",
+        "description": "Inbound data flowing INTO EOS from external systems",
+        "routingKeyPattern": "{source}.{entity}.{action}",
+        "examples": ["ice.trade.captured", "price.curve.published", "endur.trade.imported"]
+      },
+      {
+        "name": "eos.outbound",
+        "type": "topic",
+        "description": "Outbound data flowing FROM EOS to downstream systems",
+        "routingKeyPattern": "{destination}.{entity}.{action}",
+        "examples": ["pioneer.trade.captured", "hq.pnl.daily", "credit.exposure.updated"]
+      },
+      {
+        "name": "eos.internal",
+        "type": "topic",
+        "description": "Internal EOS events (audit, notifications, scheduler triggers)",
+        "routingKeyPattern": "{domain}.{entity}.{action}",
+        "examples": ["audit.trade.amended", "notification.deadline.approaching", "scheduler.eod.triggered"]
+      }
+    ],
+    "queues": [
+      { "name": "eos.ice.trade.capture", "exchange": "eos.inbound", "routingKey": "ice.trade.#", "consumer": "glint-ice", "messages": 0, "consumers": 2, "rate": 23.6, "unacked": 0, "status": "healthy" },
+      { "name": "eos.price.loading", "exchange": "eos.inbound", "routingKey": "price.#", "consumer": "glint-price-load", "messages": 12, "consumers": 2, "rate": 4.0, "unacked": 2, "status": "healthy" },
+      { "name": "eos.endur.spanish.gas", "exchange": "eos.inbound", "routingKey": "endur.trade.#", "consumer": "glint-endur", "messages": 0, "consumers": 1, "rate": 0.07, "unacked": 0, "status": "healthy" },
+      { "name": "eos.pioneer.trade", "exchange": "eos.outbound", "routingKey": "pioneer.trade.#", "consumer": "glint-pioneer-trade", "messages": 0, "consumers": 2, "rate": 0.8, "unacked": 0, "status": "healthy" },
+      { "name": "eos.pioneer.settlement", "exchange": "eos.outbound", "routingKey": "pioneer.settlement.#", "consumer": "glint-pioneer-settle", "messages": 0, "consumers": 1, "rate": 0.2, "unacked": 0, "status": "healthy" },
+      { "name": "eos.price.eod.export", "exchange": "eos.outbound", "routingKey": "price.eod.#", "consumer": "glint-price-eod", "messages": 0, "consumers": 1, "rate": 0.8, "unacked": 0, "status": "healthy" },
+      { "name": "eos.hq.pnl", "exchange": "eos.outbound", "routingKey": "hq.pnl.#", "consumer": "glint-hq-pnl", "messages": 0, "consumers": 1, "rate": 0.2, "unacked": 0, "status": "healthy" },
+      { "name": "eos.credit.cube", "exchange": "eos.outbound", "routingKey": "credit.#", "consumer": "glint-credit", "messages": 0, "consumers": 1, "rate": 0.13, "unacked": 0, "status": "healthy" },
+      { "name": "eos.var.extract", "exchange": "eos.outbound", "routingKey": "risk.var.#", "consumer": "glint-var", "messages": 0, "consumers": 1, "rate": 0.03, "unacked": 0, "status": "healthy" },
+      { "name": "eos.settlement.ma", "exchange": "eos.outbound", "routingKey": "settlement.sap.#", "consumer": "glint-ma", "messages": 0, "consumers": 1, "rate": 0.1, "unacked": 0, "status": "healthy" },
+      { "name": "eos.audit.event", "exchange": "eos.internal", "routingKey": "audit.#", "consumer": "audit-logger", "messages": 0, "consumers": 2, "rate": 8.7, "unacked": 0, "status": "healthy" },
+      { "name": "eos.notification.send", "exchange": "eos.internal", "routingKey": "notification.#", "consumer": "notification-service", "messages": 847, "consumers": 0, "rate": 0.0, "unacked": 0, "status": "critical" }
+    ]
+  },
+  "messageTypes": [
+    {
+      "type": "Trade.Captured",
+      "description": "New trade entered in EOS",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.captured",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "~10-30/day",
+      "samplePayload": {
+        "tradeId": "T-1001",
+        "direction": "BUY",
+        "counterparty": "Shell Energy Trading",
+        "benchmark": "JKM",
+        "premium": 0.50,
+        "volume": 3200000,
+        "volumeUnits": "MMBtu",
+        "deliveryMonth": "2026-06",
+        "incoterm": "DES",
+        "dischargePort": "Sodegaura",
+        "trader": "j.cobley",
+        "status": "FO-Entered",
+        "contractRef": "SPA-SHELL-2026"
+      }
+    },
+    {
+      "type": "Trade.Validated",
+      "description": "Trade status changed to FO-Validated",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.validated",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "~10-30/day",
+      "samplePayload": {
+        "tradeId": "T-1001",
+        "status": "FO-Validated",
+        "validatedBy": "m.tanaka",
+        "validatedAt": "2026-05-07T09:15:00Z"
+      }
+    },
+    {
+      "type": "Trade.Amended",
+      "description": "Trade fields modified after initial capture",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.amended",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "~5-10/day",
+      "samplePayload": {
+        "tradeId": "T-998",
+        "amendments": [{ "field": "volume", "from": 3000000, "to": 3200000 }],
+        "amendedBy": "j.cobley",
+        "reason": "Quantity correction per counterparty confirmation"
+      }
+    },
+    {
+      "type": "Trade.Cancelled",
+      "description": "Trade cancelled",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.cancelled",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "~1-2/week",
+      "samplePayload": {
+        "tradeId": "T-995",
+        "cancelledBy": "j.cobley",
+        "reason": "Duplicate entry",
+        "cancelledAt": "2026-05-06T16:42:00Z"
+      }
+    },
+    {
+      "type": "Trade.IceCaptured",
+      "description": "ICE exchange trade received via KTP/Shovel pipeline",
+      "source": "ice",
+      "exchange": "eos.inbound",
+      "routingKey": "ice.trade.captured",
+      "consumers": ["glint-ice"],
+      "frequency": "~1400/hour",
+      "samplePayload": {
+        "iceTradeId": "ICE-4821",
+        "direction": "BUY",
+        "commodity": "NBP Gas",
+        "counterparty": "Shell Energy Trading",
+        "volume": 50000,
+        "volumeUnits": "therms/day",
+        "price": 72.45,
+        "currency": "GBp/therm",
+        "tradeDate": "2026-05-07",
+        "deliveryPeriod": "2026-06"
+      }
+    },
+    {
+      "type": "Trade.EndurImported",
+      "description": "Spanish gas trade imported from Endur",
+      "source": "endur",
+      "exchange": "eos.inbound",
+      "routingKey": "endur.trade.imported",
+      "consumers": ["glint-endur"],
+      "frequency": "~4/hour",
+      "samplePayload": {
+        "endurDealId": "END-SG-0412",
+        "commodity": "Spanish Natural Gas",
+        "counterparty": "Naturgy",
+        "volume": 120000,
+        "volumeUnits": "MWh",
+        "price": 28.5,
+        "currency": "EUR/MWh",
+        "deliveryPoint": "PVB"
+      }
+    },
+    {
+      "type": "Price.Updated",
+      "description": "Market price update received from DQ Prices",
+      "source": "dq-prices",
+      "exchange": "eos.inbound",
+      "routingKey": "price.curve.updated",
+      "consumers": ["glint-price-load"],
+      "frequency": "~240/hour",
+      "samplePayload": {
+        "curveId": "JKM-M1",
+        "curveName": "JKM Front Month",
+        "value": 12.85,
+        "currency": "USD/MMBtu",
+        "asOfDate": "2026-05-07",
+        "source": "DQ Platts",
+        "quality": "final"
+      }
+    },
+    {
+      "type": "Price.EodExported",
+      "description": "End-of-day settlement prices exported",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "price.eod.exported",
+      "consumers": ["glint-price-eod"],
+      "frequency": "Once daily",
+      "samplePayload": {
+        "exportId": "EOD-20260507",
+        "curves": 47,
+        "pricePoints": 1420,
+        "asOfDate": "2026-05-07",
+        "exportedAt": "2026-05-07T17:45:00Z"
+      }
+    },
+    {
+      "type": "Settlement.Completed",
+      "description": "Trade settlement finalised",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.settlement.completed",
+      "consumers": ["glint-pioneer-settle"],
+      "frequency": "~12/hour",
+      "samplePayload": {
+        "settlementId": "STL-2026-0507-014",
+        "tradeId": "T-892",
+        "amount": 4250000,
+        "currency": "USD",
+        "counterparty": "TotalEnergies",
+        "settledAt": "2026-05-07T14:20:00Z"
+      }
+    },
+    {
+      "type": "Settlement.SapExport",
+      "description": "Settlement document generated for SAP",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "settlement.sap.export",
+      "consumers": ["glint-ma"],
+      "frequency": "~6/hour",
+      "samplePayload": {
+        "documentId": "SAP-DOC-20260507-014",
+        "settlementId": "STL-2026-0507-014",
+        "documentType": "Settlement Invoice",
+        "format": "Excel",
+        "generatedAt": "2026-05-07T14:22:00Z"
+      }
+    },
+    {
+      "type": "PnL.DailyReport",
+      "description": "Daily P&L report extract for HQ",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "hq.pnl.daily",
+      "consumers": ["glint-hq-pnl"],
+      "frequency": "Once daily",
+      "samplePayload": {
+        "reportId": "PNL-20260507",
+        "reportDate": "2026-05-07",
+        "totalPnL": 2450000,
+        "currency": "USD",
+        "bookCount": 12,
+        "tradeCount": 1247
+      }
+    },
+    {
+      "type": "Credit.ExposureUpdate",
+      "description": "Credit exposure recalculated — pushed to Credit Cube",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "credit.exposure.updated",
+      "consumers": ["glint-credit"],
+      "frequency": "~8/hour",
+      "samplePayload": {
+        "counterpartyId": "CP-SHELL",
+        "counterpartyName": "Shell Energy Trading",
+        "currentExposure": 15200000,
+        "creditLimit": 50000000,
+        "utilisationPct": 30.4,
+        "currency": "USD",
+        "calculatedAt": "2026-05-07T14:25:00Z"
+      }
+    },
+    {
+      "type": "Risk.PositionExtract",
+      "description": "Position data extracted for VaR calculation",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "risk.var.position",
+      "consumers": ["glint-var"],
+      "frequency": "Once daily",
+      "samplePayload": {
+        "extractId": "VAR-EXT-20260507",
+        "positionDate": "2026-05-07",
+        "portfolioCount": 8,
+        "positionCount": 342,
+        "notionalTotal": 890000000,
+        "currency": "USD",
+        "extractedAt": "2026-05-07T17:50:00Z"
+      }
+    }
+  ],
+  "healthChecks": [
+    {
+      "id": "hc-eos-api",
+      "name": "EOS Core API",
+      "targetNode": "eos",
+      "type": "http",
+      "config": {
+        "url": "https://eos-prod.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 5000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 18,
+        "responseCode": 200,
+        "message": "All services operational",
+        "checkedAt": "2026-05-07T14:29:45Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 500,
+        "latencyFailMs": 2000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-rabbitmq-node",
+      "name": "RabbitMQ Node Health",
+      "targetNode": "rabbitmq",
+      "type": "http",
+      "config": {
+        "url": "http://eos-rmq-prod:15672/api/healthchecks/node",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 15,
+        "headers": { "Authorization": "Basic ***" }
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 2,
+        "responseCode": 200,
+        "message": "Node running, all alarms clear",
+        "checkedAt": "2026-05-07T14:29:50Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 100,
+        "latencyFailMs": 500,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 3
+      }
+    },
+    {
+      "id": "hc-rabbitmq-tcp",
+      "name": "RabbitMQ AMQP Port",
+      "targetNode": "rabbitmq",
+      "type": "tcp",
+      "config": {
+        "url": "eos-rmq-prod:5672",
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 2000,
+        "intervalSeconds": 15,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 1,
+        "responseCode": null,
+        "message": "TCP connection established",
+        "checkedAt": "2026-05-07T14:29:50Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 50,
+        "latencyFailMs": 200,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 2
+      }
+    },
+    {
+      "id": "hc-eos-scheduler",
+      "name": "EOS Scheduler EOD",
+      "targetNode": "eos-scheduler",
+      "type": "custom",
+      "config": {
+        "url": null,
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 5000,
+        "intervalSeconds": 60,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "Last EOD run completed successfully at 17:30:54",
+        "checkedAt": "2026-05-07T14:29:00Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": null,
+        "latencyFailMs": null,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 2
+      }
+    },
+    {
+      "id": "hc-dq-prices",
+      "name": "DQ Prices Feed",
+      "targetNode": "dq-prices",
+      "type": "http",
+      "config": {
+        "url": "https://dq.prices.provider.com/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 5000,
+        "intervalSeconds": 60,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 12,
+        "responseCode": 200,
+        "message": "Feed active",
+        "checkedAt": "2026-05-07T14:29:30Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-ice-ws",
+      "name": "ICE WebSocket Feed",
+      "targetNode": "ice",
+      "type": "tcp",
+      "config": {
+        "url": "ice.exchange.com:443",
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 8,
+        "responseCode": null,
+        "message": "WebSocket connected",
+        "checkedAt": "2026-05-07T14:29:55Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 100,
+        "latencyFailMs": 500,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-ktp",
+      "name": "KTP Pipeline",
+      "targetNode": "ktp",
+      "type": "custom",
+      "config": {
+        "url": null,
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 5000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 2,
+        "responseCode": null,
+        "message": "Processing normally",
+        "checkedAt": "2026-05-07T14:29:40Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 50,
+        "latencyFailMs": 200,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-shovel",
+      "name": "RabbitMQ Shovel",
+      "targetNode": "shovel",
+      "type": "http",
+      "config": {
+        "url": "http://eos-rmq-prod:15672/api/shovels",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": { "Authorization": "Basic ***" }
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 1,
+        "responseCode": 200,
+        "message": "Shovel running",
+        "checkedAt": "2026-05-07T14:29:50Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 50,
+        "latencyFailMs": 200,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 3
+      }
+    },
+    {
+      "id": "hc-pioneer",
+      "name": "Pioneer API",
+      "targetNode": "pioneer",
+      "type": "http",
+      "config": {
+        "url": "https://pioneer.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 5000,
+        "intervalSeconds": 60,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 25,
+        "responseCode": 200,
+        "message": "Online and accepting data",
+        "checkedAt": "2026-05-07T14:29:35Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-hq-pnl",
+      "name": "HQ PnL API",
+      "targetNode": "hq-pnl",
+      "type": "http",
+      "config": {
+        "url": "https://hq-pnl.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 5000,
+        "intervalSeconds": 120,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 45,
+        "responseCode": 200,
+        "message": "Accepting reports",
+        "checkedAt": "2026-05-07T14:29:20Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 300,
+        "latencyFailMs": 1500,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-credit-cube",
+      "name": "Credit Cube API",
+      "targetNode": "credit-cube",
+      "type": "http",
+      "config": {
+        "url": "https://creditcube.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 5000,
+        "intervalSeconds": 60,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 22,
+        "responseCode": 200,
+        "message": "Running",
+        "checkedAt": "2026-05-07T14:29:25Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-endur",
+      "name": "Endur Legacy System",
+      "targetNode": "endur",
+      "type": "http",
+      "config": {
+        "url": "https://endur.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 10000,
+        "intervalSeconds": 120,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 35,
+        "responseCode": 200,
+        "message": "Legacy system responding",
+        "checkedAt": "2026-05-07T14:28:50Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 500,
+        "latencyFailMs": 2000,
+        "consecutiveFailuresWarn": 3,
+        "consecutiveFailuresFail": 6
+      }
+    },
+    {
+      "id": "hc-var-engine",
+      "name": "VaR Engine API",
+      "targetNode": "var-engine",
+      "type": "http",
+      "config": {
+        "url": "https://var.glng.internal/api/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 10000,
+        "intervalSeconds": 120,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 120,
+        "responseCode": 200,
+        "message": "Calculation engine idle",
+        "checkedAt": "2026-05-07T14:28:55Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 500,
+        "latencyFailMs": 3000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-ax-cloud",
+      "name": "AX Cloud SharePoint",
+      "targetNode": "ax-cloud",
+      "type": "http",
+      "config": {
+        "url": "https://axcloud.sharepoint.com/sites/glng/_api/web",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 10000,
+        "intervalSeconds": 300,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 180,
+        "responseCode": 200,
+        "message": "SharePoint accessible",
+        "checkedAt": "2026-05-07T14:29:10Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 500,
+        "latencyFailMs": 5000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-sap",
+      "name": "SAP Document Export",
+      "targetNode": "sap",
+      "type": "custom",
+      "config": {
+        "url": null,
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 5000,
+        "intervalSeconds": 300,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "Last export successful at 14:22",
+        "checkedAt": "2026-05-07T14:28:00Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": null,
+        "latencyFailMs": null,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 3
+      }
+    },
+    {
+      "id": "hc-glint-ice",
+      "name": "Glint ICE Trade Capture",
+      "targetNode": "glint-ice",
+      "type": "http",
+      "config": {
+        "url": "http://glint-ice-7d4f8-xk2j4:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 15,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 4,
+        "responseCode": 200,
+        "message": "Processing ICE feed normally",
+        "checkedAt": "2026-05-07T14:29:58Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-price-load",
+      "name": "Glint Price Loading",
+      "targetNode": "glint-price-load",
+      "type": "http",
+      "config": {
+        "url": "http://glint-price-8b3e2-mn5p1:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 15,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "warn",
+        "latencyMs": 342,
+        "responseCode": 200,
+        "message": "Responding but slow — DQ feed latency elevated (342ms exceeds 200ms threshold)",
+        "checkedAt": "2026-05-07T14:29:52Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-price-eod",
+      "name": "Glint Price EoD Export",
+      "targetNode": "glint-price-eod",
+      "type": "http",
+      "config": {
+        "url": "http://glint-eod-5c7a1-qr8w3:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 8,
+        "responseCode": 200,
+        "message": "Idle — awaiting next EOD trigger",
+        "checkedAt": "2026-05-07T14:29:48Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-pioneer-trade",
+      "name": "Glint Pioneer Trade Connector",
+      "targetNode": "glint-pioneer-trade",
+      "type": "http",
+      "config": {
+        "url": "http://glint-pio-t-3g2h7-wn8r5:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 15,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 12,
+        "responseCode": 200,
+        "message": "Processing trade events",
+        "checkedAt": "2026-05-07T14:29:55Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-pioneer-settle",
+      "name": "Glint Pioneer Settlements",
+      "targetNode": "glint-pioneer-settle",
+      "type": "http",
+      "config": {
+        "url": "http://glint-pio-s-8k4m1-tz7v2:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 15,
+        "responseCode": 200,
+        "message": "Idle — no active settlement window",
+        "checkedAt": "2026-05-07T14:29:53Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-hq-pnl",
+      "name": "Glint HQ PnL Reporting",
+      "targetNode": "glint-hq-pnl",
+      "type": "http",
+      "config": {
+        "url": "http://glint-hqpnl-2a8c5-bv6n9:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 6,
+        "responseCode": 200,
+        "message": "Last report sent at 07:15 SGT",
+        "checkedAt": "2026-05-07T14:29:40Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-credit",
+      "name": "Glint Credit Cube",
+      "targetNode": "glint-credit",
+      "type": "http",
+      "config": {
+        "url": "http://glint-credit-4e7b3-hs2m8:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 5,
+        "responseCode": 200,
+        "message": "Processing exposure updates",
+        "checkedAt": "2026-05-07T14:29:38Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-endur",
+      "name": "Glint Endur Spanish Gas",
+      "targetNode": "glint-endur",
+      "type": "http",
+      "config": {
+        "url": "http://glint-endur-6d9a4-jw5x1:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 15,
+        "responseCode": 200,
+        "message": "Awaiting Endur messages",
+        "checkedAt": "2026-05-07T14:29:30Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-var",
+      "name": "Glint VaR Extract",
+      "targetNode": "glint-var",
+      "type": "http",
+      "config": {
+        "url": "http://glint-var-1b5f8-cp4q6:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 10,
+        "responseCode": 200,
+        "message": "Idle — last extract at 17:45 yesterday",
+        "checkedAt": "2026-05-07T14:29:32Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-glint-ma",
+      "name": "Glint MA Settlements",
+      "targetNode": "glint-ma",
+      "type": "http",
+      "config": {
+        "url": "http://glint-ma-5p9s3-fx1y8:8080/health",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "pass",
+        "latencyMs": 8,
+        "responseCode": 200,
+        "message": "Processing settlement documents",
+        "checkedAt": "2026-05-07T14:29:28Z",
+        "consecutiveFailures": 0
+      },
+      "thresholds": {
+        "latencyWarnMs": 200,
+        "latencyFailMs": 1000,
+        "consecutiveFailuresWarn": 2,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-notification-queue",
+      "name": "eos.notification.send Queue",
+      "targetNode": "rabbitmq",
+      "type": "rabbitmq-queue",
+      "config": {
+        "url": "http://eos-rmq-prod:15672/api/queues/%2F/eos.notification.send",
+        "method": "GET",
+        "expectedStatus": 200,
+        "timeoutMs": 3000,
+        "intervalSeconds": 30,
+        "headers": { "Authorization": "Basic ***" }
+      },
+      "lastResult": {
+        "status": "fail",
+        "latencyMs": 3,
+        "responseCode": 200,
+        "message": "Consumer down — 0 consumers, 847 messages backed up",
+        "checkedAt": "2026-05-07T14:29:51Z",
+        "consecutiveFailures": 12
+      },
+      "thresholds": {
+        "latencyWarnMs": 50,
+        "latencyFailMs": 200,
+        "consecutiveFailuresWarn": 3,
+        "consecutiveFailuresFail": 5
+      }
+    },
+    {
+      "id": "hc-smtp-relay",
+      "name": "SMTP Relay",
+      "targetNode": "rabbitmq",
+      "type": "tcp",
+      "config": {
+        "url": "smtp-relay.glng.internal:587",
+        "method": null,
+        "expectedStatus": null,
+        "timeoutMs": 5000,
+        "intervalSeconds": 60,
+        "headers": null
+      },
+      "lastResult": {
+        "status": "fail",
+        "latencyMs": null,
+        "responseCode": null,
+        "message": "TCP connection failed — connection refused on port 587",
+        "checkedAt": "2026-05-07T14:29:55Z",
+        "consecutiveFailures": 8
+      },
+      "thresholds": {
+        "latencyWarnMs": 100,
+        "latencyFailMs": 500,
+        "consecutiveFailuresWarn": 1,
+        "consecutiveFailuresFail": 3
+      }
+    }
+  ]
+}
