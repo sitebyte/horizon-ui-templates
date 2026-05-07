@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL Helper — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* ---- Layout: two-column with left sidebar ---- */
+    .sql-helper-layout {
+      display: flex;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ---- Saved Queries Sidebar ---- */
+    .sql-library {
+      width: 16rem;
+      min-width: 16rem;
+      background: var(--card-bg);
+      border-right: 0.0625rem solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sql-library-header {
+      padding: var(--sp-2) var(--sp-3);
+      border-bottom: 0.0625rem solid var(--border);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .sql-library-search {
+      padding: var(--sp-2) var(--sp-3);
+      flex-shrink: 0;
+    }
+    .sql-library-search input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-1) var(--sp-2);
+      color: var(--text-primary);
+      font-size: var(--text-xs);
+      font-family: var(--font-ui);
+      height: 1.75rem;
+    }
+    .sql-library-search input::placeholder { color: var(--text-muted); }
+    .sql-library-search input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 0.125rem var(--accent-bg);
+    }
+    .sql-library-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--sp-1) 0;
+    }
+    .sql-lib-group-btn {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: var(--sp-1) var(--sp-3);
+      gap: var(--sp-2);
+      color: var(--text-muted);
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-ui);
+      transition: color var(--transition-fast);
+    }
+    .sql-lib-group-btn:hover { color: var(--text-secondary); }
+    .sql-lib-group-btn .lib-arrow {
+      display: flex;
+      transition: transform 0.15s;
+      font-size: 0.5rem;
+    }
+    .sql-lib-group-btn .lib-arrow.open { transform: rotate(90deg); }
+    .sql-lib-group-items { display: none; }
+    .sql-lib-group-items.open { display: block; }
+    .sql-lib-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: var(--sp-1) var(--sp-3) var(--sp-1) var(--sp-6);
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-ui);
+      transition: color var(--transition-fast), background var(--transition-fast);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sql-lib-item:hover {
+      color: var(--text-primary);
+      background: var(--hover);
+    }
+    .sql-lib-item.active {
+      color: var(--accent-light);
+      background: var(--accent-bg);
+    }
+
+    /* ---- Main Area ---- */
+    .sql-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ---- Toolbar ---- */
+    .sql-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      border-bottom: 0.0625rem solid var(--border);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      background: var(--card-bg);
+    }
+    .sql-toolbar .spacer { flex: 1; }
+    .sql-conn-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      padding: var(--sp-1) var(--sp-2);
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .sql-conn-indicator .hz-dot { width: 0.375rem; height: 0.375rem; }
+    .sql-shortcut-hint {
+      font-size: 0.5625rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ---- Editor + Results split ---- */
+    .sql-editor-area {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ---- SQL Editor ---- */
+    .sql-editor-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 10rem;
+      max-height: 50vh;
+      flex-shrink: 0;
+      position: relative;
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .sql-editor-container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .sql-line-numbers {
+      background: var(--surface-base);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.7;
+      padding: var(--sp-3) var(--sp-2);
+      text-align: right;
+      user-select: none;
+      min-width: 2.5rem;
+      overflow: hidden;
+      border-right: 0.0625rem solid var(--border);
+      flex-shrink: 0;
+    }
+    .sql-editor {
+      flex: 1;
+      background: var(--surface-canvas);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.7;
+      padding: var(--sp-3);
+      border: none;
+      resize: none;
+      outline: none;
+      overflow: auto;
+      tab-size: 2;
+      white-space: pre;
+      min-height: 0;
+    }
+    .sql-editor::placeholder { color: var(--text-muted); }
+    .sql-editor:focus {
+      box-shadow: inset 0 0 0 0.125rem var(--accent-bg);
+    }
+    .sql-resize-handle {
+      height: 0.375rem;
+      background: var(--surface-raised);
+      cursor: ns-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-bottom: 0.0625rem solid var(--border);
+      transition: background var(--transition-fast);
+    }
+    .sql-resize-handle:hover {
+      background: var(--accent-bg);
+    }
+    .sql-resize-handle::after {
+      content: '';
+      width: 2rem;
+      height: 0.125rem;
+      background: var(--text-muted);
+      border-radius: var(--radius-full);
+      opacity: 0.4;
+    }
+
+    /* ---- Parameter Bar ---- */
+    .sql-params-bar {
+      display: none;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--surface-base);
+      border-bottom: 0.0625rem solid var(--border);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .sql-params-bar.visible { display: flex; }
+    .sql-param-field {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-1);
+      font-size: var(--text-xs);
+    }
+    .sql-param-field label {
+      font-family: var(--font-mono);
+      color: var(--accent-light);
+      font-weight: 600;
+      font-size: var(--text-xs);
+    }
+    .sql-param-field input {
+      background: var(--input-bg);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-1) var(--sp-2);
+      color: var(--text-primary);
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      height: 1.5rem;
+      width: 10rem;
+    }
+    .sql-param-field input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 0.125rem var(--accent-bg);
+    }
+
+    /* ---- Results Panel ---- */
+    .sql-results-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .sql-results-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-1) var(--sp-3);
+      background: var(--surface-base);
+      border-bottom: 0.0625rem solid var(--border);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .sql-results-header .result-stat {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .sql-results-table-wrap {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+    /* Table compact .tbl pattern */
+    .sql-results-area .tbl { font-size: var(--text-xs); width: 100%; border-collapse: collapse; }
+    .sql-results-area .tbl th {
+      font-size: 0.5rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.125rem var(--sp-2);
+      text-align: left;
+      border-bottom: 0.0625rem solid var(--border);
+      font-family: var(--font-ui);
+      position: sticky;
+      top: 0;
+      background: var(--card-bg);
+      z-index: 1;
+    }
+    .sql-results-area .tbl td {
+      padding: 0.125rem var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      height: 1.25rem;
+      white-space: nowrap;
+    }
+    .sql-results-area .tbl tr:hover td { background: var(--hover); }
+    .sql-results-area .tbl .r { text-align: right; }
+
+    /* ---- History Panel ---- */
+    .sql-history-panel {
+      border-top: 0.0625rem solid var(--border);
+      flex-shrink: 0;
+      max-height: 10rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .sql-history-panel.collapsed { max-height: 1.75rem; }
+    .sql-history-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-1) var(--sp-3);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      background: var(--surface-base);
+      flex-shrink: 0;
+      user-select: none;
+      border: none;
+      width: 100%;
+      font-family: var(--font-ui);
+      text-align: left;
+    }
+    .sql-history-header:hover { background: var(--hover); }
+    .sql-history-header .history-arrow {
+      display: flex;
+      transition: transform 0.15s;
+      color: var(--text-muted);
+    }
+    .sql-history-header .history-arrow.open { transform: rotate(90deg); }
+    .sql-history-list {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .sql-history-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-1) var(--sp-3);
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      font-family: var(--font-ui);
+      text-align: left;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .sql-history-item:hover {
+      background: var(--hover);
+      color: var(--text-primary);
+    }
+    .sql-history-time {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .sql-history-preview {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sql-history-rows {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ---- SQL Code Preview ---- */
+    .sql-code-block {
+      background: var(--surface-canvas);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-3);
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .sql-code-block .sql-kw { color: var(--accent-light); font-weight: 600; }
+    .sql-code-block .sql-fn { color: var(--accent-violet); }
+    .sql-code-block .sql-str { color: var(--green); }
+    .sql-code-block .sql-comment { color: var(--text-muted); font-style: italic; }
+    .sql-code-block .sql-num { color: var(--amber); }
+    .sql-code-block .sql-alias { color: var(--text-tertiary); }
+
+    /* ---- Empty results state ---- */
+    .sql-results-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-8) var(--sp-4);
+      text-align: center;
+      flex: 1;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      gap: var(--sp-2);
+    }
+    .sql-results-empty .empty-icon {
+      opacity: 0.3;
+      margin-bottom: var(--sp-2);
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <div class="hz-content-fill" data-component="sql-helper">
+    <div class="sql-helper-layout">
+      <!-- ======== LEFT: Saved Queries Library ======== -->
+      <aside class="sql-library" data-component="query-library" role="complementary" aria-label="Saved queries library">
+        <div class="sql-library-header">
+          <span>Saved Queries</span>
+          <span class="hz-badge neutral" id="lib-count">17</span>
+        </div>
+        <div class="sql-library-search">
+          <input type="text" id="lib-search" placeholder="Filter queries..." aria-label="Filter saved queries" tabindex="1" />
+        </div>
+        <div class="sql-library-list" id="sql-library-list" role="listbox" aria-label="Query categories">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+
+      <!-- ======== RIGHT: Main Editor + Results ======== -->
+      <div class="sql-main" data-component="sql-workspace">
+        <!-- Toolbar -->
+        <div class="sql-toolbar" data-component="sql-toolbar" role="toolbar" aria-label="SQL editor toolbar">
+          <button class="hz-btn primary sm" onclick="runQuery()" title="Run query (Ctrl+Enter)" tabindex="2" aria-label="Run query">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run
+          </button>
+          <button class="hz-btn sm" onclick="formatSQL()" title="Format SQL" tabindex="3" aria-label="Format SQL">Format</button>
+          <button class="hz-btn sm ghost" onclick="clearEditor()" title="Clear editor" tabindex="4" aria-label="Clear editor">Clear</button>
+          <button class="hz-btn sm ghost" onclick="copySQL()" title="Copy SQL to clipboard" tabindex="5" aria-label="Copy SQL">Copy</button>
+          <button class="hz-btn sm ghost" onclick="exportResults()" title="Export results to CSV" tabindex="6" aria-label="Export results">Export</button>
+          <span class="sql-shortcut-hint">Ctrl+Enter to run</span>
+          <div class="spacer"></div>
+          <div class="sql-conn-indicator" data-component="connection-indicator" aria-label="Database connection: PROD EOS_CORE connected">
+            <span class="hz-dot green pulse"></span>
+            <span>PROD</span>
+            <span style="color:var(--text-muted);">&mdash;</span>
+            <span style="color:var(--text-primary);font-weight:600;">EOS_CORE</span>
+          </div>
+        </div>
+
+        <!-- Editor + Results -->
+        <div class="sql-editor-area" data-component="editor-results-split">
+          <!-- SQL Editor -->
+          <div class="sql-editor-wrap" id="sql-editor-wrap" data-component="sql-editor">
+            <div class="sql-editor-container">
+              <div class="sql-line-numbers" id="sql-line-numbers" aria-hidden="true">1</div>
+              <textarea
+                class="sql-editor"
+                id="sql-editor"
+                placeholder="-- Enter your SQL query here..."
+                spellcheck="false"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                aria-label="SQL query editor"
+                tabindex="7"
+>SELECT
+  t.trade_id,
+  t.counterparty,
+  t.direction,
+  t.volume_mmbtu,
+  t.price_per_mmbtu,
+  t.benchmark,
+  t.status,
+  t.trade_date
+FROM trades t
+WHERE t.status IN ('Confirmed', 'Pending')
+  AND t.trade_date >= '2026-01-01'
+ORDER BY t.trade_date DESC;</textarea>
+            </div>
+            <div class="sql-resize-handle" id="sql-resize-handle" title="Drag to resize editor" aria-label="Resize editor"></div>
+          </div>
+
+          <!-- Parameter Bar (hidden by default, shown when @params detected) -->
+          <div class="sql-params-bar" id="sql-params-bar" data-component="parameter-inputs" role="group" aria-label="Query parameters">
+            <span style="font-size:var(--text-xs);font-weight:600;color:var(--text-primary);">Parameters:</span>
+          </div>
+
+          <!-- Results -->
+          <div class="sql-results-area" data-component="query-results">
+            <div class="sql-results-header" id="sql-results-header">
+              <span>Results: <span class="result-stat" id="result-row-count">8 rows</span></span>
+              <span style="color:var(--border-strong);">|</span>
+              <span>Execution: <span class="result-stat" id="result-exec-time">0.042s</span></span>
+              <span style="color:var(--border-strong);">|</span>
+              <span>Columns: <span class="result-stat" id="result-col-count">9</span></span>
+            </div>
+            <div class="sql-results-table-wrap" id="sql-results-table-wrap">
+              <table class="tbl" id="sql-results-table" data-component="results-table">
+                <thead id="results-thead">
+                  <tr>
+                    <th>#</th>
+                    <th>Trade ID</th>
+                    <th>Counterparty</th>
+                    <th>Direction</th>
+                    <th class="r">Volume (MMBtu)</th>
+                    <th class="r">Price ($/MMBtu)</th>
+                    <th>Benchmark</th>
+                    <th>Status</th>
+                    <th>Trade Date</th>
+                  </tr>
+                </thead>
+                <tbody id="results-tbody">
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">1</td>
+                    <td><span class="hz-entity-link">T-1001</span></td>
+                    <td>Shell Trading</td>
+                    <td><span class="hz-badge green">BUY</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">3,200,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$14.25</td>
+                    <td>JKM</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-05-06</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">2</td>
+                    <td><span class="hz-entity-link">T-1002</span></td>
+                    <td>JERA Co.</td>
+                    <td><span class="hz-badge red">SELL</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">2,800,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$12.80</td>
+                    <td>TTF</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-05-05</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">3</td>
+                    <td><span class="hz-entity-link">T-1003</span></td>
+                    <td>QatarEnergy</td>
+                    <td><span class="hz-badge green">BUY</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">3,200,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$14.10</td>
+                    <td>JKM</td>
+                    <td><span class="hz-badge amber">Pending</span></td>
+                    <td style="font-family:var(--font-mono);">2026-05-04</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">4</td>
+                    <td><span class="hz-entity-link">T-1004</span></td>
+                    <td>TotalEnergies</td>
+                    <td><span class="hz-badge red">SELL</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">2,500,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$3.42</td>
+                    <td>HH</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-05-03</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">5</td>
+                    <td><span class="hz-entity-link">T-1005</span></td>
+                    <td>Cheniere</td>
+                    <td><span class="hz-badge green">BUY</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">5,000,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$3.38</td>
+                    <td>HH</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-05-02</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">6</td>
+                    <td><span class="hz-entity-link">T-1006</span></td>
+                    <td>Woodside</td>
+                    <td><span class="hz-badge green">BUY</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">3,200,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$14.45</td>
+                    <td>JKM</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-04-28</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">7</td>
+                    <td><span class="hz-entity-link">T-1007</span></td>
+                    <td>KOGAS</td>
+                    <td><span class="hz-badge red">SELL</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">2,800,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$12.95</td>
+                    <td>TTF</td>
+                    <td><span class="hz-badge green">Confirmed</span></td>
+                    <td style="font-family:var(--font-mono);">2026-04-25</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted);font-size:0.5625rem;">8</td>
+                    <td><span class="hz-entity-link">T-1008</span></td>
+                    <td>BP Gas Marketing</td>
+                    <td><span class="hz-badge green">BUY</span></td>
+                    <td class="r" style="font-family:var(--font-mono);">4,100,000</td>
+                    <td class="r" style="font-family:var(--font-mono);">$82.40</td>
+                    <td>Brent</td>
+                    <td><span class="hz-badge amber">Pending</span></td>
+                    <td style="font-family:var(--font-mono);">2026-04-22</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- History Panel -->
+          <div class="sql-history-panel" id="sql-history-panel" data-component="query-history">
+            <button class="sql-history-header" onclick="toggleHistory()" aria-label="Toggle query history" aria-expanded="true">
+              <span class="history-arrow open" id="history-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+              <span>Query History</span>
+              <span class="hz-badge neutral" style="font-size:0.5625rem;">5</span>
+            </button>
+            <div class="sql-history-list" id="sql-history-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('support-sql-helper', 'SQL Helper');
+
+  /* ======================================================================
+     SAVED QUERIES LIBRARY
+     ====================================================================== */
+  var SAVED_QUERIES = [
+    { group: 'Trades', queries: [
+      { name: 'Active trades by counterparty', sql: "SELECT\n  t.counterparty,\n  COUNT(*) AS trade_count,\n  SUM(t.volume_mmbtu) AS total_volume,\n  ROUND(AVG(t.price_per_mmbtu), 2) AS avg_price\nFROM trades t\nWHERE t.status IN ('Confirmed', 'Pending')\nGROUP BY t.counterparty\nORDER BY total_volume DESC;" },
+      { name: 'Trades missing settlement price', sql: "SELECT\n  t.trade_id,\n  t.counterparty,\n  t.benchmark,\n  t.delivery_month,\n  t.volume_mmbtu\nFROM trades t\nLEFT JOIN settlement_prices sp\n  ON t.benchmark = sp.benchmark\n  AND t.delivery_month = sp.delivery_month\nWHERE sp.price IS NULL\n  AND t.status = 'Confirmed'\n  AND t.delivery_month <= @deliveryMonth\nORDER BY t.delivery_month;" },
+      { name: 'Draft trades older than 7 days', sql: "SELECT\n  t.trade_id,\n  t.counterparty,\n  t.direction,\n  t.volume_mmbtu,\n  t.trade_date,\n  DATEDIFF(day, t.trade_date, GETDATE()) AS days_old\nFROM trades t\nWHERE t.status = 'Draft'\n  AND t.trade_date < DATEADD(day, -7, GETDATE())\nORDER BY t.trade_date;" },
+    ]},
+    { group: 'Curves', queries: [
+      { name: 'Stale curves (>24h)', sql: "SELECT\n  cd.benchmark,\n  cd.curve_date,\n  cd.last_updated,\n  DATEDIFF(hour, cd.last_updated, GETDATE()) AS hours_stale,\n  COUNT(cd.tenor) AS tenor_count\nFROM curve_data cd\nWHERE cd.last_updated < DATEADD(hour, -24, GETDATE())\nGROUP BY cd.benchmark, cd.curve_date, cd.last_updated\nORDER BY hours_stale DESC;" },
+      { name: 'Curve tenor gaps', sql: "SELECT\n  c1.benchmark,\n  c1.tenor AS tenor_before,\n  c2.tenor AS tenor_after,\n  DATEDIFF(month, c1.settle_date, c2.settle_date) AS gap_months\nFROM curve_data c1\nINNER JOIN curve_data c2\n  ON c1.benchmark = c2.benchmark\n  AND c2.tenor_rank = c1.tenor_rank + 1\nWHERE DATEDIFF(month, c1.settle_date, c2.settle_date) > 1\n  AND c1.curve_date = CURRENT_DATE\nORDER BY c1.benchmark, c1.tenor;" },
+      { name: 'Cross-benchmark spread', sql: "SELECT\n  j.tenor,\n  j.price AS jkm_price,\n  t.price AS ttf_price,\n  h.price AS hh_price,\n  ROUND(j.price - t.price, 4) AS jkm_ttf_spread,\n  ROUND(j.price - h.price, 4) AS jkm_hh_spread\nFROM curve_data j\nINNER JOIN curve_data t ON j.tenor = t.tenor AND t.benchmark = 'TTF'\nINNER JOIN curve_data h ON j.tenor = h.tenor AND h.benchmark = 'HH'\nWHERE j.benchmark = 'JKM'\n  AND j.curve_date = CURRENT_DATE\nORDER BY j.tenor;" },
+    ]},
+    { group: 'Positions', queries: [
+      { name: 'Net position by benchmark', sql: "SELECT\n  p.benchmark,\n  SUM(CASE WHEN p.direction = 'BUY' THEN p.volume ELSE -p.volume END) AS net_volume,\n  COUNT(*) AS trade_count,\n  SUM(p.mtm_value) AS total_mtm\nFROM positions p\nWHERE p.is_active = 1\nGROUP BY p.benchmark\nORDER BY ABS(net_volume) DESC;" },
+      { name: 'Unhedged exposure', sql: "SELECT\n  p.benchmark,\n  p.delivery_month,\n  p.physical_volume,\n  p.hedge_volume,\n  p.physical_volume - p.hedge_volume AS unhedged,\n  ROUND((p.hedge_volume / NULLIF(p.physical_volume, 0)) * 100, 1) AS hedge_pct\nFROM position_summary p\nWHERE ABS(p.physical_volume - p.hedge_volume) > @minExposure\nORDER BY ABS(p.physical_volume - p.hedge_volume) DESC;" },
+      { name: 'Position vs limit check', sql: "SELECT\n  l.limit_name,\n  l.limit_type,\n  l.max_value,\n  p.current_value,\n  ROUND((p.current_value / l.max_value) * 100, 1) AS utilization_pct,\n  CASE\n    WHEN p.current_value > l.max_value THEN 'BREACH'\n    WHEN p.current_value > l.max_value * 0.9 THEN 'WARNING'\n    ELSE 'OK'\n  END AS status\nFROM risk_limits l\nINNER JOIN position_limits p ON l.limit_id = p.limit_id\nORDER BY utilization_pct DESC;" },
+    ]},
+    { group: 'Operations', queries: [
+      { name: 'Unmatched nominations', sql: "SELECT\n  n.nomination_id,\n  n.contract_ref,\n  n.vessel_name,\n  n.cargo_volume,\n  n.nomination_date,\n  n.status,\n  DATEDIFF(day, n.nomination_date, GETDATE()) AS days_pending\nFROM nominations n\nLEFT JOIN cargo_matches cm ON n.nomination_id = cm.nomination_id\nWHERE cm.match_id IS NULL\n  AND n.status NOT IN ('Cancelled', 'Expired')\nORDER BY n.nomination_date;" },
+      { name: 'Cargo without vessel assignment', sql: "SELECT\n  c.cargo_id,\n  c.contract_ref,\n  c.load_port,\n  c.discharge_port,\n  c.laycan_start,\n  c.laycan_end,\n  c.volume_mmbtu,\n  c.status\nFROM cargoes c\nWHERE c.vessel_name IS NULL\n  AND c.status NOT IN ('Cancelled', 'Complete')\n  AND c.laycan_start <= DATEADD(day, 30, GETDATE())\nORDER BY c.laycan_start;" },
+      { name: 'Pending invoices >30 days', sql: "SELECT\n  i.invoice_id,\n  i.counterparty,\n  i.invoice_date,\n  i.amount_usd,\n  i.currency,\n  DATEDIFF(day, i.invoice_date, GETDATE()) AS days_outstanding,\n  i.status\nFROM invoices i\nWHERE i.status = 'Pending'\n  AND i.invoice_date < DATEADD(day, -30, GETDATE())\nORDER BY i.amount_usd DESC;" },
+    ]},
+    { group: 'System', queries: [
+      { name: 'Long-running queries', sql: "SELECT\n  r.session_id,\n  r.login_name,\n  r.start_time,\n  DATEDIFF(second, r.start_time, GETDATE()) AS elapsed_sec,\n  r.cpu_time,\n  r.reads,\n  r.writes,\n  SUBSTRING(qt.text, 1, 200) AS query_text\nFROM sys.dm_exec_requests r\nCROSS APPLY sys.dm_exec_sql_text(r.sql_handle) qt\nWHERE r.session_id > 50\n  AND r.status = 'running'\nORDER BY r.start_time;" },
+      { name: 'Table row counts', sql: "SELECT\n  s.name AS schema_name,\n  t.name AS table_name,\n  p.rows AS row_count,\n  ROUND(SUM(a.total_pages) * 8.0 / 1024, 2) AS size_mb\nFROM sys.tables t\nINNER JOIN sys.schemas s ON t.schema_id = s.schema_id\nINNER JOIN sys.partitions p ON t.object_id = p.object_id AND p.index_id IN (0, 1)\nINNER JOIN sys.allocation_units a ON p.partition_id = a.container_id\nGROUP BY s.name, t.name, p.rows\nORDER BY p.rows DESC;" },
+      { name: 'Recent schema changes', sql: "SELECT\n  o.name AS object_name,\n  o.type_desc,\n  o.create_date,\n  o.modify_date,\n  DATEDIFF(day, o.modify_date, GETDATE()) AS days_since_change\nFROM sys.objects o\nWHERE o.modify_date >= DATEADD(day, -@daysBack, GETDATE())\n  AND o.type IN ('U', 'P', 'V', 'FN', 'IF')\nORDER BY o.modify_date DESC;" },
+    ]},
+  ];
+
+  /* ======================================================================
+     QUERY HISTORY
+     ====================================================================== */
+  var QUERY_HISTORY = [
+    { time: '17:28:14', sql: "SELECT t.trade_id, t.counterparty, t.direction, t.volume_mmbtu, t.price_per_mmbtu, t.benchmark, t.status, t.trade_date FROM trades t WHERE t.status IN ('Confirmed', 'Pending') AND t.trade_date >= '2026-01-01' ORDER BY t.trade_date DESC;", rows: 8 },
+    { time: '17:15:42', sql: "SELECT counterparty, COUNT(*) AS cnt, SUM(volume_mmbtu) AS total_vol FROM trades WHERE status = 'Confirmed' GROUP BY counterparty ORDER BY total_vol DESC;", rows: 7 },
+    { time: '16:58:03', sql: "SELECT benchmark, tenor, price, last_updated FROM curve_data WHERE curve_date = CURRENT_DATE AND benchmark = 'JKM' ORDER BY tenor;", rows: 24 },
+    { time: '16:42:17', sql: "SELECT i.invoice_id, i.counterparty, i.amount_usd, i.status FROM invoices i WHERE i.status = 'Pending' ORDER BY i.amount_usd DESC;", rows: 3 },
+    { time: '16:30:55', sql: "SELECT table_name, row_count FROM sys_table_stats ORDER BY row_count DESC LIMIT 20;", rows: 20 },
+  ];
+
+  /* ======================================================================
+     MOCK RESULT SETS
+     ====================================================================== */
+  var MOCK_RESULTS = {
+    'default': {
+      columns: ['#', 'Trade ID', 'Counterparty', 'Direction', 'Volume (MMBtu)', 'Price ($/MMBtu)', 'Benchmark', 'Status', 'Trade Date'],
+      rightCols: [4, 5],
+      rows: [
+        ['1', 'T-1001', 'Shell Trading', 'BUY', '3,200,000', '$14.25', 'JKM', 'Confirmed', '2026-05-06'],
+        ['2', 'T-1002', 'JERA Co.', 'SELL', '2,800,000', '$12.80', 'TTF', 'Confirmed', '2026-05-05'],
+        ['3', 'T-1003', 'QatarEnergy', 'BUY', '3,200,000', '$14.10', 'JKM', 'Pending', '2026-05-04'],
+        ['4', 'T-1004', 'TotalEnergies', 'SELL', '2,500,000', '$3.42', 'HH', 'Confirmed', '2026-05-03'],
+        ['5', 'T-1005', 'Cheniere', 'BUY', '5,000,000', '$3.38', 'HH', 'Confirmed', '2026-05-02'],
+        ['6', 'T-1006', 'Woodside', 'BUY', '3,200,000', '$14.45', 'JKM', 'Confirmed', '2026-04-28'],
+        ['7', 'T-1007', 'KOGAS', 'SELL', '2,800,000', '$12.95', 'TTF', 'Confirmed', '2026-04-25'],
+        ['8', 'T-1008', 'BP Gas Marketing', 'BUY', '4,100,000', '$82.40', 'Brent', 'Pending', '2026-04-22'],
+      ],
+      badges: { 3: { BUY: 'green', SELL: 'red' }, 7: { Confirmed: 'green', Pending: 'amber', Draft: 'neutral' } },
+      entityLinks: [1],
+      monoColumns: [0, 4, 5, 8],
+    },
+    'Active trades by counterparty': {
+      columns: ['#', 'Counterparty', 'Trade Count', 'Total Volume', 'Avg Price'],
+      rightCols: [2, 3, 4],
+      rows: [
+        ['1', 'Shell Trading', '12', '38,400,000', '$14.32'],
+        ['2', 'QatarEnergy', '9', '28,800,000', '$14.18'],
+        ['3', 'Cheniere', '7', '35,000,000', '$3.41'],
+        ['4', 'JERA Co.', '6', '16,800,000', '$12.88'],
+        ['5', 'KOGAS', '5', '14,000,000', '$12.91'],
+        ['6', 'TotalEnergies', '4', '10,000,000', '$3.45'],
+        ['7', 'Woodside', '3', '9,600,000', '$14.38'],
+      ],
+      badges: {},
+      entityLinks: [],
+      monoColumns: [0, 2, 3, 4],
+    },
+    'Stale curves (>24h)': {
+      columns: ['#', 'Benchmark', 'Curve Date', 'Last Updated', 'Hours Stale', 'Tenor Count'],
+      rightCols: [4, 5],
+      rows: [
+        ['1', 'NBP', '2026-05-06', '2026-05-05 09:30:00', '32', '24'],
+        ['2', 'JCC', '2026-05-06', '2026-05-05 14:15:00', '27', '12'],
+        ['3', 'DES Japan', '2026-05-05', '2026-05-04 18:00:00', '47', '18'],
+      ],
+      badges: {},
+      entityLinks: [],
+      monoColumns: [0, 2, 3, 4, 5],
+    },
+    'Net position by benchmark': {
+      columns: ['#', 'Benchmark', 'Net Volume', 'Trade Count', 'Total MTM'],
+      rightCols: [2, 3, 4],
+      rows: [
+        ['1', 'JKM', '+4,800,000', '18', '+$2,340,000'],
+        ['2', 'HH', '+2,500,000', '11', '+$180,000'],
+        ['3', 'TTF', '-1,400,000', '8', '-$95,000'],
+        ['4', 'Brent', '+4,100,000', '4', '+$412,000'],
+      ],
+      badges: {},
+      entityLinks: [],
+      monoColumns: [0, 2, 3, 4],
+      pnlColumns: [2, 4],
+    },
+    'Unmatched nominations': {
+      columns: ['#', 'Nomination ID', 'Contract Ref', 'Vessel', 'Volume', 'Nom Date', 'Status', 'Days Pending'],
+      rightCols: [4, 7],
+      rows: [
+        ['1', 'NOM-Q2-003', 'SPOT-TOTAL-Q2', 'TBN', '3,200,000', '2026-04-15', 'Draft', '22'],
+      ],
+      badges: { 6: { Draft: 'neutral', Submitted: 'amber', Confirmed: 'green' } },
+      entityLinks: [1],
+      monoColumns: [0, 4, 5, 7],
+    },
+    'Table row counts': {
+      columns: ['#', 'Schema', 'Table Name', 'Row Count', 'Size (MB)'],
+      rightCols: [3, 4],
+      rows: [
+        ['1', 'dbo', 'trade_history', '2,847,392', '1,024.50'],
+        ['2', 'dbo', 'curve_data', '1,423,871', '512.30'],
+        ['3', 'dbo', 'audit_log', '987,234', '384.75'],
+        ['4', 'dbo', 'trades', '48,291', '24.10'],
+        ['5', 'dbo', 'positions', '12,847', '8.40'],
+        ['6', 'dbo', 'invoices', '8,472', '4.20'],
+        ['7', 'dbo', 'nominations', '3,891', '2.10'],
+        ['8', 'dbo', 'cargoes', '2,147', '1.80'],
+        ['9', 'dbo', 'counterparties', '47', '0.01'],
+        ['10', 'dbo', 'risk_limits', '23', '0.01'],
+      ],
+      badges: {},
+      entityLinks: [],
+      monoColumns: [0, 3, 4],
+    },
+  };
+
+  /* ======================================================================
+     RENDER SAVED QUERIES LIBRARY
+     ====================================================================== */
+  function renderLibrary(filter) {
+    var container = document.getElementById('sql-library-list');
+    var html = '';
+    var count = 0;
+    var filterLower = (filter || '').toLowerCase();
+
+    SAVED_QUERIES.forEach(function(group, gi) {
+      var matchingQueries = group.queries.filter(function(q) {
+        return !filterLower || q.name.toLowerCase().indexOf(filterLower) >= 0;
+      });
+      if (matchingQueries.length === 0) return;
+
+      count += matchingQueries.length;
+      var isOpen = gi === 0 || filterLower;
+      html += '<div class="sql-lib-group" data-group-index="' + gi + '">';
+      html += '<button class="sql-lib-group-btn" onclick="toggleLibGroup(' + gi + ')" aria-expanded="' + isOpen + '">';
+      html += '<span class="lib-arrow ' + (isOpen ? 'open' : '') + '" id="lib-arrow-' + gi + '">';
+      html += '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+      html += '</span>';
+      html += group.group;
+      html += '<span style="margin-left:auto;font-size:0.5625rem;color:var(--text-muted);font-weight:400;">' + matchingQueries.length + '</span>';
+      html += '</button>';
+      html += '<div class="sql-lib-group-items ' + (isOpen ? 'open' : '') + '" id="lib-items-' + gi + '">';
+      matchingQueries.forEach(function(q) {
+        html += '<button class="sql-lib-item" onclick="loadSavedQuery(\'' + escapeJs(q.name) + '\')" title="' + escapeHtml(q.name) + '" aria-label="Load query: ' + escapeHtml(q.name) + '">';
+        html += escapeHtml(q.name);
+        html += '</button>';
+      });
+      html += '</div></div>';
+    });
+
+    container.innerHTML = html;
+    document.getElementById('lib-count').textContent = count;
+  }
+
+  function toggleLibGroup(gi) {
+    var items = document.getElementById('lib-items-' + gi);
+    var arrow = document.getElementById('lib-arrow-' + gi);
+    var isOpen = items.classList.contains('open');
+    items.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  function loadSavedQuery(name) {
+    var sql = '';
+    SAVED_QUERIES.forEach(function(group) {
+      group.queries.forEach(function(q) {
+        if (q.name === name) sql = q.sql;
+      });
+    });
+    if (!sql) return;
+
+    var editor = document.getElementById('sql-editor');
+    editor.value = sql;
+    updateLineNumbers();
+    detectParameters();
+
+    // Highlight active in sidebar
+    var items = document.querySelectorAll('.sql-lib-item');
+    items.forEach(function(el) { el.classList.remove('active'); });
+    items.forEach(function(el) {
+      if (el.textContent.trim() === name) el.classList.add('active');
+    });
+
+    showToast('Loaded: ' + name, 'success');
+  }
+
+  /* ======================================================================
+     RENDER QUERY HISTORY
+     ====================================================================== */
+  function renderHistory() {
+    var container = document.getElementById('sql-history-list');
+    var html = '';
+    QUERY_HISTORY.forEach(function(item, i) {
+      var preview = item.sql.split('\n')[0].substring(0, 80);
+      html += '<button class="sql-history-item" onclick="loadHistoryQuery(' + i + ')" aria-label="Load history query from ' + item.time + '">';
+      html += '<span class="sql-history-time">' + item.time + '</span>';
+      html += '<span class="sql-history-preview">' + escapeHtml(preview) + '</span>';
+      html += '<span class="sql-history-rows">' + item.rows + ' rows</span>';
+      html += '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  function loadHistoryQuery(idx) {
+    var item = QUERY_HISTORY[idx];
+    if (!item) return;
+    var editor = document.getElementById('sql-editor');
+    editor.value = item.sql;
+    updateLineNumbers();
+    detectParameters();
+    showToast('Loaded query from ' + item.time, 'success');
+  }
+
+  function toggleHistory() {
+    var panel = document.getElementById('sql-history-panel');
+    var arrow = document.getElementById('history-arrow');
+    var isCollapsed = panel.classList.contains('collapsed');
+    panel.classList.toggle('collapsed', !isCollapsed);
+    arrow.classList.toggle('open', isCollapsed);
+  }
+
+  /* ======================================================================
+     LINE NUMBERS
+     ====================================================================== */
+  function updateLineNumbers() {
+    var editor = document.getElementById('sql-editor');
+    var lineNums = document.getElementById('sql-line-numbers');
+    var lines = editor.value.split('\n').length;
+    var html = '';
+    for (var i = 1; i <= lines; i++) {
+      html += i + '\n';
+    }
+    lineNums.textContent = html;
+  }
+
+  /* ======================================================================
+     PARAMETER DETECTION
+     ====================================================================== */
+  function detectParameters() {
+    var editor = document.getElementById('sql-editor');
+    var sql = editor.value;
+    var paramBar = document.getElementById('sql-params-bar');
+
+    var params = [];
+    var seen = {};
+    var regex = /(?<![@@])@([a-zA-Z_][a-zA-Z0-9_]*)/g;
+    var match;
+    while ((match = regex.exec(sql)) !== null) {
+      if (!seen[match[1]]) {
+        params.push(match[1]);
+        seen[match[1]] = true;
+      }
+    }
+
+    if (params.length === 0) {
+      paramBar.classList.remove('visible');
+      paramBar.innerHTML = '';
+      return;
+    }
+
+    var html = '<span style="font-size:var(--text-xs);font-weight:600;color:var(--text-primary);">Parameters:</span>';
+    params.forEach(function(p, i) {
+      html += '<div class="sql-param-field">';
+      html += '<label for="param-' + p + '">@' + p + '</label>';
+      html += '<input type="text" id="param-' + p + '" placeholder="value..." tabindex="' + (20 + i) + '" />';
+      html += '</div>';
+    });
+    paramBar.innerHTML = html;
+    paramBar.classList.add('visible');
+  }
+
+  /* ======================================================================
+     RUN QUERY (mock)
+     ====================================================================== */
+  function runQuery() {
+    var editor = document.getElementById('sql-editor');
+    var sql = editor.value.trim();
+    if (!sql) {
+      showToast('No SQL to execute', 'warning');
+      return;
+    }
+
+    var resultKey = 'default';
+    Object.keys(MOCK_RESULTS).forEach(function(key) {
+      if (key !== 'default') {
+        SAVED_QUERIES.forEach(function(group) {
+          group.queries.forEach(function(q) {
+            if (q.name === key && q.sql === sql) {
+              resultKey = key;
+            }
+          });
+        });
+      }
+    });
+
+    var mockData = MOCK_RESULTS[resultKey] || MOCK_RESULTS['default'];
+    renderResults(mockData);
+
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    QUERY_HISTORY.unshift({ time: timeStr, sql: sql, rows: mockData.rows.length });
+    if (QUERY_HISTORY.length > 20) QUERY_HISTORY.pop();
+    renderHistory();
+
+    var execTime = (Math.random() * 0.2 + 0.01).toFixed(3);
+    document.getElementById('result-row-count').textContent = mockData.rows.length + ' rows';
+    document.getElementById('result-exec-time').textContent = execTime + 's';
+    document.getElementById('result-col-count').textContent = mockData.columns.length;
+
+    showToast('Query executed: ' + mockData.rows.length + ' rows returned in ' + execTime + 's', 'success');
+  }
+
+  function renderResults(data) {
+    var theadHtml = '<tr>';
+    data.columns.forEach(function(col, ci) {
+      var cls = (data.rightCols && data.rightCols.indexOf(ci) >= 0) ? ' class="r"' : '';
+      theadHtml += '<th' + cls + '>' + escapeHtml(col) + '</th>';
+    });
+    theadHtml += '</tr>';
+    document.getElementById('results-thead').innerHTML = theadHtml;
+
+    var tbodyHtml = '';
+    data.rows.forEach(function(row) {
+      tbodyHtml += '<tr>';
+      row.forEach(function(cell, ci) {
+        var classes = [];
+        var style = '';
+        if (data.rightCols && data.rightCols.indexOf(ci) >= 0) classes.push('r');
+        if (data.monoColumns && data.monoColumns.indexOf(ci) >= 0) style += 'font-family:var(--font-mono);';
+        if (ci === 0) { style += 'color:var(--text-muted);font-size:0.5625rem;'; }
+
+        if (data.pnlColumns && data.pnlColumns.indexOf(ci) >= 0) {
+          if (cell.indexOf('+') === 0) style += 'color:var(--green);font-weight:600;';
+          else if (cell.indexOf('-') === 0) style += 'color:var(--red);font-weight:600;';
+        }
+
+        var cellContent = escapeHtml(cell);
+
+        if (data.badges && data.badges[ci]) {
+          var badgeColor = data.badges[ci][cell];
+          if (badgeColor) {
+            cellContent = '<span class="hz-badge ' + badgeColor + '">' + escapeHtml(cell) + '</span>';
+          }
+        }
+
+        if (data.entityLinks && data.entityLinks.indexOf(ci) >= 0) {
+          cellContent = '<span class="hz-entity-link">' + escapeHtml(cell) + '</span>';
+        }
+
+        tbodyHtml += '<td' + (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (style ? ' style="' + style + '"' : '') + '>' + cellContent + '</td>';
+      });
+      tbodyHtml += '</tr>';
+    });
+    document.getElementById('results-tbody').innerHTML = tbodyHtml;
+  }
+
+  /* ======================================================================
+     TOOLBAR ACTIONS
+     ====================================================================== */
+  function formatSQL() {
+    var editor = document.getElementById('sql-editor');
+    var sql = editor.value;
+    var keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'ORDER BY', 'GROUP BY', 'HAVING',
+                    'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN', 'CROSS APPLY',
+                    'ON', 'AS', 'IN', 'NOT', 'NULL', 'IS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END',
+                    'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP', 'UNION', 'ALL',
+                    'LIMIT', 'OFFSET', 'PARTITION BY', 'OVER', 'EXISTS', 'BETWEEN', 'LIKE',
+                    'ASC', 'DESC', 'DISTINCT', 'TOP', 'INTO', 'VALUES', 'SET'];
+
+    keywords.forEach(function(kw) {
+      var re = new RegExp('\\b' + kw.replace(/ /g, '\\s+') + '\\b', 'gi');
+      sql = sql.replace(re, kw);
+    });
+
+    editor.value = sql;
+    updateLineNumbers();
+    showToast('SQL formatted', 'success');
+  }
+
+  function clearEditor() {
+    var editor = document.getElementById('sql-editor');
+    editor.value = '';
+    updateLineNumbers();
+    detectParameters();
+    document.getElementById('results-thead').innerHTML = '<tr><th colspan="9" style="text-align:center;color:var(--text-muted);font-style:italic;">No results</th></tr>';
+    document.getElementById('results-tbody').innerHTML = '';
+    document.getElementById('result-row-count').textContent = '0 rows';
+    document.getElementById('result-exec-time').textContent = '\u2014';
+    document.getElementById('result-col-count').textContent = '0';
+    document.querySelectorAll('.sql-lib-item').forEach(function(el) { el.classList.remove('active'); });
+    editor.focus();
+    showToast('Editor cleared', 'success');
+  }
+
+  function copySQL() {
+    var editor = document.getElementById('sql-editor');
+    var sql = editor.value.trim();
+    if (!sql) {
+      showToast('Nothing to copy', 'warning');
+      return;
+    }
+    navigator.clipboard.writeText(sql).then(function() {
+      showToast('SQL copied to clipboard', 'success');
+    }).catch(function() {
+      editor.select();
+      document.execCommand('copy');
+      showToast('SQL copied to clipboard', 'success');
+    });
+  }
+
+  function exportResults() {
+    var table = document.getElementById('sql-results-table');
+    if (!table) return;
+    var rows = table.querySelectorAll('tr');
+    if (rows.length <= 1) {
+      showToast('No results to export', 'warning');
+      return;
+    }
+
+    var csv = '';
+    rows.forEach(function(row) {
+      var cells = row.querySelectorAll('th, td');
+      var rowData = [];
+      cells.forEach(function(cell) {
+        var text = cell.textContent.trim().replace(/"/g, '""');
+        rowData.push('"' + text + '"');
+      });
+      csv += rowData.join(',') + '\n';
+    });
+
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'query_results_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Results exported to CSV', 'success');
+  }
+
+  /* ======================================================================
+     RESIZE HANDLE
+     ====================================================================== */
+  (function() {
+    var handle = document.getElementById('sql-resize-handle');
+    var editorWrap = document.getElementById('sql-editor-wrap');
+    var startY, startHeight;
+
+    handle.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      startY = e.clientY;
+      startHeight = editorWrap.offsetHeight;
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    function onMouseMove(e) {
+      var delta = e.clientY - startY;
+      var newHeight = Math.max(80, Math.min(startHeight + delta, window.innerHeight * 0.7));
+      editorWrap.style.minHeight = newHeight + 'px';
+      editorWrap.style.maxHeight = newHeight + 'px';
+    }
+
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  })();
+
+  /* ======================================================================
+     KEYBOARD SHORTCUTS
+     ====================================================================== */
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runQuery();
+    }
+    if (e.key === 'Escape') {
+      var editor = document.getElementById('sql-editor');
+      if (document.activeElement === editor) {
+        editor.blur();
+      }
+    }
+  });
+
+  document.getElementById('sql-editor').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      var start = this.selectionStart;
+      var end = this.selectionEnd;
+      this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 2;
+      updateLineNumbers();
+    }
+  });
+
+  /* ======================================================================
+     EDITOR INPUT EVENTS
+     ====================================================================== */
+  var editorEl = document.getElementById('sql-editor');
+  editorEl.addEventListener('input', function() {
+    updateLineNumbers();
+    detectParameters();
+  });
+  editorEl.addEventListener('scroll', function() {
+    var lineNums = document.getElementById('sql-line-numbers');
+    lineNums.scrollTop = editorEl.scrollTop;
+  });
+
+  /* ======================================================================
+     LIBRARY SEARCH
+     ====================================================================== */
+  document.getElementById('lib-search').addEventListener('input', function() {
+    renderLibrary(this.value);
+  });
+
+  /* ======================================================================
+     HELPERS
+     ====================================================================== */
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function escapeJs(str) {
+    return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+  }
+
+  /* ======================================================================
+     INIT
+     ====================================================================== */
+  setTimeout(function() {
+    renderLibrary('');
+    renderHistory();
+    updateLineNumbers();
+    detectParameters();
+  }, 100);
+
+</script>
+</body>
+</html>

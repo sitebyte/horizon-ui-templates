@@ -1,0 +1,94 @@
+{
+  "environment": {
+    "id": "prod",
+    "name": "Production",
+    "label": "PROD",
+    "region": "SGP",
+    "color": "#22c55e",
+    "url": "https://eos-prod.glng.internal"
+  },
+  "versions": {
+    "eos": "4.2.1",
+    "horizon": "1.0.30",
+    "database": "4.2.1.3847",
+    "rabbitmq": "3.12.14",
+    "kubernetes": "1.28.4"
+  },
+  "nodes": [
+    { "id": "dq-prices", "label": "DQ Prices", "type": "external", "x": 3, "y": 8, "status": "healthy", "latency": 12, "msgPerHour": 240, "endpoint": "https://dq.prices.provider.com/api" },
+    { "id": "ice", "label": "ICE", "type": "external", "x": 3, "y": 22, "status": "healthy", "latency": 8, "msgPerHour": 1420, "endpoint": "wss://ice.exchange.com/feed" },
+    { "id": "ktp", "label": "KTP", "type": "pipeline", "x": 12, "y": 22, "status": "healthy", "latency": 2, "msgPerHour": 1420 },
+    { "id": "shovel", "label": "Shovel", "type": "pipeline", "x": 19, "y": 22, "status": "healthy", "latency": 1, "msgPerHour": 1420 },
+    { "id": "hq-pnl", "label": "HQ PnL Reporting", "type": "external", "x": 3, "y": 42, "status": "healthy", "latency": 45, "msgPerHour": 12, "endpoint": "https://hq-pnl.glng.internal/api" },
+    { "id": "credit-cube", "label": "Credit Cube", "type": "external", "x": 3, "y": 55, "status": "healthy", "latency": 22, "msgPerHour": 8, "endpoint": "https://creditcube.glng.internal/api" },
+    { "id": "endur", "label": "Endur", "type": "external", "x": 3, "y": 68, "status": "healthy", "latency": 35, "msgPerHour": 4, "endpoint": "https://endur.glng.internal/api" },
+    { "id": "var-engine", "label": "VaR Engine", "type": "external", "x": 3, "y": 82, "status": "healthy", "latency": 120, "msgPerHour": 2, "endpoint": "https://var.glng.internal/api" },
+
+    { "id": "glint-ice", "label": "Glint ICE Trade Capture", "type": "glint", "x": 28, "y": 15, "status": "healthy", "latency": 4, "msgPerHour": 1420, "image": "eos/glint-ice:4.2.1", "pod": "glint-ice-7d4f8-xk2j4", "cpu": "12%", "memory": "256MB", "restarts": 0 },
+    { "id": "glint-price-load", "label": "Glint Price Loading", "type": "glint", "x": 28, "y": 25, "status": "degraded", "latency": 342, "msgPerHour": 240, "image": "eos/glint-price:4.2.1", "pod": "glint-price-8b3e2-mn5p1", "cpu": "8%", "memory": "128MB", "restarts": 0, "issue": "Slow ingress — DQ feed latency" },
+    { "id": "glint-price-eod", "label": "Glint Price EoD Export", "type": "glint", "x": 28, "y": 33, "status": "healthy", "latency": 8, "msgPerHour": 48, "image": "eos/glint-eod:4.2.1", "pod": "glint-eod-5c7a1-qr8w3", "cpu": "3%", "memory": "96MB", "restarts": 0 },
+    { "id": "glint-hq-pnl", "label": "Glint HQ PnL", "type": "glint", "x": 20, "y": 42, "status": "healthy", "latency": 6, "msgPerHour": 12, "image": "eos/glint-hqpnl:4.2.1", "pod": "glint-hqpnl-2a8c5-bv6n9", "cpu": "2%", "memory": "64MB", "restarts": 0 },
+    { "id": "glint-credit", "label": "Glint Credit Cube", "type": "glint", "x": 20, "y": 55, "status": "healthy", "latency": 5, "msgPerHour": 8, "image": "eos/glint-credit:4.2.1", "pod": "glint-credit-4e7b3-hs2m8", "cpu": "1%", "memory": "64MB", "restarts": 0 },
+    { "id": "glint-endur", "label": "Glint Endur Spanish Gas", "type": "glint", "x": 20, "y": 68, "status": "healthy", "latency": 15, "msgPerHour": 4, "image": "eos/glint-endur:4.2.1", "pod": "glint-endur-6d9a4-jw5x1", "cpu": "1%", "memory": "64MB", "restarts": 0 },
+    { "id": "glint-var", "label": "Glint VaR Extract", "type": "glint", "x": 20, "y": 82, "status": "healthy", "latency": 10, "msgPerHour": 2, "image": "eos/glint-var:4.2.1", "pod": "glint-var-1b5f8-cp4q6", "cpu": "5%", "memory": "128MB", "restarts": 0 },
+
+    { "id": "rabbitmq", "label": "RabbitMQ", "type": "broker", "x": 45, "y": 25, "status": "healthy", "latency": 2, "msgPerHour": 4230, "endpoint": "amqp://eos-rmq-prod:5672", "queues": 8, "consumers": 14, "unacked": 3 },
+    { "id": "eos", "label": "EOS", "type": "core", "x": 45, "y": 52, "status": "healthy", "latency": 0, "msgPerHour": 4230, "endpoint": "https://eos-prod.glng.internal", "trades": 1247, "cargoes": 7, "users": 42 },
+    { "id": "eos-scheduler", "label": "EOS Scheduler EOD", "type": "core-secondary", "x": 45, "y": 78, "status": "healthy", "latency": 0, "msgPerHour": 1, "lastRun": "2026-05-04T17:30:54Z", "nextRun": "2026-05-05T17:00:00Z" },
+
+    { "id": "glint-pioneer-trade", "label": "Glint Pioneer Trade Connector", "type": "glint", "x": 65, "y": 15, "status": "healthy", "latency": 12, "msgPerHour": 48, "image": "eos/glint-pioneer-trade:4.2.1", "pod": "glint-pio-t-3g2h7-wn8r5", "cpu": "4%", "memory": "128MB", "restarts": 0 },
+    { "id": "glint-pioneer-settle", "label": "Glint Pioneer Settlements", "type": "glint", "x": 65, "y": 28, "status": "healthy", "latency": 15, "msgPerHour": 12, "image": "eos/glint-pioneer-settle:4.2.1", "pod": "glint-pio-s-8k4m1-tz7v2", "cpu": "3%", "memory": "96MB", "restarts": 0 },
+    { "id": "glint-ma", "label": "Glint MA", "type": "glint", "x": 45, "y": 90, "status": "healthy", "latency": 8, "msgPerHour": 6, "image": "eos/glint-ma:4.2.1", "pod": "glint-ma-5p9s3-fx1y8", "cpu": "2%", "memory": "64MB", "restarts": 0 },
+
+    { "id": "pioneer", "label": "Pioneer", "type": "destination", "x": 85, "y": 15, "status": "healthy", "latency": 25, "endpoint": "https://pioneer.glng.internal/api" },
+    { "id": "a2kvan", "label": "a2kvan", "type": "destination", "x": 85, "y": 42, "status": "manual", "latency": null, "endpoint": "https://a2kvan.glng.internal" },
+    { "id": "ax-cloud", "label": "AX Cloud Shared Drive", "type": "destination", "x": 85, "y": 58, "status": "healthy", "latency": 180, "endpoint": "https://axcloud.sharepoint.com/sites/glng" },
+    { "id": "sap", "label": "SAP Document", "type": "destination", "x": 85, "y": 82, "status": "healthy", "latency": null, "endpoint": "Manual download" }
+  ],
+  "flows": [
+    { "from": "dq-prices", "to": "eos", "label": "Price Ingress", "bidirectional": true, "volume": 240 },
+    { "from": "ice", "to": "ktp", "label": "", "volume": 1420 },
+    { "from": "ktp", "to": "shovel", "label": "Trade Ingress", "volume": 1420 },
+    { "from": "shovel", "to": "rabbitmq", "label": "", "volume": 1420 },
+    { "from": "rabbitmq", "to": "glint-ice", "label": "", "volume": 1420 },
+    { "from": "glint-ice", "to": "eos", "label": "", "volume": 1420 },
+    { "from": "eos", "to": "rabbitmq", "label": "", "volume": 4230 },
+    { "from": "rabbitmq", "to": "glint-pioneer-trade", "label": "", "volume": 48 },
+    { "from": "glint-pioneer-trade", "to": "pioneer", "label": "Trade/Recap data", "volume": 48 },
+    { "from": "rabbitmq", "to": "glint-pioneer-settle", "label": "", "volume": 12 },
+    { "from": "glint-pioneer-settle", "to": "pioneer", "label": "Settlements data", "volume": 12 },
+    { "from": "rabbitmq", "to": "glint-price-load", "label": "", "volume": 240 },
+    { "from": "glint-price-load", "to": "eos", "label": "", "volume": 240 },
+    { "from": "eos", "to": "glint-price-eod", "label": "", "volume": 48 },
+    { "from": "rabbitmq", "to": "glint-hq-pnl", "label": "", "volume": 12 },
+    { "from": "glint-hq-pnl", "to": "hq-pnl", "label": "PnL Reports", "volume": 12 },
+    { "from": "rabbitmq", "to": "glint-credit", "label": "", "volume": 8 },
+    { "from": "glint-credit", "to": "credit-cube", "label": "Credit Data", "volume": 8 },
+    { "from": "endur", "to": "glint-endur", "label": "", "volume": 4 },
+    { "from": "glint-endur", "to": "rabbitmq", "label": "", "volume": 4 },
+    { "from": "rabbitmq", "to": "glint-var", "label": "", "volume": 2 },
+    { "from": "glint-var", "to": "var-engine", "label": "VaR Extract", "volume": 2 },
+    { "from": "eos", "to": "ax-cloud", "label": "Invoices as PDF", "volume": 6 },
+    { "from": "a2kvan", "to": "eos", "label": "Port Distance (manual)", "volume": 0 },
+    { "from": "eos-scheduler", "to": "eos", "label": "EOD Batch", "volume": 1 },
+    { "from": "eos", "to": "glint-ma", "label": "Settlements flow", "volume": 6 },
+    { "from": "glint-ma", "to": "sap", "label": "SAP Document", "volume": 6 }
+  ],
+  "annotations": [
+    { "x": 15, "y": 65, "text": "Spanish gas trade data flow" },
+    { "x": 78, "y": 40, "text": "Port Distance data\npull (manual)" },
+    { "x": 78, "y": 55, "text": "Invoices saved as PDF" },
+    { "x": 70, "y": 88, "text": "SAP Document via download" },
+    { "x": 38, "y": 18, "text": "All integration via\nsingle RabbitMQ instance" }
+  ],
+  "queues": [
+    { "name": "eos.trade.captured", "messages": 0, "consumers": 2, "rate": 12.4, "unacked": 0, "status": "healthy" },
+    { "name": "eos.trade.validated", "messages": 0, "consumers": 2, "rate": 11.8, "unacked": 0, "status": "healthy" },
+    { "name": "eos.cargo.matched", "messages": 0, "consumers": 1, "rate": 2.1, "unacked": 0, "status": "healthy" },
+    { "name": "eos.invoice.generated", "messages": 3, "consumers": 1, "rate": 0.8, "unacked": 3, "status": "backing-up" },
+    { "name": "eos.settlement.complete", "messages": 0, "consumers": 1, "rate": 0.3, "unacked": 0, "status": "healthy" },
+    { "name": "eos.curve.updated", "messages": 0, "consumers": 3, "rate": 45.2, "unacked": 0, "status": "healthy" },
+    { "name": "eos.notification.send", "messages": 0, "consumers": 2, "rate": 8.7, "unacked": 0, "status": "healthy" },
+    { "name": "eos.audit.event", "messages": 0, "consumers": 2, "rate": 8.7, "unacked": 0, "status": "healthy" }
+  ]
+}
