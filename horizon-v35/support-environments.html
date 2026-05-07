@@ -158,9 +158,8 @@
     }
 
     /* ============================================================
-       Section: Topology Nodes — GENERIC (no per-type CSS)
-       All visual properties come from nodeTypes JSON via inline styles.
-       Only structural/shared styles here.
+       Section: Topology Nodes
+       Shape/size/border from nodeTypes JSON. Glow/hover from CSS.
        ============================================================ */
     .topo-node {
       position: absolute;
@@ -198,9 +197,53 @@
     .topo-node.dimmed { opacity: 0.15; transition: opacity 0.3s; }
     .topo-node.highlighted { z-index: 10; }
 
+    /* === Per-type glow effects (CSS, not inline — needs :hover) === */
+    .topo-node[data-type="external"] {
+      box-shadow: 0 0 0.5rem rgba(79,70,229,0.08);
+    }
+    .topo-node[data-type="external"]:hover {
+      box-shadow: 0 0 1rem rgba(79,70,229,0.15);
+    }
+    .topo-node[data-type="glint"] {
+      box-shadow: 0 0 0.5rem rgba(34,197,94,0.12);
+    }
+    .topo-node[data-type="glint"]:hover {
+      box-shadow: 0 0 1rem rgba(34,197,94,0.25);
+    }
+    .topo-node[data-type="broker"] {
+      box-shadow: 0 0 1rem rgba(249,115,22,0.2);
+    }
+    .topo-node[data-type="broker"]:hover {
+      box-shadow: 0 0 1.5rem rgba(249,115,22,0.35);
+    }
+    .topo-node[data-type="core"] {
+      box-shadow: 0 0 1.5rem rgba(79,70,229,0.2), inset 0 0 1rem rgba(79,70,229,0.05);
+    }
+    .topo-node[data-type="core"]:hover {
+      box-shadow: 0 0 2rem rgba(79,70,229,0.35), inset 0 0 1rem rgba(79,70,229,0.08);
+    }
+    .topo-node[data-type="core-secondary"] {
+      box-shadow: 0 0 0.75rem rgba(79,70,229,0.1);
+    }
+    .topo-node[data-type="destination"] {
+      box-shadow: 0 0 0.5rem rgba(124,58,237,0.1);
+    }
+    .topo-node[data-type="destination"]:hover {
+      box-shadow: 0 0 1rem rgba(124,58,237,0.2);
+    }
+    /* Combined type+status for core and broker */
+    .topo-node[data-type="core"].status-healthy {
+      border-color: var(--accent);
+      box-shadow: 0 0 1.5rem rgba(79,70,229,0.2), inset 0 0 1rem rgba(79,70,229,0.05);
+    }
+    .topo-node[data-type="broker"].status-healthy {
+      border-color: #f97316;
+      box-shadow: 0 0 1rem rgba(249,115,22,0.2);
+    }
+
     /* Health glow states — the sci-fi treatment */
     .topo-node.status-healthy {
-      /* glow applied by getNodeStyle via glowColor */
+      /* per-type glow above */
     }
     .topo-node.status-degraded {
       border-color: var(--amber) !important;
@@ -1012,14 +1055,8 @@
 
     if (typeConfig.borderStyle) styles.borderStyle = typeConfig.borderStyle;
     if (typeConfig.borderColor) { styles.borderColor = typeConfig.borderColor; styles.borderWidth = typeConfig.size === 'xl' ? '2px' : typeConfig.size === 'lg' ? '2px' : '1px'; }
-    // Sci-fi glow: outer halo + inner glow from config
-    if (typeConfig.glowColor) {
-      var gc = typeConfig.glowColor;
-      // Boost the alpha for the outer glow (1.5x), keep inner subtle
-      var outerGlow = gc.replace(/[\d.]+\)$/, function(m) { return Math.min(parseFloat(m) * 1.5, 0.5).toFixed(2) + ')'; });
-      var innerGlow = gc.replace(/[\d.]+\)$/, function(m) { return (parseFloat(m) * 0.4).toFixed(2) + ')'; });
-      styles.boxShadow = '0 0 1.2rem ' + outerGlow + ', inset 0 0 0.75rem ' + innerGlow;
-    }
+    // Glow handled by CSS [data-type] selectors — NOT inline
+    // (inline box-shadow overrides CSS :hover states)
 
     // size
     if (typeConfig.size === 'xl') { styles.minWidth = '10rem'; styles.minHeight = '6rem'; }
