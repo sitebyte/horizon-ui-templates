@@ -1,0 +1,161 @@
+{
+  "_schema": "EOS Environment Topology v1.0",
+  "_description": "This schema defines the complete data contract for the environments page. The UI renders entirely from this data. No visual elements are hardcoded.",
+
+  "manifest": {
+    "_description": "Lists available environments. The UI renders selector buttons from this.",
+    "shape": {
+      "environments": [
+        { "id": "string", "label": "string", "status": "active|disabled", "configFile": "string" }
+      ]
+    }
+  },
+
+  "environmentConfig": {
+    "_description": "Per-environment config loaded when an environment is selected.",
+    "shape": {
+      "environment": {
+        "id": "string",
+        "name": "string",
+        "label": "string (PROD/UAT/DEV/TST2)",
+        "region": "string (SGP/LON/HOU)",
+        "color": "hex string",
+        "url": "string (base URL)"
+      },
+      "versions": {
+        "eos": "semver",
+        "horizon": "semver",
+        "database": "semver",
+        "rabbitmq": "semver",
+        "kubernetes": "semver"
+      },
+      "asOf": "ISO 8601 timestamp",
+      "nodeTypes": "object — maps type id to visual config (shape, color, size)",
+      "systems": "array of SystemNode",
+      "integrationComponents": "array of IntegrationNode",
+      "dataFlows": "array of DataFlow",
+      "rabbitMq": "object — exchanges, queues",
+      "messageTypes": "array of MessageType",
+      "healthChecks": "array of HealthCheck"
+    }
+  },
+
+  "nodeTypes": {
+    "_description": "Visual configuration per node type. The renderer reads this instead of hardcoded CSS.",
+    "shape": {
+      "typeId": {
+        "label": "string (human-readable type name)",
+        "shape": "pill|circle|rect|hexagon|rounded-xl|rounded",
+        "size": "sm|md|lg|xl",
+        "borderStyle": "solid|dashed",
+        "borderColor": "CSS color or variable",
+        "glowColor": "rgba string",
+        "icon": "string (optional icon name)"
+      }
+    }
+  },
+
+  "systemNode": {
+    "_description": "A system in the topology — EOS, RabbitMQ, Pioneer, etc.",
+    "shape": {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "type": "string (references nodeTypes key)",
+      "position": { "x": "number 0-100 (percentage)", "y": "number 0-100 (percentage)" },
+      "status": "healthy|degraded|offline|manual|not-configured",
+      "health": {
+        "checkUrl": "string|null",
+        "lastCheck": "ISO timestamp|null",
+        "latencyMs": "number|null",
+        "responseCode": "number|null",
+        "message": "string|null (human-readable status)",
+        "upSince": "ISO timestamp|null",
+        "uptimePercent": "number|null"
+      },
+      "metrics": {
+        "messagesPerHour": "number",
+        "errorsLast24h": "number",
+        "avgLatencyMs": "number|null"
+      },
+      "metadata": {
+        "_description": "Type-specific fields — only include what applies",
+        "endpoint": "string|null",
+        "technology": "string|null",
+        "owner": "string|null",
+        "criticality": "critical|high|medium|low",
+        "container": {
+          "image": "string",
+          "pod": "string",
+          "namespace": "string",
+          "cpuPercent": "number",
+          "memoryMb": "number",
+          "restarts": "number",
+          "age": "string"
+        },
+        "broker": {
+          "queues": "number",
+          "consumers": "number",
+          "unackedMessages": "number",
+          "publishRate": "number",
+          "deliverRate": "number"
+        },
+        "core": {
+          "trades": "number",
+          "cargoes": "number",
+          "activeUsers": "number",
+          "dbConnections": "number"
+        }
+      },
+      "issue": "string|null (when status !== healthy)"
+    }
+  },
+
+  "dataFlow": {
+    "_description": "A named flow between systems — the lines on the diagram with labels.",
+    "shape": {
+      "id": "string",
+      "name": "string (THE label shown on the diagram — 'Price Ingress', 'Trade/Recap data')",
+      "description": "string",
+      "path": ["array of node ids defining the full route"],
+      "bidirectional": "boolean",
+      "messageTypes": ["array of message type ids"],
+      "volume": "number (messages per hour — drives line thickness)",
+      "schedule": "string (Continuous|Daily|Batch|Manual|Ad-hoc)",
+      "criticality": "critical|high|medium|low",
+      "annotation": "string|null (contextual note shown near the flow — 'Spanish gas trade data flow')"
+    }
+  },
+
+  "healthCheck": {
+    "_description": "Element-level health check definitions. Each maps to a probe.",
+    "shape": {
+      "id": "string",
+      "name": "string",
+      "targetNode": "string (node id)",
+      "type": "http|tcp|rabbitmq-queue|database|custom",
+      "config": {
+        "url": "string|null",
+        "method": "GET|POST|null",
+        "expectedStatus": "number|null (200, 204, etc.)",
+        "timeoutMs": "number",
+        "intervalSeconds": "number",
+        "headers": "object|null"
+      },
+      "lastResult": {
+        "status": "pass|warn|fail|unknown",
+        "latencyMs": "number|null",
+        "responseCode": "number|null",
+        "message": "string|null",
+        "checkedAt": "ISO timestamp",
+        "consecutiveFailures": "number"
+      },
+      "thresholds": {
+        "latencyWarnMs": "number (amber above this)",
+        "latencyFailMs": "number (red above this)",
+        "consecutiveFailuresWarn": "number",
+        "consecutiveFailuresFail": "number"
+      }
+    }
+  }
+}
