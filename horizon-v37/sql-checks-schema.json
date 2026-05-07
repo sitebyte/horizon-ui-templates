@@ -1,0 +1,527 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "SQL Check definitions for EOS.Horizon support tooling. This file defines the contract between the UI and the API. In production, check definitions are stored in database tables and served via GET /api/support/sql-checks. This JSON represents the shape of that API response.",
+  "version": "1.0.0",
+  "globalParameters": [
+    {
+      "id": "cob",
+      "label": "COB Date",
+      "type": "date",
+      "default": "today",
+      "required": true,
+      "description": "Close of business date. All checks run against this date's data snapshot."
+    },
+    {
+      "id": "environment",
+      "label": "Environment",
+      "type": "select",
+      "options": [
+        { "value": "PROD", "label": "PROD" },
+        { "value": "UAT", "label": "UAT" },
+        { "value": "TST1", "label": "TST1" },
+        { "value": "TST2", "label": "TST2" }
+      ],
+      "default": "PROD",
+      "required": true,
+      "description": "Target database environment for query execution."
+    },
+    {
+      "id": "book",
+      "label": "Book",
+      "type": "select",
+      "options": [
+        { "value": "ALL", "label": "All Books" },
+        { "value": "GLNG", "label": "GLNG" },
+        { "value": "GLNG-SPOT", "label": "GLNG Spot" },
+        { "value": "GLNG-TERM", "label": "GLNG Term" }
+      ],
+      "default": "ALL",
+      "required": false,
+      "description": "Trading book filter. ALL runs across all books."
+    },
+    {
+      "id": "benchmark",
+      "label": "Benchmark",
+      "type": "select",
+      "options": [
+        { "value": "ALL", "label": "All" },
+        { "value": "JKM", "label": "JKM" },
+        { "value": "TTF", "label": "TTF" },
+        { "value": "HH", "label": "HH" },
+        { "value": "Brent", "label": "Brent" },
+        { "value": "NBP", "label": "NBP" },
+        { "value": "JCC", "label": "JCC" }
+      ],
+      "default": "ALL",
+      "required": false,
+      "description": "Benchmark/index filter. ALL runs across all benchmarks."
+    }
+  ],
+  "presets": [
+    {
+      "id": "eod-prod",
+      "label": "EOD PROD",
+      "description": "End-of-day production run with all books and benchmarks",
+      "params": { "cob": "today", "environment": "PROD", "book": "ALL", "benchmark": "ALL" }
+    },
+    {
+      "id": "eod-1-prod",
+      "label": "EOD-1 PROD",
+      "description": "Previous business day production run",
+      "params": { "cob": "today-1", "environment": "PROD", "book": "ALL", "benchmark": "ALL" }
+    },
+    {
+      "id": "uat-all",
+      "label": "UAT All",
+      "description": "Full UAT environment check",
+      "params": { "cob": "today", "environment": "UAT", "book": "ALL", "benchmark": "ALL" }
+    },
+    {
+      "id": "jkm-only",
+      "label": "JKM Only",
+      "description": "JKM benchmark checks only",
+      "params": { "cob": "today", "environment": "PROD", "book": "ALL", "benchmark": "JKM" }
+    },
+    {
+      "id": "glng-book",
+      "label": "GLNG Book",
+      "description": "GLNG trading book checks",
+      "params": { "cob": "today", "environment": "PROD", "book": "GLNG", "benchmark": "ALL" }
+    },
+    {
+      "id": "ttf-curves",
+      "label": "TTF Curves",
+      "description": "TTF benchmark curve checks",
+      "params": { "cob": "today", "environment": "PROD", "book": "ALL", "benchmark": "TTF" }
+    }
+  ],
+  "checks": [
+    {
+      "id": 1,
+      "name": "Bootstrap Curve Validation",
+      "category": "Curves",
+      "description": "Checks forward curves for smoothness and arbitrage-free pricing. Compares adjacent tenor prices and flags any delta exceeding the configured threshold.",
+      "severity": "error",
+      "sqlTemplate": "-- Bootstrap Curve Validation\n-- Checks forward curves for smoothness and arbitrage-free pricing\nSELECT\n    c.benchmark, c.tenor, c.settle_date,\n    c.price AS current_price,\n    LAG(c.price) OVER (PARTITION BY c.benchmark ORDER BY c.tenor) AS prev_price,\n    ABS(c.price - LAG(c.price) OVER (PARTITION BY c.benchmark ORDER BY c.tenor)) AS delta,\n    CASE WHEN ABS(c.price - LAG(c.price) OVER (PARTITION BY c.benchmark ORDER BY c.tenor)) > c.price * (@max_delta_pct / 100.0)\n         THEN 'FAIL' ELSE 'PASS' END AS check_result\nFROM curve_data c\nWHERE c.curve_date = @cob\n  AND (@benchmark = 'ALL' OR c.benchmark = @benchmark)\nORDER BY c.benchmark, c.tenor;",
+      "parameters": [
+        {
+          "id": "max_delta_pct",
+          "label": "Max Delta %",
+          "type": "number",
+          "default": 5,
+          "min": 0.1,
+          "max": 50,
+          "step": 0.5,
+          "description": "Maximum allowed price change between adjacent tenors as a percentage"
+        }
+      ],
+      "resultColumns": [
+        { "id": "benchmark", "label": "Benchmark", "type": "text" },
+        { "id": "tenor", "label": "Tenor", "type": "text" },
+        { "id": "settle_date", "label": "Settle Date", "type": "date" },
+        { "id": "current_price", "label": "Price", "type": "number", "align": "right" },
+        { "id": "prev_price", "label": "Prev Price", "type": "number", "align": "right" },
+        { "id": "delta", "label": "Delta", "type": "number", "align": "right" },
+        { "id": "check_result", "label": "Result", "type": "status", "align": "center" }
+      ],
+      "passCondition": "rowCount == 0 || rows.every(r => r.check_result === 'PASS')",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 17 * * 1-5",
+        "description": "Weekdays at 17:00 after EOD curve snapshot"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Forward Curve Monotonicity",
+      "category": "Curves",
+      "description": "Detects backward inversions in the forward curve where a later tenor has a lower price than the preceding tenor, indicating potential data or model issues.",
+      "severity": "warning",
+      "sqlTemplate": "-- Forward Curve Monotonicity\n-- Detects backward inversions in the forward curve\nSELECT benchmark, tenor, price,\n    LAG(price) OVER (PARTITION BY benchmark ORDER BY tenor) AS prev,\n    CASE WHEN price < LAG(price) OVER (PARTITION BY benchmark ORDER BY tenor) THEN 'INVERSION'\n         ELSE 'OK' END AS status\nFROM curve_data\nWHERE curve_date = @cob\n  AND (@benchmark = 'ALL' OR benchmark = @benchmark)\n  AND tenor_months BETWEEN @tenor_start AND @tenor_end\nORDER BY benchmark, tenor;",
+      "parameters": [
+        {
+          "id": "tenor_start",
+          "label": "Tenor Start (months)",
+          "type": "number",
+          "default": 1,
+          "min": 1,
+          "max": 120,
+          "step": 1,
+          "description": "Start of tenor range to check (months from spot)"
+        },
+        {
+          "id": "tenor_end",
+          "label": "Tenor End (months)",
+          "type": "number",
+          "default": 60,
+          "min": 1,
+          "max": 120,
+          "step": 1,
+          "description": "End of tenor range to check (months from spot)"
+        }
+      ],
+      "resultColumns": [
+        { "id": "benchmark", "label": "Benchmark", "type": "text" },
+        { "id": "tenor", "label": "Tenor", "type": "text" },
+        { "id": "price", "label": "Price", "type": "number", "align": "right" },
+        { "id": "prev", "label": "Prev", "type": "number", "align": "right" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" }
+      ],
+      "passCondition": "rows.every(r => r.status === 'OK')",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 17 * * 1-5",
+        "description": "Weekdays at 17:00 after EOD curve snapshot"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Stale Price Detection",
+      "category": "Curves",
+      "description": "Flags prices that have not been updated within a configurable staleness threshold from the COB timestamp. Stale prices may indicate feed failures or missing market data.",
+      "severity": "warning",
+      "sqlTemplate": "-- Stale Price Detection\n-- Flags prices not updated within staleness threshold\nSELECT benchmark, tenor, price, last_updated,\n    DATEDIFF(hour, last_updated, @cob + ' 17:00') AS hours_stale\nFROM curve_data\nWHERE curve_date = @cob\n  AND DATEDIFF(hour, last_updated, @cob + ' 17:00') > @staleness_threshold_hours\n  AND (@benchmark = 'ALL' OR benchmark = @benchmark)\nORDER BY hours_stale DESC;",
+      "parameters": [
+        {
+          "id": "staleness_threshold_hours",
+          "label": "Staleness Threshold (hours)",
+          "type": "number",
+          "default": 24,
+          "min": 1,
+          "max": 168,
+          "step": 1,
+          "description": "Number of hours after which a price is considered stale"
+        }
+      ],
+      "resultColumns": [
+        { "id": "benchmark", "label": "Benchmark", "type": "text" },
+        { "id": "tenor", "label": "Tenor", "type": "text" },
+        { "id": "price", "label": "Price", "type": "number", "align": "right" },
+        { "id": "last_updated", "label": "Last Updated", "type": "datetime" },
+        { "id": "hours_stale", "label": "Hours Stale", "type": "number", "align": "right" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": "rowCount > 0 && rowCount <= 5",
+      "schedule": {
+        "cron": "30 17 * * 1-5",
+        "description": "Weekdays at 17:30, after curve snapshot completes"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Trade Duplicate Check",
+      "category": "Trades",
+      "description": "Identifies trades with identical key fields (counterparty, direction, volume, price, trade date) within a configurable lookback window. Potential duplicates from double-entry or feed replay.",
+      "severity": "error",
+      "sqlTemplate": "-- Trade Duplicate Check\n-- Identifies trades with identical key fields\nSELECT t1.trade_id, t1.counterparty, t1.direction,\n    t1.volume, t1.price, t1.trade_date,\n    COUNT(*) OVER (PARTITION BY t1.counterparty, t1.direction,\n        t1.volume, t1.price, t1.trade_date) AS dup_count\nFROM trades t1\nWHERE t1.trade_date BETWEEN DATEADD(day, -@lookback_days, @cob) AND @cob\n  AND (@book = 'ALL' OR t1.book = @book)\nHAVING dup_count > 1\nORDER BY t1.trade_date DESC;",
+      "parameters": [
+        {
+          "id": "lookback_days",
+          "label": "Lookback Days",
+          "type": "number",
+          "default": 7,
+          "min": 1,
+          "max": 90,
+          "step": 1,
+          "description": "Number of days to look back from COB date for duplicate detection"
+        }
+      ],
+      "resultColumns": [
+        { "id": "trade_id", "label": "Trade ID", "type": "text" },
+        { "id": "counterparty", "label": "Counterparty", "type": "text" },
+        { "id": "direction", "label": "Direction", "type": "text" },
+        { "id": "volume", "label": "Volume", "type": "number", "align": "right" },
+        { "id": "price", "label": "Price", "type": "number", "align": "right" },
+        { "id": "trade_date", "label": "Trade Date", "type": "date" },
+        { "id": "dup_count", "label": "Dup Count", "type": "number", "align": "right" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 8 * * 1-5",
+        "description": "Weekdays at 08:00 before trading starts"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Missing Settlement Prices",
+      "category": "Settlement",
+      "description": "Checks for settlement periods where the expected price publication date has passed but no price record exists. Configurable lookahead window to catch upcoming gaps.",
+      "severity": "error",
+      "sqlTemplate": "-- Missing Settlement Prices\n-- Checks for settlement periods without published prices\nSELECT s.benchmark, s.delivery_month, s.settlement_type,\n    s.expected_date, s.status\nFROM settlement_schedule s\nLEFT JOIN settlement_prices sp\n    ON s.benchmark = sp.benchmark\n    AND s.delivery_month = sp.delivery_month\nWHERE sp.price IS NULL\n  AND s.expected_date BETWEEN DATEADD(day, -@lookback_days, @cob) AND DATEADD(day, @lookahead_days, @cob)\n  AND (@benchmark = 'ALL' OR s.benchmark = @benchmark)\nORDER BY s.expected_date;",
+      "parameters": [
+        {
+          "id": "lookback_days",
+          "label": "Lookback Days",
+          "type": "number",
+          "default": 5,
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "description": "Number of past days to check for missing settlements"
+        },
+        {
+          "id": "lookahead_days",
+          "label": "Lookahead Days",
+          "type": "number",
+          "default": 3,
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "description": "Number of future days to check for upcoming settlement gaps"
+        }
+      ],
+      "resultColumns": [
+        { "id": "benchmark", "label": "Benchmark", "type": "text" },
+        { "id": "delivery_month", "label": "Delivery Month", "type": "text" },
+        { "id": "settlement_type", "label": "Settlement Type", "type": "text" },
+        { "id": "expected_date", "label": "Expected Date", "type": "date" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 9 * * 1-5",
+        "description": "Weekdays at 09:00 to catch overnight settlement gaps"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Position-Trade Reconciliation",
+      "category": "Positions",
+      "description": "Verifies that aggregated position volumes match the sum of underlying trade volumes. Flags any variance exceeding the configured tolerance threshold.",
+      "severity": "error",
+      "sqlTemplate": "-- Position-Trade Reconciliation\n-- Verifies aggregated positions match underlying trades\nSELECT p.benchmark, p.delivery_month,\n    p.net_position AS pos_volume,\n    SUM(CASE t.direction WHEN 'BUY' THEN t.volume\n         ELSE -t.volume END) AS trade_volume,\n    p.net_position - SUM(CASE t.direction WHEN 'BUY' THEN t.volume ELSE -t.volume END) AS variance\nFROM positions p\nJOIN trades t ON p.benchmark = t.benchmark\n    AND p.delivery_month = t.delivery_month\nWHERE p.as_of_date = @cob\n  AND (@book = 'ALL' OR p.book = @book)\nGROUP BY p.benchmark, p.delivery_month, p.net_position\nHAVING ABS(p.net_position - SUM(CASE t.direction WHEN 'BUY' THEN t.volume ELSE -t.volume END)) > @variance_threshold\nORDER BY ABS(variance) DESC;",
+      "parameters": [
+        {
+          "id": "variance_threshold",
+          "label": "Variance Threshold",
+          "type": "number",
+          "default": 0.01,
+          "min": 0,
+          "max": 1000,
+          "step": 0.01,
+          "description": "Minimum absolute variance to flag (in volume units, e.g. MMBtu)"
+        }
+      ],
+      "resultColumns": [
+        { "id": "benchmark", "label": "Benchmark", "type": "text" },
+        { "id": "delivery_month", "label": "Delivery Month", "type": "text" },
+        { "id": "pos_volume", "label": "Position Vol", "type": "number", "align": "right" },
+        { "id": "trade_volume", "label": "Trade Vol", "type": "number", "align": "right" },
+        { "id": "variance", "label": "Variance", "type": "number", "align": "right" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "15 17 * * 1-5",
+        "description": "Weekdays at 17:15 after position calc completes"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Credit Limit Validation",
+      "category": "Risk",
+      "description": "Checks counterparty credit exposure against approved limits. Flags any counterparty whose utilisation percentage exceeds the configured warning threshold.",
+      "severity": "warning",
+      "sqlTemplate": "-- Credit Limit Validation\n-- Checks counterparty exposure against credit limits\nSELECT cp.name, cp.credit_limit,\n    SUM(t.mtm_value) AS exposure,\n    cp.credit_limit - SUM(t.mtm_value) AS headroom,\n    ROUND(SUM(t.mtm_value) / cp.credit_limit * 100, 1) AS utilisation_pct\nFROM counterparties cp\nJOIN trades t ON cp.id = t.counterparty_id\nWHERE t.status IN ('FO-Validated', 'Trade Checked')\n  AND t.value_date >= @cob\n  AND (@book = 'ALL' OR t.book = @book)\nGROUP BY cp.name, cp.credit_limit\nHAVING ROUND(SUM(t.mtm_value) / cp.credit_limit * 100, 1) >= @utilisation_warning_pct\nORDER BY utilisation_pct DESC;",
+      "parameters": [
+        {
+          "id": "utilisation_warning_pct",
+          "label": "Warning Threshold %",
+          "type": "number",
+          "default": 80,
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "description": "Utilisation percentage above which a counterparty is flagged"
+        }
+      ],
+      "resultColumns": [
+        { "id": "name", "label": "Counterparty", "type": "text" },
+        { "id": "credit_limit", "label": "Credit Limit ($M)", "type": "number", "align": "right" },
+        { "id": "exposure", "label": "Exposure ($M)", "type": "number", "align": "right" },
+        { "id": "headroom", "label": "Headroom ($M)", "type": "number", "align": "right" },
+        { "id": "utilisation_pct", "label": "Utilisation %", "type": "number", "align": "right" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": "rows.some(r => r.utilisation_pct >= 80 && r.utilisation_pct < 100)",
+      "schedule": {
+        "cron": "0 18 * * 1-5",
+        "description": "Weekdays at 18:00 after all EOD processing"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Counterparty Master Check",
+      "category": "Reference",
+      "description": "Validates active counterparty records for completeness: LEI codes, credit limits, and KYC expiry. Configurable KYC warning window to catch upcoming expirations.",
+      "severity": "warning",
+      "sqlTemplate": "-- Counterparty Master Check\n-- Validates counterparty records for completeness\nSELECT cp.id, cp.name, cp.lei, cp.status,\n    cp.kyc_expiry,\n    CASE WHEN cp.lei IS NULL THEN 'Missing LEI'\n         WHEN cp.credit_limit IS NULL THEN 'No credit limit'\n         WHEN cp.kyc_expiry < @cob THEN 'KYC expired'\n         WHEN DATEDIFF(day, @cob, cp.kyc_expiry) <= @kyc_warning_days THEN 'KYC expiring soon'\n         ELSE 'Valid' END AS validation\nFROM counterparties cp\nWHERE cp.status = 'Active'\n  AND (cp.lei IS NULL OR cp.credit_limit IS NULL OR cp.kyc_expiry < DATEADD(day, @kyc_warning_days, @cob))\nORDER BY cp.name;",
+      "parameters": [
+        {
+          "id": "kyc_warning_days",
+          "label": "KYC Warning Days",
+          "type": "number",
+          "default": 30,
+          "min": 7,
+          "max": 180,
+          "step": 7,
+          "description": "Number of days before KYC expiry to raise a warning"
+        }
+      ],
+      "resultColumns": [
+        { "id": "id", "label": "ID", "type": "text" },
+        { "id": "name", "label": "Name", "type": "text" },
+        { "id": "lei", "label": "LEI", "type": "text" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" },
+        { "id": "kyc_expiry", "label": "KYC Expiry", "type": "date" },
+        { "id": "validation", "label": "Validation", "type": "status", "align": "center" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": "rows.some(r => r.validation === 'KYC expiring soon')",
+      "schedule": {
+        "cron": "0 7 * * 1",
+        "description": "Weekly on Monday at 07:00"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Unmatched Nominations",
+      "category": "Operations",
+      "description": "Finds nominations that have no matching trade or cargo record. Configurable forward window controls how far ahead to look for unmatched flow dates.",
+      "severity": "error",
+      "sqlTemplate": "-- Unmatched Nominations\n-- Finds nominations without a matching trade or cargo\nSELECT n.nom_id, n.facility, n.direction,\n    n.volume_mmbtu, n.flow_date, n.status,\n    n.counterparty\nFROM nominations n\nLEFT JOIN trades t ON n.trade_id = t.trade_id\nWHERE t.trade_id IS NULL\n  AND n.flow_date BETWEEN @cob AND DATEADD(day, @forward_days, @cob)\n  AND n.status != 'Cancelled'\nORDER BY n.flow_date;",
+      "parameters": [
+        {
+          "id": "forward_days",
+          "label": "Forward Window (days)",
+          "type": "number",
+          "default": 30,
+          "min": 1,
+          "max": 365,
+          "step": 1,
+          "description": "Number of days forward from COB to check for unmatched nominations"
+        }
+      ],
+      "resultColumns": [
+        { "id": "nom_id", "label": "Nom ID", "type": "text" },
+        { "id": "facility", "label": "Facility", "type": "text" },
+        { "id": "direction", "label": "Direction", "type": "text" },
+        { "id": "volume_mmbtu", "label": "Volume (MMBtu)", "type": "number", "align": "right" },
+        { "id": "flow_date", "label": "Flow Date", "type": "date" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" },
+        { "id": "counterparty", "label": "Counterparty", "type": "text" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 6 * * *",
+        "description": "Daily at 06:00 before ops handover"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Invoice Amount Validation",
+      "category": "Settlement",
+      "description": "Checks invoiced amounts against system-calculated amounts. Flags any variance exceeding the configured tolerance percentage of the invoice amount.",
+      "severity": "error",
+      "sqlTemplate": "-- Invoice Amount Validation\n-- Checks invoiced amounts against calculated amounts\nSELECT i.invoice_id, i.counterparty, i.invoice_amount,\n    c.calculated_amount,\n    ABS(i.invoice_amount - c.calculated_amount) AS variance,\n    CASE WHEN ABS(i.invoice_amount - c.calculated_amount) > i.invoice_amount * (@tolerance_pct / 100.0)\n         THEN 'OUT OF TOLERANCE' ELSE 'OK' END AS status\nFROM invoices i\nJOIN calculated_settlements c\n    ON i.trade_id = c.trade_id AND i.period = c.period\nWHERE i.invoice_date <= @cob\n  AND i.status IN ('Pending', 'Approved')\n  AND (@book = 'ALL' OR i.book = @book)\nORDER BY variance DESC;",
+      "parameters": [
+        {
+          "id": "tolerance_pct",
+          "label": "Tolerance %",
+          "type": "number",
+          "default": 0.1,
+          "min": 0.001,
+          "max": 5,
+          "step": 0.01,
+          "description": "Maximum allowed variance as percentage of invoice amount"
+        }
+      ],
+      "resultColumns": [
+        { "id": "invoice_id", "label": "Invoice ID", "type": "text" },
+        { "id": "counterparty", "label": "Counterparty", "type": "text" },
+        { "id": "invoice_amount", "label": "Invoiced ($)", "type": "number", "align": "right" },
+        { "id": "calculated_amount", "label": "Calculated ($)", "type": "number", "align": "right" },
+        { "id": "variance", "label": "Variance ($)", "type": "number", "align": "right" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" }
+      ],
+      "passCondition": "rows.every(r => r.status === 'OK')",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 10 * * 1-5",
+        "description": "Weekdays at 10:00 during settlement window"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Orphaned Cargo Check",
+      "category": "Physical",
+      "description": "Finds physical cargoes that lack both a buy and sell trade linkage. Configurable forward window controls how far ahead to look for orphaned cargoes.",
+      "severity": "error",
+      "sqlTemplate": "-- Orphaned Cargo Check\n-- Finds cargoes without both a buy and sell trade\nSELECT c.cargo_id, c.vessel, c.load_port, c.discharge_port,\n    c.load_date, c.volume_mmbtu,\n    CASE WHEN tb.trade_id IS NULL THEN 'No buy trade'\n         WHEN ts.trade_id IS NULL THEN 'No sell trade'\n         END AS issue\nFROM cargoes c\nLEFT JOIN trades tb ON c.buy_trade_id = tb.trade_id\nLEFT JOIN trades ts ON c.sell_trade_id = ts.trade_id\nWHERE (tb.trade_id IS NULL OR ts.trade_id IS NULL)\n  AND c.load_date BETWEEN @cob AND DATEADD(day, @forward_days, @cob)\nORDER BY c.load_date;",
+      "parameters": [
+        {
+          "id": "forward_days",
+          "label": "Forward Window (days)",
+          "type": "number",
+          "default": 90,
+          "min": 7,
+          "max": 365,
+          "step": 7,
+          "description": "Number of days forward from COB to check for orphaned cargoes"
+        }
+      ],
+      "resultColumns": [
+        { "id": "cargo_id", "label": "Cargo ID", "type": "text" },
+        { "id": "vessel", "label": "Vessel", "type": "text" },
+        { "id": "load_port", "label": "Load Port", "type": "text" },
+        { "id": "discharge_port", "label": "Discharge Port", "type": "text" },
+        { "id": "load_date", "label": "Load Date", "type": "date" },
+        { "id": "volume_mmbtu", "label": "Volume (MMBtu)", "type": "number", "align": "right" },
+        { "id": "issue", "label": "Issue", "type": "text" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "0 7 * * 1-5",
+        "description": "Weekdays at 07:00 before cargo operations"
+      }
+    },
+    {
+      "id": 12,
+      "name": "EOD Completeness",
+      "category": "System",
+      "description": "Validates that all end-of-day batch steps completed successfully. Configurable maximum allowed duration per step to catch hung processes.",
+      "severity": "error",
+      "sqlTemplate": "-- EOD Completeness\n-- Validates all end-of-day batch steps completed\nSELECT step_name, step_order, status,\n    started_at, completed_at,\n    DATEDIFF(second, started_at, completed_at) AS duration_sec\nFROM eod_batch_log\nWHERE batch_date = @cob\n  AND (status != 'COMPLETE' OR DATEDIFF(second, started_at, completed_at) > @max_step_duration_sec)\nORDER BY step_order;",
+      "parameters": [
+        {
+          "id": "max_step_duration_sec",
+          "label": "Max Step Duration (sec)",
+          "type": "number",
+          "default": 300,
+          "min": 30,
+          "max": 3600,
+          "step": 30,
+          "description": "Maximum allowed duration for any single EOD step in seconds before flagging"
+        }
+      ],
+      "resultColumns": [
+        { "id": "step_name", "label": "Step", "type": "text" },
+        { "id": "step_order", "label": "Order", "type": "number", "align": "center" },
+        { "id": "status", "label": "Status", "type": "status", "align": "center" },
+        { "id": "started_at", "label": "Started", "type": "datetime" },
+        { "id": "completed_at", "label": "Completed", "type": "datetime" },
+        { "id": "duration_sec", "label": "Duration (s)", "type": "number", "align": "right" }
+      ],
+      "passCondition": "rowCount == 0",
+      "warnCondition": null,
+      "schedule": {
+        "cron": "30 17 * * 1-5",
+        "description": "Weekdays at 17:30 after EOD batch window"
+      }
+    }
+  ]
+}
