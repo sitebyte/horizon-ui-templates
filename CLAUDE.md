@@ -30,3 +30,20 @@
 - No skeleton loading: content renders immediately with CSS fade-in
 - Sidebar menus: all groups `defaultOpen: false`
 - All pages call `initShell(key, title)` for shell integration
+
+## Handover Documents for Production Build (EOS.Horizon)
+
+These documents are written for the Claude session working in the production `EOS.Horizon` repo (.NET 10 + React 19). They translate the prototype's design intent into specs the production stack can consume.
+
+### AI Handover Spec (`analysis/ai-handover-spec.md`)
+Complete page-by-page component spec mapping every prototype pattern to the production component vocabulary (`Tile`, `StatusPill`, `Stack`, `Text`, `Mono`). Covers:
+- **Global design system mapping** — token-to-Tailwind table, component mapping, layout patterns
+- **7 page specs** — Dashboard, Blotter, Trade Detail/Lifecycle, Positions, Support Dashboard, SQL Checks, Environments
+- **Universal interaction patterns** — toasts, entity links, number formatting, keyboard-first, density tiers
+- **What to copy vs what not to copy** — visual ratios and data models yes, shell.js and CDN scripts no
+
+### Environments Handover (`analysis/pass-to-claude/`)
+- `handover.md` — Full project context, architecture, design philosophy
+- `answers-to-builder.md` — Answers to the production builder's 6 design questions
+- `implementation-guide-environments.md` — Detailed implementation guide for the `/support/environment` page
+- `eos-topology-seed.json` — Seed topology data (nodes + edges) for the environments page
