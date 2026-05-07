@@ -1,0 +1,643 @@
+{
+  "_comment": "EOS System Topology — seed data for EOS.Horizon production build. Inferred from the drawio architecture diagram + EOS user documentation. The production team should validate, correct, and extend this. Fields marked '?' are best-guesses that need confirmation.",
+
+  "systems": [
+    {
+      "id": "eos",
+      "name": "EOS",
+      "description": "Core ETRM application — trade capture, cargo operations, valuations, settlement",
+      "type": "core",
+      "technology": "WinForms / .NET",
+      "owner": "EOS Core Team",
+      "criticality": "critical",
+      "healthCheckUrl": null,
+      "notes": "The system being modernised. All trade data originates here."
+    },
+    {
+      "id": "rabbitmq",
+      "name": "RabbitMQ",
+      "description": "Single message broker instance — all integration flows through this",
+      "type": "broker",
+      "technology": "RabbitMQ 3.12.x",
+      "owner": "Platform Team",
+      "criticality": "critical",
+      "healthCheckUrl": "http://eos-rmq-{env}:15672/api/healthchecks/node",
+      "notes": "One instance per environment. Management UI on port 15672. All Glint modules connect to this."
+    },
+    {
+      "id": "eos-scheduler",
+      "name": "EOS Scheduler EOD",
+      "description": "End-of-day batch scheduler — triggers EOD processing in EOS",
+      "type": "core-secondary",
+      "technology": "? (Windows Service / Hangfire / custom)",
+      "owner": "EOS Core Team",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Runs daily ~17:00. Triggers market data load, curve bootstrap, position calc, VaR, settlement prices, regulatory reports."
+    },
+    {
+      "id": "dq-prices",
+      "name": "DQ Prices",
+      "description": "External price data provider — supplies market prices to EOS",
+      "type": "external",
+      "technology": "? (REST API / FTP / proprietary feed)",
+      "owner": "External vendor",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Bidirectional — EOS both receives and may push price data. Source of JKM, TTF, HH, Brent settlement prices."
+    },
+    {
+      "id": "ice",
+      "name": "ICE",
+      "description": "Intercontinental Exchange — source of exchange-traded data",
+      "type": "external",
+      "technology": "? (FIX protocol / WebSocket / proprietary API)",
+      "owner": "External (ICE)",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Trade data flows through KTP → Shovel pipeline before reaching RabbitMQ."
+    },
+    {
+      "id": "ktp",
+      "name": "KTP",
+      "description": "ICE data adapter — receives raw ICE data and normalises it",
+      "type": "pipeline",
+      "technology": "? (custom service)",
+      "owner": "? (Platform Team / vendor)",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Part of the ICE ingress pipeline. Sits between ICE and Shovel."
+    },
+    {
+      "id": "shovel",
+      "name": "Shovel",
+      "description": "RabbitMQ Shovel plugin — moves messages from KTP into the main RabbitMQ instance",
+      "type": "pipeline",
+      "technology": "RabbitMQ Shovel plugin",
+      "owner": "Platform Team",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Built-in RabbitMQ feature. Bridges external KTP queue into internal exchange."
+    },
+    {
+      "id": "pioneer",
+      "name": "Pioneer",
+      "description": "Downstream system — receives trade/recap data and settlement data from EOS",
+      "type": "destination",
+      "technology": "? (external system)",
+      "owner": "? (Finance / downstream team)",
+      "criticality": "high",
+      "healthCheckUrl": null,
+      "notes": "Two separate data flows: trade/recap and settlements. Each via its own Glint connector."
+    },
+    {
+      "id": "hq-pnl",
+      "name": "HQ PnL Reporting",
+      "description": "Head-quarter P&L reporting system",
+      "type": "external",
+      "technology": "? (internal reporting platform)",
+      "owner": "? (Finance / HQ)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "Receives aggregated P&L data from EOS via Glint HQ PnL module. Not available in all environments."
+    },
+    {
+      "id": "credit-cube",
+      "name": "Credit Cube",
+      "description": "Credit risk management system — receives exposure data from EOS",
+      "type": "external",
+      "technology": "? (internal credit system)",
+      "owner": "? (Risk / Credit team)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "EOS pushes credit exposure data. Used for counterparty credit limit monitoring."
+    },
+    {
+      "id": "endur",
+      "name": "Endur",
+      "description": "Legacy ETRM — source of Spanish gas trade data",
+      "type": "external",
+      "technology": "OpenLink Endur",
+      "owner": "? (European trading desk)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "One-way: Endur pushes Spanish gas trades into EOS via Glint module. Not available in UAT/TEST."
+    },
+    {
+      "id": "var-engine",
+      "name": "VaR Engine",
+      "description": "Value-at-Risk calculation engine — receives position data from EOS",
+      "type": "external",
+      "technology": "? (custom / vendor risk engine)",
+      "owner": "? (Risk team)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "EOS extracts position data via Glint module, VaR engine processes and returns results."
+    },
+    {
+      "id": "a2kvan",
+      "name": "a2kvan",
+      "description": "Port distance calculation service — provides voyage distance data to EOS",
+      "type": "destination",
+      "technology": "? (web service / manual)",
+      "owner": "? (Operations)",
+      "criticality": "low",
+      "healthCheckUrl": null,
+      "notes": "MANUAL pull — not automated. Operators manually retrieve port distance data and enter into EOS."
+    },
+    {
+      "id": "ax-cloud",
+      "name": "AX Cloud Shared Drive",
+      "description": "SharePoint / cloud storage — EOS exports invoices as PDF here",
+      "type": "destination",
+      "technology": "SharePoint Online / Azure Files",
+      "owner": "? (Finance / IT)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "One-way push from EOS. Invoices saved as PDF for downstream consumption."
+    },
+    {
+      "id": "sap",
+      "name": "SAP Document",
+      "description": "SAP financial system — receives settlement documents from EOS",
+      "type": "destination",
+      "technology": "SAP (via Excel download)",
+      "owner": "? (Finance)",
+      "criticality": "medium",
+      "healthCheckUrl": null,
+      "notes": "Settlement data flows via Glint MA module. Final output is an Excel/document download. Not automated end-to-end."
+    }
+  ],
+
+  "integrationComponents": [
+    {
+      "id": "glint-ice",
+      "name": "Glint ICE Trade Capture",
+      "description": "Consumes ICE trade data from RabbitMQ, transforms and writes to EOS",
+      "type": "glint",
+      "dockerImage": "eos/glint-ice-trade-capture",
+      "sourceSystem": "ice",
+      "targetSystem": "eos",
+      "direction": "inbound",
+      "messageTypes": ["Trade.IceCaptured"],
+      "rabbitExchange": "eos.inbound",
+      "rabbitQueue": "eos.ice.trade.capture",
+      "rabbitRoutingKey": "ice.trade.#",
+      "notes": "Receives from Shovel, publishes validated trades to EOS database."
+    },
+    {
+      "id": "glint-price-load",
+      "name": "Glint Price Loading",
+      "description": "Loads price/curve data into EOS from external sources",
+      "type": "glint",
+      "dockerImage": "eos/glint-price-loading",
+      "sourceSystem": "dq-prices",
+      "targetSystem": "eos",
+      "direction": "inbound",
+      "messageTypes": ["Price.Updated", "Curve.Published"],
+      "rabbitExchange": "eos.inbound",
+      "rabbitQueue": "eos.price.loading",
+      "rabbitRoutingKey": "price.#",
+      "notes": "Critical for EOD — must complete before curve bootstrap runs."
+    },
+    {
+      "id": "glint-price-eod",
+      "name": "Glint Price EoD Export",
+      "description": "Exports end-of-day settlement prices from EOS",
+      "type": "glint",
+      "dockerImage": "eos/glint-price-eod-export",
+      "sourceSystem": "eos",
+      "targetSystem": null,
+      "direction": "outbound",
+      "messageTypes": ["Price.EodExported"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.price.eod.export",
+      "rabbitRoutingKey": "price.eod.#",
+      "notes": "Triggered after EOD settlement price load completes."
+    },
+    {
+      "id": "glint-pioneer-trade",
+      "name": "Glint Pioneer Trade Connector",
+      "description": "Pushes trade/recap data from EOS to Pioneer",
+      "type": "glint",
+      "dockerImage": "eos/glint-pioneer-trade-connector",
+      "sourceSystem": "eos",
+      "targetSystem": "pioneer",
+      "direction": "outbound",
+      "messageTypes": ["Trade.Captured", "Trade.Validated", "Trade.Amended", "Trade.Cancelled"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.pioneer.trade",
+      "rabbitRoutingKey": "pioneer.trade.#",
+      "notes": "Near-real-time. Pioneer expects trade events within seconds of capture."
+    },
+    {
+      "id": "glint-pioneer-settle",
+      "name": "Glint Pioneer Settlements Connector",
+      "description": "Pushes settlement data from EOS to Pioneer",
+      "type": "glint",
+      "dockerImage": "eos/glint-pioneer-settlements-connector",
+      "sourceSystem": "eos",
+      "targetSystem": "pioneer",
+      "direction": "outbound",
+      "messageTypes": ["Settlement.Completed", "Invoice.Approved", "Invoice.Paid"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.pioneer.settlement",
+      "rabbitRoutingKey": "pioneer.settlement.#",
+      "notes": "Batch-oriented. Settlements typically pushed after EOD processing."
+    },
+    {
+      "id": "glint-hq-pnl",
+      "name": "Glint HQ PnL Reporting",
+      "description": "Extracts P&L data from EOS and pushes to HQ reporting system",
+      "type": "glint",
+      "dockerImage": "eos/glint-hq-pnl-reporting",
+      "sourceSystem": "eos",
+      "targetSystem": "hq-pnl",
+      "direction": "outbound",
+      "messageTypes": ["PnL.DailyReport", "PnL.MonthEndReport"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.hq.pnl",
+      "rabbitRoutingKey": "hq.pnl.#",
+      "notes": "Daily and month-end. Not available in all non-prod environments."
+    },
+    {
+      "id": "glint-credit",
+      "name": "Glint Credit Cube",
+      "description": "Pushes credit exposure data from EOS to Credit Cube",
+      "type": "glint",
+      "dockerImage": "eos/glint-credit-cube",
+      "sourceSystem": "eos",
+      "targetSystem": "credit-cube",
+      "direction": "outbound",
+      "messageTypes": ["Credit.ExposureUpdate", "Credit.LimitBreach"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.credit.cube",
+      "rabbitRoutingKey": "credit.#",
+      "notes": "Triggered on trade capture and EOD revaluation."
+    },
+    {
+      "id": "glint-endur",
+      "name": "Glint Endur Spanish Gas",
+      "description": "Imports Spanish gas trades from Endur into EOS",
+      "type": "glint",
+      "dockerImage": "eos/glint-endur-spanish-gas",
+      "sourceSystem": "endur",
+      "targetSystem": "eos",
+      "direction": "inbound",
+      "messageTypes": ["Trade.EndurImported"],
+      "rabbitExchange": "eos.inbound",
+      "rabbitQueue": "eos.endur.spanish.gas",
+      "rabbitRoutingKey": "endur.trade.#",
+      "notes": "Spanish gas specific. Endur is legacy — this bridge may be retired when Endur is decommissioned."
+    },
+    {
+      "id": "glint-var",
+      "name": "Glint VaR Extract",
+      "description": "Extracts position data from EOS for VaR calculation",
+      "type": "glint",
+      "dockerImage": "eos/glint-var-extract",
+      "sourceSystem": "eos",
+      "targetSystem": "var-engine",
+      "direction": "outbound",
+      "messageTypes": ["Risk.PositionExtract", "Risk.VarRequest"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.var.extract",
+      "rabbitRoutingKey": "risk.var.#",
+      "notes": "Triggered after EOD position calculation. VaR engine processes and may return results (not via RabbitMQ?)."
+    },
+    {
+      "id": "glint-ma",
+      "name": "Glint MA",
+      "description": "Master Agreements / Settlements connector — pushes settlement data to SAP",
+      "type": "glint",
+      "dockerImage": "eos/glint-ma",
+      "sourceSystem": "eos",
+      "targetSystem": "sap",
+      "direction": "outbound",
+      "messageTypes": ["Settlement.SapExport", "Settlement.DocumentGenerated"],
+      "rabbitExchange": "eos.outbound",
+      "rabbitQueue": "eos.settlement.ma",
+      "rabbitRoutingKey": "settlement.sap.#",
+      "notes": "Final output is a document (Excel/PDF) for SAP. May not be fully automated."
+    }
+  ],
+
+  "rabbitMq": {
+    "exchanges": [
+      {
+        "name": "eos.inbound",
+        "type": "topic",
+        "description": "Inbound data flowing INTO EOS from external systems",
+        "routingKeyPattern": "{source}.{entity}.{action}",
+        "examples": ["ice.trade.captured", "price.curve.published", "endur.trade.imported"]
+      },
+      {
+        "name": "eos.outbound",
+        "type": "topic",
+        "description": "Outbound data flowing FROM EOS to downstream systems",
+        "routingKeyPattern": "{destination}.{entity}.{action}",
+        "examples": ["pioneer.trade.captured", "hq.pnl.daily", "credit.exposure.updated"]
+      },
+      {
+        "name": "eos.internal",
+        "type": "topic",
+        "description": "? Internal EOS events (audit, notifications, scheduler triggers)",
+        "routingKeyPattern": "{domain}.{entity}.{action}",
+        "examples": ["audit.trade.amended", "notification.deadline.approaching", "scheduler.eod.triggered"],
+        "_comment": "This exchange may or may not exist — inferred from the need for audit/notification queues"
+      }
+    ],
+    "queues": [
+      { "name": "eos.ice.trade.capture", "exchange": "eos.inbound", "routingKey": "ice.trade.#", "consumer": "glint-ice" },
+      { "name": "eos.price.loading", "exchange": "eos.inbound", "routingKey": "price.#", "consumer": "glint-price-load" },
+      { "name": "eos.endur.spanish.gas", "exchange": "eos.inbound", "routingKey": "endur.trade.#", "consumer": "glint-endur" },
+      { "name": "eos.pioneer.trade", "exchange": "eos.outbound", "routingKey": "pioneer.trade.#", "consumer": "glint-pioneer-trade" },
+      { "name": "eos.pioneer.settlement", "exchange": "eos.outbound", "routingKey": "pioneer.settlement.#", "consumer": "glint-pioneer-settle" },
+      { "name": "eos.price.eod.export", "exchange": "eos.outbound", "routingKey": "price.eod.#", "consumer": "glint-price-eod" },
+      { "name": "eos.hq.pnl", "exchange": "eos.outbound", "routingKey": "hq.pnl.#", "consumer": "glint-hq-pnl" },
+      { "name": "eos.credit.cube", "exchange": "eos.outbound", "routingKey": "credit.#", "consumer": "glint-credit" },
+      { "name": "eos.var.extract", "exchange": "eos.outbound", "routingKey": "risk.var.#", "consumer": "glint-var" },
+      { "name": "eos.settlement.ma", "exchange": "eos.outbound", "routingKey": "settlement.sap.#", "consumer": "glint-ma" },
+      { "name": "eos.audit.event", "exchange": "eos.internal", "routingKey": "audit.#", "consumer": "? (audit logger)" },
+      { "name": "eos.notification.send", "exchange": "eos.internal", "routingKey": "notification.#", "consumer": "? (notification service)" }
+    ]
+  },
+
+  "messageTypes": [
+    {
+      "type": "Trade.Captured",
+      "description": "New trade entered in EOS",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.captured",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "Per trade (~10-30/day)",
+      "samplePayload": {
+        "tradeId": "T-1001",
+        "direction": "BUY",
+        "counterparty": "Shell Energy Trading",
+        "benchmark": "JKM",
+        "premium": 0.50,
+        "volume": 3200000,
+        "volumeUnits": "MMBtu",
+        "deliveryMonth": "2026-06",
+        "incoterm": "DES",
+        "dischargePort": "Sodegaura",
+        "trader": "j.cobley",
+        "status": "FO-Entered",
+        "contractRef": "SPA-SHELL-2026"
+      }
+    },
+    {
+      "type": "Trade.Validated",
+      "description": "Trade status changed to FO-Validated",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.validated",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "Per validation (~10-30/day)"
+    },
+    {
+      "type": "Trade.Amended",
+      "description": "Trade fields modified after initial capture",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.amended",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "~5-10/day"
+    },
+    {
+      "type": "Trade.Cancelled",
+      "description": "Trade cancelled",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.trade.cancelled",
+      "consumers": ["glint-pioneer-trade"],
+      "frequency": "Rare (~1-2/week)"
+    },
+    {
+      "type": "Trade.IceCaptured",
+      "description": "ICE exchange trade received via KTP/Shovel pipeline",
+      "source": "ice",
+      "exchange": "eos.inbound",
+      "routingKey": "ice.trade.captured",
+      "consumers": ["glint-ice"],
+      "frequency": "High (~1400/hour during trading hours)"
+    },
+    {
+      "type": "Trade.EndurImported",
+      "description": "Spanish gas trade imported from Endur",
+      "source": "endur",
+      "exchange": "eos.inbound",
+      "routingKey": "endur.trade.imported",
+      "consumers": ["glint-endur"],
+      "frequency": "Low (~4/hour)"
+    },
+    {
+      "type": "Price.Updated",
+      "description": "Market price update received from DQ Prices",
+      "source": "dq-prices",
+      "exchange": "eos.inbound",
+      "routingKey": "price.curve.updated",
+      "consumers": ["glint-price-load"],
+      "frequency": "~240/hour during market hours"
+    },
+    {
+      "type": "Price.EodExported",
+      "description": "End-of-day settlement prices exported",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "price.eod.exported",
+      "consumers": ["glint-price-eod"],
+      "frequency": "Once daily (EOD batch)"
+    },
+    {
+      "type": "Settlement.Completed",
+      "description": "Trade settlement finalised",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "pioneer.settlement.completed",
+      "consumers": ["glint-pioneer-settle"],
+      "frequency": "~12/hour during settlement window"
+    },
+    {
+      "type": "Settlement.SapExport",
+      "description": "Settlement document generated for SAP",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "settlement.sap.export",
+      "consumers": ["glint-ma"],
+      "frequency": "~6/hour during settlement"
+    },
+    {
+      "type": "PnL.DailyReport",
+      "description": "Daily P&L report extract for HQ",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "hq.pnl.daily",
+      "consumers": ["glint-hq-pnl"],
+      "frequency": "Once daily (post-EOD)"
+    },
+    {
+      "type": "Credit.ExposureUpdate",
+      "description": "Credit exposure recalculated — pushed to Credit Cube",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "credit.exposure.updated",
+      "consumers": ["glint-credit"],
+      "frequency": "Per trade + EOD revaluation (~8/hour)"
+    },
+    {
+      "type": "Risk.PositionExtract",
+      "description": "Position data extracted for VaR calculation",
+      "source": "eos",
+      "exchange": "eos.outbound",
+      "routingKey": "risk.var.position",
+      "consumers": ["glint-var"],
+      "frequency": "Once daily (post-EOD position calc)"
+    }
+  ],
+
+  "dataFlows": [
+    {
+      "id": "price-ingress",
+      "name": "Price Ingress",
+      "description": "Market prices from DQ Prices into EOS for curve building and valuation",
+      "path": ["dq-prices", "eos"],
+      "bidirectional": true,
+      "messageTypes": ["Price.Updated"],
+      "schedule": "Continuous during market hours",
+      "criticality": "critical",
+      "notes": "Must complete before EOD curve bootstrap. Bidirectional — EOS may also push derived prices back."
+    },
+    {
+      "id": "ice-trade-ingress",
+      "name": "ICE Trade Ingress",
+      "description": "Exchange-traded data from ICE through KTP/Shovel pipeline into EOS",
+      "path": ["ice", "ktp", "shovel", "rabbitmq", "glint-ice", "eos"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.IceCaptured"],
+      "schedule": "Continuous during exchange hours",
+      "criticality": "critical",
+      "notes": "High volume. KTP normalises ICE format. Shovel bridges into RabbitMQ."
+    },
+    {
+      "id": "pioneer-trade",
+      "name": "Trade/Recap to Pioneer",
+      "description": "Trade lifecycle events pushed to Pioneer for downstream processing",
+      "path": ["eos", "rabbitmq", "glint-pioneer-trade", "pioneer"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.Captured", "Trade.Validated", "Trade.Amended", "Trade.Cancelled"],
+      "schedule": "Near real-time",
+      "criticality": "high",
+      "notes": "Pioneer expects events within seconds. Latency SLA: <5s."
+    },
+    {
+      "id": "pioneer-settlement",
+      "name": "Settlements to Pioneer",
+      "description": "Settlement completion events pushed to Pioneer",
+      "path": ["eos", "rabbitmq", "glint-pioneer-settle", "pioneer"],
+      "bidirectional": false,
+      "messageTypes": ["Settlement.Completed", "Invoice.Approved", "Invoice.Paid"],
+      "schedule": "Batch — during settlement window",
+      "criticality": "high"
+    },
+    {
+      "id": "spanish-gas",
+      "name": "Spanish Gas Trade Import",
+      "description": "Spanish gas trades from Endur legacy system into EOS",
+      "path": ["endur", "glint-endur", "rabbitmq", "eos"],
+      "bidirectional": false,
+      "messageTypes": ["Trade.EndurImported"],
+      "schedule": "Low frequency, business hours",
+      "criticality": "medium",
+      "notes": "Legacy integration. May be retired when Endur is decommissioned."
+    },
+    {
+      "id": "var-extract",
+      "name": "VaR Position Extract",
+      "description": "Position data extracted from EOS for VaR engine processing",
+      "path": ["eos", "rabbitmq", "glint-var", "var-engine"],
+      "bidirectional": false,
+      "messageTypes": ["Risk.PositionExtract"],
+      "schedule": "Once daily post-EOD",
+      "criticality": "medium"
+    },
+    {
+      "id": "credit-exposure",
+      "name": "Credit Exposure Update",
+      "description": "Credit exposure data pushed to Credit Cube on trade events and EOD",
+      "path": ["eos", "rabbitmq", "glint-credit", "credit-cube"],
+      "bidirectional": false,
+      "messageTypes": ["Credit.ExposureUpdate", "Credit.LimitBreach"],
+      "schedule": "Per trade + EOD revaluation",
+      "criticality": "medium"
+    },
+    {
+      "id": "hq-pnl",
+      "name": "HQ PnL Reporting",
+      "description": "P&L reports extracted and pushed to HQ reporting system",
+      "path": ["eos", "rabbitmq", "glint-hq-pnl", "hq-pnl"],
+      "bidirectional": false,
+      "messageTypes": ["PnL.DailyReport", "PnL.MonthEndReport"],
+      "schedule": "Daily + month-end",
+      "criticality": "medium"
+    },
+    {
+      "id": "settlement-sap",
+      "name": "Settlement to SAP",
+      "description": "Settlement documents generated and pushed to SAP via Glint MA",
+      "path": ["eos", "rabbitmq", "glint-ma", "sap"],
+      "bidirectional": false,
+      "messageTypes": ["Settlement.SapExport"],
+      "schedule": "During settlement window",
+      "criticality": "medium",
+      "notes": "Final leg may be manual (Excel download)."
+    },
+    {
+      "id": "invoice-pdf",
+      "name": "Invoice PDF Export",
+      "description": "EOS exports invoices as PDF to AX Cloud shared drive",
+      "path": ["eos", "ax-cloud"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "schedule": "Per invoice approval",
+      "criticality": "low",
+      "notes": "Direct file write — not via RabbitMQ. No message type."
+    },
+    {
+      "id": "port-distance",
+      "name": "Port Distance Manual Pull",
+      "description": "Operators manually retrieve port distance data from a2kvan into EOS",
+      "path": ["a2kvan", "eos"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "schedule": "Manual / ad-hoc",
+      "criticality": "low",
+      "notes": "Not automated. No RabbitMQ involvement."
+    },
+    {
+      "id": "eod-batch",
+      "name": "EOD Batch Trigger",
+      "description": "EOS Scheduler triggers end-of-day processing in EOS",
+      "path": ["eos-scheduler", "eos"],
+      "bidirectional": false,
+      "messageTypes": [],
+      "schedule": "Daily ~17:00",
+      "criticality": "critical",
+      "notes": "Direct invocation — not via RabbitMQ?"
+    }
+  ],
+
+  "_validationNotes": [
+    "All fields marked '?' need confirmation from the EOS/platform team",
+    "RabbitMQ exchange names (eos.inbound, eos.outbound, eos.internal) are inferred — verify against actual RabbitMQ config",
+    "Routing key patterns are best-guesses based on common RabbitMQ conventions",
+    "The eos.internal exchange may not exist — audit and notification queues might use eos.outbound",
+    "KTP and Shovel are inferred from the diagram — verify technology and ownership",
+    "Some data flows (invoice PDF, port distance, EOD batch) may not use RabbitMQ at all",
+    "Docker image names are inferred from the Glint module names — verify against actual container registry",
+    "Message type names follow {Domain}.{Action} convention — verify against actual message contracts",
+    "Consumer assignments are 1:1 in this model — in practice a queue might have multiple consumers"
+  ]
+}
