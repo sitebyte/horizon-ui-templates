@@ -1405,7 +1405,7 @@
         "deliveryMonth": "2026-06",
         "incoterm": "DES",
         "dischargePort": "Sodegaura",
-        "trader": "j.cobley",
+        "trader": "a.morgan",
         "status": "FO-Entered",
         "contractRef": "SPA-SHELL-2026"
       }
@@ -1446,7 +1446,7 @@
             "to": 3200000
           }
         ],
-        "amendedBy": "j.cobley",
+        "amendedBy": "a.morgan",
         "reason": "Quantity correction per counterparty confirmation"
       }
     },
@@ -1462,7 +1462,7 @@
       "frequency": "~1-2/week",
       "samplePayload": {
         "tradeId": "T-995",
-        "cancelledBy": "j.cobley",
+        "cancelledBy": "a.morgan",
         "reason": "Duplicate entry",
         "cancelledAt": "2026-05-06T16:42:00Z"
       }

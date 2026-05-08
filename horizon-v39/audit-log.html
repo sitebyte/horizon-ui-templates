@@ -97,13 +97,13 @@ initShell('audit-log', 'Audit Log');
 const auditEntries = [
   {
     id: 1, timestamp: '2026-04-11 09:42:15', entity: 'T-1024', entityType: 'Trade',
-    action: 'create', user: 'Jon Cobley', role: 'Senior Trader',
+    action: 'create', user: 'Alex Morgan', role: 'Senior Trader',
     summary: 'Created trade T-1024: Buy 65,000 MMBtu JKM @ $12.45 from Shell',
     diff: null
   },
   {
     id: 2, timestamp: '2026-04-11 09:45:32', entity: 'T-1024', entityType: 'Trade',
-    action: 'amend', user: 'Jon Cobley', role: 'Senior Trader',
+    action: 'amend', user: 'Alex Morgan', role: 'Senior Trader',
     summary: 'Amended trade T-1024: Price and volume adjusted',
     diff: [
       { field: 'Price', old: '$12.40', new: '$12.45' },
@@ -120,7 +120,7 @@ const auditEntries = [
   },
   {
     id: 4, timestamp: '2026-04-11 09:38:44', entity: 'T-1023', entityType: 'Trade',
-    action: 'create', user: 'Jon Cobley', role: 'Senior Trader',
+    action: 'create', user: 'Alex Morgan', role: 'Senior Trader',
     summary: 'Created trade T-1023: Sell 70,000 MMBtu JKM @ $12.52 to JERA',
     diff: null
   },

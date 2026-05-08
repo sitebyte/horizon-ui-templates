@@ -406,7 +406,7 @@
         <button class="preset-btn" onclick="applyPreset('eod-1-prod')">EOD-1 PROD</button>
         <button class="preset-btn" onclick="applyPreset('uat-all')">UAT All</button>
         <button class="preset-btn" onclick="applyPreset('jkm-only')">JKM Only</button>
-        <button class="preset-btn" onclick="applyPreset('glng-book')">GLNG Book</button>
+        <button class="preset-btn" onclick="applyPreset('glng-book')">ACME Book</button>
         <button class="preset-btn" onclick="applyPreset('ttf-curves')">TTF Curves</button>
       </div>
 
@@ -429,9 +429,9 @@
           <label for="param-book">Book</label>
           <select id="param-book" aria-label="Trading book filter">
             <option value="ALL" selected>All Books</option>
-            <option value="GLNG">GLNG</option>
-            <option value="GLNG-SPOT">GLNG Spot</option>
-            <option value="GLNG-TERM">GLNG Term</option>
+            <option value="ACME">ACME</option>
+            <option value="ACME-SPOT">ACME Spot</option>
+            <option value="ACME-TERM">ACME Term</option>
           </select>
         </div>
         <div class="param-group">
@@ -835,7 +835,7 @@
     'eod-1-prod': { cob: -1, env: 'PROD', book: 'ALL', benchmark: 'ALL' },
     'uat-all':    { cob: 0, env: 'UAT',  book: 'ALL', benchmark: 'ALL' },
     'jkm-only':   { cob: 0, env: 'PROD', book: 'ALL', benchmark: 'JKM' },
-    'glng-book':  { cob: 0, env: 'PROD', book: 'GLNG', benchmark: 'ALL' },
+    'glng-book':  { cob: 0, env: 'PROD', book: 'ACME', benchmark: 'ALL' },
     'ttf-curves': { cob: 0, env: 'PROD', book: 'ALL', benchmark: 'TTF' }
   };
 

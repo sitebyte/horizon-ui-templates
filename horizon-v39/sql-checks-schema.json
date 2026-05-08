@@ -31,9 +31,9 @@
       "type": "select",
       "options": [
         { "value": "ALL", "label": "All Books" },
-        { "value": "GLNG", "label": "GLNG" },
-        { "value": "GLNG-SPOT", "label": "GLNG Spot" },
-        { "value": "GLNG-TERM", "label": "GLNG Term" }
+        { "value": "ACME", "label": "ACME" },
+        { "value": "ACME-SPOT", "label": "ACME Spot" },
+        { "value": "ACME-TERM", "label": "ACME Term" }
       ],
       "default": "ALL",
       "required": false,
@@ -84,9 +84,9 @@
     },
     {
       "id": "glng-book",
-      "label": "GLNG Book",
-      "description": "GLNG trading book checks",
-      "params": { "cob": "today", "environment": "PROD", "book": "GLNG", "benchmark": "ALL" }
+      "label": "ACME Book",
+      "description": "ACME trading book checks",
+      "params": { "cob": "today", "environment": "PROD", "book": "ACME", "benchmark": "ALL" }
     },
     {
       "id": "ttf-curves",
