@@ -261,6 +261,31 @@ Map to: `<Stack direction="row" wrap gap="2">` with label/value pairs using `<Te
 
 **Note for production**: Per your architectural decision, the API owns the topology model. The UI should consume `{ nodes: [...], edges: [...], asOf }` and render it. Node positions can be hand-tuned in a UI-only `topology-positions.ts`. Do NOT ship static `prod.json`/`uat.json` — probe registry is the catalogue.
 
+### 8. Security Profile (`user-profile.html` — v39)
+
+**Layout**: Identity Banner → KPI Row → Sidebar (20rem) + Main Content (1fr)
+
+**Identity Banner**: Gradient background card with large avatar (accent ring), full name, AD domain\username (`Mono`), status pills (Online, User ID, Environment). Settings button top-right.
+
+**KPI Row**: 4 tiles — Roles count, Legal Entities count, Permissions count (green), Trades MTD (accent).
+
+**Sidebar** (left, 20rem):
+- **Account**: key-value `DetailRow` pairs — username, domain, email, department, location, manager (entity link)
+- **Authentication**: provider, MFA status (green badge), last login, password expiry, account created
+- **Recent Activity**: timeline list with colour-coded dots (trade=accent, login=green, setting=amber, admin=blue)
+- **Sessions**: compact table — device, IP, last active (current session highlighted green)
+
+**Main Content** (right, 1fr):
+- **Roles**: Gradient-bordered cards with icons — one per EOS role (Connect, Security Administrator, System Administrator)
+- **Legal Entities**: Card grid (`auto-fill, minmax(13rem, 1fr)`) — code (mono, accent), full name (muted), ID, active dot
+- **Permission Explorer**: The key feature. Search bar with live filter + match count. Stats bar (462 granted / 14 limited / 12 denied). 8 collapsible accordion categories grouped by verb prefix (Add, Change, View, Cancel, Cargo, Approve, Reports, System). Each permission is a coloured pill (green=granted, red=denied, amber=limited). Search auto-opens matching categories and hides empty ones.
+
+**Data source**: Single `GET /api/admin/security-profile` returning user identity (from Keycloak claims + EOS user table), roles, legal entities, and permissions. Permission categorisation is client-side by parsing PascalCase names.
+
+**Shell integration**: Avatar dropdown in header (click initials → flyout with name, role, View Profile / Settings / Sign Out). Sidebar entry under ADMINISTRATION. Command palette: `G U`.
+
+**Full implementation guide**: `analysis/pass-to-claude/implementation-guide-security-profile.md`
+
 ---
 
 ## Universal Interaction Patterns
