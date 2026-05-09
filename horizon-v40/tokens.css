@@ -1,0 +1,185 @@
+/* ============================================================
+   HORIZON ETRM — Design Tokens
+   Standalone consumable token file for theme porting.
+
+   This file contains ONLY design tokens and theme bindings.
+   No component CSS, no resets, no layout.
+
+   Usage:
+   - Production consumers: import this file only.
+   - Demo pages: import via shell.css (which @imports this file).
+
+   Token Reference:
+   --surface-canvas    Page/viewport background (deepest)
+   --surface-base      App chrome surface (sidebar, header)
+   --surface-raised    Card/panel background
+   --surface-elevated  Higher elevation (modals, popovers)
+   --surface-overlay   Overlays/dropdowns (highest)
+
+   --text-primary      Headings, emphasis
+   --text-secondary    Body text
+   --text-tertiary     Supporting text
+   --text-muted        Disabled/meta text
+
+   --accent            Primary action color (indigo)
+   --accent-violet     Secondary brand accent — used for gradient
+                       endpoints and brand-mark touches. General-
+                       purpose secondary accent, safe to use freely.
+   --gradient          Brand gradient (accent → accent-violet 135deg).
+                       Used on: primary CTA buttons, brand banners,
+                       header logo glow, hero KPI accents.
+   --gradient-subtle   Tinted version of --gradient at ~10% opacity.
+                       Used on: card hover backgrounds, section tints,
+                       subtle brand touches.
+
+   --green/red/amber/blue   Semantic status colors
+   --*-dim                  15% opacity tint for badge/alert backgrounds
+   --*-text                 Darker variant for light-mode text legibility
+
+   Surface ramp (5 tiers):
+   canvas → base → raised → elevated → overlay
+   Canvas is the page background. Base is the app chrome.
+   Both are distinct and durable across iterations.
+
+   Status -dim/-text variants:
+   Stable since v6. -dim = tinted background. -text = legible
+   foreground on light themes. Durable across iterations.
+   ============================================================ */
+
+/* ---------- CSS Custom Properties (Design Tokens) ---------- */
+:root {
+  /* Typography */
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Type scale */
+  --text-xs: 0.6875rem;   /* 11px — labels, badges */
+  --text-sm: 0.8125rem;   /* 13px — compact body, table cells */
+  --text-base: 0.875rem;  /* 14px — body text */
+  --text-lg: 1.125rem;    /* 18px — section titles */
+  --text-xl: 1.5rem;      /* 24px — page titles */
+  --text-hero: 2rem;      /* 32px — hero KPIs */
+
+  /* Accent — indigo to violet gradient */
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-light: #6366f1;
+  --accent-violet: #7c3aed;
+  --accent-bg: rgba(79, 70, 229, 0.1);
+  --accent-bg2: rgba(79, 70, 229, 0.06);
+  --gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-subtle: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.08));
+
+  /* Semantic colors */
+  --green: #22c55e;
+  --green-dim: rgba(34, 197, 94, 0.15);
+  --green-text: #16a34a;
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.15);
+  --red-text: #dc2626;
+  --amber: #f59e0b;
+  --amber-dim: rgba(245, 158, 11, 0.15);
+  --amber-text: #d97706;
+  --blue: #3b82f6;
+  --blue-dim: rgba(59, 130, 246, 0.15);
+  --blue-text: #2563eb;
+
+  /* Spacing base: 0.25rem */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-panel: 0.2s ease-out;
+  --transition-page: 0.3s ease;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 624.9375rem;
+
+  /* Sidebar widths */
+  --sidebar-collapsed: 3.5rem;
+  --sidebar-expanded: 15.5rem;
+}
+
+/* ---------- Dark Theme (default) ---------- */
+[data-theme="dark"] {
+  /* 5 surface tiers: canvas → base → raised → elevated → overlay */
+  --surface-canvas: #09090b;
+  --surface-base: #0f0f12;
+  --surface-raised: #18181b;
+  --surface-elevated: #1f1f23;
+  --surface-overlay: #27272a;
+
+  /* 4 text tiers */
+  --text-primary: #fafafa;
+  --text-secondary: #d4d4d8;
+  --text-tertiary: #a1a1aa;
+  --text-muted: #71717a;
+
+  /* Component surfaces */
+  --sidebar-bg: var(--surface-base);
+  --header-bg: #0f0f12;
+  --card-bg: #141417;
+  --input-bg: #1a1a1e;
+
+  /* Borders */
+  --border: #27272a;
+  --border-subtle: #1f1f23;
+  --border-strong: #3f3f46;
+
+  /* Interactive */
+  --hover: rgba(255, 255, 255, 0.04);
+  --active: rgba(255, 255, 255, 0.06);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(0, 0, 0, 0.4);
+
+  /* Skeleton */
+  --skeleton-base: #1f1f23;
+  --skeleton-shine: #27272a;
+
+  color-scheme: dark;
+}
+
+/* ---------- Light Theme ---------- */
+[data-theme="light"] {
+  --surface-canvas: #f8fafc;
+  --surface-base: #f1f5f9;
+  --surface-raised: #e2e8f0;
+  --surface-elevated: #cbd5e1;
+  --surface-overlay: #94a3b8;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+
+  --sidebar-bg: #ffffff;
+  --header-bg: #ffffff;
+  --card-bg: #ffffff;
+  --input-bg: #f1f5f9;
+
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-strong: #cbd5e1;
+
+  --hover: rgba(0, 0, 0, 0.04);
+  --active: rgba(0, 0, 0, 0.06);
+  --overlay-bg: rgba(0, 0, 0, 0.3);
+  --backdrop: rgba(0, 0, 0, 0.2);
+
+  --skeleton-base: #e2e8f0;
+  --skeleton-shine: #f1f5f9;
+
+  color-scheme: light;
+}

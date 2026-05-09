@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security Profile — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* ---- Layout ---- */
+    .sp-grid { display:grid; grid-template-columns:20rem 1fr; gap:0.75rem; }
+    @media (max-width:64rem) { .sp-grid { grid-template-columns:1fr; } }
+
+    /* ---- Identity Banner ---- */
+    .sp-banner {
+      position:relative; overflow:hidden; padding:1.25rem 1.5rem;
+      background:linear-gradient(135deg, rgba(79,70,229,0.12) 0%, rgba(124,58,237,0.06) 100%);
+      border-bottom:0.0625rem solid var(--border);
+      display:flex; align-items:center; gap:1.25rem;
+    }
+    .sp-banner::before {
+      content:''; position:absolute; top:-3rem; right:-3rem; width:12rem; height:12rem;
+      background:radial-gradient(circle, rgba(79,70,229,0.08) 0%, transparent 70%);
+      border-radius:var(--radius-full);
+    }
+    .sp-avatar-xl {
+      width:4rem; height:4rem; border-radius:var(--radius-full);
+      background:var(--gradient); display:flex; align-items:center; justify-content:center;
+      font-size:1.25rem; font-weight:700; color:#fff; flex-shrink:0;
+      box-shadow:0 0 0 0.1875rem var(--surface-raised), 0 0 0 0.25rem var(--accent);
+    }
+    .sp-identity { flex:1; min-width:0; }
+    .sp-fullname { font-size:1.25rem; font-weight:700; color:var(--text-primary); font-family:'Inter',sans-serif; letter-spacing:-0.01em; }
+    .sp-domain { font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-top:0.125rem; }
+    .sp-status-row { display:flex; align-items:center; gap:0.75rem; margin-top:0.375rem; flex-wrap:wrap; }
+    .sp-status-pill { display:inline-flex; align-items:center; gap:0.25rem; font-size:0.625rem; font-weight:500; font-family:'Inter',sans-serif; padding:0.125rem 0.5rem; border-radius:var(--radius-full); }
+    .sp-status-pill.online { background:var(--green-dim); color:var(--green); }
+    .sp-status-pill.uid { background:var(--accent-bg); color:var(--accent-light); }
+    .sp-status-pill.env { background:var(--amber-dim); color:var(--amber); }
+    .sp-banner-actions { display:flex; gap:0.375rem; flex-shrink:0; }
+    .sp-btn {
+      font-size:0.6875rem; padding:0.375rem 0.75rem; display:inline-flex; align-items:center; gap:0.375rem;
+      background:var(--surface-elevated); color:var(--text-secondary); border:0.0625rem solid var(--border);
+      border-radius:var(--radius-md); text-decoration:none; cursor:pointer; transition:all 0.15s; font-family:'Inter',sans-serif;
+    }
+    .sp-btn:hover { background:var(--accent-bg); color:var(--accent-light); border-color:var(--accent); }
+
+    /* ---- Section Headers ---- */
+    .sp-section-hdr {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;
+    }
+    .sp-section-title { font-size:0.8125rem; font-weight:600; color:var(--text-primary); font-family:'Inter',sans-serif; }
+    .sp-section-count {
+      font-size:0.625rem; font-weight:600; padding:0.0625rem 0.375rem; border-radius:var(--radius-full);
+      background:var(--surface-overlay); color:var(--text-muted); font-family:'JetBrains Mono',monospace;
+    }
+
+    /* ---- Sidebar Details ---- */
+    .sp-detail-row { display:flex; justify-content:space-between; align-items:center; padding:0.3125rem 0; border-bottom:0.0625rem solid var(--border); }
+    .sp-detail-row:last-child { border-bottom:none; }
+    .sp-detail-label { font-size:0.6875rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .sp-detail-value { font-size:0.6875rem; color:var(--text-secondary); font-family:'Inter',sans-serif; text-align:right; max-width:60%; }
+    .sp-detail-value.mono { font-family:'JetBrains Mono',monospace; }
+
+    /* ---- Role Cards ---- */
+    .sp-role-cards { display:flex; gap:0.375rem; flex-wrap:wrap; }
+    .sp-role-card {
+      display:flex; align-items:center; gap:0.375rem; padding:0.375rem 0.625rem;
+      background:var(--gradient-subtle); border:0.0625rem solid rgba(79,70,229,0.2);
+      border-radius:var(--radius-md); font-size:0.6875rem; font-weight:500;
+      color:var(--accent-light); font-family:'Inter',sans-serif; transition:all 0.15s;
+    }
+    .sp-role-card:hover { border-color:var(--accent); background:var(--accent-bg); }
+    .sp-role-card svg { opacity:0.7; }
+
+    /* ---- Legal Entity Cards ---- */
+    .sp-entity-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(13rem, 1fr)); gap:0.5rem; }
+    .sp-entity-card {
+      padding:0.625rem; background:var(--surface-base); border:0.0625rem solid var(--border);
+      border-radius:var(--radius-md); transition:all 0.15s; cursor:default;
+    }
+    .sp-entity-card:hover { border-color:var(--accent); background:var(--accent-bg2); }
+    .sp-entity-code {
+      font-size:0.75rem; font-weight:600; font-family:'JetBrains Mono',monospace;
+      color:var(--accent-light); display:flex; align-items:center; gap:0.375rem;
+    }
+    .sp-entity-code .sp-active-dot { width:0.375rem; height:0.375rem; border-radius:var(--radius-full); background:var(--green); flex-shrink:0; }
+    .sp-entity-name { font-size:0.625rem; color:var(--text-muted); font-family:'Inter',sans-serif; margin-top:0.1875rem; line-height:1.3; }
+    .sp-entity-id { font-size:0.5625rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-top:0.1875rem; opacity:0.6; }
+
+    /* ---- Permission Explorer ---- */
+    .sp-perm-search-wrap {
+      display:flex; align-items:center; gap:0.5rem; padding:0.375rem 0.625rem;
+      background:var(--input-bg); border:0.0625rem solid var(--border); border-radius:var(--radius-md);
+      margin-bottom:0.625rem; transition:border-color 0.15s;
+    }
+    .sp-perm-search-wrap:focus-within { border-color:var(--accent); }
+    .sp-perm-search-wrap svg { color:var(--text-muted); flex-shrink:0; }
+    .sp-perm-search {
+      flex:1; background:none; border:none; outline:none; font-size:0.75rem;
+      color:var(--text-primary); font-family:'Inter',sans-serif;
+    }
+    .sp-perm-search::placeholder { color:var(--text-muted); }
+    .sp-perm-stats {
+      display:flex; gap:0.75rem; margin-bottom:0.625rem; flex-wrap:wrap;
+    }
+    .sp-perm-stat {
+      font-size:0.625rem; color:var(--text-muted); font-family:'Inter',sans-serif;
+      display:flex; align-items:center; gap:0.25rem;
+    }
+    .sp-perm-stat-num { font-weight:600; font-family:'JetBrains Mono',monospace; }
+    .sp-perm-stat-num.granted { color:var(--green); }
+    .sp-perm-stat-num.limited { color:var(--amber); }
+    .sp-perm-stat-num.denied { color:var(--red); }
+
+    /* Permission category accordion */
+    .sp-perm-cat {
+      border:0.0625rem solid var(--border); border-radius:var(--radius-md);
+      margin-bottom:0.375rem; overflow:hidden; transition:border-color 0.15s;
+    }
+    .sp-perm-cat:hover { border-color:var(--border-strong); }
+    .sp-perm-cat-hdr {
+      display:flex; align-items:center; gap:0.5rem; padding:0.4375rem 0.625rem;
+      cursor:pointer; user-select:none; transition:background 0.1s;
+    }
+    .sp-perm-cat-hdr:hover { background:var(--hover); }
+    .sp-perm-cat-chevron {
+      transition:transform 0.2s; color:var(--text-muted); flex-shrink:0;
+    }
+    .sp-perm-cat.open .sp-perm-cat-chevron { transform:rotate(90deg); }
+    .sp-perm-cat-label { font-size:0.6875rem; font-weight:600; color:var(--text-primary); font-family:'Inter',sans-serif; flex:1; }
+    .sp-perm-cat-count {
+      font-size:0.5625rem; font-weight:600; padding:0.0625rem 0.3125rem; border-radius:var(--radius-full);
+      background:var(--surface-overlay); color:var(--text-muted); font-family:'JetBrains Mono',monospace;
+    }
+    .sp-perm-cat-bar {
+      height:0.125rem; border-radius:0.0625rem; flex-shrink:0; width:3rem;
+    }
+    .sp-perm-cat-body { display:none; padding:0.25rem 0.625rem 0.5rem; }
+    .sp-perm-cat.open .sp-perm-cat-body { display:block; }
+    .sp-perm-pills { display:flex; flex-wrap:wrap; gap:0.1875rem; }
+    .sp-perm-pill {
+      font-size:0.5625rem; padding:0.125rem 0.375rem; border-radius:var(--radius-sm);
+      font-family:'JetBrains Mono',monospace; font-weight:400; transition:all 0.1s; cursor:default;
+    }
+    .sp-perm-pill.g { background:var(--green-dim); color:var(--green); }
+    .sp-perm-pill.g:hover { background:rgba(34,197,94,0.25); }
+    .sp-perm-pill.d { background:var(--red-dim); color:var(--red); }
+    .sp-perm-pill.d:hover { background:rgba(239,68,68,0.25); }
+    .sp-perm-pill.l { background:var(--amber-dim); color:var(--amber); }
+    .sp-perm-pill.l:hover { background:rgba(245,158,11,0.25); }
+    .sp-perm-pill.hidden { display:none; }
+    .sp-perm-pill.highlight { outline:0.0625rem solid var(--accent); outline-offset:0.0625rem; }
+
+    /* ---- Activity Timeline ---- */
+    .sp-activity-list { list-style:none; padding:0; margin:0; }
+    .sp-activity-item { display:flex; gap:0.5rem; padding:0.375rem 0; border-bottom:0.0625rem solid var(--border); }
+    .sp-activity-item:last-child { border-bottom:none; }
+    .sp-activity-dot { width:0.375rem; height:0.375rem; border-radius:var(--radius-full); margin-top:0.3125rem; flex-shrink:0; }
+    .sp-activity-dot.trade { background:var(--accent); }
+    .sp-activity-dot.login { background:var(--green); }
+    .sp-activity-dot.setting { background:var(--amber); }
+    .sp-activity-dot.admin { background:var(--blue); }
+    .sp-activity-text { font-size:0.6875rem; color:var(--text-secondary); font-family:'Inter',sans-serif; flex:1; }
+    .sp-activity-time { font-size:0.5625rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace; white-space:nowrap; flex-shrink:0; }
+
+    /* ---- Session Table ---- */
+    .sp-session-tbl { width:100%; border-collapse:collapse; }
+    .sp-session-tbl th { text-align:left; padding:0.25rem 0.375rem; font-size:0.5625rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); border-bottom:0.0625rem solid var(--border); font-family:'Inter',sans-serif; }
+    .sp-session-tbl td { padding:0.25rem 0.375rem; font-size:0.6875rem; color:var(--text-secondary); border-bottom:0.0625rem solid var(--border); font-family:'Inter',sans-serif; }
+    .sp-session-tbl tr:last-child td { border-bottom:none; }
+    .sp-session-now { color:var(--green) !important; font-weight:500; }
+
+    /* ---- KPI Row ---- */
+    .sp-kpi-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem; margin-bottom:0.75rem; }
+    @media (max-width:48rem) { .sp-kpi-row { grid-template-columns:repeat(2, 1fr); } }
+    .sp-kpi {
+      padding:0.625rem; background:var(--surface-base); border:0.0625rem solid var(--border);
+      border-radius:var(--radius-md); text-align:center;
+    }
+    .sp-kpi-value { font-size:1.25rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--text-primary); line-height:1; }
+    .sp-kpi-label { font-size:0.5625rem; color:var(--text-muted); font-family:'Inter',sans-serif; margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+    /* ---- No-results ---- */
+    .sp-no-results { display:none; padding:1rem; text-align:center; font-size:0.75rem; color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .sp-no-results.visible { display:block; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- ===== Identity Banner ===== -->
+  <div class="hz-card fade-in" style="margin-bottom:0.75rem;padding:0;overflow:hidden;">
+    <div class="sp-banner">
+      <div class="sp-avatar-xl">AM</div>
+      <div class="sp-identity">
+        <div class="sp-fullname">Alex Morgan</div>
+        <div class="sp-domain">ACMECORP\amorgan</div>
+        <div class="sp-status-row">
+          <span class="sp-status-pill online"><span style="width:0.375rem;height:0.375rem;border-radius:50%;background:var(--green);display:inline-block;"></span> Online</span>
+          <span class="sp-status-pill uid">User ID: 712</span>
+          <span class="sp-status-pill env">UAT1</span>
+        </div>
+      </div>
+      <div class="sp-banner-actions">
+        <a href="settings.html" class="sp-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI Row ===== -->
+  <div class="sp-kpi-row fade-in-d1">
+    <div class="sp-kpi">
+      <div class="sp-kpi-value">3</div>
+      <div class="sp-kpi-label">Roles</div>
+    </div>
+    <div class="sp-kpi">
+      <div class="sp-kpi-value">5</div>
+      <div class="sp-kpi-label">Legal Entities</div>
+    </div>
+    <div class="sp-kpi">
+      <div class="sp-kpi-value" style="color:var(--green);">488</div>
+      <div class="sp-kpi-label">Permissions</div>
+    </div>
+    <div class="sp-kpi">
+      <div class="sp-kpi-value" style="color:var(--accent-light);">18</div>
+      <div class="sp-kpi-label">Trades (MTD)</div>
+    </div>
+  </div>
+
+  <div class="sp-grid">
+    <!-- ===== Left Sidebar ===== -->
+    <div>
+      <!-- Account Details -->
+      <div class="hz-card fade-in-d1" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Account</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Username</span>
+          <span class="sp-detail-value mono">amorgan</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Domain</span>
+          <span class="sp-detail-value mono">ACMECORP</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Email</span>
+          <span class="sp-detail-value">a.morgan@acmecorp.com</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Department</span>
+          <span class="sp-detail-value">Commodities Trading</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Location</span>
+          <span class="sp-detail-value">London, UK</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Manager</span>
+          <span class="sp-detail-value"><a class="hz-entity-link" href="#">S. Williams</a></span>
+        </div>
+      </div>
+
+      <!-- Authentication -->
+      <div class="hz-card fade-in-d2" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Authentication</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Provider</span>
+          <span class="sp-detail-value">Active Directory</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">MFA</span>
+          <span class="sp-detail-value"><span class="hz-badge green" style="font-size:0.5625rem;">Enabled</span></span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Last Login</span>
+          <span class="sp-detail-value mono">2026-05-08 08:42</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Password Expiry</span>
+          <span class="sp-detail-value mono">2026-09-15</span>
+        </div>
+        <div class="sp-detail-row">
+          <span class="sp-detail-label">Account Created</span>
+          <span class="sp-detail-value mono">2024-06-12</span>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="hz-card fade-in-d3" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Recent Activity</span>
+        </div>
+        <ul class="sp-activity-list">
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot trade"></span>
+            <span class="sp-activity-text">Created trade <a class="hz-entity-link" href="lifecycle.html">T-1006</a></span>
+            <span class="sp-activity-time">10m</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot trade"></span>
+            <span class="sp-activity-text">Amended <a class="hz-entity-link" href="lifecycle.html">T-1003</a> delivery window</span>
+            <span class="sp-activity-time">42m</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot trade"></span>
+            <span class="sp-activity-text">Approved <a class="hz-entity-link" href="invoices.html">INV-2026-0042</a></span>
+            <span class="sp-activity-time">1h</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot login"></span>
+            <span class="sp-activity-text">Signed in — Main Office</span>
+            <span class="sp-activity-time">2h</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot setting"></span>
+            <span class="sp-activity-text">Changed portfolio to Pacific</span>
+            <span class="sp-activity-time">1d</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot trade"></span>
+            <span class="sp-activity-text">Confirmed <a class="hz-entity-link" href="cargo-board.html">CARGO-Q2-01</a></span>
+            <span class="sp-activity-time">1d</span>
+          </li>
+          <li class="sp-activity-item">
+            <span class="sp-activity-dot admin"></span>
+            <span class="sp-activity-text">Exported blotter CSV (24 rows)</span>
+            <span class="sp-activity-time">2d</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Active Sessions -->
+      <div class="hz-card fade-in-d4">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Sessions</span>
+          <span class="sp-section-count">3</span>
+        </div>
+        <table class="sp-session-tbl">
+          <thead><tr><th>Device</th><th>IP</th><th>Active</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="sp-session-now">Chrome macOS</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:0.625rem;">10.1.22.58</td>
+              <td class="sp-session-now">Now</td>
+            </tr>
+            <tr>
+              <td>Chrome Win</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:0.625rem;">10.1.22.103</td>
+              <td>1d ago</td>
+            </tr>
+            <tr>
+              <td>Safari iOS</td>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:0.625rem;">172.16.5.44</td>
+              <td>3d ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== Main Content ===== -->
+    <div>
+      <!-- Roles -->
+      <div class="hz-card fade-in-d1" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Roles</span>
+          <span class="sp-section-count">3</span>
+        </div>
+        <div class="sp-role-cards">
+          <div class="sp-role-card">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Connect
+          </div>
+          <div class="sp-role-card">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security Administrator
+          </div>
+          <div class="sp-role-card">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            System Administrator
+          </div>
+        </div>
+      </div>
+
+      <!-- Legal Entities -->
+      <div class="hz-card fade-in-d2" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Legal Entities</span>
+          <span class="sp-section-count">5</span>
+        </div>
+        <div class="sp-entity-grid">
+          <div class="sp-entity-card">
+            <div class="sp-entity-code"><span class="sp-active-dot"></span> ACHK</div>
+            <div class="sp-entity-name">ACME ENERGY (HONG KONG) CORPORATION LIMITED</div>
+            <div class="sp-entity-id">ID 4201</div>
+          </div>
+          <div class="sp-entity-card">
+            <div class="sp-entity-code"><span class="sp-active-dot"></span> AIHK</div>
+            <div class="sp-entity-name">ACME INTERNATIONAL (HONG KONG) CORPORATION LIMITED</div>
+            <div class="sp-entity-id">ID 4202</div>
+          </div>
+          <div class="sp-entity-card">
+            <div class="sp-entity-code"><span class="sp-active-dot"></span> AILN</div>
+            <div class="sp-entity-name">ACME INTERNATIONAL (LONDON) CO., LTD</div>
+            <div class="sp-entity-id">ID 4203</div>
+          </div>
+          <div class="sp-entity-card">
+            <div class="sp-entity-code"><span class="sp-active-dot"></span> AISG</div>
+            <div class="sp-entity-name">ACME INTERNATIONAL (SINGAPORE) PTE. LTD.</div>
+            <div class="sp-entity-id">ID 4204</div>
+          </div>
+          <div class="sp-entity-card">
+            <div class="sp-entity-code"><span class="sp-active-dot"></span> ACI</div>
+            <div class="sp-entity-name">ACME COMMODITIES INTERNATIONAL LTD.</div>
+            <div class="sp-entity-id">ID 4205</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions Explorer -->
+      <div class="hz-card fade-in-d3" style="margin-bottom:0.75rem;">
+        <div class="sp-section-hdr">
+          <span class="sp-section-title">Permissions</span>
+          <span class="sp-section-count" id="sp-perm-total">488</span>
+        </div>
+
+        <div class="sp-perm-search-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="sp-perm-search" id="sp-perm-search" placeholder="Search 488 permissions..." autocomplete="off" />
+          <span id="sp-perm-match-count" style="font-size:0.5625rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;"></span>
+        </div>
+
+        <div class="sp-perm-stats">
+          <span class="sp-perm-stat"><span class="sp-perm-stat-num granted">462</span> granted</span>
+          <span class="sp-perm-stat"><span class="sp-perm-stat-num limited">14</span> limited</span>
+          <span class="sp-perm-stat"><span class="sp-perm-stat-num denied">12</span> denied</span>
+        </div>
+
+        <div id="sp-perm-cats">
+          <!-- Populated by JS -->
+        </div>
+        <div class="sp-no-results" id="sp-no-results">No permissions match your search.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+  initShell('user-profile', 'Security Profile');
+
+  /* ========== PERMISSION DATA ========== */
+  /* Grouped by verb/domain, sourced from EOS security tables */
+  var PERM_CATEGORIES = [
+    { label: 'Add / Create', color: 'var(--green)', perms: [
+      'ActualisationQuantity','AddActualDefinition','AddAddressandContact','AddARDownload',
+      'AddBankAccount','AddBasin','AddBasinProduct','AddBook','AddBookLinkType','AddBookTransfer',
+      'AddCalendar','AddCalendarDate','AddCanalData','AddCargo','AddChain','AddChainBook',
+      'AddChargeProduct','AddChargeType','AddCompany','AddCompanyProductPaymentTerms',
+      'AddCompanyProductType','AddComplexPricing','AddConsumptionCurves','AddContract',
+      'AddCountry','AddCountryProduct','AddCurveDefinition','AddDeliveryRegion',
+      'AddExposureTag','AddGrade','AddGroup','AddGroupMember','AddGroupScenario',
+      'AddIdleConsumption','AddImportBatch','AddIndex','AddInterbookTrades',
+      'AddIntercompanyTrades','AddLateContractReason','AddLocationContext','AddLocationCurve',
+      'AddMarketIndex','AddMasterTradingAgreement','AddMasterTradingAgreementType',
+      'AddNaturalGasSwapTemplate','AddNaturalGasSwapTemplatePaymentTerms','AddNotRemitReportableReason',
+      'AddOilSwapTemplate','AddOilSwapTemplatePaymentTerms','AddPaymentTerm','AddPort',
+      'AddPortfolio','AddPortProduct','AddPrepayment','AddPriceBasis','AddPricingMarket',
+      'AddProductTypes','AddRegion','AddRegionProduct','AddRegressionReason','AddRegulatoryRegion',
+      'AddRemoveDocumentAttachment','AddRole','AddSAPTaxCode','AddStatementDescription',
+      'AddStatementDescriptionProduct','AddStrategy','AddSystemFilter','AddTaxBasis',
+      'AddTaxRate','AddTaxRegion','AddTaxRegistration','AddTermsandConditions','AddTrade',
+      'AddTradeDetails','AddTradeMarktoMarket','AddUser','AddValuationDefinition','AddValuationRun',
+      'AddVATRegionAccount','AddVessel','AddVesselClass','AddVesselEvent','AddVesselProduct',
+      'AddVesselVetting','AddInPortTimes'
+    ]},
+    { label: 'Change / Update', color: 'var(--amber)', perms: [
+      'ChangeActualStatusEvaluation','ChangeActualStatusFinal','ChangeContractStatusConfirmed',
+      'ChangeCounterPartyReference','ChangeCurveStatusEvaluation','ChangeCurveStatusFinal',
+      'ChangeInvoiceType','ChangeOptionStatusActive','ChangeOptionStatusAssumeLapse',
+      'ChangeOptionStatusAssumeExercise','ChangeOptionStatusExercise','ChangeOptionStatusLapsed',
+      'ChangeStatusActive','ChangeStatusAmended','ChangeStatusCancelled','ChangeStatusConfirmed',
+      'ChangeStatusDraft','ChangeStatusEnteredByFO','ChangeStatusValidatedByFO',
+      'ChangeTradeBookTransfer','ChangeVesselOnTradeEvent'
+    ]},
+    { label: 'View / Read', color: 'var(--blue)', perms: [
+      'ViewActuals','ViewARStatement','ViewAuditTrail','ViewCalendar','ViewCargoSchedule',
+      'ViewChainBook','ViewCharges','ViewCompanyDetails','ViewContractDetails',
+      'ViewCurveDefinitions','ViewDeals','ViewExposure','ViewForwardCurves',
+      'ViewGroupScenarios','ViewImportBatches','ViewIndexDefinitions','ViewInvoices',
+      'ViewMarktoMarket','ViewMasterAgreements','ViewNominations','ViewPaymentTerms',
+      'ViewPortfolio','ViewPositions','ViewPrepayments','ViewPriceBasis','ViewRegions',
+      'ViewRegulatoryReports','ViewRoles','ViewSchedules','ViewSecurityProfile',
+      'ViewStatements','ViewStrategy','ViewSystemLogs','ViewTaxRates','ViewTradeDetails',
+      'ViewTradeHistory','ViewUsers','ViewValuations','ViewVesselCharters','ViewVesselDetails',
+      'ViewVesselEvents','ViewVetting'
+    ]},
+    { label: 'Cancel / Delete', color: 'var(--red)', status: 'd', perms: [
+      'CancelInvoice','CancelPreApprovedInvoice','DeleteTrade','DeleteTradeDocument',
+      'RemoveDocumentAttachment','RemoveGroupMember','RemoveRole','RemoveUser',
+      'CancelStatement','DeleteActual','DeleteCurve','DeleteImportBatch'
+    ]},
+    { label: 'Cargo & Shipping', color: 'var(--accent-light)', perms: [
+      'CargoScheduleOverrideCargoCV','CargoScheduleOverrideCCTDischargeEstimate',
+      'CargoSchedulePinVessel','CargoScheduleVessel','CargoScheduleFuelStrategy',
+      'AnnualDeliveryProfileUpdates','ApplyDataFixes_v_1_2','ApplyTradeLock',
+      'AssignAddressContacttoCompany','AttachStatementDocument','AttachTradeDocument',
+      'BroadcastSystemMessage'
+    ]},
+    { label: 'Approve / Confirm', color: 'var(--green)', perms: [
+      'ApproveInvoice','ApproveStatement','ConfirmTrade','ConfirmNomination',
+      'ConfirmCargoSchedule','ConfirmVesselEvent','ApproveValuation','ApprovePrepayment',
+      'ConfirmActual','ConfirmCurve','ValidateTrade','CheckTrade'
+    ]},
+    { label: 'Reports & Export', color: 'var(--text-tertiary)', perms: [
+      'ExportData','GenerateReport','PrintStatement','PrintInvoice','RunValuation',
+      'RunExposureReport','GenerateARStatement','ExportCargoSchedule','ExportPositions',
+      'RunRegulatoryReport','ExportAuditTrail','GenerateTradeConfirmation'
+    ]},
+    { label: 'System & Admin', color: 'var(--accent-violet)', perms: [
+      'ManageSystemFilter','ManageCalendar','ManageImportBatch','ManageLookups',
+      'ManageAttributes','ManageUserTables','ManageNotRemitReports','ManageRegressionReason',
+      'ManageLateContractReason','ManageReports','ConfigureSystem','ManageScheduledTasks',
+      'ManageDataImport','ManageRegulations','BackupDatabase','RestoreDatabase'
+    ]},
+  ];
+
+  /* ========== BUILD PERMISSION CATEGORIES ========== */
+  function buildPermCats() {
+    var container = document.getElementById('sp-perm-cats');
+    var html = '';
+    PERM_CATEGORIES.forEach(function(cat, ci) {
+      var defaultStatus = cat.status || 'g';
+      html += '<div class="sp-perm-cat" data-cat="' + ci + '">';
+      html += '  <div class="sp-perm-cat-hdr" onclick="togglePermCat(' + ci + ')">';
+      html += '    <svg class="sp-perm-cat-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+      html += '    <span class="sp-perm-cat-label">' + cat.label + '</span>';
+      html += '    <div class="sp-perm-cat-bar" style="background:' + cat.color + ';opacity:0.4;"></div>';
+      html += '    <span class="sp-perm-cat-count" data-original="' + cat.perms.length + '">' + cat.perms.length + '</span>';
+      html += '  </div>';
+      html += '  <div class="sp-perm-cat-body"><div class="sp-perm-pills">';
+      cat.perms.forEach(function(p) {
+        html += '<span class="sp-perm-pill ' + defaultStatus + '" data-perm="' + p.toLowerCase() + '">' + p + '</span>';
+      });
+      html += '</div></div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function togglePermCat(idx) {
+    var el = document.querySelector('.sp-perm-cat[data-cat="' + idx + '"]');
+    el.classList.toggle('open');
+  }
+
+  /* ========== PERMISSION SEARCH ========== */
+  document.getElementById('sp-perm-search').addEventListener('input', function(e) {
+    var q = e.target.value.toLowerCase().trim();
+    var pills = document.querySelectorAll('.sp-perm-pill');
+    var cats = document.querySelectorAll('.sp-perm-cat');
+    var matchCount = 0;
+
+    if (!q) {
+      pills.forEach(function(p) { p.classList.remove('hidden'); });
+      cats.forEach(function(c) {
+        c.style.display = '';
+        c.classList.remove('open');
+        var orig = c.querySelector('.sp-perm-cat-count').getAttribute('data-original');
+        c.querySelector('.sp-perm-cat-count').textContent = orig;
+      });
+      document.getElementById('sp-perm-match-count').textContent = '';
+      document.getElementById('sp-no-results').classList.remove('visible');
+      return;
+    }
+
+    pills.forEach(function(p) {
+      var name = p.getAttribute('data-perm');
+      if (name.indexOf(q) >= 0) {
+        p.classList.remove('hidden');
+        matchCount++;
+      } else {
+        p.classList.add('hidden');
+      }
+    });
+
+    cats.forEach(function(c) {
+      var visible = c.querySelectorAll('.sp-perm-pill:not(.hidden)');
+      if (visible.length === 0) {
+        c.style.display = 'none';
+      } else {
+        c.style.display = '';
+        c.classList.add('open');
+        c.querySelector('.sp-perm-cat-count').textContent = visible.length;
+      }
+    });
+
+    document.getElementById('sp-perm-match-count').textContent = matchCount + ' found';
+    document.getElementById('sp-no-results').classList.toggle('visible', matchCount === 0);
+  });
+
+  buildPermCats();
+</script>
+</body>
+</html>

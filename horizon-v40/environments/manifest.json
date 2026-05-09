@@ -1,0 +1,9 @@
+{
+  "environments": [
+    { "id": "prod", "label": "PROD", "status": "active", "configFile": "prod.json" },
+    { "id": "uat", "label": "UAT", "status": "active", "configFile": "uat.json" },
+    { "id": "dev", "label": "DEV", "status": "disabled", "configFile": null },
+    { "id": "tst2", "label": "TST2", "status": "disabled", "configFile": null }
+  ],
+  "defaultEnvironment": "prod"
+}
