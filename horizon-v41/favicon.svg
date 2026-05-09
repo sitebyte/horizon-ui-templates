@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- EOS.Horizon favicon — LNG Carrier silhouette (Moss-type, 3 domes) -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="8" cy="8" r="7.5" fill="url(#g)"/>
+  <!-- Hull -->
+  <path d="M1.5 10.8 L3 9.2 L14 9.2 L15 10.8 Z" fill="white" opacity="0.95"/>
+  <!-- Bow rake -->
+  <path d="M3 9.2 L2.2 8.2 L4 9.2 Z" fill="white" opacity="0.95"/>
+  <!-- Dome 1 -->
+  <path d="M4.2 9.2 A1.5 1.5 0 0 1 7 9.2" fill="white" opacity="0.9"/>
+  <!-- Dome 2 -->
+  <path d="M7.2 9.2 A1.5 1.5 0 0 1 10 9.2" fill="white" opacity="0.9"/>
+  <!-- Dome 3 -->
+  <path d="M10.2 9.2 A1.5 1.5 0 0 1 12.8 9.2" fill="white" opacity="0.9"/>
+  <!-- Superstructure -->
+  <rect x="13" y="6.5" width="1.8" height="2.7" rx="0.3" fill="white" opacity="0.95"/>
+  <!-- Funnel -->
+  <rect x="13.4" y="5.5" width="0.9" height="1" rx="0.2" fill="white" opacity="0.85"/>
+</svg>

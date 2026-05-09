@@ -570,7 +570,7 @@ function buildHeader(pageTitle) {
   var html = '<header class="hz-header" data-component="header" role="banner">';
   html += '<div class="hz-header-left">';
   html += '  <div class="hz-header-brand">';
-  html += '    <div class="hz-header-brand-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>';
+  html += '    <div class="hz-header-brand-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M1 16.5L2.5 14H21.5L23 16.5Z" fill="#fff" opacity=".95"/><path d="M2.5 14L1.5 12.5 4 14Z" fill="#fff" opacity=".95"/><path d="M5.5 14A2.2 2.2 0 0 1 9.5 14" fill="#fff" opacity=".9"/><path d="M10 14A2.2 2.2 0 0 1 14 14" fill="#fff" opacity=".9"/><path d="M14.5 14A2.2 2.2 0 0 1 18.5 14" fill="#fff" opacity=".9"/><rect x="19" y="9.5" width="3" height="4.5" rx=".4" fill="#fff" opacity=".95"/><rect x="19.5" y="10.2" width="2" height=".6" rx=".2" fill="#fff" opacity=".3"/><rect x="20.2" y="7.8" width="1.2" height="1.7" rx=".3" fill="#fff" opacity=".85"/></svg></div>';
   html += '    <span class="hz-header-brand-text">Horizon</span>';
   html += '  </div>';
   html += '  <span class="hz-breadcrumb-page">' + (pageTitle || '') + '</span>';
@@ -1155,16 +1155,207 @@ function exitFullscreenIfActive() {
   }
 }
 
+/* ========== WORKSPACE TABS ========== */
+
+/* Build a flat lookup of menu key -> {label, href} from the MENU tree */
+function getMenuLookup() {
+  var lookup = {};
+  function walk(items) {
+    items.forEach(function(item) {
+      if (item.key) {
+        lookup[item.key] = { label: item.label, href: item.href || '' };
+      }
+      if (item.children) walk(item.children);
+      if (item.items) walk(item.items);
+    });
+  }
+  walk(MENU);
+  return lookup;
+}
+
+function buildWorkspaceTabs(activeKey, pageTitle) {
+  var stored = [];
+  try { stored = JSON.parse(localStorage.getItem('hz-workspace-tabs')) || []; } catch(e) { stored = []; }
+
+  // Determine URL for the current page
+  var currentUrl = window.location.pathname.split('/').pop() || 'index.html';
+  var currentHash = window.location.hash || '';
+  if (currentHash) currentUrl += currentHash;
+
+  // Check if current page is already in tabs (by key)
+  var found = false;
+  for (var i = 0; i < stored.length; i++) {
+    if (stored[i].key === activeKey) {
+      // Update title and url if changed
+      stored[i].title = pageTitle;
+      stored[i].url = currentUrl;
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    stored.push({ key: activeKey, title: pageTitle, url: currentUrl });
+    // Enforce max 10 tabs — drop oldest (leftmost) if needed
+    if (stored.length > 10) {
+      stored = stored.slice(stored.length - 10);
+    }
+  }
+
+  localStorage.setItem('hz-workspace-tabs', JSON.stringify(stored));
+
+  // Build HTML
+  var html = '<div class="hz-workspace-tabs" data-component="workspace-tabs">';
+  stored.forEach(function(tab) {
+    var isActive = tab.key === activeKey;
+    html += '<div class="hz-ws-tab' + (isActive ? ' active' : '') + '" data-key="' + tab.key + '" title="' + tab.title + '" onclick="navigateWorkspaceTab(\'' + tab.key + '\')">';
+    html += '  <span class="hz-ws-tab-title">' + tab.title + '</span>';
+    html += '  <button class="hz-ws-tab-close" onclick="closeWorkspaceTab(\'' + tab.key + '\', event)">&times;</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function navigateWorkspaceTab(key) {
+  var stored = [];
+  try { stored = JSON.parse(localStorage.getItem('hz-workspace-tabs')) || []; } catch(e) { stored = []; }
+  for (var i = 0; i < stored.length; i++) {
+    if (stored[i].key === key) {
+      window.location.href = stored[i].url;
+      return;
+    }
+  }
+}
+
+function closeWorkspaceTab(key, event) {
+  event.stopPropagation();
+  var stored = [];
+  try { stored = JSON.parse(localStorage.getItem('hz-workspace-tabs')) || []; } catch(e) { stored = []; }
+  stored = stored.filter(function(t) { return t.key !== key; });
+  localStorage.setItem('hz-workspace-tabs', JSON.stringify(stored));
+
+  // If closing the active tab, navigate to the last remaining tab (or do nothing if none left)
+  var activeKey = window.hzPageKey || '';
+  if (key === activeKey && stored.length > 0) {
+    window.location.href = stored[stored.length - 1].url;
+    return;
+  }
+
+  // Otherwise just re-render the tab bar in place
+  var container = document.querySelector('.hz-workspace-tabs');
+  if (container) {
+    var html = '';
+    stored.forEach(function(tab) {
+      var isActive = tab.key === activeKey;
+      html += '<div class="hz-ws-tab' + (isActive ? ' active' : '') + '" data-key="' + tab.key + '" title="' + tab.title + '" onclick="navigateWorkspaceTab(\'' + tab.key + '\')">';
+      html += '  <span class="hz-ws-tab-title">' + tab.title + '</span>';
+      html += '  <button class="hz-ws-tab-close" onclick="closeWorkspaceTab(\'' + tab.key + '\', event)">&times;</button>';
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
+}
+
+/* ========== STATE PERSISTENCE ========== */
+var hzGridApis = [];
+
+function hzRegisterGrid(api, gridId) {
+  gridId = gridId || 'default';
+  hzGridApis.push({ api: api, id: gridId });
+  // Restore saved state for this grid
+  var saved = hzLoadPageState();
+  if (saved && saved.grids && saved.grids[gridId]) {
+    var gs = saved.grids[gridId];
+    if (gs.columnState) api.applyColumnState({ state: gs.columnState, applyOrder: true });
+    if (gs.filterModel) api.setFilterModel(gs.filterModel);
+  }
+}
+
+function hzSavePageState() {
+  var key = 'hz-page-state-' + (window.hzPageKey || 'unknown');
+  var state = {};
+
+  // Scroll position
+  var content = document.querySelector('.hz-content');
+  if (content) state.scrollTop = content.scrollTop;
+
+  // Active pills
+  var pills = document.querySelectorAll('.hz-pill.active, .recon-sel-btn.active, .density-opt.active');
+  if (pills.length) {
+    state.activePills = [];
+    pills.forEach(function(p) { state.activePills.push(p.textContent.trim()); });
+  }
+
+  // Active tabs (like in lifecycle.html)
+  var activeTab = document.querySelector('[data-tab].active, .td-tab.active');
+  if (activeTab) state.activeTab = activeTab.getAttribute('data-tab') || activeTab.textContent.trim();
+
+  // AG Grid state
+  state.grids = {};
+  hzGridApis.forEach(function(g) {
+    try {
+      state.grids[g.id] = {
+        columnState: g.api.getColumnState(),
+        filterModel: g.api.getFilterModel()
+      };
+    } catch(e) {}
+  });
+
+  localStorage.setItem(key, JSON.stringify(state));
+}
+
+function hzLoadPageState() {
+  var key = 'hz-page-state-' + (window.hzPageKey || 'unknown');
+  try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+}
+
+function hzRestorePageState() {
+  var saved = hzLoadPageState();
+  if (!saved) return;
+
+  // Restore scroll position (slight delay to let content render)
+  if (saved.scrollTop) {
+    setTimeout(function() {
+      var content = document.querySelector('.hz-content');
+      if (content) content.scrollTop = saved.scrollTop;
+    }, 200);
+  }
+
+  // Restore active pills
+  if (saved.activePills && saved.activePills.length) {
+    var allPills = document.querySelectorAll('.hz-pill, .recon-sel-btn, .density-opt');
+    allPills.forEach(function(p) {
+      var text = p.textContent.trim();
+      if (saved.activePills.indexOf(text) !== -1) {
+        p.classList.add('active');
+      }
+    });
+  }
+
+  // Restore active tab
+  if (saved.activeTab) {
+    var tabs = document.querySelectorAll('[data-tab]');
+    tabs.forEach(function(t) {
+      if (t.getAttribute('data-tab') === saved.activeTab || t.textContent.trim() === saved.activeTab) {
+        t.click(); // simulate click to activate
+      }
+    });
+  }
+}
+
 /* ========== INIT SHELL ========== */
 function initShell(activePage, pageTitle) {
+  window.hzPageKey = activePage;
   initTheme();
 
   var wrapper = document.getElementById('hz-app');
   var pageContent = wrapper.innerHTML;
 
-  // Build the shell — header + context strip + sidebar + content + status bar
+  // Build the shell — header + context strip + workspace tabs + sidebar + content + status bar
   wrapper.innerHTML = buildHeader(pageTitle) +
     buildContextStrip() +
+    buildWorkspaceTabs(activePage, pageTitle) +
     buildSidebar(activePage) +
     '<div class="hz-main" data-component="main-content">' +
       '<main class="hz-content" role="main">' +
@@ -1173,6 +1364,9 @@ function initShell(activePage, pageTitle) {
       buildStatusBar() +
     '</div>' +
     buildCmdK();
+
+  // Add class for workspace tabs layout adjustment
+  wrapper.classList.add('hz-has-workspace-tabs');
 
   // ---- Sidebar search ----
   initSidebarSearch();
@@ -1238,6 +1432,10 @@ function initShell(activePage, pageTitle) {
   updateThemeIcons();
   var observer = new MutationObserver(updateThemeIcons);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---- State persistence ----
+  hzRestorePageState();
+  window.addEventListener('beforeunload', hzSavePageState);
 
 }
 

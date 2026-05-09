@@ -997,6 +997,7 @@ input, select, textarea {
 /* App fullscreen — hides everything except content */
 .hz-app-fullscreen .hz-header,
 .hz-app-fullscreen .hz-context-strip,
+.hz-app-fullscreen .hz-workspace-tabs,
 .hz-app-fullscreen .hz-sidebar,
 .hz-app-fullscreen .hz-status-bar { display: none !important; }
 .hz-app-fullscreen .hz-main {
@@ -1575,6 +1576,86 @@ select.hz-input {
 .hz-context-strip .ctx-warn { font-weight: 600; color: var(--amber); }
 .hz-context-strip .ctx-sep { color: var(--border-strong); margin: 0 var(--sp-1); }
 
+/* ---------- Workspace Tabs ---------- */
+.hz-workspace-tabs {
+  position: fixed;
+  top: calc(var(--sp-12) + 1.5rem);
+  left: 0;
+  right: 0;
+  height: 1.75rem;
+  background: var(--surface-base);
+  border-bottom: 0.0625rem solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-2);
+  gap: 0.0625rem;
+  z-index: 99;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.hz-workspace-tabs::-webkit-scrollbar { height: 0; }
+
+.hz-ws-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-2) 0 var(--sp-3);
+  height: 1.5rem;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: transparent;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  border: 0.0625rem solid transparent;
+  border-bottom: none;
+  flex-shrink: 0;
+}
+.hz-ws-tab:hover {
+  color: var(--text-secondary);
+  background: var(--hover);
+}
+.hz-ws-tab.active {
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border-color: var(--border);
+}
+.hz-ws-tab-title {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hz-ws-tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.625rem;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+.hz-ws-tab:hover .hz-ws-tab-close,
+.hz-ws-tab.active .hz-ws-tab-close {
+  opacity: 1;
+}
+.hz-ws-tab-close:hover {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+/* Adjust layout when workspace tabs are present */
+.hz-has-workspace-tabs .hz-sidebar {
+  top: calc(var(--sp-12) + 1.5rem + 1.75rem);
+}
+.hz-has-workspace-tabs .hz-main {
+  margin-top: calc(var(--sp-12) + 1.5rem + 1.75rem);
+  height: calc(100vh - var(--sp-12) - 1.5rem - 1.75rem);
+}
+
 /* ---------- Entity Links (clickable trade/cargo/invoice IDs) ---------- */
 .hz-entity-link {
   color: var(--accent-light);
@@ -1807,6 +1888,7 @@ select.hz-input {
 
 /* ---------- Responsive: Mobile ---------- */
 @media (max-width: 48rem) {
+  .hz-workspace-tabs { display: none; }
   .hz-sidebar {
     transform: translateX(-100%);
     position: fixed;
@@ -1861,7 +1943,7 @@ select.hz-input {
 
 /* ---------- Print Support ---------- */
 @media print {
-  .hz-header, .hz-sidebar, .hz-status-bar { display: none; }
+  .hz-header, .hz-sidebar, .hz-status-bar, .hz-workspace-tabs { display: none; }
   .hz-main { margin: 0 !important; height: auto; overflow: visible; }
   .hz-content { height: auto; overflow: visible; }
 }

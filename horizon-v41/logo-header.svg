@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <!-- EOS.Horizon — LNG Carrier silhouette (Moss-type, 3 domes) -->
+  <!-- Hull -->
+  <path d="M1 16.5 L2.5 14 L21.5 14 L23 16.5 Z" fill="white" opacity="0.95"/>
+  <!-- Bow rake -->
+  <path d="M2.5 14 L1.5 12.5 L4 14 Z" fill="white" opacity="0.95"/>
+  <!-- Dome 1 -->
+  <path d="M5.5 14 A2.2 2.2 0 0 1 9.5 14" fill="white" opacity="0.9"/>
+  <!-- Dome 2 -->
+  <path d="M10 14 A2.2 2.2 0 0 1 14 14" fill="white" opacity="0.9"/>
+  <!-- Dome 3 -->
+  <path d="M14.5 14 A2.2 2.2 0 0 1 18.5 14" fill="white" opacity="0.9"/>
+  <!-- Superstructure (aft) -->
+  <rect x="19" y="9.5" width="3" height="4.5" rx="0.4" fill="white" opacity="0.95"/>
+  <!-- Bridge windows -->
+  <rect x="19.5" y="10.2" width="2" height="0.6" rx="0.2" fill="white" opacity="0.3"/>
+  <!-- Funnel -->
+  <rect x="20.2" y="7.8" width="1.2" height="1.7" rx="0.3" fill="white" opacity="0.85"/>
+</svg>
