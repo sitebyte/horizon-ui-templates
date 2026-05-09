@@ -1,2 +1,5 @@
 screenshots/
 analysis/spot-the-difference/*.png
+
+# Local test screenshots (Playwright captures)
+analysis/v*-screenshots/
