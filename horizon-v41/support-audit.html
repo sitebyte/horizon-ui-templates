@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Search — Horizon ETRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Search bar compact layout */
+    .audit-search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-3);
+      flex-shrink: 0;
+    }
+    .audit-search-bar .hz-input,
+    .audit-search-bar select.hz-input {
+      height: 1.75rem;
+      font-size: var(--text-xs);
+    }
+    .audit-search-bar .search-text {
+      flex: 1;
+      min-width: 14rem;
+    }
+    .audit-search-bar .search-date {
+      width: 8.5rem;
+    }
+    .audit-search-bar .search-select {
+      width: 9rem;
+    }
+
+    /* Results table — compact .tbl pattern from dashboard */
+    .tbl { font-size: var(--text-xs); width: 100%; border-collapse: collapse; }
+    .tbl th {
+      font-size: 0.5rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.125rem var(--sp-2); text-align: left;
+      border-bottom: 0.0625rem solid var(--border);
+      font-family: var(--font-ui);
+      position: sticky; top: 0; background: var(--surface-canvas); z-index: 1;
+    }
+    .tbl td {
+      padding: 0.125rem var(--sp-2);
+      border-bottom: 0.0625rem solid var(--border-subtle);
+      height: 1.25rem;
+    }
+    .tbl tr:hover td { background: var(--hover); }
+    .tbl .r { text-align: right; }
+
+    /* Pagination */
+    .audit-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--sp-2);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .audit-pagination .page-btns {
+      display: flex;
+      gap: var(--sp-1);
+    }
+    .audit-pagination .page-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 var(--sp-1);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.5625rem;
+      font-family: var(--font-mono);
+      color: var(--text-tertiary);
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .audit-pagination .page-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .audit-pagination .page-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .audit-pagination .page-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Action badge */
+    .action-badge {
+      display: inline-flex;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 1rem;
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <div class="hz-content-fill">
+    <!-- Search Bar -->
+    <div class="audit-search-bar fade-in">
+      <input type="text" class="hz-input search-text" placeholder="Search by entity ID, user, action..." />
+      <input type="date" class="hz-input search-date" value="2026-05-01" title="Date From" />
+      <input type="date" class="hz-input search-date" value="2026-05-02" title="Date To" />
+      <select class="hz-input search-select">
+        <option value="">All Entities</option>
+        <option>Trade</option>
+        <option>Invoice</option>
+        <option>Nomination</option>
+        <option>Cargo</option>
+        <option>Contract</option>
+        <option>Curve</option>
+        <option>User</option>
+      </select>
+      <select class="hz-input search-select">
+        <option value="">All Actions</option>
+        <option>Create</option>
+        <option>Update</option>
+        <option>Delete</option>
+        <option>Approve</option>
+        <option>Reject</option>
+        <option>Login</option>
+        <option>EOD</option>
+      </select>
+      <select class="hz-input search-select">
+        <option value="">All Users</option>
+        <option>a.morgan</option>
+        <option>s.kumar</option>
+        <option>r.mehta</option>
+        <option>system</option>
+        <option>admin</option>
+      </select>
+      <button class="hz-btn primary sm">Search</button>
+      <button class="hz-btn ghost sm">Reset</button>
+    </div>
+
+    <!-- Results Table -->
+    <div class="fade-in-d1" style="flex:1; min-height:0; overflow:auto;">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Entity</th>
+            <th>ID</th>
+            <th>Action</th>
+            <th>User</th>
+            <th>Field</th>
+            <th>Old Value</th>
+            <th>New Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 17:14:32</td>
+            <td>Trade</td>
+            <td><a href="lifecycle.html" class="hz-entity-link">T-1024</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>a.morgan</td>
+            <td style="color:var(--text-tertiary);">Price</td>
+            <td class="font-mono pnl-negative">$14.25</td>
+            <td class="font-mono pnl-positive">$14.42</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 17:14:32</td>
+            <td>Trade</td>
+            <td><a href="lifecycle.html" class="hz-entity-link">T-1024</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>a.morgan</td>
+            <td style="color:var(--text-tertiary);">Volume</td>
+            <td class="font-mono pnl-negative">3,200,000</td>
+            <td class="font-mono pnl-positive">3,450,000</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 16:58:11</td>
+            <td>Invoice</td>
+            <td><a href="invoices.html" class="hz-entity-link">INV-4520</a></td>
+            <td><span class="action-badge" style="background:var(--green-dim);color:var(--green);">Approve</span></td>
+            <td>r.mehta</td>
+            <td style="color:var(--text-tertiary);">Status</td>
+            <td class="font-mono pnl-negative">Pending</td>
+            <td class="font-mono pnl-positive">Approved</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 16:45:07</td>
+            <td>Curve</td>
+            <td><a href="curves.html" class="hz-entity-link">JKM-FWD</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>system</td>
+            <td style="color:var(--text-tertiary);">Jun-26 Settle</td>
+            <td class="font-mono pnl-negative">$14.18</td>
+            <td class="font-mono pnl-positive">$14.25</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 16:30:00</td>
+            <td>Nomination</td>
+            <td><a href="nominations.html" class="hz-entity-link">NOM-Q2-003</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>s.kumar</td>
+            <td style="color:var(--text-tertiary);">Status</td>
+            <td class="font-mono pnl-negative">Draft</td>
+            <td class="font-mono pnl-positive">Submitted</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 16:15:44</td>
+            <td>Trade</td>
+            <td><a href="lifecycle.html" class="hz-entity-link">T-1023</a></td>
+            <td><span class="action-badge" style="background:var(--green-dim);color:var(--green);">Create</span></td>
+            <td>a.morgan</td>
+            <td style="color:var(--text-muted);">&mdash;</td>
+            <td style="color:var(--text-muted);">&mdash;</td>
+            <td style="color:var(--text-muted);">SELL 2.8M TTF Jul-26 @ $12.95</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 15:42:18</td>
+            <td>User</td>
+            <td><span class="hz-entity-link">a.morgan</span></td>
+            <td><span class="action-badge" style="background:var(--blue-dim);color:var(--blue);">Login</span></td>
+            <td>a.morgan</td>
+            <td style="color:var(--text-tertiary);">IP</td>
+            <td style="color:var(--text-muted);">&mdash;</td>
+            <td class="font-mono" style="color:var(--text-secondary);">10.8.4.112</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 15:30:00</td>
+            <td>Curve</td>
+            <td><a href="curves.html" class="hz-entity-link">TTF-FWD</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>admin</td>
+            <td style="color:var(--text-tertiary);">Sep-26 Override</td>
+            <td class="font-mono pnl-negative">$12.60</td>
+            <td class="font-mono pnl-positive">$12.78</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 14:12:55</td>
+            <td>Contract</td>
+            <td><a href="contracts.html" class="hz-entity-link">SPA-SHELL-26</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>r.mehta</td>
+            <td style="color:var(--text-tertiary);">Credit Limit</td>
+            <td class="font-mono pnl-negative">$80M</td>
+            <td class="font-mono pnl-positive">$100M</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 13:00:00</td>
+            <td>Trade</td>
+            <td><a href="lifecycle.html" class="hz-entity-link">T-1022</a></td>
+            <td><span class="action-badge" style="background:var(--red-dim);color:var(--red);">Reject</span></td>
+            <td>r.mehta</td>
+            <td style="color:var(--text-tertiary);">Status</td>
+            <td class="font-mono pnl-negative">Pending</td>
+            <td class="font-mono pnl-negative">Rejected</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 12:45:30</td>
+            <td>Cargo</td>
+            <td><a href="cargo-board.html" class="hz-entity-link">C-2406</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>s.kumar</td>
+            <td style="color:var(--text-tertiary);">ETA</td>
+            <td class="font-mono pnl-negative">15 May</td>
+            <td class="font-mono pnl-positive">14 May</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">02 May 09:00:00</td>
+            <td>Trade</td>
+            <td><span class="hz-entity-link">EOD-20260501</span></td>
+            <td><span class="action-badge" style="background:var(--blue-dim);color:var(--blue);">EOD</span></td>
+            <td>system</td>
+            <td style="color:var(--text-tertiary);">Batch</td>
+            <td style="color:var(--text-muted);">&mdash;</td>
+            <td style="color:var(--text-secondary);">1,247 trades settled</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">01 May 17:30:22</td>
+            <td>Trade</td>
+            <td><a href="lifecycle.html" class="hz-entity-link">T-1021</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>a.morgan</td>
+            <td style="color:var(--text-tertiary);">Delivery Point</td>
+            <td class="font-mono pnl-negative">Gate</td>
+            <td class="font-mono pnl-positive">Zeebrugge</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">01 May 16:08:15</td>
+            <td>Invoice</td>
+            <td><a href="invoices.html" class="hz-entity-link">INV-4518</a></td>
+            <td><span class="action-badge" style="background:var(--amber-dim);color:var(--amber);">Update</span></td>
+            <td>r.mehta</td>
+            <td style="color:var(--text-tertiary);">Amount</td>
+            <td class="font-mono pnl-negative">$1,120,000</td>
+            <td class="font-mono pnl-positive">$1,150,000</td>
+          </tr>
+          <tr>
+            <td class="font-mono" style="white-space:nowrap; color:var(--text-tertiary);">01 May 14:55:40</td>
+            <td>User</td>
+            <td><span class="hz-entity-link">s.kumar</span></td>
+            <td><span class="action-badge" style="background:var(--blue-dim);color:var(--blue);">Login</span></td>
+            <td>s.kumar</td>
+            <td style="color:var(--text-tertiary);">IP</td>
+            <td style="color:var(--text-muted);">&mdash;</td>
+            <td class="font-mono" style="color:var(--text-secondary);">10.8.4.88</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="audit-pagination fade-in-d2">
+      <span>Showing 15 of 2,847 results &mdash; Page 1 of 190</span>
+      <div class="page-btns">
+        <button class="page-btn" disabled>&laquo;</button>
+        <button class="page-btn" disabled>&lsaquo;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">&hellip;</button>
+        <button class="page-btn">190</button>
+        <button class="page-btn">&rsaquo;</button>
+        <button class="page-btn">&raquo;</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('support-audit', 'Audit Search');
+</script>
+
+</body>
+</html>

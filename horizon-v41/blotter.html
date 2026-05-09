@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blotter — Horizon ETRM</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:["selector","[data-theme=\"dark\"]"],theme:{extend:{fontFamily:{sans:["Inter","sans-serif"],mono:["JetBrains Mono","monospace"]}}}}</script>
+  <link href="shell.css" rel="stylesheet" />
+  <style>
+    /* Column toggle panel */
+    .hz-col-panel { position:absolute; right:0; top:100%; margin-top:0.25rem; background:var(--surface-raised); border:0.0625rem solid var(--border); border-radius:0.375rem; padding:0.5rem; z-index:20; min-width:10rem; max-height:24rem; overflow-y:auto; box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3); display:none; }
+    .hz-col-panel.open { display:block; }
+    .hz-col-item { display:flex; align-items:center; gap:0.375rem; padding:0.1875rem 0.25rem; font-size:0.6875rem; color:var(--text-secondary); cursor:pointer; }
+    .hz-col-item input { accent-color: var(--accent); }
+    /* Filter pills — status row */
+    .hz-pill { padding:0.1875rem 0.5rem; border-radius:1rem; font-size:0.625rem; font-weight:500; border:0.0625rem solid var(--border); color:var(--text-tertiary); background:transparent; transition: all 0.15s; cursor:pointer; }
+    .hz-pill:hover { border-color:var(--text-muted); color:var(--text-secondary); }
+    .hz-pill.active { background:var(--accent); border-color:var(--accent); color:var(--text-inverse); }
+    /* Quick filter buttons — row 2 */
+    .hz-qf-btn { padding:0.125rem 0.375rem; border-radius:0.25rem; font-size:0.5625rem; font-weight:600; border:0.0625rem solid var(--border); color:var(--text-muted); background:transparent; transition: all 0.15s; cursor:pointer; text-transform:uppercase; letter-spacing:0.03em; }
+    .hz-qf-btn:hover { border-color:var(--text-muted); color:var(--text-secondary); }
+    .hz-qf-btn.active { background:var(--accent-bg); border-color:var(--accent); color:var(--accent-light); }
+    /* Row-level styling via getRowClass */
+    .row-matched { border-left: 3px solid var(--blue) !important; }
+    .row-cancelled .ag-cell { color: var(--text-muted) !important; text-decoration: line-through; }
+  </style>
+</head>
+<body>
+<div id="hz-app">
+
+  <!-- Blotter content — v7: EOS-dense, 25+ columns, column grouping -->
+  <div id="blotter-content" class="hz-content-fill">
+    <!-- Toolbar Row 1: Search + Status Pills + Actions -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:0.25rem; flex-shrink:0;">
+      <div style="position:relative; flex:1; max-width:14rem;">
+        <input id="grid-search" type="text" class="hz-input" placeholder="Search trades..." style="width:100%; padding-left:1.75rem;" oninput="onSearchChanged()" />
+        <svg style="position:absolute; left:0.5rem; top:50%; transform:translateY(-50%); color:var(--text-muted);" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div style="display:flex; gap:0.25rem;">
+        <button class="hz-pill active" data-status="all" onclick="filterStatus('all')">All</button>
+        <button class="hz-pill" data-status="Draft" onclick="filterStatus('Draft')">Draft</button>
+        <button class="hz-pill" data-status="FO-Entered" onclick="filterStatus('FO-Entered')">FO-Entered</button>
+        <button class="hz-pill" data-status="FO-Validated" onclick="filterStatus('FO-Validated')">FO-Validated</button>
+        <button class="hz-pill" data-status="Trade Checked" onclick="filterStatus('Trade Checked')">Trade Checked</button>
+        <button class="hz-pill" data-status="Cancelled" onclick="filterStatus('Cancelled')">Cancelled</button>
+      </div>
+      <div style="position:relative;">
+        <button class="hz-btn sm" onclick="toggleColPanel()">Columns</button>
+        <div id="col-panel" class="hz-col-panel"></div>
+      </div>
+      <button class="hz-btn sm" onclick="exportCsv()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+      <span class="hz-inline-kpi">Trades <span class="kpi-val">24</span></span>
+      <span class="hz-inline-kpi">Net Vol <span class="kpi-val pnl-positive">+8.4M</span></span>
+      <span class="hz-inline-kpi">P&L <span class="kpi-val pnl-positive">+$2.1M</span></span>
+      <span style="margin-left:auto; font-size:0.625rem; color:var(--text-muted);" id="row-count">24 trades</span>
+      <span style="color:var(--border-subtle);">|</span>
+      <span id="total-pnl" style="font-size:0.625rem; font-weight:600; color:var(--green);">Total Unrealized P&L: --</span>
+    </div>
+    <!-- Toolbar Row 2: Quick Filters -->
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.25rem; margin-bottom:0.5rem; flex-shrink:0;">
+      <span style="font-size:0.5625rem; color:var(--text-muted); margin-right:0.25rem;">Quick:</span>
+      <button class="hz-qf-btn" data-qf="matched" onclick="toggleQuickFilter('matched')">Matched</button>
+      <button class="hz-qf-btn" data-qf="unmatched" onclick="toggleQuickFilter('unmatched')">Unmatched</button>
+      <button class="hz-qf-btn" data-qf="buy" onclick="toggleQuickFilter('buy')">Buy</button>
+      <button class="hz-qf-btn" data-qf="sell" onclick="toggleQuickFilter('sell')">Sell</button>
+      <button class="hz-qf-btn" data-qf="mytrades" onclick="toggleQuickFilter('mytrades')">My Trades</button>
+    </div>
+    <!-- AG Grid — ag-compact for tighter rows -->
+    <div id="blotter-grid" class="ag-theme-quartz-dark ag-compact" style="width:100%;height:calc(100vh - 11rem);"></div>
+  </div>
+
+</div>
+
+<script src="shell.js"></script>
+<script>
+initShell('blotter', 'Blotter');
+
+/* --- Utilities --- */
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+const benchmarkPrices = { JKM: 14.60, TTF: 12.65, HH: 3.55, Brent: 82.40 };
+
+function calcMtm(data) {
+  if (!data || data.price == null || !data.benchmark) return null;
+  const spot = benchmarkPrices[data.benchmark];
+  if (spot == null) return null;
+  return data.side === 'B' ? (spot - data.price) : (data.price - spot);
+}
+function calcUnrealPnl(data) {
+  const mtm = calcMtm(data);
+  if (mtm == null || data.volume == null) return null;
+  return mtm * data.volume;
+}
+function formatPnl(v) {
+  if (v == null) return '\u2013';
+  const abs = Math.abs(v);
+  const sign = v < 0 ? '-$' : '$';
+  if (abs >= 1e6) return sign + (abs / 1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return sign + Math.round(abs / 1e3) + 'K';
+  return sign + abs.toFixed(0);
+}
+
+/* --- Trade Data (24 rows) — EOS-accurate columns --- */
+const tradeData = [
+  {id:1,tradeId:'T-1024',groupId:'GRP-501',side:'B',counterparty:'Shell',volume:65000,benchmark:'JKM',price:12.45,delivery:'Jun 26',status:'Trade Checked',trader:'JC',timestamp:'2026-04-11 09:42',type:'Physical',incoterm:'FOB',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'SHELL-SG-01',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2240',contractRef:'MSA-0091',locRestriction:'Open',optionRight:'',creditSecurity:'LC',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:3,lastModified:'2026-04-11 10:15'},
+  {id:2,tradeId:'T-1023',groupId:'GRP-501',side:'S',counterparty:'JERA',volume:70000,benchmark:'JKM',price:12.52,delivery:'Jun 26',status:'Trade Checked',trader:'JC',timestamp:'2026-04-11 09:38',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'JERA-JP-01',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2240',contractRef:'MSA-0088',locRestriction:'Validated',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-11 10:12'},
+  {id:3,tradeId:'T-1022',groupId:'GRP-502',side:'B',counterparty:'TotalEnergies',volume:55000,benchmark:'TTF',price:11.82,delivery:'Jul 26',status:'FO-Validated',trader:'AK',timestamp:'2026-04-11 09:31',type:'Physical',incoterm:'FOB',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'TOTAL-FR-01',strategy:'None',matched:'No',cargoRef:'CGO-2241',contractRef:'MSA-0072',locRestriction:'Open',optionRight:'',creditSecurity:'Guarantee',tolMin:-3,tolMax:3,index:'ICE_TTF Month Ahead',charges:1,lastModified:'2026-04-11 09:55'},
+  {id:4,tradeId:'T-1021',groupId:'GRP-502',side:'S',counterparty:'BP',volume:60000,benchmark:'TTF',price:11.95,delivery:'Jul 26',status:'FO-Entered',trader:'SM',timestamp:'2026-04-11 09:25',type:'Physical',incoterm:'DES',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'BP-UK-03',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0065',locRestriction:'Constrained',optionRight:'',creditSecurity:'LC',tolMin:-5,tolMax:5,index:'ICE_TTF Month Ahead',charges:2,lastModified:'2026-04-11 09:40'},
+  {id:5,tradeId:'T-1020',groupId:'GRP-503',side:'B',counterparty:'Chevron',volume:72000,benchmark:'HH',price:2.34,delivery:'Aug 26',status:'Trade Checked',trader:'JC',timestamp:'2026-04-11 09:18',type:'Physical',incoterm:'FOB',portfolio:'Americas',leBook:'US-LNG-01',cptyBook:'CVX-US-01',strategy:'Exclude',matched:'Yes',cargoRef:'CGO-2242',contractRef:'MSA-0101',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-2,tolMax:2,index:'CME_HH Month Ahead',charges:4,lastModified:'2026-04-11 09:50'},
+  {id:6,tradeId:'T-1019',groupId:'GRP-504',side:'S',counterparty:'Vitol',volume:68000,benchmark:'JKM',price:12.38,delivery:'Jun 26',status:'FO-Validated',trader:'RP',timestamp:'2026-04-11 09:12',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'VITOL-CH-02',strategy:'Temporary',matched:'No',cargoRef:'',contractRef:'MSA-0110',locRestriction:'Open',optionRight:'',creditSecurity:'Guarantee',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:1,lastModified:'2026-04-11 09:30'},
+  {id:7,tradeId:'T-1018',groupId:'GRP-505',side:'B',counterparty:'Petronas',volume:45000,benchmark:'JKM',price:12.41,delivery:'Jul 26',status:'FO-Validated',trader:'AK',timestamp:'2026-04-11 09:05',type:'Physical',incoterm:'FOB',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'PETNAS-MY-01',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2243',contractRef:'MSA-0078',locRestriction:'Validated',optionRight:'',creditSecurity:'LC',tolMin:-3,tolMax:3,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-11 09:20'},
+  {id:8,tradeId:'T-1017',groupId:'GRP-506',side:'S',counterparty:'QatarEnergy',volume:80000,benchmark:'JKM',price:12.55,delivery:'Aug 26',status:'Draft',trader:'JC',timestamp:'2026-04-11 08:58',type:'Physical',incoterm:'DES',portfolio:'Middle East',leBook:'SG-LNG-01',cptyBook:'QE-QA-01',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0055',locRestriction:'Constrained',optionRight:'',creditSecurity:'LC',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:0,lastModified:'2026-04-11 09:00'},
+  {id:9,tradeId:'T-1016',groupId:'GRP-507',side:'B',counterparty:'Equinor',volume:50000,benchmark:'TTF',price:11.78,delivery:'Sep 26',status:'Trade Checked',trader:'SM',timestamp:'2026-04-11 08:51',type:'Physical',incoterm:'FOB',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'EQNR-NO-01',strategy:'None',matched:'Yes',cargoRef:'CGO-2244',contractRef:'MSA-0082',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'ICE_TTF Month Ahead',charges:3,lastModified:'2026-04-11 09:10'},
+  {id:10,tradeId:'T-1015',groupId:'GRP-508',side:'S',counterparty:'Cheniere',volume:75000,benchmark:'HH',price:2.38,delivery:'Jun 26',status:'FO-Validated',trader:'JC',timestamp:'2026-04-11 08:44',type:'Physical',incoterm:'DES',portfolio:'Americas',leBook:'US-LNG-01',cptyBook:'LNG-US-02',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2245',contractRef:'MSA-0099',locRestriction:'Validated',optionRight:'',creditSecurity:'Guarantee',tolMin:-2,tolMax:2,index:'CME_HH Month Ahead',charges:2,lastModified:'2026-04-11 09:05'},
+  {id:11,tradeId:'T-1014',groupId:'GRP-509',side:'B',counterparty:'Trafigura',volume:62000,benchmark:'JKM',price:12.33,delivery:'Jul 26',status:'Trade Checked',trader:'RP',timestamp:'2026-04-10 16:37',type:'Physical',incoterm:'FOB',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'TRAF-CH-01',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0115',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:1,lastModified:'2026-04-10 17:00'},
+  {id:12,tradeId:'T-1013',groupId:'GRP-510',side:'S',counterparty:'Glencore',volume:58000,benchmark:'TTF',price:11.89,delivery:'Aug 26',status:'Cancelled',trader:'AK',timestamp:'2026-04-10 16:30',type:'Physical',incoterm:'DES',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'GLEN-CH-01',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0060',locRestriction:'Open',optionRight:'',creditSecurity:'LC',tolMin:-5,tolMax:5,index:'ICE_TTF Month Ahead',charges:0,lastModified:'2026-04-10 16:45'},
+  {id:13,tradeId:'T-1012',groupId:'GRP-511',side:'B',counterparty:'Mitsui',volume:66000,benchmark:'JKM',price:12.48,delivery:'Sep 26',status:'FO-Entered',trader:'JC',timestamp:'2026-04-10 15:22',type:'Physical',incoterm:'FOB',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'MITSUI-JP-01',strategy:'Inventory',matched:'No',cargoRef:'',contractRef:'MSA-0085',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-3,tolMax:3,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-10 15:40'},
+  {id:14,tradeId:'T-1011',groupId:'GRP-512',side:'S',counterparty:'ENI',volume:54000,benchmark:'TTF',price:11.92,delivery:'Jun 26',status:'Trade Checked',trader:'SM',timestamp:'2026-04-10 15:15',type:'Physical',incoterm:'DES',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'ENI-IT-01',strategy:'None',matched:'Yes',cargoRef:'CGO-2246',contractRef:'MSA-0070',locRestriction:'Validated',optionRight:'',creditSecurity:'Guarantee',tolMin:-5,tolMax:5,index:'ICE_TTF Month Ahead',charges:3,lastModified:'2026-04-10 15:30'},
+  {id:15,tradeId:'T-1010',groupId:'GRP-513',side:'B',counterparty:'Gunvor',volume:71000,benchmark:'HH',price:2.31,delivery:'Jul 26',status:'FO-Validated',trader:'RP',timestamp:'2026-04-10 14:08',type:'Physical',incoterm:'FOB',portfolio:'Americas',leBook:'US-LNG-01',cptyBook:'GUNV-CH-01',strategy:'Temporary',matched:'No',cargoRef:'',contractRef:'MSA-0105',locRestriction:'Open',optionRight:'',creditSecurity:'LC',tolMin:-2,tolMax:2,index:'CME_HH Month Ahead',charges:1,lastModified:'2026-04-10 14:25'},
+  {id:16,tradeId:'T-1009',groupId:'GRP-514',side:'S',counterparty:'Shell',volume:48000,benchmark:'JKM',price:12.51,delivery:'Aug 26',status:'Draft',trader:'JC',timestamp:'2026-04-10 13:42',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'SHELL-SG-01',strategy:'Inventory',matched:'No',cargoRef:'',contractRef:'MSA-0091',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:0,lastModified:'2026-04-10 13:50'},
+  {id:17,tradeId:'T-1008',groupId:'GRP-515',side:'B',counterparty:'BP',volume:63000,benchmark:'TTF',price:11.85,delivery:'Sep 26',status:'Trade Checked',trader:'AK',timestamp:'2026-04-10 11:35',type:'Physical',incoterm:'FOB',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'BP-UK-03',strategy:'None',matched:'Yes',cargoRef:'CGO-2247',contractRef:'MSA-0065',locRestriction:'Open',optionRight:'',creditSecurity:'Guarantee',tolMin:-3,tolMax:3,index:'ICE_TTF Month Ahead',charges:2,lastModified:'2026-04-10 12:00'},
+  {id:18,tradeId:'T-1007',groupId:'GRP-516',side:'S',counterparty:'TotalEnergies',volume:57000,benchmark:'JKM',price:12.44,delivery:'Oct 26',status:'FO-Validated',trader:'SM',timestamp:'2026-04-10 10:28',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'TOTAL-FR-01',strategy:'None',matched:'Yes',cargoRef:'CGO-2248',contractRef:'MSA-0072',locRestriction:'Validated',optionRight:'',creditSecurity:'LC',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-10 10:45'},
+  {id:19,tradeId:'T-1006',groupId:'GRP-517',side:'B',counterparty:'Vitol',volume:69000,benchmark:'HH',price:2.36,delivery:'Jun 26',status:'FO-Entered',trader:'JC',timestamp:'2026-04-09 16:55',type:'Physical',incoterm:'FOB',portfolio:'Americas',leBook:'US-LNG-01',cptyBook:'VITOL-CH-02',strategy:'Exclude',matched:'No',cargoRef:'',contractRef:'MSA-0110',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-2,tolMax:2,index:'CME_HH Month Ahead',charges:1,lastModified:'2026-04-09 17:10'},
+  {id:20,tradeId:'T-1005',groupId:'GRP-518',side:'S',counterparty:'JERA',volume:74000,benchmark:'JKM',price:12.49,delivery:'Jul 26',status:'Cancelled',trader:'RP',timestamp:'2026-04-09 15:41',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'JERA-JP-01',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0088',locRestriction:'Open',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:0,lastModified:'2026-04-09 15:50'},
+  {id:21,tradeId:'T-1004',groupId:'GRP-519',side:'B',counterparty:'Chevron',volume:52000,benchmark:'TTF',price:11.79,delivery:'Aug 26',status:'Trade Checked',trader:'AK',timestamp:'2026-04-09 14:22',type:'Physical',incoterm:'FOB',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'CVX-US-01',strategy:'None',matched:'Yes',cargoRef:'CGO-2249',contractRef:'MSA-0101',locRestriction:'Validated',optionRight:'',creditSecurity:'LC',tolMin:-3,tolMax:3,index:'ICE_TTF Month Ahead',charges:3,lastModified:'2026-04-09 14:40'},
+  {id:22,tradeId:'T-1003',groupId:'GRP-520',side:'S',counterparty:'Petronas',volume:67000,benchmark:'JKM',price:12.57,delivery:'Sep 26',status:'FO-Validated',trader:'JC',timestamp:'2026-04-09 11:18',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'PETNAS-MY-01',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2250',contractRef:'MSA-0078',locRestriction:'Open',optionRight:'',creditSecurity:'Guarantee',tolMin:-5,tolMax:5,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-09 11:35'},
+  {id:23,tradeId:'T-1002',groupId:'GRP-521',side:'B',counterparty:'Equinor',volume:59000,benchmark:'TTF',price:11.88,delivery:'Oct 26',status:'Draft',trader:'SM',timestamp:'2026-04-09 10:05',type:'Physical',incoterm:'FOB',portfolio:'Atlantic',leBook:'UK-GAS-02',cptyBook:'EQNR-NO-01',strategy:'None',matched:'No',cargoRef:'',contractRef:'MSA-0082',locRestriction:'Constrained',optionRight:'',creditSecurity:'None',tolMin:-5,tolMax:5,index:'ICE_TTF Month Ahead',charges:0,lastModified:'2026-04-09 10:20'},
+  {id:24,tradeId:'T-1001',groupId:'GRP-522',side:'S',counterparty:'Mitsui',volume:73000,benchmark:'JKM',price:12.42,delivery:'Jun 26',status:'FO-Entered',trader:'RP',timestamp:'2026-04-08 16:50',type:'Physical',incoterm:'DES',portfolio:'Pacific',leBook:'SG-LNG-01',cptyBook:'MITSUI-JP-01',strategy:'Inventory',matched:'Yes',cargoRef:'CGO-2251',contractRef:'MSA-0085',locRestriction:'Open',optionRight:'',creditSecurity:'LC',tolMin:-3,tolMax:3,index:'SGP_Platts JKM Month Ahead',charges:2,lastModified:'2026-04-08 17:05'},
+];
+
+let gridApi;
+let activeStatusFilter = 'all';
+let activeQuickFilters = new Set();
+const currentTrader = 'JC'; // simulated logged-in user
+
+function updateTotalPnl() {
+  let total = 0;
+  gridApi.forEachNodeAfterFilter(node => { total += calcUnrealPnl(node.data) || 0; });
+  const el = document.getElementById('total-pnl');
+  if (!el) return;
+  const sign = total >= 0 ? '+' : '';
+  el.style.color = total >= 0 ? 'var(--green)' : 'var(--red)';
+  el.textContent = 'Total Unrealized P&L: ' + sign + formatPnl(total);
+}
+
+function onSearchChanged() {
+  gridApi.setGridOption('quickFilterText', document.getElementById('grid-search').value);
+}
+
+function filterStatus(status) {
+  activeStatusFilter = status;
+  document.querySelectorAll('.hz-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === status);
+  });
+  gridApi.onFilterChanged();
+}
+
+function toggleQuickFilter(qf) {
+  if (activeQuickFilters.has(qf)) {
+    activeQuickFilters.delete(qf);
+  } else {
+    // Clear mutually exclusive filters
+    if (qf === 'matched') activeQuickFilters.delete('unmatched');
+    if (qf === 'unmatched') activeQuickFilters.delete('matched');
+    if (qf === 'buy') activeQuickFilters.delete('sell');
+    if (qf === 'sell') activeQuickFilters.delete('buy');
+    activeQuickFilters.add(qf);
+  }
+  document.querySelectorAll('.hz-qf-btn').forEach(btn => {
+    btn.classList.toggle('active', activeQuickFilters.has(btn.dataset.qf));
+  });
+  gridApi.onFilterChanged();
+}
+
+function exportCsv() { gridApi.exportDataAsCsv({ fileName: 'blotter-export.csv' }); }
+
+function toggleColPanel() { document.getElementById('col-panel').classList.toggle('open'); }
+
+function toggleCol(field, visible) { gridApi.setColumnsVisible([field], visible); }
+
+/* --- Context menu --- */
+let selectedRow = null;
+let ctxMenuEl = null;
+
+function showContextMenu(event, items) {
+  closeContextMenu();
+  ctxMenuEl = document.createElement('div');
+  ctxMenuEl.style.cssText = 'position:fixed;z-index:9999;min-width:10rem;padding:0.25rem;border-radius:0.5rem;border:1px solid var(--border,#27272a);background:var(--surface-elevated,#27272a);box-shadow:0 0.5rem 1.5rem rgba(0,0,0,0.3);';
+  ctxMenuEl.innerHTML = items.map(function(item) {
+    return '<button onclick="' + item.action + '" style="display:block;width:100%;text-align:left;padding:0.375rem 0.75rem;font-size:0.8125rem;color:var(--text-primary,#fafafa);background:none;border:none;border-radius:0.375rem;cursor:pointer;" onmouseover="this.style.background=\'var(--surface-raised,#3f3f46)\'" onmouseout="this.style.background=\'none\'">' + item.label + '</button>';
+  }).join('');
+  var x = event.clientX, y = event.clientY;
+  document.body.appendChild(ctxMenuEl);
+  if (x + ctxMenuEl.offsetWidth > window.innerWidth) x = window.innerWidth - ctxMenuEl.offsetWidth - 8;
+  if (y + ctxMenuEl.offsetHeight > window.innerHeight) y = window.innerHeight - ctxMenuEl.offsetHeight - 8;
+  ctxMenuEl.style.left = x + 'px';
+  ctxMenuEl.style.top = y + 'px';
+}
+
+function closeContextMenu() {
+  if (ctxMenuEl && ctxMenuEl.parentNode) { ctxMenuEl.parentNode.removeChild(ctxMenuEl); ctxMenuEl = null; }
+}
+
+document.addEventListener('click', closeContextMenu);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeContextMenu(); });
+
+function ctxAction(action) {
+  closeContextMenu();
+  if (!selectedRow) return;
+  if (action === 'view') showToast('Viewing ' + selectedRow.tradeId);
+  else if (action === 'amend') showToast('Amending ' + selectedRow.tradeId);
+  else if (action === 'cancel') {
+    selectedRow.status = 'Cancelled';
+    gridApi.applyTransaction({ update: [selectedRow] });
+    updateTotalPnl();
+    showToast(selectedRow.tradeId + ' cancelled');
+  }
+}
+
+/* --- Status badge renderer --- */
+function statusRenderer(p) {
+  if (p.value == null) return '\u2013';
+  var v = escapeHtml(p.value);
+  var styles = {
+    'Draft':         'background:rgba(59,130,246,0.2);color:#3b82f6',
+    'FO-Entered':    'background:rgba(245,158,11,0.2);color:#f59e0b',
+    'FO-Validated':  'background:rgba(34,197,94,0.2);color:#22c55e',
+    'Trade Checked': 'background:rgba(22,163,74,0.3);color:#16a34a',
+    'Cancelled':     'background:rgba(113,113,122,0.2);color:#71717a',
+  };
+  return '<span style="display:inline-flex;padding:0.0625rem 0.375rem;border-radius:1rem;font-size:0.5625rem;font-weight:600;white-space:nowrap;' + (styles[v] || '') + '">' + v + '</span>';
+}
+
+/* --- Entity link renderer --- */
+function entityLinkRenderer(targetPage) {
+  return function(p) {
+    if (p.value == null || p.value === '') return '\u2013';
+    return '<a href="' + targetPage + '" class="hz-entity-link">' + escapeHtml(p.value) + '</a>';
+  };
+}
+
+/* --- Matched badge renderer --- */
+function matchedRenderer(p) {
+  if (p.value == null) return '\u2013';
+  if (p.value === 'Yes') return '<span style="display:inline-flex;padding:0.0625rem 0.25rem;border-radius:0.1875rem;font-size:0.5rem;font-weight:700;background:rgba(59,130,246,0.15);color:#3b82f6;">YES</span>';
+  return '<span style="font-size:0.5rem;color:var(--text-muted);">NO</span>';
+}
+
+/* --- Strategy renderer --- */
+function strategyRenderer(p) {
+  if (p.value == null || p.value === '' || p.value === 'None') return '<span style="color:var(--text-muted);">\u2013</span>';
+  var colors = {
+    'Inventory':  'color:#22c55e',
+    'Exclude':    'color:#ef4444',
+    'Temporary':  'color:#f59e0b',
+  };
+  return '<span style="font-size:0.5625rem;font-weight:600;' + (colors[p.value] || '') + '">' + escapeHtml(p.value) + '</span>';
+}
+
+/* --- Location restriction renderer --- */
+function locRestrictionRenderer(p) {
+  if (p.value == null) return '\u2013';
+  var styles = {
+    'Open':        'color:var(--green)',
+    'Validated':   'color:var(--blue)',
+    'Constrained': 'color:var(--amber)',
+  };
+  return '<span style="font-size:0.5625rem;font-weight:500;' + (styles[p.value] || '') + '">' + escapeHtml(p.value) + '</span>';
+}
+
+/* --- Init Grid --- */
+setTimeout(function() {
+  var colDefs = [
+    /* === Trade Identity === */
+    {
+      headerName: 'Trade Identity',
+      children: [
+        { field:'tradeId', headerName:'ID', flex:1, minWidth:64, pinned:'left',
+          cellRenderer: function(p) {
+            if (p.value == null) return '\u2013';
+            return '<a href="lifecycle.html" class="hz-entity-link">' + escapeHtml(p.value) + '</a>';
+          }
+        },
+        { field:'groupId', headerName:'Trade Group', flex:1, minWidth:64 },
+        { field:'side', flex:0.7, minWidth:48, cellRenderer: function(p) {
+          if (p.value == null) return '\u2013';
+          var v = escapeHtml(p.value);
+          return v === 'B'
+            ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:0.1875rem;font-size:0.5625rem;font-weight:700;background:var(--green-dim);color:var(--green);">B</span>'
+            : '<span style="display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:0.1875rem;font-size:0.5625rem;font-weight:700;background:var(--red-dim);color:var(--red);">S</span>';
+        }},
+        { field:'type', headerName:'Type', flex:0.7, minWidth:48 },
+        { field:'status', flex:0.7, minWidth:64, cellRenderer: statusRenderer },
+      ]
+    },
+    /* === Counterparty & Books === */
+    {
+      headerName: 'Counterparty & Books',
+      children: [
+        { field:'counterparty', headerName:'Counterparty', flex:1.2, minWidth:64 },
+        { field:'leBook', headerName:'LE Book', flex:1, minWidth:64 },
+        { field:'cptyBook', headerName:'Cpty Book', flex:1, minWidth:64 },
+      ]
+    },
+    /* === Commercial === */
+    {
+      headerName: 'Commercial',
+      children: [
+        { field:'volume', flex:1, minWidth:64, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? p.value.toLocaleString() : '\u2013'; } },
+        { field:'benchmark', headerName:'Bench', flex:0.7, minWidth:48 },
+        { field:'price', flex:1, minWidth:64, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? '$' + p.value.toFixed(2) : '\u2013'; } },
+        { field:'index', headerName:'Index', flex:1.5, minWidth:64 },
+        { field:'incoterm', headerName:'Inco', flex:0.7, minWidth:48 },
+        { field:'delivery', headerName:'Delivery', flex:1.2, minWidth:64 },
+      ]
+    },
+    /* === Valuation === */
+    {
+      headerName: 'Valuation',
+      children: [
+        { field:'mtm', headerName:'MTM', flex:1, minWidth:64, type:'rightAligned',
+          valueGetter: function(p) { return calcMtm(p.data); },
+          valueFormatter: function(p) { return p.value != null ? '$' + p.value.toFixed(2) : '\u2013'; },
+          cellStyle: function(p) { if (p.value == null) return null; return { color: p.value >= 0 ? 'var(--green)' : 'var(--red)' }; },
+          comparator: function(a, b) { return (a || 0) - (b || 0); }
+        },
+        { field:'unrealPnl', headerName:'Unreal P&L', flex:1, minWidth:64, type:'rightAligned',
+          valueGetter: function(p) { return calcUnrealPnl(p.data); },
+          valueFormatter: function(p) { return p.value != null ? formatPnl(p.value) : '\u2013'; },
+          cellStyle: function(p) { if (p.value == null) return null; return { color: p.value >= 0 ? 'var(--green)' : 'var(--red)' }; },
+          comparator: function(a, b) { return (a || 0) - (b || 0); }
+        },
+      ]
+    },
+    /* === Matching & References === */
+    {
+      headerName: 'Matching & References',
+      children: [
+        { field:'matched', headerName:'Matched', flex:0.7, minWidth:48, cellRenderer: matchedRenderer },
+        { field:'cargoRef', headerName:'Cargo Ref', flex:1, minWidth:64, cellRenderer: entityLinkRenderer('cargo-board.html') },
+        { field:'contractRef', headerName:'Contract Ref', flex:1, minWidth:64, cellRenderer: entityLinkRenderer('contracts.html') },
+      ]
+    },
+    /* === Strategy & Controls === */
+    {
+      headerName: 'Strategy & Controls',
+      children: [
+        { field:'strategy', headerName:'Strategy', flex:1, minWidth:64, cellRenderer: strategyRenderer },
+        { field:'locRestriction', headerName:'Loc Restriction', flex:1, minWidth:64, cellRenderer: locRestrictionRenderer },
+        { field:'creditSecurity', headerName:'Credit Sec.', flex:1, minWidth:64 },
+        { field:'optionRight', headerName:'Option Right', flex:1, minWidth:64 },
+      ]
+    },
+    /* === Tolerances === */
+    {
+      headerName: 'Tolerances',
+      children: [
+        { field:'tolMin', headerName:'Tol Min %', flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? p.value + '%' : '\u2013'; } },
+        { field:'tolMax', headerName:'Tol Max %', flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? '+' + p.value + '%' : '\u2013'; } },
+      ]
+    },
+    /* === Audit === */
+    {
+      headerName: 'Audit',
+      children: [
+        { field:'portfolio', headerName:'Portfolio', flex:1, minWidth:64 },
+        { field:'trader', headerName:'Trader', flex:0.7, minWidth:48 },
+        { field:'charges', headerName:'Charges', flex:0.7, minWidth:48, type:'rightAligned' },
+        { field:'timestamp', headerName:'Created', flex:1.2, minWidth:64 },
+        { field:'lastModified', headerName:'Modified', flex:1.2, minWidth:64 },
+      ]
+    },
+  ];
+
+  // Flatten column defs for toggle panel
+  function flattenCols(defs) {
+    var result = [];
+    defs.forEach(function(d) {
+      if (d.children) {
+        d.children.forEach(function(c) { result.push(c); });
+      } else {
+        result.push(d);
+      }
+    });
+    return result;
+  }
+
+  var flatCols = flattenCols(colDefs);
+
+  // Build column toggle panel
+  var colPanel = document.getElementById('col-panel');
+  flatCols.forEach(function(c) {
+    if (!c.field) return;
+    var name = c.headerName || c.field;
+    var div = document.createElement('div');
+    div.className = 'hz-col-item';
+    div.innerHTML = '<input type="checkbox" checked onchange="toggleCol(\'' + escapeHtml(c.field) + '\',this.checked)" /><span>' + escapeHtml(name) + '</span>';
+    colPanel.appendChild(div);
+  });
+
+  var gridOptions = {
+    columnDefs: colDefs,
+    rowData: tradeData,
+    getRowId: function(params) { return String(params.data.id); },
+    defaultColDef: { flex: 1, minWidth: 64, sortable: true, filter: true, resizable: true },
+    autoSizeStrategy: { type: 'fitGridWidth' },
+    rowGroupPanelShow: 'always',
+    rowSelection: 'single',
+    animateRows: true,
+    suppressCellFocus: true,
+    getRowClass: function(params) {
+      if (!params.data) return '';
+      var classes = [];
+      if (params.data.matched === 'Yes') classes.push('row-matched');
+      if (params.data.status === 'Cancelled') classes.push('row-cancelled');
+      return classes.join(' ');
+    },
+    isExternalFilterPresent: function() {
+      return activeStatusFilter !== 'all' || activeQuickFilters.size > 0;
+    },
+    doesExternalFilterPass: function(node) {
+      var d = node.data;
+      // Status filter
+      if (activeStatusFilter !== 'all' && d.status !== activeStatusFilter) return false;
+      // Quick filters (all must pass)
+      if (activeQuickFilters.has('matched') && d.matched !== 'Yes') return false;
+      if (activeQuickFilters.has('unmatched') && d.matched !== 'No') return false;
+      if (activeQuickFilters.has('buy') && d.side !== 'B') return false;
+      if (activeQuickFilters.has('sell') && d.side !== 'S') return false;
+      if (activeQuickFilters.has('mytrades') && d.trader !== currentTrader) return false;
+      return true;
+    },
+    onCellContextMenu: function(e) {
+      e.event.preventDefault();
+      selectedRow = e.data;
+      showContextMenu(e.event, [
+        { label: 'View Trade', action: "ctxAction('view')" },
+        { label: 'Amend Trade', action: "ctxAction('amend')" },
+        { label: 'Cancel Trade', action: "ctxAction('cancel')" },
+      ]);
+    },
+    onFirstDataRendered: function() {
+      document.getElementById('row-count').textContent = gridApi.getDisplayedRowCount() + ' trades';
+      updateTotalPnl();
+    },
+    onFilterChanged: function() {
+      document.getElementById('row-count').textContent = gridApi.getDisplayedRowCount() + ' trades';
+      updateTotalPnl();
+    },
+  };
+
+  gridApi = agGrid.createGrid(document.getElementById('blotter-grid'), gridOptions);
+
+  // Theme-aware grid
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var gridEl = document.getElementById('blotter-grid');
+  gridEl.classList.toggle('ag-theme-quartz-dark', isDark);
+  gridEl.classList.toggle('ag-theme-quartz', !isDark);
+
+}, 100);
+
+// Close column panel on outside click
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('col-panel');
+  if (panel && !e.target.closest('.hz-col-panel') && !e.target.closest('[onclick*="toggleColPanel"]')) {
+    panel.classList.remove('open');
+  }
+});
+</script>
+
+</body>
+</html>
