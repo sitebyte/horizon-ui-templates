@@ -293,7 +293,7 @@ setTimeout(function() {
             return '<a href="lifecycle.html" class="hz-entity-link">' + escapeHtml(p.value) + '</a>';
           }
         },
-        { field:'groupId', headerName:'Trade Group', flex:1, minWidth:64 },
+        { field:'groupId', headerName:'Trade Group', hide:true, flex:1, minWidth:64 },
         { field:'side', flex:0.7, minWidth:48, cellRenderer: function(p) {
           if (p.value == null) return '\u2013';
           var v = escapeHtml(p.value);
@@ -310,8 +310,8 @@ setTimeout(function() {
       headerName: 'Counterparty & Books',
       children: [
         { field:'counterparty', headerName:'Counterparty', flex:1.2, minWidth:64 },
-        { field:'leBook', headerName:'LE Book', flex:1, minWidth:64 },
-        { field:'cptyBook', headerName:'Cpty Book', flex:1, minWidth:64 },
+        { field:'leBook', headerName:'LE Book', hide:true, flex:1, minWidth:64 },
+        { field:'cptyBook', headerName:'Cpty Book', hide:true, flex:1, minWidth:64 },
       ]
     },
     /* === Commercial === */
@@ -322,7 +322,7 @@ setTimeout(function() {
         { field:'benchmark', headerName:'Bench', flex:0.7, minWidth:48 },
         { field:'price', flex:1, minWidth:64, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? '$' + p.value.toFixed(2) : '\u2013'; } },
         { field:'index', headerName:'Index', flex:1.5, minWidth:64 },
-        { field:'incoterm', headerName:'Inco', flex:0.7, minWidth:48 },
+        { field:'incoterm', headerName:'Inco', hide:true, flex:0.7, minWidth:48 },
         { field:'delivery', headerName:'Delivery', flex:1.2, minWidth:64 },
       ]
     },
@@ -358,17 +358,17 @@ setTimeout(function() {
       headerName: 'Strategy & Controls',
       children: [
         { field:'strategy', headerName:'Strategy', flex:1, minWidth:64, cellRenderer: strategyRenderer },
-        { field:'locRestriction', headerName:'Loc Restriction', flex:1, minWidth:64, cellRenderer: locRestrictionRenderer },
-        { field:'creditSecurity', headerName:'Credit Sec.', flex:1, minWidth:64 },
-        { field:'optionRight', headerName:'Option Right', flex:1, minWidth:64 },
+        { field:'locRestriction', headerName:'Loc Restriction', hide:true, flex:1, minWidth:64, cellRenderer: locRestrictionRenderer },
+        { field:'creditSecurity', headerName:'Credit Sec.', hide:true, flex:1, minWidth:64 },
+        { field:'optionRight', headerName:'Option Right', hide:true, flex:1, minWidth:64 },
       ]
     },
     /* === Tolerances === */
     {
       headerName: 'Tolerances',
       children: [
-        { field:'tolMin', headerName:'Tol Min %', flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? p.value + '%' : '\u2013'; } },
-        { field:'tolMax', headerName:'Tol Max %', flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? '+' + p.value + '%' : '\u2013'; } },
+        { field:'tolMin', headerName:'Tol Min %', hide:true, flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? p.value + '%' : '\u2013'; } },
+        { field:'tolMax', headerName:'Tol Max %', hide:true, flex:0.7, minWidth:48, type:'rightAligned', valueFormatter: function(p) { return p.value != null ? '+' + p.value + '%' : '\u2013'; } },
       ]
     },
     /* === Audit === */
@@ -377,9 +377,9 @@ setTimeout(function() {
       children: [
         { field:'portfolio', headerName:'Portfolio', flex:1, minWidth:64 },
         { field:'trader', headerName:'Trader', flex:0.7, minWidth:48 },
-        { field:'charges', headerName:'Charges', flex:0.7, minWidth:48, type:'rightAligned' },
+        { field:'charges', headerName:'Charges', hide:true, flex:0.7, minWidth:48, type:'rightAligned' },
         { field:'timestamp', headerName:'Created', flex:1.2, minWidth:64 },
-        { field:'lastModified', headerName:'Modified', flex:1.2, minWidth:64 },
+        { field:'lastModified', headerName:'Modified', hide:true, flex:1.2, minWidth:64 },
       ]
     },
   ];
@@ -406,7 +406,8 @@ setTimeout(function() {
     var name = c.headerName || c.field;
     var div = document.createElement('div');
     div.className = 'hz-col-item';
-    div.innerHTML = '<input type="checkbox" checked onchange="toggleCol(\'' + escapeHtml(c.field) + '\',this.checked)" /><span>' + escapeHtml(name) + '</span>';
+    var isVisible = !c.hide;
+    div.innerHTML = '<input type="checkbox" ' + (isVisible ? 'checked' : '') + ' onchange="toggleCol(\'' + escapeHtml(c.field) + '\',this.checked)" /><span>' + escapeHtml(name) + '</span>';
     colPanel.appendChild(div);
   });
 
