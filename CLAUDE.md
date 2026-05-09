@@ -31,6 +31,12 @@
 - Sidebar menus: all groups `defaultOpen: false`
 - All pages call `initShell(key, title)` for shell integration
 
+## Version Handover Rule (MANDATORY)
+- **Every version iteration must include a handover summary** at `analysis/pass-to-claude/v{N}/handover-v{N}.md`.
+- The handover summarises: what changed, new/changed tokens, EOS.Horizon sync impact, page count, and any breaking changes.
+- This is the primary document the production EOS.Horizon session reads to stay in sync.
+- Update this on every version commit — do not batch.
+
 ## Handover Documents for Production Build (EOS.Horizon)
 
 These documents are written for the Claude session working in the production `EOS.Horizon` repo (.NET 10 + React 19). They translate the prototype's design intent into specs the production stack can consume.
