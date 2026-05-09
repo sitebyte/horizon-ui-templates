@@ -981,6 +981,61 @@
       .msg-header-grid { grid-template-columns: repeat(2, 1fr); }
       .dash-kpi-strip { gap: var(--sp-2); }
     }
+
+    /* ============================================================
+       Section: Topology Legend (overlay panel)
+       ============================================================ */
+    .env-legend {
+      position: absolute;
+      bottom: var(--sp-3);
+      left: var(--sp-3);
+      background: var(--surface-raised);
+      border: 0.0625rem solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-2);
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      z-index: 20;
+      min-width: 12rem;
+      box-shadow: var(--shadow-md);
+    }
+    .env-legend.collapsed .env-legend-body { display: none; }
+    .env-legend.collapsed .env-legend-toggle { transform: rotate(-90deg); }
+    .env-legend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .env-legend-toggle { transition: transform var(--transition-fast); font-size: 0.5rem; }
+    .env-legend-section {
+      font-size: 0.5625rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: var(--sp-2);
+      margin-bottom: var(--sp-1);
+    }
+    .env-legend-section:first-child { margin-top: var(--sp-1); }
+    .env-legend-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: 0.125rem 0;
+      color: var(--text-tertiary);
+    }
+    .env-legend-swatch {
+      display: inline-block;
+      width: 0.875rem;
+      height: 0.875rem;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -1008,6 +1063,34 @@
           <span class="env-region" id="env-region">---</span>
           <span class="env-versions" id="env-versions">---</span>
           <span class="env-url font-mono" id="env-url">---</span>
+        </div>
+
+        <!-- Health Summary KPI Strip -->
+        <div class="flex gap-2 flex-shrink-0 mb-2" style="padding:0 var(--sp-3);" id="env-health-summary">
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Total Nodes</span>
+            <span class="hz-kpi-value font-mono" id="env-total-nodes">--</span>
+          </div>
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Healthy</span>
+            <span class="hz-kpi-value font-mono pnl-positive" id="env-healthy-count">--</span>
+          </div>
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Degraded</span>
+            <span class="hz-kpi-value font-mono" style="color:var(--amber);" id="env-degraded-count">--</span>
+          </div>
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Down</span>
+            <span class="hz-kpi-value font-mono pnl-negative" id="env-down-count">--</span>
+          </div>
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Offline</span>
+            <span class="hz-kpi-value font-mono" style="color:var(--text-muted);" id="env-offline-count">--</span>
+          </div>
+          <div class="hz-kpi" style="flex:1;">
+            <span class="hz-kpi-label">Queue Alerts</span>
+            <span class="hz-kpi-value font-mono pnl-negative" id="env-queue-alerts">--</span>
+          </div>
         </div>
       </div>
 
@@ -1052,6 +1135,38 @@
                 </marker>
               </defs>
             </svg>
+            <!-- Topology Legend -->
+            <div class="env-legend" id="env-legend">
+              <div class="env-legend-header" onclick="document.getElementById('env-legend').classList.toggle('collapsed')">
+                <span>Legend</span>
+                <span class="env-legend-toggle">&#9660;</span>
+              </div>
+              <div class="env-legend-body">
+                <!-- Node Types -->
+                <div class="env-legend-section">Node Types</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:rgba(79,70,229,0.15); border:1px solid rgba(79,70,229,0.4); border-radius:1rem;"></span> External System</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:var(--surface-raised); border:1px solid var(--border); border-radius:50%;"></span> Pipeline / Adapter</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:0.25rem;"></span> Integration Module (Glint)</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.4); clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"></span> Message Broker</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:rgba(79,70,229,0.2); border:2px solid rgba(79,70,229,0.6); border-radius:0.5rem;"></span> Core System</div>
+                <div class="env-legend-row"><span class="env-legend-swatch" style="background:rgba(124,58,237,0.1); border:1px solid rgba(124,58,237,0.3); border-radius:0.25rem;"></span> Destination System</div>
+
+                <!-- Health States -->
+                <div class="env-legend-section" style="margin-top:var(--sp-2);">Health Status</div>
+                <div class="env-legend-row"><span class="hz-dot green" style="width:0.5rem;height:0.5rem;"></span> Healthy</div>
+                <div class="env-legend-row"><span class="hz-dot amber" style="width:0.5rem;height:0.5rem;"></span> Degraded</div>
+                <div class="env-legend-row"><span class="hz-dot red" style="width:0.5rem;height:0.5rem;"></span> Down / Failing</div>
+                <div class="env-legend-row"><span class="hz-dot" style="width:0.5rem;height:0.5rem;background:var(--text-muted);"></span> Offline</div>
+
+                <!-- Flow Lines -->
+                <div class="env-legend-section" style="margin-top:var(--sp-2);">Data Flows</div>
+                <div class="env-legend-row"><span style="display:inline-block;width:1.5rem;height:2px;background:var(--accent);opacity:0.6;"></span> Active flow</div>
+                <div class="env-legend-row"><span style="display:inline-block;width:1.5rem;height:2px;background:var(--accent);opacity:0.15;border-top:1px dashed var(--text-muted);"></span> Offline flow</div>
+                <div class="env-legend-row"><span style="display:inline-block;width:1.5rem;height:3px;background:var(--accent);opacity:0.6;"></span> High volume</div>
+                <div class="env-legend-row"><span style="display:inline-block;width:1.5rem;height:1px;background:var(--accent);opacity:0.35;"></span> Low volume</div>
+              </div>
+            </div>
+
             <!-- Detail panel -->
             <div class="detail-panel" id="detail-panel">
               <button class="dp-close" onclick="closeDetailPanel()">&times;</button>
@@ -1446,6 +1561,7 @@
   function renderAll(data) {
     updateEnvInfo(data);
     renderKPIs(data);
+    renderHealthSummary(data);
     renderQueues(data);
     renderHealthChecks(data);
     populateMessageTypeDropdown(data);
@@ -1533,6 +1649,47 @@
     html += '<span class="strip-sep">|</span>';
     html += '<span><span class="strip-label">Environment</span><span class="strip-value" style="color:' + data.environment.color + ';">' + data.environment.label + '</span></span>';
     strip.innerHTML = html;
+  }
+
+  function renderHealthSummary(data) {
+    var allNodes = getAllNodes(data);
+    var total = 0, healthy = 0, degraded = 0, down = 0, offline = 0;
+
+    allNodes.forEach(function(n) {
+      if (n.status === 'manual') return; // skip manual/placeholder nodes
+      total++;
+      if (n.status === 'healthy') healthy++;
+      else if (n.status === 'degraded') degraded++;
+      else if (n.status === 'down') down++;
+      else if (n.status === 'offline') offline++;
+      else healthy++; // default to healthy if status unset
+    });
+
+    // Queue alerts: count queues that are critical or backing up
+    var queueAlerts = 0;
+    var queues = [];
+    if (data.rabbitMq && data.rabbitMq.queues) queues = data.rabbitMq.queues;
+    else if (data.queues) queues = data.queues;
+    queues.forEach(function(q) {
+      if (q.status === 'critical' || q.status === 'backing-up' || q.messages > 100) queueAlerts++;
+    });
+
+    // Also count health check failures as contributing to down count
+    var hcFailNodes = {};
+    if (data.healthChecks) {
+      data.healthChecks.forEach(function(hc) {
+        if (hc.lastResult && hc.lastResult.status === 'fail') {
+          hcFailNodes[hc.targetNode] = true;
+        }
+      });
+    }
+
+    document.getElementById('env-total-nodes').textContent = total;
+    document.getElementById('env-healthy-count').textContent = healthy;
+    document.getElementById('env-degraded-count').textContent = degraded;
+    document.getElementById('env-down-count').textContent = down;
+    document.getElementById('env-offline-count').textContent = offline;
+    document.getElementById('env-queue-alerts').textContent = queueAlerts;
   }
 
   function renderQueues(data) {

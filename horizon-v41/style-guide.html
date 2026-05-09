@@ -725,6 +725,504 @@
       </div>
     </section>
 
+    <!-- 13. Shadow Tokens -->
+    <section id="shadow-tokens" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">13. Shadow Tokens</h2>
+      <p class="sg-desc">Four elevation levels. Shadows are theme-aware: softer in light theme, deeper in dark theme.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-6">
+          <div class="flex flex-col items-center gap-2">
+            <div style="background: var(--card-bg); border-radius: var(--radius-lg); padding: var(--sp-4); box-shadow: var(--shadow-sm); width: 9rem; height: 5rem; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--shadow-sm</div>
+            <span class="sg-swatch-label">Cards, dropdowns</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div style="background: var(--card-bg); border-radius: var(--radius-lg); padding: var(--sp-4); box-shadow: var(--shadow-md); width: 9rem; height: 5rem; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--shadow-md</div>
+            <span class="sg-swatch-label">Popovers, tooltips</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div style="background: var(--card-bg); border-radius: var(--radius-lg); padding: var(--sp-4); box-shadow: var(--shadow-lg); width: 9rem; height: 5rem; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--shadow-lg</div>
+            <span class="sg-swatch-label">Modals, panels</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div style="background: var(--card-bg); border-radius: var(--radius-lg); padding: var(--sp-4); box-shadow: var(--shadow-xl); width: 9rem; height: 5rem; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--shadow-xl</div>
+            <span class="sg-swatch-label">Full-screen overlays</span>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;div style="box-shadow: var(--shadow-sm);"&gt;...&lt;/div&gt;
+&lt;div style="box-shadow: var(--shadow-md);"&gt;...&lt;/div&gt;
+&lt;div style="box-shadow: var(--shadow-lg);"&gt;...&lt;/div&gt;
+&lt;div style="box-shadow: var(--shadow-xl);"&gt;...&lt;/div&gt;
+
+&lt;!-- Dark: deeper rgba(0,0,0,0.2–0.4) --&gt;
+&lt;!-- Light: softer rgba(0,0,0,0.08–0.16) --&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 14. Text Inverse & Contrast -->
+    <section id="text-inverse" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">14. Text Inverse &amp; Contrast</h2>
+      <p class="sg-desc">Use <code style="font-family: var(--font-mono); font-size: var(--text-xs);">--text-inverse</code> (#fff) for white text on colored backgrounds. Ensures legibility on accent, status, and gradient surfaces.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-3 items-center">
+          <span style="background: var(--accent); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Accent</span>
+          <span style="background: var(--red); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Red</span>
+          <span style="background: var(--green); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Green</span>
+          <span style="background-image: var(--gradient); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Gradient</span>
+          <span style="background: var(--blue); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Blue</span>
+          <span style="background: var(--amber); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Amber</span>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;span style="background: var(--accent); color: var(--text-inverse);"&gt;
+  Accent pill
+&lt;/span&gt;
+
+&lt;span style="background-image: var(--gradient); color: var(--text-inverse);"&gt;
+  Gradient pill
+&lt;/span&gt;
+
+&lt;!-- --text-inverse is always #ffffff regardless of theme --&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 15. Cargo Phase Colors -->
+    <section id="cargo-phases" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">15. Cargo Phase Colors</h2>
+      <p class="sg-desc">Six lifecycle phases for LNG cargo tracking. Used on the Cargo Board Gantt bars, phase dots, and legend swatches.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-2">
+          <span style="background: var(--phase-planning); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Planning</span>
+          <span style="background: var(--phase-nomination); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Nomination</span>
+          <span style="background: var(--phase-loading); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Loading</span>
+          <span style="background: var(--phase-transit); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Transit</span>
+          <span style="background: var(--phase-discharge); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Discharge</span>
+          <span style="background: var(--phase-settlement); color: var(--text-inverse); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600;">Settlement</span>
+        </div>
+      </div>
+
+      <h3 class="sg-subsection">Token Values</h3>
+      <div class="sg-example">
+        <div class="flex flex-wrap gap-4">
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-planning);"></div>
+            <div class="sg-swatch-label">Planning</div>
+            <div class="sg-swatch-var">--phase-planning</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-nomination);"></div>
+            <div class="sg-swatch-label">Nomination</div>
+            <div class="sg-swatch-var">--phase-nomination</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-loading);"></div>
+            <div class="sg-swatch-label">Loading</div>
+            <div class="sg-swatch-var">--phase-loading</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-transit);"></div>
+            <div class="sg-swatch-label">Transit</div>
+            <div class="sg-swatch-var">--phase-transit</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-discharge);"></div>
+            <div class="sg-swatch-label">Discharge</div>
+            <div class="sg-swatch-var">--phase-discharge</div>
+          </div>
+          <div class="flex flex-col items-center">
+            <div class="sg-swatch" style="background: var(--phase-settlement);"></div>
+            <div class="sg-swatch-label">Settlement</div>
+            <div class="sg-swatch-var">--phase-settlement</div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Phase pill --&gt;
+&lt;span style="background: var(--phase-transit); color: var(--text-inverse);"&gt;
+  Transit
+&lt;/span&gt;
+
+&lt;!-- Phase dot (as used on Cargo Board) --&gt;
+&lt;span class="phase-dot loading" style="background: var(--phase-loading);"&gt;&lt;/span&gt;
+
+&lt;!-- Tokens: #64748b, #3b82f6, #f59e0b, #6366f1, #10b981, #22c55e --&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 16. Border System -->
+    <section id="border-system" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">16. Border System</h2>
+      <p class="sg-desc">Three-tier border system. Subtle for dividers, default for card edges, strong for emphasis and focus.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-col gap-4">
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Border Tiers</div>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <div style="flex: 1; height: 0.0625rem; background: var(--border-subtle);"></div>
+                <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary); white-space: nowrap;">--border-subtle</span>
+                <span style="font-size: var(--text-xs); color: var(--text-muted);">Dividers, separators</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div style="flex: 1; height: 0.0625rem; background: var(--border);"></div>
+                <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary); white-space: nowrap;">--border</span>
+                <span style="font-size: var(--text-xs); color: var(--text-muted);">Card edges, inputs</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div style="flex: 1; height: 0.0625rem; background: var(--border-strong);"></div>
+                <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary); white-space: nowrap;">--border-strong</span>
+                <span style="font-size: var(--text-xs); color: var(--text-muted);">Emphasis, active states</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Combined Example</div>
+            <div style="background: var(--card-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-lg); overflow: hidden;">
+              <div style="padding: var(--sp-3); border-bottom: 0.0625rem solid var(--border-subtle);">
+                <span style="font-size: var(--text-sm); color: var(--text-secondary);">Header area <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">(--border-subtle divider below)</span></span>
+              </div>
+              <div style="padding: var(--sp-3); border-bottom: 0.0625rem solid var(--border-subtle);">
+                <span style="font-size: var(--text-sm); color: var(--text-secondary);">Content row <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">(--border outer edge)</span></span>
+              </div>
+              <div style="padding: var(--sp-3); border-left: 0.125rem solid var(--border-strong);">
+                <span style="font-size: var(--text-sm); color: var(--text-secondary);">Emphasized row <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">(--border-strong left accent)</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Card with subtle divider --&gt;
+&lt;div style="border: 0.0625rem solid var(--border);"&gt;
+  &lt;div style="border-bottom: 0.0625rem solid var(--border-subtle);"&gt;Header&lt;/div&gt;
+  &lt;div&gt;Content&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Emphasis border --&gt;
+&lt;div style="border-left: 0.125rem solid var(--border-strong);"&gt;Important&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 17. Interactive States -->
+    <section id="interactive-states" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">17. Interactive States</h2>
+      <p class="sg-desc">RGBA overlay tokens that work on any background. Theme-aware: white overlays in dark mode, black overlays in light mode.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-col gap-4">
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">State Overlays</div>
+            <div class="flex flex-wrap gap-3">
+              <div style="background: var(--hover); border: 0.0625rem solid var(--border); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-secondary); text-align: center; min-width: 7rem;">
+                <div>Hover</div>
+                <div style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">--hover</div>
+              </div>
+              <div style="background: var(--active); border: 0.0625rem solid var(--border); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-secondary); text-align: center; min-width: 7rem;">
+                <div>Active</div>
+                <div style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted);">--active</div>
+              </div>
+              <div style="background: var(--backdrop); border: 0.0625rem solid var(--border); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-inverse); text-align: center; min-width: 7rem;">
+                <div>Backdrop</div>
+                <div style="font-family: var(--font-mono); font-size: var(--text-xs); color: rgba(255,255,255,0.6);">--backdrop</div>
+              </div>
+              <div style="background: var(--overlay-bg); border: 0.0625rem solid var(--border); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-inverse); text-align: center; min-width: 7rem;">
+                <div>Overlay</div>
+                <div style="font-family: var(--font-mono); font-size: var(--text-xs); color: rgba(255,255,255,0.6);">--overlay-bg</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Usage on Colored Backgrounds</div>
+            <div class="flex flex-wrap gap-3">
+              <div style="position: relative; background: var(--accent); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-inverse); min-width: 7rem; text-align: center;">
+                Base
+              </div>
+              <div style="position: relative; background: var(--accent); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-inverse); min-width: 7rem; text-align: center;">
+                <div style="position: absolute; inset: 0; background: var(--hover); border-radius: var(--radius-md);"></div>
+                <span style="position: relative;">+ hover</span>
+              </div>
+              <div style="position: relative; background: var(--accent); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-4); font-size: var(--text-sm); color: var(--text-inverse); min-width: 7rem; text-align: center;">
+                <div style="position: absolute; inset: 0; background: var(--active); border-radius: var(--radius-md);"></div>
+                <span style="position: relative;">+ active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Hover state (menu items, rows) --&gt;
+.item:hover { background: var(--hover); }
+
+&lt;!-- Active/pressed --&gt;
+.item:active { background: var(--active); }
+
+&lt;!-- Modal backdrop --&gt;
+.backdrop { background: var(--backdrop); }
+
+&lt;!-- Full overlay --&gt;
+.overlay { background: var(--overlay-bg); }
+
+&lt;!-- Dark: rgba(255,255,255, 0.04/0.06) --&gt;
+&lt;!-- Light: rgba(0,0,0, 0.04/0.06) --&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 18. Responsive Utilities -->
+    <section id="responsive-utilities" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">18. Responsive Utilities</h2>
+      <p class="sg-desc">Built-in breakpoints and utility classes for responsive layouts. No custom media queries needed for common patterns.</p>
+
+      <div class="sg-example" style="overflow-x: auto;">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Breakpoint</th>
+              <th>Width</th>
+              <th>Target</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">64rem</td>
+              <td>1024px</td>
+              <td>Tablet landscape</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">48rem</td>
+              <td>768px</td>
+              <td>Mobile</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sg-subsection">Utility Classes</h3>
+      <div class="sg-example" style="overflow-x: auto;">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Breakpoint</th>
+              <th>Behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">.hz-layout-collapse</td>
+              <td>&le; 64rem</td>
+              <td>Collapses grid to single column</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">.hz-dense-form</td>
+              <td>&le; 64rem</td>
+              <td>Collapses from 4-col to 2-col grid</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">.hz-mobile-banner</td>
+              <td>&le; 48rem</td>
+              <td>Shown only on mobile viewports</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">.hz-kpi-strip</td>
+              <td>&le; 64rem</td>
+              <td>Wraps to multiple lines</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Auto-collapse grid on tablet --&gt;
+&lt;div class="grid grid-cols-3 gap-3 hz-layout-collapse"&gt;
+  &lt;div&gt;Card 1&lt;/div&gt;
+  &lt;div&gt;Card 2&lt;/div&gt;
+  &lt;div&gt;Card 3&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Dense form: 4-col → 2-col at 64rem --&gt;
+&lt;div class="hz-dense-form"&gt;
+  &lt;span class="df-label"&gt;Field&lt;/span&gt;
+  &lt;span class="df-value"&gt;Value&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Mobile-only banner --&gt;
+&lt;div class="hz-mobile-banner"&gt;Use landscape for best experience&lt;/div&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 19. Workspace Tabs -->
+    <section id="workspace-tabs" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">19. Workspace Tabs</h2>
+      <p class="sg-desc">Browser-like workspace tabs that persist navigation state. Tabs appear automatically when navigating between pages via the sidebar.</p>
+
+      <div class="sg-example">
+        <div class="flex flex-col gap-3">
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Features</div>
+            <div class="flex flex-col gap-2" style="font-size: var(--text-sm); color: var(--text-secondary);">
+              <div class="flex items-start gap-2">
+                <span style="color: var(--accent); font-weight: 600;">&#8226;</span>
+                <span>Tabs appear automatically when navigating between pages</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span style="color: var(--accent); font-weight: 600;">&#8226;</span>
+                <span>State persisted to <code style="font-family: var(--font-mono); font-size: var(--text-xs); background: var(--surface-raised); padding: 0.0625rem 0.25rem; border-radius: var(--radius-sm);">localStorage</code> (survives refresh)</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span style="color: var(--accent); font-weight: 600;">&#8226;</span>
+                <span>Maximum 10 tabs — oldest evicted when limit reached</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span style="color: var(--accent); font-weight: 600;">&#8226;</span>
+                <span>Hidden on mobile (&le; 48rem)</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">State Persistence API</div>
+            <table class="hz-table">
+              <thead>
+                <tr>
+                  <th>Function</th>
+                  <th>Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-family: var(--font-mono); font-size: var(--text-xs);">hzRegisterGrid(api, gridId?)</td>
+                  <td>Register AG Grid instance for automatic column/filter state save/restore</td>
+                </tr>
+                <tr>
+                  <td style="font-family: var(--font-mono); font-size: var(--text-xs);">hzSavePageState()</td>
+                  <td>Manually save page state (scroll, active pills, tabs, grid state)</td>
+                </tr>
+                <tr>
+                  <td style="font-family: var(--font-mono); font-size: var(--text-xs);">hzRestorePageState()</td>
+                  <td>Restore previously saved page state on load</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- AG Grid state persistence --&gt;
+&lt;script&gt;
+  var gridOptions = { /* ... */ };
+  var api = agGrid.createGrid(el, gridOptions);
+  hzRegisterGrid(api, 'blotter');  // auto-saves column + filter state
+&lt;/script&gt;
+
+&lt;!-- Manual state control --&gt;
+&lt;script&gt;
+  // Called automatically on beforeunload, but can be triggered manually:
+  hzSavePageState();
+  hzRestorePageState();
+&lt;/script&gt;</code></pre>
+      </div>
+    </section>
+
+    <!-- 20. AG Grid Theming -->
+    <section id="ag-grid-theming" class="sg-section" data-component="style-guide-section">
+      <h2 class="sg-title">20. AG Grid Theming</h2>
+      <p class="sg-desc">AG Grid tokens mapped to Horizon design tokens. Both dark (<code style="font-family: var(--font-mono); font-size: var(--text-xs);">.ag-theme-quartz-dark</code>) and light (<code style="font-family: var(--font-mono); font-size: var(--text-xs);">.ag-theme-quartz</code>) themes are pre-configured.</p>
+
+      <h3 class="sg-subsection">Token Mappings</h3>
+      <div class="sg-example" style="overflow-x: auto;">
+        <table class="hz-table">
+          <thead>
+            <tr>
+              <th>AG Grid Token</th>
+              <th>Horizon Token</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-background-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--card-bg)</td>
+              <td>Grid background</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-header-background-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--surface-raised)</td>
+              <td>Header row background</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-row-hover-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--accent-bg2)</td>
+              <td>Row hover highlight</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-selected-row-background-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--accent-bg)</td>
+              <td>Selected row highlight</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-border-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--border)</td>
+              <td>Grid borders</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-foreground-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--text-secondary)</td>
+              <td>Cell text</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-header-foreground-color</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--text-muted)</td>
+              <td>Header text</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-font-family</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--font-mono)</td>
+              <td>Monospace for data cells</td>
+            </tr>
+            <tr>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">--ag-font-size</td>
+              <td style="font-family: var(--font-mono); font-size: var(--text-xs);">var(--text-xs)</td>
+              <td>11px cell text</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sg-subsection">Compact Mode</h3>
+      <div class="sg-example">
+        <div class="flex flex-col gap-2" style="font-size: var(--text-sm); color: var(--text-secondary);">
+          <div>Add <code style="font-family: var(--font-mono); font-size: var(--text-xs); background: var(--surface-raised); padding: 0.0625rem 0.25rem; border-radius: var(--radius-sm);">.ag-compact</code> to reduce row height from 2rem to 1.5rem:</div>
+          <div class="flex flex-wrap gap-4" style="margin-top: 0.25rem;">
+            <div class="flex items-center gap-2">
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--ag-row-height:</span>
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-primary);">1.5rem</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--ag-header-height:</span>
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-primary);">1.75rem</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-tertiary);">--ag-font-size:</span>
+              <span style="font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-primary);">0.6875rem</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-code">
+        <pre><code>&lt;!-- Standard density --&gt;
+&lt;div class="ag-theme-quartz-dark" style="height: calc(100vh - 12rem);"&gt;&lt;/div&gt;
+
+&lt;!-- Compact density --&gt;
+&lt;div class="ag-theme-quartz-dark ag-compact" style="height: calc(100vh - 12rem);"&gt;&lt;/div&gt;
+
+&lt;!-- Important: use height:calc(100vh - Xrem), NOT flexbox --&gt;
+&lt;!-- AG Grid init: use setTimeout(fn, 100), NOT DOMContentLoaded --&gt;</code></pre>
+      </div>
+    </section>
+
   </div>
 
   <script src="shell.js"></script>
