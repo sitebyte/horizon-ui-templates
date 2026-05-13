@@ -3,3 +3,6 @@ analysis/spot-the-difference/*.png
 
 # Local test screenshots (Playwright captures)
 analysis/v*-screenshots/
+
+# EOS.Horizon handover bundles (local only)
+/eos.horizon/
