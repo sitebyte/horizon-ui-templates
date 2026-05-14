@@ -1,5 +1,21 @@
 # CLAUDE.md — Project Rules
 
+## Role: Design Authority (MANDATORY)
+This session is the **design authority** for the Horizon ETRM UI. Everything related to visual design, component patterns, layout, tokens, density, and interaction design is decided here. A separate production session (EOS.Horizon, running on a Windows instance) implements these designs in a .NET 10 + React 19 SPA.
+
+### Spec-Led Handover
+- **The prototype drives.** We build HTML/CSS prototypes to explore and refine designs.
+- **The spec is the integration artifact.** After prototyping, generate a component spec (`analysis/eos.horizon/component-spec-vN.md`) with exact pixel-level measurements keyed to EOS.Horizon's React component names.
+- **Future updates use deltas.** When a new version ships, write only what changed vs the previous spec.
+- **The handover cycle:** iterate prototype → generate spec → hand spec to EOS.Horizon → they apply values and re-screenshot.
+- Component specs live in `analysis/eos.horizon/`. The current spec is `handover-05-13/component-spec-v41.md`.
+
+### No Backend Authority (MANDATORY)
+- **NEVER include API endpoints, DTOs, data shapes, query patterns, or backend suggestions in specs or handover documents.**
+- The EOS.Horizon session is 100% in charge of backend architecture. We have no visibility into their .NET backend, EOS database schema, or API design.
+- If a spec needs to reference data, describe the UI: "this cell displays a volume value" — NOT "the API returns `{ volume: number }` from `GET /api/positions`".
+- Backend hallucinations in specs cause confusion and waste time. Omit entirely.
+
 ## Versioning Rule (MANDATORY)
 - **ALWAYS version work.** Create a new directory (horizon-v7, horizon-v8, etc.) for each iteration.
 - **NEVER modify existing versions.** horizon-v1 through horizon-v6 are frozen. Do not edit files in those directories.
@@ -39,17 +55,22 @@
 
 ## Handover Documents for Production Build (EOS.Horizon)
 
-These documents are written for the Claude session working in the production `EOS.Horizon` repo (.NET 10 + React 19). They translate the prototype's design intent into specs the production stack can consume.
+These documents are written for the Claude session working in the production `EOS.Horizon` repo (.NET 10 + React 19). They describe **UI-only** specs — layout, composition, component measurements, visual states. No backend.
 
-### AI Handover Spec (`analysis/ai-handover-spec.md`)
-Complete page-by-page component spec mapping every prototype pattern to the production component vocabulary (`Tile`, `StatusPill`, `Stack`, `Text`, `Mono`). Covers:
-- **Global design system mapping** — token-to-Tailwind table, component mapping, layout patterns
-- **7 page specs** — Dashboard, Blotter, Trade Detail/Lifecycle, Positions, Support Dashboard, SQL Checks, Environments
-- **Universal interaction patterns** — toasts, entity links, number formatting, keyboard-first, density tiers
-- **What to copy vs what not to copy** — visual ratios and data models yes, shell.js and CDN scripts no
+### Component Spec (primary handover artifact)
+- `analysis/eos.horizon/handover-05-13/component-spec-v41.md` — Exact measurements from v41, keyed to EOS.Horizon's React component names. Every property marked TOKEN/FIXED/DENSITY.
+- Future versions ship a delta section listing only what changed. EOS applies the delta, re-screenshots, done.
 
-### Environments Handover (`analysis/pass-to-claude/`)
+### Page-Level UI Spec (`analysis/ai-handover-spec.md`)
+- Page-by-page layout and composition spec (UI only, no backend)
+- Component mapping, layout patterns, interaction patterns
+- 8 pages: Dashboard, Blotter, Trade Detail, Positions, Support Dashboard, SQL Checks, Environments, Security Profile
+
+### Supporting Documents (`analysis/eos.horizon/handover-05-13/`)
+- `response-plan.md` — Design authority answers to EOS.Horizon's 3 asks
+- `integration-lessons.md` — Why HTML prototypes are hard to integrate, and the spec-led approach
+- `eval-1/2/3-*.md` — Detailed evaluation reports (token audit, visual gaps, design decisions)
+
+### Legacy Handover (`analysis/pass-to-claude/`)
 - `handover.md` — Full project context, architecture, design philosophy
-- `answers-to-builder.md` — Answers to the production builder's 6 design questions
-- `implementation-guide-environments.md` — Detailed implementation guide for the `/support/environment` page
-- `eos-topology-seed.json` — Seed topology data (nodes + edges) for the environments page
+- `answers-to-builder.md` — Answers to the production builder's design questions
