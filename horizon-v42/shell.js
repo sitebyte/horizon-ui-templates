@@ -589,16 +589,7 @@ function buildHeader(pageTitle) {
   html += '  </div>';
   html += '  <span class="hz-breadcrumb-page">' + (pageTitle || '') + '</span>';
   html += '</div>';
-  // Ticker
-  html += '<div class="hz-ticker">';
-  html += '  <span class="hz-tick up"><span class="hz-tick-label">JKM</span> <span class="hz-tick-price">$14.25</span> <span class="hz-tick-delta">&#9650; 0.35</span></span>';
-  html += '  <span class="hz-tick-sep">|</span>';
-  html += '  <span class="hz-tick down"><span class="hz-tick-label">TTF</span> <span class="hz-tick-price">$12.80</span> <span class="hz-tick-delta">&#9660; 0.15</span></span>';
-  html += '  <span class="hz-tick-sep">|</span>';
-  html += '  <span class="hz-tick up"><span class="hz-tick-label">HH</span> <span class="hz-tick-price">$3.42</span> <span class="hz-tick-delta">&#9650; 0.02</span></span>';
-  html += '  <span class="hz-tick-sep">|</span>';
-  html += '  <span class="hz-tick up"><span class="hz-tick-label">Brent</span> <span class="hz-tick-price">$82.40</span> <span class="hz-tick-delta">&#9650; 1.20</span></span>';
-  html += '</div>';
+  // Ticker — removed (not relevant for Support area; re-enable when Trading pages go live)
   // Right
   html += '<div class="hz-header-right">';
   html += '  <button class="hz-cmd-k-btn" onclick="openCmdK()" title="Cmd+K" tabindex="0">' + svg('search', 14) + ' <span class="hz-kbd">&#8984;K</span></button>';
