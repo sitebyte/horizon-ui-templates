@@ -1,0 +1,373 @@
+/* ================================================================
+   SQL Checks page styles — ported from v43 support-sql-checks.html
+   Uses the same class names as the prototype for spec fidelity.
+   ================================================================ */
+
+/* ---- Toolbar ---- */
+.sql-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+.sql-toolbar .spacer { flex: 1; }
+.sql-status-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+.sql-status-summary .hz-dot { width: 0.375rem; height: 0.375rem; }
+
+/* ---- Parameter bar ---- */
+.param-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-raised);
+  border: 0.0625rem solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+.param-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.param-group label {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.param-group input,
+.param-group select {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background: var(--input-bg);
+  border: 0.0625rem solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.125rem var(--sp-2);
+  height: 1.5rem;
+}
+.param-group input[type="date"] { width: 8.5rem; }
+.param-group select { min-width: 6rem; }
+
+/* ---- Table — compact .tbl pattern ---- */
+.tbl { font-size: var(--text-xs); width: 100%; border-collapse: collapse; }
+.tbl th {
+  font-size: 0.5rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.125rem var(--sp-2);
+  text-align: left;
+  border-bottom: 0.0625rem solid var(--border);
+  font-family: var(--font-ui);
+  position: sticky;
+  top: 0;
+  background: var(--surface-canvas);
+  z-index: 1;
+}
+.tbl td {
+  padding: 0.125rem var(--sp-2);
+  border-bottom: 0.0625rem solid var(--border-subtle);
+  height: 1.25rem;
+}
+.tbl tr:hover td { background: var(--hover); }
+.tbl .r { text-align: right; }
+.tbl .c { text-align: center; }
+.tbl .check-num {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.5625rem;
+  width: 1.5rem;
+}
+.tbl .check-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.tbl .check-category {
+  font-size: 0.5625rem;
+  color: var(--text-tertiary);
+}
+.tbl .check-time {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 0.5625rem;
+}
+.tbl .check-duration {
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  font-size: 0.5625rem;
+}
+.tbl .check-details {
+  font-size: 0.5625rem;
+  color: var(--text-tertiary);
+  max-width: 14rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tbl .check-actions {
+  display: flex;
+  gap: var(--sp-1);
+  white-space: nowrap;
+}
+.tbl .check-select {
+  width: 1.25rem;
+  text-align: center;
+}
+.tbl .check-select input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Active row highlight */
+.tbl tr.active-check td {
+  background: var(--accent-bg2);
+}
+
+/* Running spinner */
+.check-running {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 0.5625rem;
+  color: var(--accent-light);
+}
+.check-running::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 0.0625rem solid var(--accent-light);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: sql-spin 0.6s linear infinite;
+}
+@keyframes sql-spin { to { transform: rotate(360deg); } }
+
+/* ---- Layout: checks table + bottom panel ---- */
+.sql-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.sql-table-wrap {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+/* ---- Bottom detail panel (tabs: Results | SQL) ---- */
+.detail-panel {
+  flex-shrink: 0;
+  border-top: 0.0625rem solid var(--border);
+  margin-top: var(--sp-2);
+  max-height: 45vh;
+  flex-direction: column;
+}
+.detail-panel.open { display: flex; }
+.detail-panel.closed { display: none; }
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.detail-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 0.0625rem solid var(--border);
+  flex-shrink: 0;
+  width: 100%;
+}
+.detail-tab {
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 0.125rem solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.detail-tab:hover { color: var(--text-secondary); }
+.detail-tab.active {
+  color: var(--accent-light);
+  border-bottom-color: var(--accent-light);
+}
+.detail-tab-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding-right: var(--sp-2);
+}
+.detail-tab-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: var(--sp-2) var(--sp-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20rem;
+}
+
+.detail-body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.detail-pane {
+  display: none;
+  padding: var(--sp-2) 0;
+}
+.detail-pane.active { display: block; }
+
+/* Results table inside detail panel */
+.results-wrap {
+  overflow: auto;
+  padding: 0 var(--sp-2);
+}
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2) var(--sp-1);
+  font-size: 0.5625rem;
+  color: var(--text-muted);
+}
+.results-empty {
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+/* SQL code block */
+.sql-code-block {
+  background: var(--surface-canvas);
+  border: 0.0625rem solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  margin: 0 var(--sp-2);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.sql-code-block .sql-kw { color: var(--accent-light); font-weight: 600; }
+.sql-code-block .sql-fn { color: var(--accent-violet); }
+.sql-code-block .sql-str { color: var(--green); }
+.sql-code-block .sql-comment { color: var(--text-muted); font-style: italic; }
+.sql-code-block .sql-num { color: var(--amber); }
+.sql-code-block .sql-alias { color: var(--text-tertiary); }
+.sql-code-block .sql-param { color: var(--amber); font-weight: 600; }
+
+/* Preset buttons */
+.preset-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+.preset-label {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-right: var(--sp-1);
+}
+.preset-btn {
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  border: 0.0625rem solid var(--border);
+  color: var(--text-tertiary);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.preset-btn:hover { border-color: var(--accent); color: var(--text-secondary); }
+.preset-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent-light); }
+
+/* Clickable rows */
+.tbl tr[data-check-id] { cursor: pointer; }
+
+/* Multi-select summary in detail panel */
+.multi-summary { padding: var(--sp-2); }
+.multi-summary .tbl td { cursor: pointer; }
+.multi-summary .tbl tr:hover td { background: var(--accent-bg2); }
+
+/* Resize handle */
+.detail-resize {
+  height: 0.375rem;
+  cursor: ns-resize;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.detail-resize::after {
+  content: '';
+  width: 2rem;
+  height: 0.125rem;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+}
+.detail-resize:hover::after { background: var(--accent-light); }
+
+/* ---- Per-check parameters inline form ---- */
+.check-params-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-elevated);
+  border-bottom: 0.0625rem solid var(--border);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.check-params-bar .param-group input[type="number"] {
+  width: 6rem;
+}
+.check-params-label {
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-light);
+  white-space: nowrap;
+  margin-right: var(--sp-1);
+}
+.check-params-bar .param-group input:focus,
+.check-params-bar .param-group select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 0.0625rem var(--accent-bg);
+}

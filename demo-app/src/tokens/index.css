@@ -1,3 +1,7 @@
 @import "./tokens-v43.css";
 @import "./shell.css";
 @import "./dashboard.css";
+@import "./data-quality.css";
+@import "./audit.css";
+@import "./sql-checks.css";
+@import "./environment.css";
