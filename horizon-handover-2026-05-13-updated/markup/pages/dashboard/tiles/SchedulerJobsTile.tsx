@@ -138,6 +138,8 @@ function SchedulerRow({
   const tone = severityToTone(row.severity);
   const isRunning = row.status === 'Running' || row.status === 'Cancelling' || row.severity === 'warn';
 
+  const cellStyle = { paddingBlock: 'var(--density-cell-padding-y)', paddingInline: 'var(--density-cell-padding-x)' };
+
   return (
     <tr
       data-testid="scheduler-job-row"
@@ -145,40 +147,42 @@ function SchedulerRow({
       data-id={row.id}
       className="border-b border-border-subtle last:border-b-0 hover:bg-sidebar-hover"
     >
-      <td style={{ paddingBlock: 'var(--density-cell-padding-y)', paddingInline: 'var(--density-cell-padding-x)' }}>
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Mono size="xs" tone="tertiary">#{row.id}</Mono>
-            <Text size="xs" tone="primary" weight={600} truncate>{row.name}</Text>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Mono size="xs" tone="tertiary" title={row.nextRunUtc ?? undefined}>
-              {formatNextRun(row.nextRunUtc)}
-            </Mono>
-            {tone ? (
-              <StatusPill kind="severity" tone={tone} label={(row.status ?? '—').toUpperCase()} />
-            ) : (
-              <Text size="xs" tone="tertiary" weight={600}>{(row.status ?? '—').toUpperCase()}</Text>
-            )}
-            {isRunning ? (
-              <ActionButton
-                kind="cancel"
-                onClick={onCancel}
-                disabled={isPending}
-                testId="scheduler-cancel-btn"
-                label={isPending ? '…' : 'Cancel'}
-              />
-            ) : (
-              <ActionButton
-                kind="run"
-                onClick={onRun}
-                disabled={isPending}
-                testId="scheduler-run-btn"
-                label={isPending ? '…' : 'Run'}
-              />
-            )}
-          </div>
+      <td style={cellStyle}>
+        <div className="flex items-center gap-2 min-w-0">
+          <Mono size="xs" tone="tertiary">#{row.id}</Mono>
+          <Text size="xs" tone="primary" weight={600} truncate>{row.name}</Text>
         </div>
+      </td>
+      <td className="text-right" style={cellStyle}>
+        <Mono size="xs" tone="tertiary" title={row.nextRunUtc ?? undefined}>
+          {formatNextRun(row.nextRunUtc)}
+        </Mono>
+      </td>
+      <td className="text-center" style={cellStyle}>
+        {tone ? (
+          <StatusPill kind="severity" tone={tone} label={(row.status ?? '—').toUpperCase()} />
+        ) : (
+          <Text size="xs" tone="tertiary" weight={600}>{(row.status ?? '—').toUpperCase()}</Text>
+        )}
+      </td>
+      <td className="text-right" style={cellStyle}>
+        {isRunning ? (
+          <ActionButton
+            kind="cancel"
+            onClick={onCancel}
+            disabled={isPending}
+            testId="scheduler-cancel-btn"
+            label={isPending ? '…' : 'Cancel'}
+          />
+        ) : (
+          <ActionButton
+            kind="run"
+            onClick={onRun}
+            disabled={isPending}
+            testId="scheduler-run-btn"
+            label={isPending ? '…' : 'Run'}
+          />
+        )}
       </td>
     </tr>
   );

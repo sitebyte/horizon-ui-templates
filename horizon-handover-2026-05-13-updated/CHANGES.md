@@ -122,10 +122,11 @@ All changes are UI-only. No API, data, or state management changes.
 
 **What changed:**
 - Added `<thead>` with header row (Job | Last Run | Status | action column)
-- Row padding → bound to density tokens
+- Split SchedulerRow body into 4 matching `<td>` columns (was single `<td>` with flex layout) so thead/tbody columns align
+- Cell padding → bound to density tokens
 - ActionButton sizing → bound to density tokens (`--density-font-size`, `--density-cell-padding-y/x`)
 
-**Why:** The v41 template has visible table headers for scanability. The original implementation omitted `<thead>`, making it harder to parse which column is which at a glance. Button sizing was hardcoded at `text-[10px] px-1.5 py-px` — binding to density tokens means buttons scale with the page's density setting.
+**Why:** The v41 template has visible table headers for scanability. The original implementation omitted `<thead>`, making it harder to parse which column is which at a glance. The body must use the same column structure as the header for the HTML table model to align correctly. Button sizing was hardcoded at `text-[10px] px-1.5 py-px` — binding to density tokens means buttons scale with the page's density setting.
 
 ---
 
