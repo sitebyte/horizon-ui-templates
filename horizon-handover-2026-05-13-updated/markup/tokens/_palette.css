@@ -1,0 +1,49 @@
+/*
+ * Horizon — raw palette
+ *
+ * Tier 1 of the two-tier token model. Raw colours only. NEVER read by
+ * components — only by `_semantic.css` and theme files. The semantic
+ * layer is the contract every component consumes.
+ *
+ * Naming: `--palette-{family}-{shade}` matches Tailwind's stone/amber/
+ * red/etc. ramp so eyeballing values in DevTools is muscle memory.
+ */
+
+:root {
+  /* Stone (warm neutrals — the existing Horizon dark surface family) */
+  --palette-stone-50:   #faf9f7;
+  --palette-stone-100:  #f5f3f0;
+  --palette-stone-200:  #e8e5e1;
+  --palette-stone-300:  #d6d3d1;
+  --palette-stone-400:  #a8a29e;
+  --palette-stone-500:  #78716c;
+  --palette-stone-600:  #57534e;
+  --palette-stone-700:  #44403c;
+  --palette-stone-800:  #292524;
+  --palette-stone-900:  #1c1917;
+  --palette-stone-950:  #171412;
+
+  /* Stone subtle (between 700 and 800) — used for sidebar borders etc. */
+  --palette-stone-hover-light:  #ece9e4;
+  --palette-stone-hover-dark:   #332e2b;
+  --palette-stone-border-dark:  #3d3836;
+  --palette-stone-border-light: #f0eeeb;
+
+  /* Amber (the existing Horizon accent family) */
+  --palette-amber-200:  #fef3c7;
+  --palette-amber-500:  #f59e0b;
+  --palette-amber-700:  #b45309;
+  --palette-amber-500-15: rgba(245, 158, 11, 0.15);
+
+  /* Status — RAG ramp (single set; same hex across light/dark) */
+  --palette-emerald-500: #10b981;
+  --palette-amber-d-500: #d97706; /* deeper amber for amber-status text */
+  --palette-red-500:     #ef4444;
+  --palette-blue-500:    #3b82f6;
+
+  /* Environment palette (sidebar/header tinting per env) */
+  --palette-env:        #708D91;
+  --palette-env-dark:   #5f787c;
+  --palette-env-light:  #8ba5a8;
+  --palette-env-text:   #d1dfe0;
+}

@@ -1,0 +1,13 @@
+/*
+ * Horizon — token barrel.
+ *
+ * Imports the two-tier token model in dependency order:
+ *   palette → semantic shape → theme bindings.
+ *
+ * `client/src/index.css` imports this barrel; nothing else should import
+ * the individual token files directly. The barrel is the public surface.
+ */
+
+@import "./_palette.css";
+@import "./_semantic.css";
+@import "./theme-horizon-ui.css";

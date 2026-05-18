@@ -1,0 +1,214 @@
+/*
+ * Horizon — semantic role tokens
+ *
+ * Tier 2 of the two-tier token model. Components read these tokens and
+ * NEVER read raw palette tokens (gate G3 enforces this in Wave 2).
+ *
+ * The active theme file (`theme-horizon-ui.css`) REDEFINES these tokens
+ * by reference to palette tokens. So this file declares the *shape*
+ * (what tokens exist); the theme file declares the *bindings* (what
+ * values they take). Horizon-UI is the only theme — the light variant
+ * lives inside the same theme file as `[data-theme="horizon-ui-light"]`.
+ *
+ * Cross-cutting axis: `[data-env="..."]` selectors at the bottom of
+ * this file paint the env-tint variable independent of theme.
+ *
+ * The horizon-ui theme is the port of `sitebyte/horizon-ui-templates/
+ * horizon-v40/tokens.css` — see
+ * `analysis/eos-ui-horizon-comparison/horizon-ui-theme-port.md`.
+ */
+
+:root {
+  /* === Surface ramp (5 tiers — page bg → overlay) ===
+     Per the v40 reply (durable since v4): canvas is the page/viewport
+     background; base is the app chrome (sidebar, header, page shell);
+     raised/elevated/overlay layer cards/modals/dropdowns above. */
+  --surface-canvas:   #0f0f12;
+  --surface-base:     #1c1917;
+  --surface-raised:   #292524;
+  --surface-elevated: #44403c;
+  --surface-overlay:  rgba(0, 0, 0, 0.5);
+
+  /* === Component surfaces ===
+     Distinct from the surface ramp because real components don't always
+     map 1:1 onto a tier. e.g. card-bg is slightly off `--surface-raised`
+     in v40 (#141417 vs #18181b). Themes can choose to bind these to
+     surface tiers (parity with old behaviour) or to bespoke values
+     (parity with v40). */
+  --card-bg:          var(--surface-raised);
+  --input-bg:         var(--surface-raised);
+  --header-bg:        var(--surface-base);
+  --sidebar-bg:       var(--surface-base);
+
+  /* === Text ramp === */
+  --text-primary:    #f5f5f4;
+  --text-secondary:  #d6d3d1;
+  --text-tertiary:   #a8a29e;
+  --text-muted:      #78716c;
+  --text-on-accent:  #ffffff;
+  /* `--text-inverse` is white text intended for use on coloured
+     backgrounds (active pills, badge fills, accent buttons). v41
+     introduced this so pages stop reaching for `#fff` directly. Both
+     theme variants bind it to white; the indirection is the point. */
+  --text-inverse:    #ffffff;
+
+  /* === Border ramp ===
+     `--border` is the v40-style primary token; `--border-default` is
+     the historical name kept as an alias for existing consumers. New
+     code uses `--border`. */
+  --border:          #3d3836;
+  --border-default:  var(--border);
+  --border-subtle:   #332e2b;
+  --border-strong:   #44403c;
+
+  /* === Accent (chart/CTA/active emphasis) === */
+  --accent:          #f59e0b;
+  --accent-hover:    #d97706;
+  --accent-light:    var(--accent-hover);
+  --accent-violet:   #c084fc;
+  --accent-bg:       rgba(245, 158, 11, 0.15);
+  --accent-bg2:      rgba(245, 158, 11, 0.06);
+  --accent-on:       #1c1917;
+  --gradient:        linear-gradient(135deg, var(--accent), var(--accent-violet));
+  --gradient-subtle: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(192, 132, 252, 0.08));
+
+  /* === Interactive states ===
+     Used for row hovers, modal backdrops, pressed states. Near-transparent
+     overlays so they layer on any surface. */
+  --hover:           rgba(255, 255, 255, 0.04);
+  --active:          rgba(255, 255, 255, 0.06);
+  --overlay-bg:      rgba(0, 0, 0, 0.6);
+  --backdrop:        rgba(0, 0, 0, 0.4);
+  /* `--blur-overlay` is the backdrop-filter blur radius for modal
+     overlays / dropdowns / popovers. Single token so the entire app
+     reads as one piece of glass — change once, lands everywhere. */
+  --blur-overlay:    0.5rem;
+
+  /* === Elevation shadows ===
+     v41-introduced theme-aware shadow ramp. Dark theme uses opaque
+     blacks (depth reads as light absorption); light theme uses softer
+     greys (depth reads as light scatter). Themes override these with
+     theme-specific values; this :root block is the dark-theme default
+     so any consumer rendered without a `data-theme` attribute still
+     gets sensible shadows. */
+  --shadow-sm:       0 0.25rem 0.75rem rgba(0, 0, 0, 0.30);
+  --shadow-md:       0 0.5rem 1.5rem rgba(0, 0, 0, 0.20);
+  --shadow-lg:       0 1rem 2.5rem rgba(0, 0, 0, 0.35);
+  --shadow-xl:       0 1.5rem 3rem rgba(0, 0, 0, 0.40);
+
+  /* === Skeleton loading === */
+  --skeleton-base:   #292524;
+  --skeleton-shine:  #44403c;
+
+  /* === RAG status (used by tiles, dots, value text) ===
+     Each status colour has three variants:
+       --rag-{name}      primary status colour (badge fill, dot, line)
+       --rag-{name}-dim  15% alpha tint for backgrounds (alert wash)
+       --rag-{name}-text darker shade for light-mode text legibility
+     Aligned with v40's --green-dim/-text convention (durable since v6). */
+  --rag-green:       #22c55e;
+  --rag-green-dim:   rgba(34, 197, 94, 0.15);
+  --rag-green-text:  #16a34a;
+  --rag-amber:       #f59e0b;
+  --rag-amber-dim:   rgba(245, 158, 11, 0.15);
+  --rag-amber-text:  #d97706;
+  --rag-red:         #ef4444;
+  --rag-red-dim:     rgba(239, 68, 68, 0.15);
+  --rag-red-text:    #dc2626;
+  --rag-info:        #60a5fa;
+  --rag-info-dim:    rgba(96, 165, 250, 0.15);
+  --rag-info-text:   #2563eb;
+
+  /* === P&L (positive / negative / neutral) ===
+     Stay finance-tuned (slightly muted vs RAG). Trader screens want subtle
+     green/red because almost every cell on a blotter is one or the other —
+     full saturation everywhere is exhausting. RAG is for status surfaces. */
+  --pnl-positive:    #10b981;
+  --pnl-negative:    #ef4444;
+  --pnl-neutral:     var(--text-secondary);
+
+  /* === Status (lifecycle pills — capped axis) === */
+  --status-pass:     var(--rag-green);
+  --status-warn:     var(--rag-amber);
+  --status-fail:     var(--rag-red);
+  --status-info:     var(--rag-info);
+  --status-running:  var(--rag-info);
+  --status-neutral:  var(--text-tertiary);
+
+  /* === Environment tint (cross-cutting axis; paint via [data-env=...]) === */
+  --env-accent:      var(--text-tertiary);
+
+  /* === Typography === */
+  /* Sans-serif throughout — horizon-v24 reference uses no serif accents.
+     If a future surface ever needs a display face, add it here, but the
+     Support area target is sans-only. */
+  --font-ui:         'DM Sans', system-ui, sans-serif;
+  --font-mono:       ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+                     Consolas, "Liberation Mono", monospace;
+
+  --text-xs:         0.625rem;   /* 10px */
+  --text-sm:         0.75rem;    /* 12px */
+  --text-base:       0.8125rem;  /* 13px */
+  --text-md:         0.875rem;   /* 14px */
+  --text-lg:         1rem;       /* 16px */
+  --text-xl:         1.25rem;    /* 20px */
+  --text-2xl:        1.5rem;     /* 24px */
+  --text-3xl:        1.875rem;   /* 30px */
+  --text-hero:       2.25rem;    /* 36px */
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* === Spacing (4px base) === */
+  --sp-1:  0.25rem;   /* 4px */
+  --sp-2:  0.5rem;    /* 8px */
+  --sp-3:  0.75rem;   /* 12px */
+  --sp-4:  1rem;      /* 16px */
+  --sp-5:  1.25rem;   /* 20px */
+  --sp-6:  1.5rem;    /* 24px */
+  --sp-7:  1.75rem;   /* 28px */
+  --sp-8:  2rem;      /* 32px */
+  --sp-10: 2.5rem;    /* 40px */
+  --sp-12: 3rem;      /* 48px */
+
+  /* === Radii === */
+  --radius-xs:  2px;
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-full: 9999px;
+
+  /* === Transitions === */
+  --transition-fast:  0.15s ease;
+  --transition-panel: 0.2s ease-out;
+  --transition-page:  0.3s ease;
+
+  /* === Sidebar widths === */
+  --sidebar-collapsed: 3.5rem;
+  --sidebar-expanded:  15.5rem;
+
+  /* === Density (row heights) === */
+  --density-row-comfortable: 36px;
+  --density-row-compact:     28px;
+  --density-row-trader:      20px; /* experimental; gated by data-density-experimental */
+
+  /* === Icon sizes === */
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+}
+
+/* Environment tint axis. Paint via `<html data-env="prod">` etc.
+   Replaces the JS env-class computation in Header.tsx. Default (no attr)
+   leaves `--env-accent` neutral. */
+
+:root[data-env="prod"]    { --env-accent: var(--rag-red); }
+:root[data-env="preprod"] { --env-accent: var(--rag-amber); }
+:root[data-env="tm1"]     { --env-accent: var(--rag-info); }
+:root[data-env="tst"]     { --env-accent: var(--rag-green); }
+:root[data-env="dev"]     { --env-accent: var(--text-tertiary); }
