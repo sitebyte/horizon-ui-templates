@@ -10,7 +10,7 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 
 ## Current State: v41 (38 pages)
 
-**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v41/
+**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v42/
 
 ### Version History (Recent)
 
@@ -19,7 +19,8 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 | v29-v38 | Earlier iterations (dashboard, blotter, support area, SQL checks, environments, user profile, security profile) | Frozen |
 | v39 | Security Profile redesign with EOS data, permission explorer | Frozen |
 | v40 | **Token split** — `shell.css` split into `tokens.css` + `demo-fonts.css` + `shell.css` for production theme porting | Frozen |
-| v41 | **Theme hardening** — light theme WCAG fix, reactive design, workspace tabs, state persistence, LNG carrier branding | Current |
+| v41 | **Theme hardening** — light theme WCAG fix, reactive design, workspace tabs, state persistence, LNG carrier branding | Frozen |
+| v42 | **Feature flags** — ENABLED_MENU_GROUPS flags out all menu groups except SUPPORT (EOS.Horizon parity) | Current |
 
 Versions v1-v28 were removed from deployment. v29+ are on disk.
 
