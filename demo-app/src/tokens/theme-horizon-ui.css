@@ -1,0 +1,171 @@
+/*
+ * Horizon UI theme — bindings.
+ *
+ * Ports `sitebyte/horizon-ui-templates/horizon-v40/tokens.css` values
+ * into our semantic shape. Activated via `<html data-theme="horizon-ui">`.
+ * No font @import lines — the v40 token shape uses Inter / JetBrains
+ * Mono in the demo, but we keep DM Sans + system mono for the in-house
+ * theme so we don't add an external font dependency for production
+ * users. Token names + values otherwise track v40 wholesale.
+ *
+ * Iteration source-of-truth: when v41 lands, re-pull
+ * `horizon-v{N}/tokens.css` from the templates repo and re-bind here.
+ * Token names are stable across iterations per the theme-builder reply
+ * (see `analysis/eos-ui-horizon-comparison/answers-from-theme-builder.md`).
+ *
+ * Two scoping rules:
+ *   1. Universal bindings (theme-independent — type scale, radii,
+ *      spacing) live in `_semantic.css`. We don't restate them here.
+ *   2. Theme-dependent bindings (everything below) live under a
+ *      `[data-theme="horizon-ui"]` selector. Default falls through to
+ *      whatever's set in `_semantic.css`.
+ */
+
+/* Dark variant of horizon-ui (default — matches v40's default-dark). */
+
+[data-theme="horizon-ui"],
+[data-theme="horizon-ui-dark"] {
+  /* === 5-tier surface ramp === */
+  --surface-canvas:   #09090b;
+  --surface-base:     #0f0f12;
+  --surface-raised:   #18181b;
+  --surface-elevated: #1f1f23;
+  --surface-overlay:  #27272a;
+
+  /* === Text ramp === */
+  --text-primary:    #fafafa;
+  --text-secondary:  #d4d4d8;
+  --text-tertiary:   #a1a1aa;
+  --text-muted:      #71717a;
+  --text-on-accent:  #ffffff;
+  --text-inverse:    #ffffff;
+
+  /* === Component surfaces (slightly off the surface ramp) === */
+  --sidebar-bg:      var(--surface-base);
+  --header-bg:       #0f0f12;
+  --card-bg:         #141417;
+  --input-bg:        #1a1a1e;
+
+  /* === Borders === */
+  --border:          #27272a;
+  --border-default:  var(--border);
+  --border-subtle:   #1f1f23;
+  --border-strong:   #3f3f46;
+
+  /* === Accent — indigo-violet (v40's brand pair) === */
+  --accent:          #4f46e5;
+  --accent-hover:    #4338ca;
+  --accent-light:    #6366f1;
+  --accent-violet:   #7c3aed;
+  --accent-bg:       rgba(79, 70, 229, 0.10);
+  --accent-bg2:      rgba(79, 70, 229, 0.06);
+  --accent-on:       #ffffff;
+  --gradient:        linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-subtle: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.08));
+
+  /* === Interactive states === */
+  --hover:           rgba(255, 255, 255, 0.04);
+  --active:          rgba(255, 255, 255, 0.06);
+  --overlay-bg:      rgba(0, 0, 0, 0.6);
+  --backdrop:        rgba(0, 0, 0, 0.4);
+  --blur-overlay:    0.5rem;
+
+  /* === Elevation shadows (dark — opaque blacks) === */
+  --shadow-sm:       0 0.25rem 0.75rem rgba(0, 0, 0, 0.30);
+  --shadow-md:       0 0.5rem 1.5rem rgba(0, 0, 0, 0.20);
+  --shadow-lg:       0 1rem 2.5rem rgba(0, 0, 0, 0.35);
+  --shadow-xl:       0 1.5rem 3rem rgba(0, 0, 0, 0.40);
+
+  /* === Skeleton loading === */
+  --skeleton-base:   #1f1f23;
+  --skeleton-shine:  #27272a;
+
+  /* === RAG status (values identical to our existing rag-* — the v40
+        --green/--red/--amber/--blue match ours) === */
+  --rag-green:       #22c55e;
+  --rag-green-dim:   rgba(34, 197, 94, 0.15);
+  --rag-green-text:  #16a34a;
+  --rag-amber:       #f59e0b;
+  --rag-amber-dim:   rgba(245, 158, 11, 0.15);
+  --rag-amber-text:  #d97706;
+  --rag-red:         #ef4444;
+  --rag-red-dim:     rgba(239, 68, 68, 0.15);
+  --rag-red-text:    #dc2626;
+  --rag-info:        #3b82f6;
+  --rag-info-dim:    rgba(59, 130, 246, 0.15);
+  --rag-info-text:   #2563eb;
+
+  color-scheme: dark;
+}
+
+/* Light variant — opt-in via `<html data-theme="horizon-ui-light">`.
+   Matches v40's `[data-theme="light"]`. */
+
+[data-theme="horizon-ui-light"] {
+  --surface-canvas:   #f8fafc;
+  --surface-base:     #f1f5f9;
+  --surface-raised:   #e2e8f0;
+  --surface-elevated: #cbd5e1;
+  /* v41 fix: was #94a3b8, identical to --text-muted, so popovers had
+     invisible text on overlay surfaces. Now distinct. */
+  --surface-overlay:  #b4bdca;
+
+  --text-primary:    #0f172a;
+  --text-secondary:  #334155;
+  --text-tertiary:   #64748b;
+  /* v41 fix: was #94a3b8 — fails WCAG AA contrast on the surface ramp.
+     Darker variant lifts contrast above 4.5:1. */
+  --text-muted:      #78859b;
+  --text-on-accent:  #ffffff;
+  --text-inverse:    #ffffff;
+
+  --sidebar-bg:      #ffffff;
+  --header-bg:       #ffffff;
+  --card-bg:         #ffffff;
+  --input-bg:        #f1f5f9;
+
+  --border:          #e2e8f0;
+  --border-default:  var(--border);
+  --border-subtle:   #f1f5f9;
+  --border-strong:   #cbd5e1;
+
+  --accent:          #4f46e5;
+  --accent-hover:    #4338ca;
+  --accent-light:    #6366f1;
+  --accent-violet:   #7c3aed;
+  --accent-bg:       rgba(79, 70, 229, 0.10);
+  --accent-bg2:      rgba(79, 70, 229, 0.06);
+  --accent-on:       #ffffff;
+  --gradient:        linear-gradient(135deg, #4f46e5, #7c3aed);
+  --gradient-subtle: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.08));
+
+  --hover:           rgba(0, 0, 0, 0.04);
+  --active:          rgba(0, 0, 0, 0.06);
+  --overlay-bg:      rgba(0, 0, 0, 0.3);
+  --backdrop:        rgba(0, 0, 0, 0.2);
+  --blur-overlay:    0.5rem;
+
+  /* === Elevation shadows (light — softer greys) === */
+  --shadow-sm:       0 0.25rem 0.75rem rgba(0, 0, 0, 0.10);
+  --shadow-md:       0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+  --shadow-lg:       0 1rem 2.5rem rgba(0, 0, 0, 0.12);
+  --shadow-xl:       0 1.5rem 3rem rgba(0, 0, 0, 0.16);
+
+  --skeleton-base:   #e2e8f0;
+  --skeleton-shine:  #f1f5f9;
+
+  --rag-green:       #22c55e;
+  --rag-green-dim:   rgba(34, 197, 94, 0.15);
+  --rag-green-text:  #16a34a;
+  --rag-amber:       #f59e0b;
+  --rag-amber-dim:   rgba(245, 158, 11, 0.15);
+  --rag-amber-text:  #d97706;
+  --rag-red:         #ef4444;
+  --rag-red-dim:     rgba(239, 68, 68, 0.15);
+  --rag-red-text:    #dc2626;
+  --rag-info:        #3b82f6;
+  --rag-info-dim:    rgba(59, 130, 246, 0.15);
+  --rag-info-text:   #2563eb;
+
+  color-scheme: light;
+}

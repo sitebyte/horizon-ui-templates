@@ -1,0 +1,20 @@
+/* Bridge: map EOS.Horizon --rag-* names to prototype --green/--red/etc names */
+:root, [data-theme="dark"], [data-theme="light"] {
+  --rag-green:      var(--green);
+  --rag-green-dim:  var(--green-dim);
+  --rag-green-text: var(--green-text);
+  --rag-red:        var(--red);
+  --rag-red-dim:    var(--red-dim);
+  --rag-red-text:   var(--red-text);
+  --rag-amber:      var(--amber);
+  --rag-amber-dim:  var(--amber-dim);
+  --rag-amber-text: var(--amber-text);
+  --rag-info:       var(--blue);
+  --rag-info-dim:   var(--blue-dim);
+  --rag-info-text:  var(--blue-text);
+  --pnl-positive:   #10b981;
+  --pnl-negative:   #ef4444;
+  --pnl-neutral:    var(--text-secondary);
+  --font-ui:        'Inter', system-ui, sans-serif;
+  --font-mono:      'JetBrains Mono', ui-monospace, monospace;
+}
