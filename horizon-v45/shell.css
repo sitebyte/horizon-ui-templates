@@ -1597,7 +1597,10 @@ select.hz-input {
 .hz-sidebar.collapsed ~ .hz-workspace-tabs {
   left: var(--sidebar-collapsed);
 }
-.hz-workspace-tabs::-webkit-scrollbar { height: 0; }
+.hz-workspace-tabs::-webkit-scrollbar { height: 3px; }
+.hz-workspace-tabs::-webkit-scrollbar-track { background: transparent; }
+.hz-workspace-tabs::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-full); }
+.hz-workspace-tabs::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 .hz-ws-tab {
   display: flex;
