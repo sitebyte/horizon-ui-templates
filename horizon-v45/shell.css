@@ -1655,7 +1655,8 @@ select.hz-input {
 
 /* Adjust layout when workspace tabs are present */
 .hz-has-workspace-tabs .hz-sidebar {
-  top: calc(var(--sp-12) + 1.75rem);
+  top: var(--sp-12);
+  padding-top: 1.75rem;
 }
 .hz-has-workspace-tabs .hz-main {
   margin-top: calc(var(--sp-12) + 1.75rem);
