@@ -135,8 +135,6 @@ function Shell() {
   const [cmdkOpen, setCmdkOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [sidebarSearch, setSidebarSearch] = useState('')
-  const [panelOpen, setPanelOpen] = useState<string | null>(null)
   const [menuGroupOpen, setMenuGroupOpen] = useState(true) // SUPPORT group
 
   /* ---- Refs ---- */
@@ -208,15 +206,8 @@ function Shell() {
     [navigate],
   )
 
-  /* ---- Sidebar search filter ---- */
-  const filteredNav = sidebarSearch
-    ? NAV.filter(n => n.label.toLowerCase().includes(sidebarSearch.toLowerCase()))
-    : NAV
 
-  /* ---- Sidebar panel toggle (permissions, versions) ---- */
-  const togglePanel = useCallback((id: string) => {
-    setPanelOpen(prev => (prev === id ? null : id))
-  }, [])
+
 
   /* ---- Close user menu on outside click ---- */
   useEffect(() => {
@@ -418,18 +409,8 @@ function Shell() {
         role="navigation"
         aria-label="Main navigation"
       >
-        {/* Search */}
-        <div className="hz-sidebar-search">
-          <input
-            id="hz-sidebar-search-input"
-            placeholder="Search menu..."
-            value={sidebarSearch}
-            onChange={e => setSidebarSearch(e.target.value)}
-          />
-        </div>
-
-        {/* Nav */}
-        <nav className="hz-sidebar-nav">
+        {/* Nav — at the top, no search, maximise content area */}
+        <nav className="hz-sidebar-nav" style={{ paddingTop: 'var(--sp-2)' }}>
           <div className="hz-menu-group" data-group="SUPPORT" data-menu-group="SUPPORT">
             <button
               className={`hz-menu-group-btn active`}
@@ -449,7 +430,7 @@ function Shell() {
               </span>
             </button>
             <div className={`hz-menu-group-items${menuGroupOpen ? ' open' : ''}`}>
-              {filteredNav.map(item => {
+              {NAV.map(item => {
                 const isActive = item.key === activeKey
                 return (
                   <Link
@@ -471,108 +452,17 @@ function Shell() {
           </div>
         </nav>
 
-        {/* Footer */}
-        <div className="hz-sidebar-footer">
-          {/* Settings link */}
-          <button className="hz-sidebar-footer-link" tabIndex={0}>
-            <span className="hz-menu-icon">
-              <Ico name="settings" size={14} />
-            </span>
-            <span className="hz-menu-label">Settings</span>
-          </button>
-
-          {/* Permissions (expandable) */}
-          <button
-            className="hz-sidebar-footer-link"
-            onClick={() => togglePanel('perms')}
-            tabIndex={0}
-          >
-            <span className="hz-menu-icon">
-              <Ico name="shield" size={14} />
-            </span>
-            <span className="hz-menu-label">Permissions</span>
-            <span
-              className="hz-menu-label"
-              style={{ marginLeft: 'auto', opacity: 0.5, fontSize: '0.5rem' }}
-            >
-              Trader
-            </span>
-          </button>
-          <div
-            className="hz-sidebar-panel"
-            id="hz-panel-perms"
-            style={{ display: panelOpen === 'perms' ? 'block' : 'none' }}
-          >
-            <div className="hz-sidebar-panel-content">
-              <div className="hz-sidebar-perm-item granted">Trade Capture</div>
-              <div className="hz-sidebar-perm-item granted">Trade Amendment</div>
-              <div className="hz-sidebar-perm-item granted">Position View</div>
-              <div className="hz-sidebar-perm-item granted">Curve View</div>
-              <div className="hz-sidebar-perm-item granted">Cargo Matching</div>
-              <div className="hz-sidebar-perm-item denied">Trade Cancellation</div>
-              <div className="hz-sidebar-perm-item denied">Invoice Approval</div>
-              <div className="hz-sidebar-perm-item denied">Credit Override</div>
-              <div className="hz-sidebar-perm-item denied">User Admin</div>
-            </div>
-          </div>
-
-          {/* Versions (expandable) */}
-          <button
-            className="hz-sidebar-footer-link"
-            onClick={() => togglePanel('versions')}
-            tabIndex={0}
-          >
-            <span className="hz-menu-icon">
-              <Ico name="info" size={14} />
-            </span>
-            <span className="hz-menu-label">Versions</span>
-          </button>
-          <div
-            className="hz-sidebar-panel"
-            id="hz-panel-versions"
-            style={{ display: panelOpen === 'versions' ? 'block' : 'none' }}
-          >
-            <div className="hz-sidebar-panel-content">
-              <div className="hz-sidebar-version-row">
-                <span>EOS</span>
-                <span className="font-mono">4.2.1</span>
-              </div>
-              <div className="hz-sidebar-version-row">
-                <span>EOS.Horizon</span>
-                <span className="font-mono">1.0.17</span>
-              </div>
-              <div className="hz-sidebar-version-row">
-                <span>EOS.Database</span>
-                <span className="font-mono">4.2.1.3847</span>
-              </div>
-              <div className="hz-sidebar-version-row">
-                <span>AG Grid</span>
-                <span className="font-mono">31.3.2</span>
-              </div>
-              <div className="hz-sidebar-version-row">
-                <span>Environment</span>
-                <span className="font-mono" style={{ color: 'var(--green)' }}>
-                  PROD
-                </span>
-              </div>
-              <div className="hz-sidebar-version-row">
-                <span>Region</span>
-                <span className="font-mono">SGP</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Collapse button */}
+        {/* Collapse — compact, bottom of sidebar */}
         <button
           className="hz-sidebar-collapse-btn"
           id="hz-sidebar-toggle"
           onClick={toggleSidebar}
           title="Cmd+B"
           tabIndex={0}
+          style={{ padding: '0.25rem 0.5rem', fontSize: '0.5rem' }}
         >
-          <Ico name={sidebarExpanded ? 'chevrons-left' : 'chevrons-right'} size={14} />
-          <span className="hz-menu-label" style={{ fontSize: '0.625rem' }}>
+          <Ico name={sidebarExpanded ? 'chevrons-left' : 'chevrons-right'} size={12} />
+          <span className="hz-menu-label" style={{ fontSize: '0.5rem' }}>
             {sidebarExpanded ? 'Collapse' : ''}
           </span>
         </button>
