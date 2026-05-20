@@ -410,7 +410,7 @@ function Shell() {
         aria-label="Main navigation"
       >
         {/* Nav — at the top, no search, maximise content area */}
-        <nav className="hz-sidebar-nav" style={{ paddingTop: 'var(--sp-2)' }}>
+        <nav className="hz-sidebar-nav">
           <div className="hz-menu-group" data-group="SUPPORT" data-menu-group="SUPPORT">
             <button
               className={`hz-menu-group-btn active`}
