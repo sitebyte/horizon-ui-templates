@@ -10,7 +10,7 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 
 ## Current State: v41 (38 pages)
 
-**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v44/
+**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v45/
 
 ### Version History (Recent)
 
@@ -22,7 +22,8 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 | v41 | **Theme hardening** — light theme WCAG fix, reactive design, workspace tabs, state persistence, LNG carrier branding | Frozen |
 | v42 | **Feature flags** — ENABLED_MENU_GROUPS flags out all menu groups except SUPPORT (EOS.Horizon parity) | Frozen |
 | v43 | **Support-only chrome** — Remove ticker, notification bell, context strip; Environment singular (prod only) | Frozen |
-| v44 | **Tab refinement** — Workspace tabs indent past sidebar, accent indicator on active tab, bold active text | Current |
+| v44 | **Tab refinement** — Workspace tabs indent past sidebar, accent indicator on active tab, bold active text | Frozen |
+| v45 | **Sidebar cleanup** — Remove Settings/Permissions/Versions, search input; compact collapse; nav at top | Current |
 
 Versions v1-v28 were removed from deployment. v29+ are on disk.
 
