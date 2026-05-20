@@ -1594,7 +1594,7 @@ select.hz-input {
   overflow-y: hidden;
   transition: left var(--transition-panel);
 }
-.hz-sidebar-collapsed .hz-workspace-tabs {
+.hz-sidebar.collapsed ~ .hz-workspace-tabs {
   left: var(--sidebar-collapsed);
 }
 .hz-workspace-tabs::-webkit-scrollbar { height: 0; }
