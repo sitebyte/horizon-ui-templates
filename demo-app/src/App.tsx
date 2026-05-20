@@ -11,6 +11,7 @@ import { DataQualityPage } from './pages/DataQualityPage'
 import { AuditSearchPage } from './pages/AuditSearchPage'
 import { SqlChecksPage } from './pages/SqlChecksPage'
 import { EnvironmentPage } from './pages/EnvironmentPage'
+import { UserProfilePage } from './pages/UserProfilePage'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { CommandPalette } from './components/CommandPalette'
 
@@ -106,24 +107,6 @@ function Placeholder({ title }: { title: string }) {
   )
 }
 
-function ProfilePage() {
-  return (
-    <div className="hz-content-fill" style={{ padding: 'var(--sp-4)' }}>
-      <span className="sec-title">My Profile</span>
-      <div style={{ marginTop: 'var(--sp-3)', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 'var(--sp-3)', maxWidth: '30rem' }}>
-        <div className="hz-avatar" style={{ width: '3rem', height: '3rem', fontSize: 'var(--text-lg)' }}>AM</div>
-        <div>
-          <div style={{ fontSize: 'var(--text-lg)', fontWeight: 600 }}>Alex Morgan</div>
-          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>a.morgan@acmecorp.com</div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2)' }}>
-            Senior Trader · Commodities Desk · Roles: Trader, Admin
-          </div>
-        </div>
-      </div>
-      {/* TODO: API — user profile data */}
-    </div>
-  )
-}
 
 /* ================================================================
    Workspace Tab type
@@ -518,7 +501,7 @@ function Shell() {
               <Route path="/audit" element={<AuditSearchPage />} />
               <Route path="/data-quality" element={<DataQualityPage />} />
               <Route path="/sql-checks" element={<SqlChecksPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile" element={<UserProfilePage />} />
             </Routes>
           </div>
         </main>
