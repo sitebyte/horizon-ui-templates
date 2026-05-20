@@ -277,6 +277,88 @@ If a page looks wrong, check:
 
 ---
 
+## Spacing matters — this is not cosmetic
+
+The previous integration failed because of spacing differences that seemed minor in isolation. Playwright measurements proved they were the root cause:
+
+| Token | Prototype (correct) | EOS.Horizon (wrong) | Difference |
+|---|---|---|---|
+| `--text-xs` | 0.6875rem (11px) | 0.625rem (10px) | 1px per label |
+| `--text-sm` | 0.8125rem (13px) | 0.75rem (12px) | 1px per cell |
+| `--text-base` | 0.875rem (14px) | 0.8125rem (13px) | 1px per value |
+| `--text-lg` | 1.125rem (18px) | 1rem (16px) | 2px per title |
+| `--text-xl` | 1.5rem (24px) | 1.25rem (20px) | 4px per heading |
+
+Each difference is "only 1px." But a single page has ~200 text elements. 200 elements x 1px = the entire page reads differently. Labels are tighter, values are smaller, rows are shorter, cards are more compact. The cumulative effect is a completely different density — which is the entire design.
+
+### The rule
+
+When `tokens-v43.css` says `--text-xs: 0.6875rem`, use `0.6875rem`. Not `0.625rem`. Not "close enough." Not a rounded value. The exact value.
+
+### How to verify
+
+Run this Playwright script against your production app to compare computed styles with the prototype:
+
+```javascript
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+
+  // Measure your production app
+  await page.goto('http://your-app-url/support/dashboard');
+  await page.waitForTimeout(2000);
+  const yours = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    return {
+      textXs:   cs.getPropertyValue('--text-xs').trim(),
+      textSm:   cs.getPropertyValue('--text-sm').trim(),
+      textBase: cs.getPropertyValue('--text-base').trim(),
+      textLg:   cs.getPropertyValue('--text-lg').trim(),
+      green:    cs.getPropertyValue('--green').trim(),
+      red:      cs.getPropertyValue('--red').trim(),
+      fontUi:   cs.fontFamily.substring(0, 30),
+      theme:    document.documentElement.getAttribute('data-theme'),
+    };
+  });
+
+  // Expected values (from tokens-v43.css)
+  const expected = {
+    textXs:   '0.6875rem',
+    textSm:   '0.8125rem',
+    textBase: '0.875rem',
+    textLg:   '1.125rem',
+    green:    '#22c55e',
+    red:      '#ef4444',
+    fontUi:   "'Inter', system-ui",
+    theme:    'dark',
+  };
+
+  // Compare
+  for (const [key, exp] of Object.entries(expected)) {
+    const got = yours[key];
+    const match = got.includes(exp) || exp.includes(got);
+    console.log(`${match ? '✓' : '✗'} ${key}: expected "${exp}", got "${got}"`);
+  }
+
+  await browser.close();
+})();
+```
+
+Run this after every integration. If any value doesn't match, the CSS files didn't load correctly or something is overriding them.
+
+### The density cascade
+
+One wrong spacing token doesn't just affect one element — it affects every component that reads it:
+
+- `--text-xs` is used by: labels, badges, table headers, check rows, feed rows, KPI labels, tooltips
+- `--text-sm` is used by: table cells, body text, sidebar items, status bar
+- `--sp-2` is used by: card padding, row gaps, section spacing, input padding
+
+Change one value by 1px and dozens of components shift. This is why consuming the CSS file directly (instead of re-typing the values) is critical.
+
+---
+
 ## Ongoing process
 
 When the prototype updates (v44, v45...):

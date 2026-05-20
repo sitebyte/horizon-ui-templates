@@ -277,7 +277,7 @@ function Shell() {
      RENDER
      ================================================================ */
   return (
-    <div id="hz-app" className="hz-has-workspace-tabs">
+    <div id="hz-app" className={`hz-has-workspace-tabs${sidebarExpanded ? '' : ' hz-sidebar-collapsed'}`}>
       {/* ---- HEADER ---- */}
       <header className="hz-header" data-component="header" role="banner">
         <div className="hz-header-left">
