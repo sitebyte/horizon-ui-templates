@@ -361,15 +361,6 @@ function Shell() {
                 </div>
               </div>
               <div className="hz-user-menu-divider" />
-              <a className="hz-user-menu-item" href="#">
-                <Ico name="user" size={14} />
-                <span>View Profile</span>
-              </a>
-              <a className="hz-user-menu-item" href="#">
-                <Ico name="settings" size={14} />
-                <span>Settings</span>
-              </a>
-              <div className="hz-user-menu-divider" />
               <a className="hz-user-menu-item hz-user-menu-item-danger" href="#">
                 <Ico name="log-out" size={14} />
                 <span>Sign Out</span>
