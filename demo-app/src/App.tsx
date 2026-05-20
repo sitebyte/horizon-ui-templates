@@ -136,6 +136,7 @@ function Shell() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [menuGroupOpen, setMenuGroupOpen] = useState(true) // SUPPORT group
+  const [versionsOpen, setVersionsOpen] = useState(false)
 
   /* ---- Refs ---- */
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -361,6 +362,11 @@ function Shell() {
                 </div>
               </div>
               <div className="hz-user-menu-divider" />
+              <Link className="hz-user-menu-item" to="/" onClick={() => setUserMenuOpen(false)}>
+                <Ico name="user" size={14} />
+                <span>View Profile</span>
+              </Link>
+              <div className="hz-user-menu-divider" />
               <a className="hz-user-menu-item hz-user-menu-item-danger" href="#">
                 <Ico name="log-out" size={14} />
                 <span>Sign Out</span>
@@ -443,7 +449,31 @@ function Shell() {
           </div>
         </nav>
 
-        {/* Collapse — compact, bottom of sidebar */}
+        {/* Footer — versions + collapse */}
+        <div className="hz-sidebar-footer">
+          <button
+            className="hz-sidebar-footer-link"
+            onClick={() => setVersionsOpen(v => !v)}
+            tabIndex={0}
+          >
+            <span className="hz-menu-icon"><Ico name="info" size={14} /></span>
+            <span className="hz-menu-label">Versions</span>
+          </button>
+          {versionsOpen && (
+            <div className="hz-sidebar-panel" style={{ display: 'block' }}>
+              <div className="hz-sidebar-panel-content">
+                <div className="hz-sidebar-version-row"><span>EOS</span><span className="font-mono">4.2.1</span></div>
+                <div className="hz-sidebar-version-row"><span>EOS.Horizon</span><span className="font-mono">1.0.17</span></div>
+                <div className="hz-sidebar-version-row"><span>EOS.Database</span><span className="font-mono">4.2.1.3847</span></div>
+                <div className="hz-sidebar-version-row"><span>AG Grid</span><span className="font-mono">31.3.2</span></div>
+                <div className="hz-sidebar-version-row"><span>Environment</span><span className="font-mono" style={{ color: 'var(--green)' }}>PROD</span></div>
+                <div className="hz-sidebar-version-row"><span>Region</span><span className="font-mono">SGP</span></div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Collapse */}
         <button
           className="hz-sidebar-collapse-btn"
           id="hz-sidebar-toggle"
