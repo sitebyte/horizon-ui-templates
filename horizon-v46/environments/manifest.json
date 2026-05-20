@@ -1,0 +1,6 @@
+{
+  "environments": [
+    { "id": "prod", "label": "PROD", "status": "active", "configFile": "prod.json" }
+  ],
+  "defaultEnvironment": "prod"
+}
