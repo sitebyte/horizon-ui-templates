@@ -106,6 +106,25 @@ function Placeholder({ title }: { title: string }) {
   )
 }
 
+function ProfilePage() {
+  return (
+    <div className="hz-content-fill" style={{ padding: 'var(--sp-4)' }}>
+      <span className="sec-title">My Profile</span>
+      <div style={{ marginTop: 'var(--sp-3)', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 'var(--sp-3)', maxWidth: '30rem' }}>
+        <div className="hz-avatar" style={{ width: '3rem', height: '3rem', fontSize: 'var(--text-lg)' }}>AM</div>
+        <div>
+          <div style={{ fontSize: 'var(--text-lg)', fontWeight: 600 }}>Alex Morgan</div>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>a.morgan@acmecorp.com</div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)', marginTop: 'var(--sp-2)' }}>
+            Senior Trader · Commodities Desk · Roles: Trader, Admin
+          </div>
+        </div>
+      </div>
+      {/* TODO: API — user profile data */}
+    </div>
+  )
+}
+
 /* ================================================================
    Workspace Tab type
    ================================================================ */
@@ -362,7 +381,7 @@ function Shell() {
                 </div>
               </div>
               <div className="hz-user-menu-divider" />
-              <Link className="hz-user-menu-item" to="/" onClick={() => setUserMenuOpen(false)}>
+              <Link className="hz-user-menu-item" to="/profile" onClick={() => setUserMenuOpen(false)}>
                 <Ico name="user" size={14} />
                 <span>View Profile</span>
               </Link>
@@ -499,6 +518,7 @@ function Shell() {
               <Route path="/audit" element={<AuditSearchPage />} />
               <Route path="/data-quality" element={<DataQualityPage />} />
               <Route path="/sql-checks" element={<SqlChecksPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </div>
         </main>

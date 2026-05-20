@@ -1897,7 +1897,7 @@ select.hz-input {
 
 /* ---------- Responsive: Mobile ---------- */
 @media (max-width: 48rem) {
-  .hz-workspace-tabs { display: none; }
+  .hz-workspace-tabs { left: 0; }
   .hz-sidebar {
     transform: translateX(-100%);
     position: fixed;
