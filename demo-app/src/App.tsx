@@ -12,6 +12,7 @@ import { AuditSearchPage } from './pages/AuditSearchPage'
 import { SqlChecksPage } from './pages/SqlChecksPage'
 import { EnvironmentPage } from './pages/EnvironmentPage'
 import { UserProfilePage } from './pages/UserProfilePage'
+import { TradeEntryPage } from './pages/TradeEntryPage'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { CommandPalette } from './components/CommandPalette'
 
@@ -38,6 +39,7 @@ const ICON_PATHS: Record<string, string> = {
   briefcase: '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   mail: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
   'external-link': '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
+  'file-text': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
 }
 
 function Ico({ name, size = 16 }: { name: string; size?: number }) {
@@ -85,13 +87,19 @@ interface NavItem {
   icon: string
 }
 
-const NAV: NavItem[] = [
+const TRADING_NAV: NavItem[] = [
+  { label: 'Trade Entry', href: '/trade-entry', key: 'trade-entry', icon: 'file-text' },
+]
+
+const SUPPORT_NAV: NavItem[] = [
   { label: 'System Status', href: '/', key: 'support-dashboard', icon: 'activity' },
   { label: 'Environment', href: '/environment', key: 'support-environments', icon: 'settings' },
   { label: 'Audit Search', href: '/audit', key: 'support-audit', icon: 'search' },
   { label: 'Data Quality', href: '/data-quality', key: 'data-quality', icon: 'shield' },
   { label: 'SQL Checks', href: '/sql-checks', key: 'support-sql-checks', icon: 'clipboard' },
 ]
+
+const NAV: NavItem[] = [...TRADING_NAV, ...SUPPORT_NAV]
 
 /* ================================================================
    Placeholder page component
@@ -137,6 +145,7 @@ function Shell() {
   const [cmdkOpen, setCmdkOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [tradingGroupOpen, setTradingGroupOpen] = useState(true) // TRADING group
   const [menuGroupOpen, setMenuGroupOpen] = useState(true) // SUPPORT group
   const [versionsOpen, setVersionsOpen] = useState(false)
 
@@ -410,6 +419,48 @@ function Shell() {
       >
         {/* Nav — at the top, no search, maximise content area */}
         <nav className="hz-sidebar-nav">
+          {/* TRADING group */}
+          <div className="hz-menu-group" data-group="TRADING" data-menu-group="TRADING">
+            <button
+              className={`hz-menu-group-btn active`}
+              onClick={() => setTradingGroupOpen(o => !o)}
+              tabIndex={0}
+              aria-expanded={tradingGroupOpen}
+            >
+              <span className="hz-menu-icon">
+                <Ico name="file-text" size={14} />
+              </span>
+              <span className="hz-menu-group-label">TRADING</span>
+              <span
+                className={`hz-menu-group-arrow${tradingGroupOpen ? ' open' : ''}`}
+                style={{ marginLeft: 'auto' }}
+              >
+                <Ico name="chevron-right" size={10} />
+              </span>
+            </button>
+            <div className={`hz-menu-group-items${tradingGroupOpen ? ' open' : ''}`}>
+              {TRADING_NAV.map(item => {
+                const isActive = item.key === activeKey
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.href}
+                    className={`hz-menu-item${isActive ? ' active' : ''}`}
+                    data-tooltip={item.label}
+                    data-menu-item={item.key}
+                    tabIndex={0}
+                  >
+                    <span className="hz-menu-icon">
+                      <Ico name={item.icon} size={16} />
+                    </span>
+                    <span className="hz-menu-label">{item.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* SUPPORT group */}
           <div className="hz-menu-group" data-group="SUPPORT" data-menu-group="SUPPORT">
             <button
               className={`hz-menu-group-btn active`}
@@ -429,7 +480,7 @@ function Shell() {
               </span>
             </button>
             <div className={`hz-menu-group-items${menuGroupOpen ? ' open' : ''}`}>
-              {NAV.map(item => {
+              {SUPPORT_NAV.map(item => {
                 const isActive = item.key === activeKey
                 return (
                   <Link
@@ -496,6 +547,7 @@ function Shell() {
         <main className="hz-content" role="main">
           <div className="fade-in">
             <Routes>
+              <Route path="/trade-entry" element={<TradeEntryPage />} />
               <Route path="/" element={<DemoSupportDashboard />} />
               <Route path="/environment" element={<EnvironmentPage />} />
               <Route path="/audit" element={<AuditSearchPage />} />
