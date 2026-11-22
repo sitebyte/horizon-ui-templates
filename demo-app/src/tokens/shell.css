@@ -1213,6 +1213,7 @@ select.hz-input {
 .hz-dot.amber { background: var(--amber); }
 .hz-dot.red { background: var(--red); }
 .hz-dot.blue { background: var(--blue); }
+.hz-dot.neutral { background: var(--text-muted); } /* not monitored / no reading */
 .hz-dot.pulse {
   box-shadow: 0 0 0 0 var(--green);
   animation: dotPulse 2s infinite;

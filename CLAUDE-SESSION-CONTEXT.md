@@ -10,7 +10,7 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 
 ## Current State: v41 (38 pages)
 
-**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v47/
+**Live:** https://sitebyte.github.io/horizon-ui-templates/horizon-v48/
 
 ### Version History (Recent)
 
@@ -25,7 +25,8 @@ A parallel production build (**EOS.Horizon**) runs in a separate repo (`.NET 10 
 | v44 | **Tab refinement** — Workspace tabs indent past sidebar, accent indicator on active tab, bold active text | Frozen |
 | v45 | **Sidebar cleanup** — Remove Settings/Permissions, search input; compact collapse; nav at top | Frozen |
 | v46 | **EOS.Horizon handover** — From v43: sidebar + tab changes only. Tabs indent past sidebar, accent active indicator, scrollable. Sidebar: no search, no Settings/Permissions, Versions kept, compact collapse. Context strip gap removed. | Frozen |
-| v47 | **Trade Entry** — Multi-tabbed trade capture form (5 tabs, ~40 fields). TRADING sidebar group added. | Current |
+| v47 | **Trade Entry** — Multi-tabbed trade capture form (5 tabs, ~40 fields). TRADING sidebar group added. | Frozen |
+| v48 | **Neutral status dot** — `.hz-dot.neutral` (`--text-muted`) for not-monitored / no-reading states; requested by Environment Manager. Also in demo-app shell.css. | Current |
 
 Versions v1-v28 were removed from deployment. v29+ are on disk.
 
